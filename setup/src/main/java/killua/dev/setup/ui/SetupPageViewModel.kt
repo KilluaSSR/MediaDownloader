@@ -1,12 +1,10 @@
 package killua.dev.setup.ui
 
 import android.content.Context
-import androidx.compose.material3.ExperimentalMaterial3Api
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import killua.dev.core.utils.NotificationUtils
 import killua.dev.core.utils.StorageUtils
-import killua.dev.setup.EnvState
+import Model.EnvState
 import killua.dev.setup.ui.SetupUIIntent.ValidateNotifications
 import killua.dev.setup.ui.SetupUIIntent.ValidateStoragePermission
 import killua.dev.setup.ui.SetupUIIntent.ValidatedRoot
