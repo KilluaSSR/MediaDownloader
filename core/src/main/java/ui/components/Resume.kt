@@ -8,7 +8,7 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 
 @Composable
-inline fun SetOnResume(crossinline onResume: () -> Unit) {
+fun SetOnResume(onResume: () -> Unit) {
     val owner = LocalLifecycleOwner.current
     DisposableEffect(owner){
         val observer = LifecycleEventObserver{ _, event ->

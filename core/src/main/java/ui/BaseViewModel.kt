@@ -2,7 +2,6 @@ package ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -17,13 +16,16 @@ import kotlinx.coroutines.withContext
 
 interface UIIntent
 interface UIState
-interface UIEvent
-interface IBaseViewModel<I: UIIntent, S: UIState, E: UIEvent> {
+interface UIEffect
+interface IBaseViewModel<I: UIIntent, S: UIState, E: UIEffect> {
     suspend fun onEvent(state: S, intent: I)
     suspend fun onEffect(effect: E)
 }
-abstract class BaseViewModel <I: UIIntent, S: UIState, E: UIEvent>(state: S): ViewModel(),
-    IBaseViewModel<I, S, E> {
+sealed class SetupPageUIEffect: UIEffect{
+
+}
+abstract class BaseViewModel <I: UIIntent, S: UIState, E: SetupPageUIEffect>(state: S): ViewModel(),
+    IBaseViewModel<I, S, SetupPageUIEffect> {
     fun<T> Flow<T>.flowOnIO() = flowOn(Dispatchers.IO)
     fun<T> Flow<T>.stateInScope(initValue: T) = stateIn(
         scope = viewModelScope,
@@ -44,5 +46,5 @@ abstract class BaseViewModel <I: UIIntent, S: UIState, E: UIEvent>(state: S): Vi
     fun emitIntentOnIO(intent: I) = launchOnIO { emitIntent(intent) }
     fun launchOnIO(block: suspend CoroutineScope.() -> Unit) = viewModelScope.launch(context = Dispatchers.IO,block = block)
     override suspend fun onEvent(state: S, intent: I) {}
-    override suspend fun onEffect(effect: E) {}
+    override suspend fun onEffect(effect: SetupPageUIEffect) {}
 }
