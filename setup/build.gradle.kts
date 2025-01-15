@@ -39,6 +39,15 @@ android {
 }
 
 dependencies {
+
+    //tmp
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.okhttp)
+    implementation(libs.kotlinx.serialization.json.v151)
+    implementation(libs.ktor.client.serialization)
+    implementation(libs.gson)
+
     implementation(libs.hilt.android)
     implementation(project(":core"))
     ksp(libs.hilt.android.compiler)

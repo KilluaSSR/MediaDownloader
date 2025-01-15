@@ -13,29 +13,31 @@ import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 
 
 class TwitterAPI(
-    private val okHttpClient: OkHttpClient
+    val okHttpClient: OkHttpClient
 ){
-    private val json = Json {
-        ignoreUnknownKeys = true
-        prettyPrint = true
-    }
-    suspend fun getTweetDetail(tweetId: String): List<Tweet>? {
-        val variables = TweetDetailVariables(tweetId)
+    private val json = Json
+    fun getTweetDetail(tweetURL: String): List<Tweet>? {
+        val tweetId = tweetURL.split("/").last()
+        val variables = TweetDetailVariables(
+            focalTweetId = tweetId,
+            with_rux_injections = "false",
+            rankingMode = "Relevance",
+            includePromotedContent = "true",
+            withCommunity = "true",
+            withQuickPromoteEligibilityTweetFields = "true",
+            withBirdwatchNotes = "true",
+            withVoice = "true"
+        )
         val parameters = mapOf(
-            "variables" to json.encodeToString<TweetDetailVariables>(TweetDetailVariables.serializer(),variables),
+            "variables" to json.encodeToString(TweetDetailVariables.serializer(), variables),
             "features" to GetTweetDetailFeatures,
             "fieldToggles" to """{"withArticleRichContentState":true,"withArticlePlainText":false,"withGrokAnalyze":false,"withDisallowedReplyControls":false}"""
         )
         return try {
-            val response = sendRequest<GraphQLResponse>(
-                baseUrl = "TWEET_DETAIL_URL",
-                parameters = parameters
-            ) ?: return null
-
+            val response = sendRequest<GraphQLResponse>(parameters) ?: return null
             response.data.threadedConversationV2?.instructions
                 ?.asSequence()
                 ?.filter { it.type == "TimelineAddEntries" }
@@ -122,28 +124,31 @@ class TwitterAPI(
     private fun buildUrl(baseUrl: String, parameters: Map<String, String>?): String {
         if (parameters.isNullOrEmpty()) return baseUrl
 
-        val queryString = parameters.map { (key, value) ->
-            "${URLEncoder.encode(key, StandardCharsets.UTF_8.name())}=" +
-                    "${URLEncoder.encode(value, StandardCharsets.UTF_8.name())}"
-        }.joinToString("&")
+        val queryString = parameters.entries.joinToString("&") { (key, value) ->
+            val encodedKey = URLEncoder.encode(key, "UTF-8")
+            val encodedValue = value
+                .replace(":", "%3A")
+                .replace(",", "%2C")
+            "$encodedKey=$encodedValue"
+        }
 
         return "$baseUrl?$queryString"
     }
-
-    private suspend inline fun <reified T> sendRequest(baseUrl: String, parameters: Map<String, String>): T? {
-        val url = buildUrl(baseUrl, parameters)
+    private inline fun <reified T> sendRequest(parameters: Map<String, String>): T? {
+        val url = buildUrl(TwitterAPIURL.TweetDetailUrl, parameters)
         val request = Request.Builder()
             .url(url)
             .addHeader("Authorization", "Bearer ${TwitterAPIURL.Bearer}")
-            .addHeader("x-csrf-token", "ct0")
+            .addHeader("x-csrf-token", "27879499ccf196d64621d8b2974290d618a5f345e942fcdff81bf8573c74dd2ac25a8efa2913f5dc431498a292c6bef929062a908655819f93bdfd9c05c642eacdfa7145182b1698a8a9d18dba104ad4")
             .addHeader("x-twitter-active-user", "yes")
             .addHeader("x-twitter-auth-type", "OAuth2Session")
             .addHeader("x-twitter-client-language", "en")
+            .get()
             .build()
 
         return okHttpClient.newCall(request).execute().use { response ->
+            println(response.code)
             if (!response.isSuccessful) return null
-
             val responseBody = response.body?.string() ?: return null
             json.decodeFromString<T>(responseBody)
         }

@@ -25,14 +25,15 @@ enum class MediaType {
 class ExecuteDownload @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-    fun Preprocessing(tweets: List<Tweet>?) {
+    suspend fun Preprocessing(tweets: List<Tweet>?) {
         tweets?.forEach { tweet ->
             tweet.media.forEach { media ->
-                when (media.type) {
-                    MediaType.photo.name -> downloadPhoto(media.url)
-                    MediaType.video.name -> downloadVideo(media.url, media.bitrate)
-                    MediaType.animated_gif.name -> downloadGif(media.url)
-                }
+//                when (media.type) {
+//                    MediaType.photo.name -> downloadPhoto(media.url)
+//                    MediaType.video.name -> downloadVideo(media.url, media.bitrate)
+//                    MediaType.animated_gif.name -> downloadGif(media.url)
+//                }
+                DownloadImage(media.url.toString(), tweet.userId!!).let { it -> if (it != null) ImageSaver(context, it, tweet.userId!!) }
             }
         }
     }
@@ -79,6 +80,8 @@ class ExecuteDownload @Inject constructor(
                     stream.close()
                 }
             }
+        }catch (ex: Exception){
+            println("${ex.message}")
         }
     }
 }
