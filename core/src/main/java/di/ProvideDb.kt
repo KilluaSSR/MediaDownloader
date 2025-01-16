@@ -7,19 +7,21 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import db.AppDatabase
+import db.TwitterDownloadDatabase
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object ProvideDb {
+object DatabaseModule {
     @Provides
     @Singleton
-    fun provideDb(@ApplicationContext context: Context): AppDatabase {
-        return Room.databaseBuilder(
-            context,
-            AppDatabase::class.java,
-            "DownloadDatabase"
-        ).build()
+    fun provideDatabase(@ApplicationContext context: Context): TwitterDownloadDatabase {
+        return TwitterDownloadDatabase.getInstance(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDownloadDao(database: TwitterDownloadDatabase): DownloadDao {
+        return database.downloadDao()
     }
 }

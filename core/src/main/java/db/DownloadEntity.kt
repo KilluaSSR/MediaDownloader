@@ -10,6 +10,11 @@ import kotlin.uuid.ExperimentalUuidApi
 @Entity
 data class Download @OptIn(ExperimentalUuidApi::class) constructor(
     @PrimaryKey val uuid: String,
+
+    @ColumnInfo(name = "twitter_user_id") val twitterUserId: String? = null,
+    @ColumnInfo(name = "twitter_screen_name") val twitterScreenName: String? = null,
+    @ColumnInfo(name = "twitter_name") val twitterName: String? = null,
+
     @ColumnInfo(name = "file_uri") val fileUri: Uri?,
     @ColumnInfo(name = "link") val link: String?,
 

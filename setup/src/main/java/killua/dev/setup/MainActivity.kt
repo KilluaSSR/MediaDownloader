@@ -16,6 +16,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import killua.dev.setup.MainActivity
 import killua.dev.setup.ui.theme.TwitterDownloaderTheme
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
 import ui.LocalNavController
 @ExperimentalAnimationApi
 @AndroidEntryPoint
@@ -37,4 +38,8 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+}
+
+fun main() {
+    TwitterAPI(OkHttpClient()).getTweetDetail("1875451750695760028")
 }

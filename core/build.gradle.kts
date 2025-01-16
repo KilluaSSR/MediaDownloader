@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json.v151)
     implementation(libs.ktor.client.serialization)
     implementation(libs.gson)
+    implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)

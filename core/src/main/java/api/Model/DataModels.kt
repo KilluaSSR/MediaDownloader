@@ -265,3 +265,5 @@ data class VideoVariant(
     @SerialName("url")
     val url: String
 )
+
+private fun LegacyInfo.filter(function: () -> kotlin.Boolean) {}
