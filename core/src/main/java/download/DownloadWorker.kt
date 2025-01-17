@@ -55,7 +55,7 @@ class VideoDownloadWorker(
             } else {
                 Result.failure(workDataOf(
                     KEY_DOWNLOAD_ID to downloadId,
-                    "error" to (e.message ?: "下载失败")
+                    "error" to (e.message ?: "Failed to download")
                 ))
             }
         }
