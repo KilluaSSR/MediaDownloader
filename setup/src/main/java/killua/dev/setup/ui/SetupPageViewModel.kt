@@ -4,7 +4,7 @@ import android.content.Context
 import dagger.hilt.android.lifecycle.HiltViewModel
 import killua.dev.core.utils.NotificationUtils
 import killua.dev.core.utils.StorageUtils
-import Model.EnvState
+import killua.dev.setup.EnvState
 import killua.dev.setup.ui.SetupUIIntent.ValidateNotifications
 import killua.dev.setup.ui.SetupUIIntent.ValidateStoragePermission
 import killua.dev.setup.ui.SetupUIIntent.ValidatedRoot
@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import ui.BaseViewModel
-import ui.SetupPageUIEffect
+import ui.PageUIEffect
 import ui.UIIntent
 import ui.UIState
 import javax.inject.Inject
@@ -31,7 +31,7 @@ sealed class SetupUIIntent : UIIntent{
 }
 
 @HiltViewModel
-class SetupPageViewModel @Inject constructor() : BaseViewModel<SetupUIIntent, SetupUIState, SetupPageUIEffect>(SetupUIState("")) {
+class SetupPageViewModel @Inject constructor() : BaseViewModel<SetupUIIntent, SetupUIState, PageUIEffect>(SetupUIState("")) {
     private val mutex = Mutex()
     private val _rootState: MutableStateFlow<EnvState> = MutableStateFlow(EnvState.Idle)
     private val _notificationState: MutableStateFlow<EnvState> = MutableStateFlow(EnvState.Idle)
@@ -73,5 +73,9 @@ class SetupPageViewModel @Inject constructor() : BaseViewModel<SetupUIIntent, Se
                 }
             }
         }
+    }
+
+    override suspend fun onEffect(effect: PageUIEffect) {
+
     }
 }

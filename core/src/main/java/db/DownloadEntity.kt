@@ -22,6 +22,8 @@ data class Download @OptIn(ExperimentalUuidApi::class) constructor(
     @ColumnInfo(name = "file_type") val fileType: String,
     @ColumnInfo(name = "file_size") val fileSize: Long,
 
+    @ColumnInfo(name = "range_header") val rangeHeader: String? = null,
+
     @ColumnInfo(name = "status") val status: DownloadStatus = DownloadStatus.PENDING,
     @ColumnInfo(name = "progress") val progress: Int = 0,
     @ColumnInfo(name = "error_message") val errorMessage: String? = null,
@@ -30,7 +32,6 @@ data class Download @OptIn(ExperimentalUuidApi::class) constructor(
     @ColumnInfo(name = "completed_at") val completedAt: Long? = null,
 
     @ColumnInfo(name = "mime_type") val mimeType: String? = null,
-    @ColumnInfo(name = "description") val description: String? = null
 )
 class UriTypeConverter {
     @TypeConverter

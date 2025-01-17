@@ -1,5 +1,6 @@
 package db
 
+import android.net.Uri
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -26,6 +27,8 @@ interface DownloadDao {
     @Delete
     suspend fun delete(download: Download)
 
+    @Query("SELECT * FROM Download WHERE twitter_user_id = :userID")
+    suspend fun getByUserID(userID: String): Download?
 
     @Query("SELECT * FROM Download WHERE status = :status")
     suspend fun getByStatus(status: DownloadStatus): List<Download>
@@ -46,6 +49,21 @@ interface DownloadDao {
     @Query("UPDATE Download SET status = :status, progress = :progress WHERE uuid = :uuid")
     suspend fun updateProgress(uuid: String, status: DownloadStatus, progress: Int)
 
+    @Query("""
+        UPDATE Download 
+        SET status = :status, 
+            file_uri = :fileUri, 
+            file_size = :fileSize, 
+            completed_at = :completedAt 
+        WHERE uuid = :uuid
+    """)
+    suspend fun updateCompleted(
+        uuid: String,
+        status: DownloadStatus,
+        fileUri: Uri,
+        fileSize: Long,
+        completedAt: Long
+    )
     @OptIn(ExperimentalUuidApi::class)
     @Query("UPDATE Download SET status = :status, error_message = :errorMessage WHERE uuid = :uuid")
     suspend fun updateError(uuid: String, status: DownloadStatus = DownloadStatus.FAILED, errorMessage: String?)

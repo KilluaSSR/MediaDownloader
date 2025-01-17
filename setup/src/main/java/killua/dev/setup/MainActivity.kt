@@ -6,18 +6,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
-import api.ExecuteDownload
-import api.TwitterAPI
+import api.TwitterApiService
 import dagger.hilt.android.AndroidEntryPoint
-import killua.dev.setup.MainActivity
 import killua.dev.setup.ui.theme.TwitterDownloaderTheme
-import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import ui.LocalNavController
+
 @ExperimentalAnimationApi
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -38,8 +34,4 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
-
-fun main() {
-    TwitterAPI(OkHttpClient()).getTweetDetail("1875451750695760028")
 }

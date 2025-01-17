@@ -21,11 +21,11 @@ interface IBaseViewModel<I: UIIntent, S: UIState, E: UIEffect> {
     suspend fun onEvent(state: S, intent: I)
     suspend fun onEffect(effect: E)
 }
-sealed class SetupPageUIEffect: UIEffect{
+sealed class PageUIEffect: UIEffect{
 
 }
-abstract class BaseViewModel <I: UIIntent, S: UIState, E: SetupPageUIEffect>(state: S): ViewModel(),
-    IBaseViewModel<I, S, SetupPageUIEffect> {
+abstract class BaseViewModel <I: UIIntent, S: UIState, E: UIEffect>(state: S): ViewModel(),
+    IBaseViewModel<I, S, E> {
     fun<T> Flow<T>.flowOnIO() = flowOn(Dispatchers.IO)
     fun<T> Flow<T>.stateInScope(initValue: T) = stateIn(
         scope = viewModelScope,
@@ -46,5 +46,5 @@ abstract class BaseViewModel <I: UIIntent, S: UIState, E: SetupPageUIEffect>(sta
     fun emitIntentOnIO(intent: I) = launchOnIO { emitIntent(intent) }
     fun launchOnIO(block: suspend CoroutineScope.() -> Unit) = viewModelScope.launch(context = Dispatchers.IO,block = block)
     override suspend fun onEvent(state: S, intent: I) {}
-    override suspend fun onEffect(effect: SetupPageUIEffect) {}
+    override suspend fun onEffect(effect: E) {}
 }

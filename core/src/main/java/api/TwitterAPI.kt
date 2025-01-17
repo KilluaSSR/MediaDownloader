@@ -1,8 +1,11 @@
+package api
+
 import android.os.Build
 import androidx.annotation.RequiresApi
 import api.Constants.GetTweetDetailFeatures
 import api.Constants.TwitterAPIURL
 import api.Model.GraphQLResponse
+import api.Model.TwitterRequestResult
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import killua.dev.core.utils.TweetData
@@ -14,15 +17,18 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import repository.LoginCredentials
 import java.net.URLEncoder
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class TwitterApiService(
+@Singleton
+class TwitterApiService @Inject constructor(
     private val client: OkHttpClient,
     private val credentials: LoginCredentials
 ) {
     private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    suspend fun getTweetDetailAsync(tweetId: String) {
-        if (tweetId.isBlank()) return
+    suspend fun getTweetDetailAsync(tweetId: String): TwitterRequestResult {
+        if (tweetId.isBlank()) return TwitterRequestResult.Error(message = "ID cannot be empty")
         val variables = tweetId.toTweetVariablesSingleMedia()
         val params = mapOf(
             "variables" to gson.toJson(variables),
@@ -35,17 +41,25 @@ class TwitterApiService(
             .url(url)
             .addTwitterHeaders(credentials.ct0)
             .build()
-        client.newCall(request).execute().use { response ->
-            if (response.isSuccessful) {
-                val content = response.body?.string().orEmpty()
-                val tweet = gson.fromJson(content, GraphQLResponse::class.java)
-                TweetData(
-                    user = tweet.extractTwitterUser(),
-                    videoUrls = tweet.getAllHighestBitrateUrls()
-                )
-            } else {
-                println("请求失败: ${response.code} - ${response.message}")
+        return try {
+            client.newCall(request).execute().use { response ->
+                if (response.isSuccessful) {
+                    val content = response.body?.string().orEmpty()
+                    val tweet = gson.fromJson(content, GraphQLResponse::class.java)
+                    val tweetData = TweetData(
+                        user = tweet.extractTwitterUser(),
+                        videoUrls = tweet.getAllHighestBitrateUrls()
+                    )
+                    TwitterRequestResult.Success(tweetData)
+                } else {
+                    TwitterRequestResult.Error(
+                        code = response.code,
+                        message = "请求失败: ${response.message}"
+                    )
+                }
             }
+        } catch (e: Exception) {
+            TwitterRequestResult.Error(message = e.message ?: "未知错误")
         }
     }
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)

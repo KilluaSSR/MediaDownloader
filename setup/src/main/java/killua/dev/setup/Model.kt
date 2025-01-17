@@ -1,4 +1,4 @@
-package Model
+package killua.dev.setup
 sealed class EnvState{
     data object Idle: EnvState()
     data object Processing: EnvState()
