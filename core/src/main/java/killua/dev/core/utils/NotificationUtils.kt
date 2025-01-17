@@ -1,9 +1,9 @@
 package killua.dev.core.utils
 
 import android.Manifest
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
 import android.widget.Toast
@@ -11,12 +11,21 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 
 object NotificationUtils {
-    fun checkPermission(context: Context) = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
-        ActivityCompat.checkSelfPermission(
-            context, Manifest.permission.POST_NOTIFICATIONS
-        )
-    }else{
-        NotificationManagerCompat.from(context).areNotificationsEnabled()
+    fun checkAndRequestPermission(context: Context): Boolean {
+        val hasPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            NotificationManagerCompat.from(context).areNotificationsEnabled()
+        }
+
+        if (!hasPermission) {
+            requestPermission(context)
+        }
+
+        return hasPermission
     }
 
     fun requestPermission(context: Context){

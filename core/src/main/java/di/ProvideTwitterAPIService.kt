@@ -1,7 +1,6 @@
 package di
 
 import api.TwitterApiService
-import api.TwitterApiClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -32,7 +31,7 @@ object ProvideTwitterApiService {
     ): TwitterApiService {
         val credentials = credentialRepository.getCredentials() ?: LoginCredentials("", "")
 
-        val client = TwitterApiClient.buildClient(credentials)
+        val client = ProvideTwitterApiClient.buildClient(credentials)
         return TwitterApiService(client, credentials)
     }
 }

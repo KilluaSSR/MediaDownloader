@@ -49,11 +49,11 @@ class SetupPageViewModel @Inject constructor() : BaseViewModel<SetupUIIntent, Se
             is ValidateNotifications -> {
                 mutex.withLock{
                     if(notificationState.value != EnvState.Success){
-                        NotificationUtils.checkPermission(intent.context)
+                        NotificationUtils.checkAndRequestPermission(intent.context)
                     }
                 }
             }
-            is ValidatedRoot -> TODO()
+            is ValidatedRoot -> {}
             is ValidateStoragePermission -> {
                 mutex.withLock{
                     if(storagePermissionState.value != EnvState.Success){
@@ -64,7 +64,7 @@ class SetupPageViewModel @Inject constructor() : BaseViewModel<SetupUIIntent, Se
 
             is SetupUIIntent.onResume -> {
                 mutex.withLock{
-                    if(NotificationUtils.checkPermission(intent.context) != 0){
+                    if(NotificationUtils.checkAndRequestPermission(intent.context)){
                         _notificationState.value = EnvState.Success
                     }
                     if (StorageUtils.checkPermission(intent.context) != 0){
