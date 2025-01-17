@@ -46,6 +46,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.datastore.preferences)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.okhttp)

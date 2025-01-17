@@ -11,7 +11,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object WorkManagerModule {
+object ProvideWorkManagerModule {
     @Provides
     @Singleton
     fun provideWorkManager(

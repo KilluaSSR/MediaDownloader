@@ -44,6 +44,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.datastore.preferences)
     implementation(libs.hilt.android)
     implementation(project(":core"))
     implementation(project(":setup"))

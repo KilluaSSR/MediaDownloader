@@ -11,7 +11,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object NetworkModule {
+object ProvideNetworkManagerModule {
     @Provides
     @Singleton
     fun provideNetworkManager(@ApplicationContext context: Context): NetworkManager =

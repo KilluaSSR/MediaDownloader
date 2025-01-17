@@ -9,7 +9,6 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.runBlocking
 import repository.CredentialRepository
 import repository.LoginCredentials
 import javax.inject.Qualifier
@@ -27,18 +26,14 @@ object ProvideTwitterApiService {
 
     @Provides
     @Singleton
-    fun provideTwitterApiService(
+    suspend fun provideTwitterApiService(
         credentialRepository: CredentialRepository,
         @ApplicationScope appScope: CoroutineScope
     ): TwitterApiService {
-        val creds = runBlocking {
-            withContext(appScope.coroutineContext) {
-                credentialRepository.getCredentials() ?: LoginCredentials("", "")
-            }
-        }
+        val credentials = credentialRepository.getCredentials() ?: LoginCredentials("", "")
 
-        val client = TwitterApiClient.buildClient(creds)
-        return TwitterApiService(client, creds)
+        val client = TwitterApiClient.buildClient(credentials)
+        return TwitterApiService(client, credentials)
     }
 }
 @Retention(AnnotationRetention.RUNTIME)

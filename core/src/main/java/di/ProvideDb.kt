@@ -8,13 +8,11 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import db.DownloadDao
 import db.TwitterDownloadDatabase
-import db.UserinfoDAO
-import db.UserinfoDatabase
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object DatabaseModule {
+object ProvideDownloadDatabaseModule {
     @Provides
     @Singleton
     fun provideDownloadDatabase(@ApplicationContext context: Context): TwitterDownloadDatabase {
@@ -25,17 +23,5 @@ object DatabaseModule {
     @Singleton
     fun provideDownloadDao(database: TwitterDownloadDatabase): DownloadDao {
         return database.downloadDao()
-    }
-
-    @Provides
-    @Singleton
-    fun provideUserinfoDatabase(@ApplicationContext context: Context): UserinfoDatabase {
-        return UserinfoDatabase.getInstance(context)
-    }
-
-    @Provides
-    @Singleton
-    fun provideUserinfoDao(database: UserinfoDatabase): UserinfoDAO {
-        return database.userinfoDao()
     }
 }

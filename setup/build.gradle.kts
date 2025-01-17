@@ -39,7 +39,7 @@ android {
 }
 
 dependencies {
-
+    implementation(libs.androidx.datastore.preferences)
     //tmp
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
