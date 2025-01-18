@@ -27,7 +27,7 @@ class TwitterApiService @Inject constructor(
 ) {
     private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    suspend fun getTweetDetailAsync(tweetId: String): TwitterRequestResult {
+    fun getTweetDetailAsync(tweetId: String): TwitterRequestResult {
         if (tweetId.isBlank()) return TwitterRequestResult.Error(message = "ID cannot be empty")
         val variables = tweetId.toTweetVariablesSingleMedia()
         val params = mapOf(

@@ -46,8 +46,8 @@ android {
 dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.hilt.android)
+    implementation(libs.androidx.material.icons.extended)
     implementation(project(":core"))
-    implementation(project(":setup"))
     ksp(libs.hilt.android.compiler)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.room.runtime)

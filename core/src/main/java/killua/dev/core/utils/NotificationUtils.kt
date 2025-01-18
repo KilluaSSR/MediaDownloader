@@ -11,8 +11,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 
 object NotificationUtils {
-    fun checkAndRequestPermission(context: Context): Boolean {
-        val hasPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+    fun checkPermission(context: Context)= if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ActivityCompat.checkSelfPermission(
                 context,
                 Manifest.permission.POST_NOTIFICATIONS
@@ -21,12 +20,6 @@ object NotificationUtils {
             NotificationManagerCompat.from(context).areNotificationsEnabled()
         }
 
-        if (!hasPermission) {
-            requestPermission(context)
-        }
-
-        return hasPermission
-    }
 
     fun requestPermission(context: Context){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){

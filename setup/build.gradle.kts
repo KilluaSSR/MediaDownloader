@@ -40,21 +40,16 @@ android {
 
 dependencies {
     implementation(libs.androidx.datastore.preferences)
-    //tmp
-    implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.kotlinx.serialization.json)
-    implementation(libs.okhttp)
-    implementation(libs.kotlinx.serialization.json.v151)
-    implementation(libs.ktor.client.serialization)
-    implementation(libs.gson)
-
     implementation(libs.hilt.android)
+    implementation(libs.androidx.material.icons.extended)
     implementation(project(":core"))
     ksp(libs.hilt.android.compiler)
+    implementation(libs.androidx.core.splashscreen)
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))

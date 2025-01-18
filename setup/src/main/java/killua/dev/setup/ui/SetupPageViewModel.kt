@@ -3,14 +3,12 @@ package killua.dev.setup.ui
 import android.content.Context
 import dagger.hilt.android.lifecycle.HiltViewModel
 import killua.dev.core.utils.NotificationUtils
-import killua.dev.core.utils.StorageUtils
-import killua.dev.setup.EnvState
+import killua.dev.setup.CurrentState
 import killua.dev.setup.ui.SetupUIIntent.ValidateNotifications
 import killua.dev.setup.ui.SetupUIIntent.ValidateStoragePermission
 import killua.dev.setup.ui.SetupUIIntent.ValidatedRoot
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import ui.BaseViewModel
@@ -27,49 +25,46 @@ sealed class SetupUIIntent : UIIntent{
     data object ValidatedRoot: SetupUIIntent()
     data class ValidateNotifications(val context: Context): SetupUIIntent()
     data class ValidateStoragePermission(val context: Context): SetupUIIntent()
-    data class onResume(val context: Context): SetupUIIntent()
+    data class OnResume(val context: Context): SetupUIIntent()
 }
 
 @HiltViewModel
 class SetupPageViewModel @Inject constructor() : BaseViewModel<SetupUIIntent, SetupUIState, PageUIEffect>(SetupUIState("")) {
     private val mutex = Mutex()
-    private val _rootState: MutableStateFlow<EnvState> = MutableStateFlow(EnvState.Idle)
-    private val _notificationState: MutableStateFlow<EnvState> = MutableStateFlow(EnvState.Idle)
-    private val _storagePermissionState: MutableStateFlow<EnvState> = MutableStateFlow(EnvState.Idle)
-    val rootState: StateFlow<EnvState> = _rootState.stateInScope(EnvState.Idle)
-    val notificationState: StateFlow<EnvState> = _notificationState.stateInScope(EnvState.Idle)
-    val storagePermissionState: StateFlow<EnvState> = _storagePermissionState.stateInScope(EnvState.Idle)
-
-    val allOptionsValidated: StateFlow<Boolean> = combine(_rootState,_notificationState,_storagePermissionState){ root,notification,storage ->
-        root == EnvState.Success && notification == EnvState.Success && storage == EnvState.Success
-    }.flowOnIO().stateInScope(false)
-
+    private val _rootState: MutableStateFlow<CurrentState> = MutableStateFlow(CurrentState.Idle)
+    private val _notificationState: MutableStateFlow<CurrentState> = MutableStateFlow(CurrentState.Idle)
+    private val _storagePermissionState: MutableStateFlow<CurrentState> = MutableStateFlow(CurrentState.Idle)
+    //val rootState: StateFlow<EnvState> = _rootState.stateInScope(EnvState.Idle)
+    val notificationState: StateFlow<CurrentState> = _notificationState.stateInScope(CurrentState.Idle)
+    //val storagePermissionState: StateFlow<EnvState> = _storagePermissionState.stateInScope(EnvState.Idle)
+//    val allOptionsValidated: StateFlow<Boolean> = combine(_notificationState,_storagePermissionState){ notification,storage ->
+//         notification == EnvState.Success && storage == EnvState.Success
+//    }.flowOnIO().stateInScope(false)
     override suspend fun onEvent(state: SetupUIState, intent: SetupUIIntent) {
         when(intent){
             is ValidateNotifications -> {
                 mutex.withLock{
-                    if(notificationState.value != EnvState.Success){
-                        NotificationUtils.checkAndRequestPermission(intent.context)
+                    if(notificationState.value != CurrentState.Success){
+                        NotificationUtils.requestPermission(intent.context)
                     }
                 }
             }
             is ValidatedRoot -> {}
             is ValidateStoragePermission -> {
-                mutex.withLock{
-                    if(storagePermissionState.value != EnvState.Success){
-                        // Request storage permission
-                    }
-                }
+//                mutex.withLock{
+//                    if(storagePermissionState.value != EnvState.Success){
+//                        StorageUtils.requestPermission(context = intent.context)
+//                    }
+//                }
             }
-
-            is SetupUIIntent.onResume -> {
+            is SetupUIIntent.OnResume -> {
                 mutex.withLock{
-                    if(NotificationUtils.checkAndRequestPermission(intent.context)){
-                        _notificationState.value = EnvState.Success
+                    if(NotificationUtils.checkPermission(intent.context)){
+                        _notificationState.value = CurrentState.Success
                     }
-                    if (StorageUtils.checkPermission(intent.context) != 0){
-                        _storagePermissionState.value = EnvState.Success
-                    }
+//                    if (StorageUtils.checkPermission(intent.context)){
+//                        _storagePermissionState.value = EnvState.Success
+//                    }
                 }
             }
         }

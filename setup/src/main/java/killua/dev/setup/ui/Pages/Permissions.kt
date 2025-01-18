@@ -17,11 +17,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import killua.dev.core.utils.navigateSingle
+import killua.dev.setup.CurrentState
 import killua.dev.setup.SetupRoutes
 import killua.dev.setup.ui.SetupPageViewModel
 import killua.dev.setup.ui.SetupUIIntent
 import ui.LocalNavController
 import ui.components.Section
+import ui.components.SetOnResume
 import ui.components.SetupScaffold
 import ui.tokens.SizeTokens
 
@@ -30,20 +32,20 @@ import ui.tokens.SizeTokens
 fun PermissionsPage(viewModel: SetupPageViewModel = viewModel()) {
     val navController = LocalNavController.current!!
     val context = LocalContext.current
-    val rootState = viewModel.rootState.collectAsStateWithLifecycle()
+//    val rootState = viewModel.rootState.collectAsStateWithLifecycle()
     val notificationState = viewModel.notificationState.collectAsStateWithLifecycle()
-    val storagePermissionState = viewModel.storagePermissionState.collectAsStateWithLifecycle()
-    val allOptionsValidated = viewModel.allOptionsValidated.collectAsStateWithLifecycle()
-//    SetOnResume {
-//        viewModel.emitIntentOnIO(SetupUIIntent.onResume(context))
-//    }
+//    val storagePermissionState = viewModel.storagePermissionState.collectAsStateWithLifecycle()
+//    val allOptionsValidated = viewModel.allOptionsValidated.collectAsStateWithLifecycle()
+    SetOnResume {
+        viewModel.emitIntentOnIO(SetupUIIntent.OnResume(context))
+    }
     SetupScaffold(
         actions = {
-            AnimatedVisibility(visible = allOptionsValidated.value.not()) {
+            AnimatedVisibility(visible = notificationState.value != CurrentState.Success) {
                 OutlinedButton(
                     onClick = {
                         viewModel.launchOnIO {
-                            viewModel.emitIntent(SetupUIIntent.ValidatedRoot)
+                            //viewModel.emitIntent(SetupUIIntent.ValidatedRoot)
                             viewModel.emitIntent(SetupUIIntent.ValidateNotifications(context))
                             viewModel.emitIntent(SetupUIIntent.ValidateStoragePermission(context))
                         }
@@ -53,7 +55,7 @@ fun PermissionsPage(viewModel: SetupPageViewModel = viewModel()) {
                 }
             }
             Button(
-                enabled = allOptionsValidated.value,
+                enabled = notificationState.value == CurrentState.Success,
                 onClick = {
                     navController.navigateSingle(SetupRoutes.welcomePage.route)
                 }
@@ -70,7 +72,7 @@ fun PermissionsPage(viewModel: SetupPageViewModel = viewModel()) {
 
         }
         Spacer(modifier = Modifier.size(SizeTokens.Level24))
-        Section(title = "We ask you for some permissions.") {
+        Section(title = "We want to ask you for something.") {
 
         }
 

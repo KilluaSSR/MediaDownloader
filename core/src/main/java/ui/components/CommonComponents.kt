@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import killua.dev.setup.CurrentState
 import ui.tokens.SizeTokens
 
 @Composable
@@ -40,8 +41,8 @@ fun ActionButton(
     enabled: Boolean = true,
     icon: ImageVector,
     onClick: () -> Unit = {},
+    trainlingIcon: @Composable (RowScope.() -> Unit)? = null,
     content: @Composable RowScope.() -> Unit,
-    trainlingIcon: @Composable (RowScope.() -> Unit)? = null
 ){
     val interactionSource = remember { MutableInteractionSource() }
     Card (
@@ -70,17 +71,25 @@ fun ActionButton(
         }
     }
 }
-//@Composable
-//fun PermissionButton(
-//    enabled: Boolean = true,
-//    state: EnvState,
-//    title: String,
-//    description: String,
-//    onClick: () -> Unit,
-//    onSetting: () -> Unit
-//){
-//    ActionButton(
-//        enabled = enabled,
-//        icon = state.icon,
-//    )
-//}
+@Composable
+fun PermissionButton(
+    enabled: Boolean = true,
+    onClick: () -> Unit,
+    title: String,
+    description: String,
+    state: CurrentState,
+    onSetting: (()->Unit)? = null
+){
+    ActionButton(
+        enabled = enabled,
+        icon = state.leadingIcon,
+        onClick = onClick,
+        trainlingIcon = {
+
+        }
+    ){
+        Column (modifier = Modifier.weight(1f)){
+            LableTextLarge(text = title)
+        }
+    }
+}
