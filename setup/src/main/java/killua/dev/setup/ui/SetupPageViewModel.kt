@@ -3,7 +3,7 @@ package killua.dev.setup.ui
 import android.content.Context
 import dagger.hilt.android.lifecycle.HiltViewModel
 import killua.dev.core.utils.NotificationUtils
-import killua.dev.setup.CurrentState
+import Model.CurrentState
 import killua.dev.setup.ui.SetupUIIntent.ValidateNotifications
 import killua.dev.setup.ui.SetupUIIntent.ValidateStoragePermission
 import killua.dev.setup.ui.SetupUIIntent.ValidatedRoot

@@ -8,6 +8,7 @@ import killua.dev.setup.ui.Pages.PermissionsPage
 import ui.LocalNavController
 import ui.animations.AnimatedNavHost
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Setup(){
     val navController = LocalNavController.current!!

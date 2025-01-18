@@ -9,7 +9,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
-import killua.dev.setup.Setup
 import killua.dev.twitterdownloader.ui.theme.TwitterDownloaderTheme
 import ui.LocalNavController
 @AndroidEntryPoint

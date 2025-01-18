@@ -44,10 +44,11 @@ android {
 }
 
 dependencies {
+    implementation(project(":setup"))
+    implementation(project(":core"))
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.hilt.android)
     implementation(libs.androidx.material.icons.extended)
-    implementation(project(":core"))
     ksp(libs.hilt.android.compiler)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.room.runtime)

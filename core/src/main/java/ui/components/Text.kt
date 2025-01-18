@@ -33,3 +33,20 @@ fun LableTextLarge(
         textAlign = textAlign,
     )
 }
+@Composable
+fun BodySmallText(
+    modifier: Modifier = Modifier,
+    text: String,
+    color: Color = Color.Unspecified,
+    textAlign: TextAlign? = null,
+    fontWeight: FontWeight? = null,
+    enabled: Boolean = true,
+) {
+    Text(
+        modifier = modifier,
+        text = text,
+        style = MaterialTheme.typography.bodySmall,
+        textAlign = textAlign,
+        fontWeight = fontWeight,
+    )
+}

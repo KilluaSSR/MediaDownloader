@@ -1,6 +1,7 @@
 package killua.dev.setup.ui.Pages
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -17,16 +18,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import killua.dev.core.utils.navigateSingle
-import killua.dev.setup.CurrentState
+import Model.CurrentState
 import killua.dev.setup.SetupRoutes
 import killua.dev.setup.ui.SetupPageViewModel
 import killua.dev.setup.ui.SetupUIIntent
 import ui.LocalNavController
+import ui.components.PermissionButton
 import ui.components.Section
 import ui.components.SetOnResume
 import ui.components.SetupScaffold
 import ui.tokens.SizeTokens
-
+@ExperimentalFoundationApi
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PermissionsPage(viewModel: SetupPageViewModel = viewModel()) {
@@ -73,7 +75,29 @@ fun PermissionsPage(viewModel: SetupPageViewModel = viewModel()) {
         }
         Spacer(modifier = Modifier.size(SizeTokens.Level24))
         Section(title = "We want to ask you for something.") {
-
+            PermissionButton(
+                title = "Notification Permission",
+                description = "We need to send you notifications to keep you updated.",
+                state = notificationState.value,
+                onClick = {
+                    viewModel.launchOnIO {
+                        viewModel.emitIntent(SetupUIIntent.ValidateNotifications(context))
+                    }
+                }
+            )
+        }
+        Spacer(modifier = Modifier.size(SizeTokens.Level24))
+        Section(title = "You're invited to log in to your Twitter account.") {
+            PermissionButton(
+                title = "Notification",
+                description = "We need to send you notifications to keep you updated.",
+                state = notificationState.value,
+                onClick = {
+                    viewModel.launchOnIO {
+                        viewModel.emitIntent(SetupUIIntent.ValidateNotifications(context))
+                    }
+                }
+            )
         }
 
     }
