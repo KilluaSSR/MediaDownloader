@@ -46,6 +46,38 @@ fun Section(title: String, content: @Composable ColumnScope.() -> Unit){
     }
 }
 @Composable
+fun ActionButtonContent(
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    icon: ImageVector,
+    onClick: () -> Unit = {},
+    interactionSource: MutableInteractionSource,
+    trainlingIcon: @Composable (RowScope.() -> Unit)? = null,
+    content: @Composable RowScope.() -> Unit,
+) {
+    Row(
+        modifier = modifier
+            .padding(SizeTokens.Level12)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(SizeTokens.Level10)
+    ) {
+        Surface(
+            modifier = Modifier.size(SizeTokens.Level36),
+            shape = CircleShape,
+            enabled = enabled,
+            onClick = onClick,
+            interactionSource = interactionSource
+        ) {
+            Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(SizeTokens.Level8))
+        }
+        content()
+        trainlingIcon?.invoke(this)
+    }
+}
+
+
+@Composable
 fun ActionButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -54,9 +86,9 @@ fun ActionButton(
     state: CurrentState,
     trainlingIcon: @Composable (RowScope.() -> Unit)? = null,
     content: @Composable RowScope.() -> Unit,
-){
+) {
     val interactionSource = remember { MutableInteractionSource() }
-    Card (
+    Card(
         modifier = modifier.wrapContentHeight(),
         shape = RoundedCornerShape(SizeTokens.Level16),
         onClick = onClick,
@@ -65,26 +97,19 @@ fun ActionButton(
         ),
         enabled = enabled,
         interactionSource = interactionSource,
-    ){
-        Row (
-            modifier = Modifier.padding(SizeTokens.Level12).fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(SizeTokens.Level10)
-        ){
-            Surface(
-                modifier = Modifier.size(SizeTokens.Level36),
-                shape = CircleShape,
-                enabled = enabled,
-                onClick = onClick,
-                interactionSource = interactionSource
-            ) {
-                Icon(imageVector = icon, contentDescription = null,modifier = Modifier.size(SizeTokens.Level8))
-            }
-            content()
-            trainlingIcon?.invoke(this)
-        }
+    ) {
+        ActionButtonContent(
+            modifier = Modifier,
+            enabled = enabled,
+            icon = icon,
+            onClick = onClick,
+            interactionSource = interactionSource,
+            trainlingIcon = trainlingIcon,
+            content = content
+        )
     }
 }
+
 @Composable
 fun PermissionButton(
     enabled: Boolean = true,
@@ -120,34 +145,41 @@ fun PermissionButton(
         }
     }
 }
+
 @Composable
-fun NavigationButtion(
+fun NavigationButton(
+    enabled: Boolean = true,
     onClick: () -> Unit,
     title: String,
     icon: ImageVector
 ){
-    Surface (
-        modifier = Modifier
-            .width(SizeTokens.Level128)
-            .height(SizeTokens.Level36),
-        shape = CircleShape,
-        onClick = onClick
-    ){
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Icon(imageVector = icon, contentDescription = null)
-            Text(text = title)
+    val interactionSource = remember { MutableInteractionSource() }
+    Card(
+        modifier = Modifier.wrapContentHeight(),
+        shape = RoundedCornerShape(SizeTokens.Level16),
+        onClick = onClick,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+        ),
+        enabled = enabled,
+        interactionSource = interactionSource,
+    ) {
+        ActionButtonContent(
+            modifier = Modifier,
+            enabled = enabled,
+            icon = icon,
+            onClick = onClick,
+            interactionSource = interactionSource
+        ){
+            LableTextLarge(text = title, color = MaterialTheme.colorScheme.onTertiaryContainer)
         }
     }
-}
 
+}
 @Preview
 @Composable
 fun PermissionButtonPreview(){
-    NavigationButtion(
+    NavigationButton(
         onClick = {},
         title = "Notification",
         icon = Icons.Rounded.KeyboardDoubleArrowRight

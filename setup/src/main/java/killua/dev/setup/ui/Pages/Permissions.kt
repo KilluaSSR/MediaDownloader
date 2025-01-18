@@ -19,10 +19,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import killua.dev.core.utils.navigateSingle
 import Model.CurrentState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Settings
 import killua.dev.setup.SetupRoutes
 import killua.dev.setup.ui.SetupPageViewModel
 import killua.dev.setup.ui.SetupUIIntent
 import ui.LocalNavController
+import ui.components.NavigationButton
 import ui.components.PermissionButton
 import ui.components.Section
 import ui.components.SetOnResume
@@ -59,7 +62,7 @@ fun PermissionsPage(viewModel: SetupPageViewModel = viewModel()) {
             Button(
                 enabled = notificationState.value == CurrentState.Success,
                 onClick = {
-                    navController.navigateSingle(SetupRoutes.welcomePage.route)
+                    navController.navigateSingle(SetupRoutes.WelcomePage.route)
                 }
             ){
                 Text(text = "Continue")
@@ -71,6 +74,7 @@ fun PermissionsPage(viewModel: SetupPageViewModel = viewModel()) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(SizeTokens.Level24)
         ){
+
 
         }
         Spacer(modifier = Modifier.size(SizeTokens.Level24))
@@ -85,6 +89,7 @@ fun PermissionsPage(viewModel: SetupPageViewModel = viewModel()) {
                     }
                 }
             )
+            NavigationButton(enabled = true,{},"Downloads", Icons.Outlined.Settings)
         }
         Spacer(modifier = Modifier.size(SizeTokens.Level24))
         Section(title = "You're invited to log in to your Twitter account.") {
