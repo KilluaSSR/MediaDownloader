@@ -1,18 +1,19 @@
-package killua.dev.twitterdownloader.Pages
+package killua.dev.twitterdownloader.ui.Pages
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import killua.dev.core.MainRoutes
-import killua.dev.setup.SetupRoutes
-import killua.dev.setup.ui.Pages.PermissionsPage
+import killua.dev.twitterdownloader.ui.MainpageViewmodel
 import ui.LocalNavController
 import ui.animations.AnimatedNavHost
 import ui.components.MainPageTopBar
 import ui.components.MainScaffold
 import ui.components.Section
+
 @Composable
 fun Home(){
     val navController = LocalNavController.current!!
@@ -26,7 +27,7 @@ fun Home(){
         composable(MainRoutes.UserinfoPage.route) {
             Mainpage()
         }
-        composable(MainRoutes.DownloadingListPage.route) {
+        composable(MainRoutes.Download.route) {
             Mainpage()
         }
         composable(MainRoutes.DownloadedPage.route) {
@@ -53,7 +54,9 @@ fun Home(){
     }
 }
 @Composable
-fun Mainpage() {
+fun Mainpage(
+    mainpageViewmodel: MainpageViewmodel = viewModel()
+) {
     val navController = rememberNavController()
     MainScaffold(
         topBar = {
@@ -63,6 +66,7 @@ fun Mainpage() {
         Section("Your summary") {
             Text("This is your summary")
         }
+
     }
 }
 

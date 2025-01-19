@@ -46,6 +46,7 @@ android {
 dependencies {
     implementation(project(":setup"))
     implementation(project(":core"))
+    implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.hilt.android)
     implementation(libs.androidx.material.icons.extended)

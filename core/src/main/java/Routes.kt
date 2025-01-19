@@ -1,9 +1,14 @@
 package killua.dev.core
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Help
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.ContactPage
 import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.DownloadDone
 import androidx.compose.material.icons.rounded.Downloading
+import androidx.compose.material.icons.rounded.Help
+import androidx.compose.material.icons.rounded.Report
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class MainRoutes(val route: String){
@@ -12,7 +17,7 @@ sealed class MainRoutes(val route: String){
     }
     data object MainPage : MainRoutes(route = "main_page")
     data object UserinfoPage : MainRoutes(route = "userinfo_page")
-    data object DownloadingListPage : MainRoutes(route = "downloading_list_page")
+    data object Download : MainRoutes(route = "downloading")
     data object DownloadedPage : MainRoutes(route = "downloaded_page")
     data object TwitterUserPage : MainRoutes(route = "twitter_user_page")
     data object SpecificTwitterUserPage : MainRoutes(route = "specific_twitter_user_page/{$ARG_USER_ID}") {
@@ -31,22 +36,22 @@ data class MainPageButtonsEssentials(
 )
 val MainPageButtons = listOf(
     MainPageButtonsEssentials(
-        MainRoutes.DownloadingListPage.route,
-        Icons.Rounded.Downloading,
-        MainRoutes.DownloadingListPage.route
+        "Download",
+        Icons.Rounded.Download,
+        MainRoutes.Download.route
     ),
     MainPageButtonsEssentials(
-        MainRoutes.DownloadedPage.route,
-        Icons.Rounded.Download,
+        "Downloaded",
+        Icons.Rounded.DownloadDone,
         MainRoutes.DownloadedPage.route
     ),
     MainPageButtonsEssentials(
-        MainRoutes.TwitterUserPage.route,
+        "Twitter Users",
         Icons.Rounded.AccountCircle,
         MainRoutes.TwitterUserPage.route
     ),
     MainPageButtonsEssentials(
-        MainRoutes.UserinfoPage.route,
+        "User Info",
         Icons.Rounded.ContactPage,
         MainRoutes.UserinfoPage.route
     ),
@@ -54,23 +59,18 @@ val MainPageButtons = listOf(
 )
 val MainPageDropdownMenuButtons = listOf(
     MainPageButtonsEssentials(
-        MainRoutes.SettingPage.route,
-        Icons.Rounded.AccountCircle,
+        "Settings",
+        Icons.Rounded.Settings,
         MainRoutes.SettingPage.route
     ),
     MainPageButtonsEssentials(
-        MainRoutes.ReportPage.route,
-        Icons.Rounded.AccountCircle,
+        "Report",
+        Icons.Rounded.Report,
         MainRoutes.ReportPage.route
     ),
     MainPageButtonsEssentials(
-        MainRoutes.AboutPage.route,
-        Icons.Rounded.AccountCircle,
+        "About",
+        Icons.AutoMirrored.Rounded.Help,
         MainRoutes.AboutPage.route
-    ),
-    MainPageButtonsEssentials(
-        MainRoutes.HelpPage.route,
-        Icons.Rounded.AccountCircle,
-        MainRoutes.HelpPage.route
-    ),
+    )
 )

@@ -40,7 +40,6 @@ fun MainScaffold(
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(innerPadding)
                     .fillMaxWidth()
             ){
                 LazyColumn(modifier = Modifier.fillMaxSize()){
@@ -77,7 +76,7 @@ fun MainPageTopBar(navController: NavHostController){
                     ) {
                         MainPageDropdownMenuButtons.forEach{
                             DropdownMenuItem(
-                                text = { Text(it.route) },
+                                text = { Text(it.title) },
                                 onClick = {
                                     navController.navigateSingle(it.route)
                                 }

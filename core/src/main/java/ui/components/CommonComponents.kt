@@ -46,6 +46,17 @@ fun Section(title: String, content: @Composable ColumnScope.() -> Unit){
     }
 }
 @Composable
+fun MainButtonSection(title: String, content: @Composable ColumnScope.() -> Unit){
+    Column (
+        modifier = Modifier.padding(SizeTokens.Level16,0.dp),
+        verticalArrangement = Arrangement.spacedBy(SizeTokens.Level8),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ){
+        LableTextLarge(text = title, fontWeight = FontWeight.SemiBold)
+        content()
+    }
+}
+@Composable
 fun ActionButtonContent(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
