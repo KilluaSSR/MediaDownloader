@@ -1,6 +1,8 @@
 package killua.dev.core
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Help
+import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.ContactPage
 import androidx.compose.material.icons.rounded.Download
@@ -9,6 +11,7 @@ import androidx.compose.material.icons.rounded.Downloading
 import androidx.compose.material.icons.rounded.Help
 import androidx.compose.material.icons.rounded.Report
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.sharp.Download
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class MainRoutes(val route: String){
@@ -37,7 +40,7 @@ data class MainPageButtonsEssentials(
 val MainPageButtons = listOf(
     MainPageButtonsEssentials(
         "Download Now",
-        Icons.Rounded.Download,
+        Icons.Sharp.Download,
         MainRoutes.Download.route
     ),
     MainPageButtonsEssentials(
@@ -56,11 +59,12 @@ val MainPageButtons = listOf(
         MainRoutes.UserinfoPage.route
     ),
 
+
 )
 val MainPageDropdownMenuButtons = listOf(
     MainPageButtonsEssentials(
         "Settings",
-        Icons.Rounded.Settings,
+        Icons.Outlined.Settings,
         MainRoutes.SettingPage.route
     ),
     MainPageButtonsEssentials(

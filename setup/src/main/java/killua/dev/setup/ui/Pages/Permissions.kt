@@ -1,6 +1,7 @@
 package killua.dev.setup.ui.Pages
 
 import Model.CurrentState
+import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import killua.dev.core.utils.navigateSingle
+import killua.dev.setup.ActivityUtil
 import killua.dev.setup.SetupRoutes
 import killua.dev.setup.ui.SetupPageViewModel
 import killua.dev.setup.ui.SetupUIIntent
@@ -60,7 +62,7 @@ fun PermissionsPage(viewModel: SetupPageViewModel = viewModel()) {
             Button(
                 enabled = notificationState.value == CurrentState.Success,
                 onClick = {
-                    navController.navigateSingle(SetupRoutes.WelcomePage.route)
+                    context.startActivity(Intent(context, ActivityUtil.classMainActivity))
                 }
             ){
                 Text(text = "Continue")
