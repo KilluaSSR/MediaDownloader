@@ -11,7 +11,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import db.UserPreuserferences
+import db.UserPreferences
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import repository.CredentialRepository
@@ -54,7 +54,7 @@ class CredentialRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
 ) : CredentialRepository {
     override suspend fun getCredentials(): LoginCredentials? {
-        val userdata = UserPreuserferences.getUserdata(context).first()
+        val userdata = UserPreferences.getUserdata(context).first()
         return userdata?.let {
             LoginCredentials(it.userct0,it.userauth)
         }

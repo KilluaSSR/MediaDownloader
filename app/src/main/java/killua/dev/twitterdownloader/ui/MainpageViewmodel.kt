@@ -24,7 +24,6 @@ import javax.inject.Inject
 data class DownloadUIState(
     val downloads: List<DownloadItem> = emptyList(),
     val isLoading: Boolean = false,
-    val error: String? = null
 ) : UIState
 
 sealed class MainpageUIIntent : UIIntent{
@@ -37,7 +36,7 @@ class MainpageViewmodel @Inject constructor(
     private val twitterApiService: TwitterApiService,
     private val downloadRepository: DownloadRepository,
     private val downloadManager: DownloadManager,
-) : BaseViewModel<MainpageUIIntent, DownloadUIState, SnackbarUIEffect>(DownloadUIState()) {
+) : BaseViewModel<MainpageUIIntent, DownloadUIState, SnackbarUIEffect>(DownloadUIState(isLoading = false)) {
     private val mutex = Mutex()
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override suspend fun onEvent(state: DownloadUIState, intent: MainpageUIIntent) {

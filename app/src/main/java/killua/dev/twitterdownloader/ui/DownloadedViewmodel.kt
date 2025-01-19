@@ -31,14 +31,16 @@ class DownloadedViewmodel @Inject constructor(
     private val downloadRepository: DownloadRepository,
     private val downloadManager: DownloadManager,
 ) : BaseViewModel<DownloadedPageUIIntent, DownloadUIState, SnackbarUIEffect>(
-    DownloadUIState()
+    DownloadUIState(isLoading = false)
 ){
     val mutex = Mutex()
     override suspend fun onEvent(state: DownloadUIState, intent: DownloadedPageUIIntent) {
         when (intent){
             is DownloadedPageUIIntent.OnResume -> {
+                emitState(state.copy(isLoading = true))
                 loadDownloads()
                 observeAllDownloads()
+                emitState(state.copy(isLoading = false))
             }
             is DownloadedPageUIIntent.CancelDownload -> {
                 mutex.withLock {

@@ -1,10 +1,6 @@
 package Model
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AccessTime
-import androidx.compose.material.icons.rounded.Done
-import androidx.compose.material.icons.rounded.Error
-import androidx.compose.material.icons.rounded.Pending
 import androidx.compose.material.icons.twotone.AccessTime
 import androidx.compose.material.icons.twotone.Done
 import androidx.compose.material.icons.twotone.Error

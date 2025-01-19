@@ -6,8 +6,6 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import dagger.hilt.android.qualifiers.ApplicationContext
-import di.ApplicationScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -20,7 +18,7 @@ data class Userdata(
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
     name = "user_data"
 )
-object UserPreuserferences {
+object UserPreferences {
     private val SCREENNAME_KEY = stringPreferencesKey("screenname")
     private val NAME_KEY = stringPreferencesKey("name")
     private val USERCT0_KEY = stringPreferencesKey("userct0")
