@@ -18,6 +18,9 @@ import repository.DownloadRepository
 import ui.BaseViewModel
 import ui.UIIntent
 import ui.UIState
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
 
@@ -28,7 +31,6 @@ data class DownloadUIState(
 
 sealed class MainpageUIIntent : UIIntent{
     data class ExecuteDownload(val twitterID: String): MainpageUIIntent()
-    data class OnResume(val context: Context): MainpageUIIntent()
 }
 
 @HiltViewModel
@@ -41,9 +43,6 @@ class MainpageViewmodel @Inject constructor(
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override suspend fun onEvent(state: DownloadUIState, intent: MainpageUIIntent) {
         when(intent){
-            is MainpageUIIntent.OnResume -> {
-
-            }
             is MainpageUIIntent.ExecuteDownload -> {
                 mutex.withLock{
                     handleNewDownload(intent.twitterID)
@@ -70,34 +69,38 @@ class MainpageViewmodel @Inject constructor(
         }
     }
 
-    private suspend fun createAndStartDownload(videoUrl: String, user: TwitterUser?) = withMainContext {
-        val download = Download(
-            uuid = UUID.randomUUID().toString(),
-            twitterUserId = user?.id,
-            twitterScreenName = user?.screenName,
-            twitterName = user?.name,
-            fileUri = null,
-            link = videoUrl,
-            fileName = "${System.currentTimeMillis()}.mp4",
-            fileType = "video/mp4",
-            fileSize = 0L,
-            status = DownloadStatus.PENDING
-        )
-        downloadRepository.insert(download)
-        downloadManager.enqueueDownload(download)
-        updateDownloadItem(download.uuid) {
-            DownloadItem.fromDownload(download)
+    private suspend fun createAndStartDownload(videoUrl: String, user: TwitterUser?) {
+        try {
+            val download = Download(
+                uuid = UUID.randomUUID().toString(),
+                twitterUserId = user?.id,
+                twitterScreenName = user?.screenName,
+                twitterName = user?.name,
+                fileUri = null,
+                link = videoUrl,
+                fileName = generateFileName(user?.screenName),
+                fileType = "video/mp4",
+                fileSize = 0L,
+                status = DownloadStatus.PENDING
+            )
+
+            downloadRepository.insert(download)
+            downloadManager.enqueueDownload(download)
+
+            val downloads = uiState.value.downloads + DownloadItem.fromDownload(download)
+            emitState(uiState.value.copy(downloads = downloads))
+        } catch (e: Exception) {
+            handleError("添加下载任务失败", e)
         }
     }
-    private suspend fun updateDownloadItem(
-        downloadId: String,
-        update: (DownloadItem) -> DownloadItem
-    ) {
-        val downloads = uiState.value.downloads.toMutableList()
-        val index = downloads.indexOfFirst { it.id == downloadId }
-        if (index != -1) {
-            downloads[index] = update(downloads[index])
-            emitState(uiState.value.copy(downloads = downloads))
-        }
+
+    private fun generateFileName(screenName: String?): String {
+        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+            .format(Date())
+        return "${screenName ?: "video"}_${timestamp}.mp4"
+    }
+    private suspend fun handleError(message: String, error: Exception) {
+        emitState(uiState.value.copy(isLoading = false))
+        emitEffect(SnackbarUIEffect.ShowSnackbar("$message: ${error.message ?: "未知错误"}"))
     }
 }

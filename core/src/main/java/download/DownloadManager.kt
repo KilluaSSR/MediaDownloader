@@ -6,6 +6,7 @@ import androidx.work.Constraints
 import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -73,5 +74,13 @@ class DownloadManager @Inject constructor(
         queueManager.getAllPendingDownloads().forEach { download ->
             enqueueDownload(download)
         }
+    }
+    fun isDownloadActive(downloadId: String): Boolean {
+        return workManager.getWorkInfosForUniqueWork(downloadId)
+            .get()
+            ?.any { info ->
+                info.state == WorkInfo.State.RUNNING ||
+                        info.state == WorkInfo.State.ENQUEUED
+            } == true
     }
 }
