@@ -151,7 +151,7 @@ class DownloadedViewModel @Inject constructor(
             it.downloadState is DownloadState.Pending
         }
         if (pending.isEmpty()) {
-            showError("没有待下载的任务")
+            handleError("没有待下载的任务")
             return
         }
 
@@ -159,7 +159,7 @@ class DownloadedViewModel @Inject constructor(
             try {
                 resumeDownload(download.id)
             } catch (e: Exception) {
-                showError("启动下载失败: ${download.id} - ${e.message}")
+                handleError("启动下载失败: ${download.id} - ${e.message}")
             }
         }
     }
@@ -168,7 +168,7 @@ class DownloadedViewModel @Inject constructor(
             it.downloadState is DownloadState.Downloading
         }
         if (active.isEmpty()) {
-            showError("没有正在下载的任务")
+            handleError("没有正在下载的任务")
             return
         }
 
@@ -176,7 +176,7 @@ class DownloadedViewModel @Inject constructor(
             try {
                 pauseDownload(download.id)
             } catch (e: Exception) {
-                showError("暂停失败: ${download.id} - ${e.message}")
+                handleError("暂停失败: ${download.id} - ${e.message}")
             }
         }
     }
@@ -186,7 +186,7 @@ class DownloadedViewModel @Inject constructor(
             it.downloadState !is DownloadState.Completed
         }
         if (downloads.isEmpty()) {
-            showError("没有可取消的任务")
+            handleError("没有可取消的任务")
             return
         }
 
@@ -194,7 +194,7 @@ class DownloadedViewModel @Inject constructor(
             try {
                 cancelDownload(download.id)
             } catch (e: Exception) {
-                showError("取消失败: ${download.id} - ${e.message}")
+                handleError("取消失败: ${download.id} - ${e.message}")
             }
         }
     }
@@ -262,7 +262,8 @@ class DownloadedViewModel @Inject constructor(
             emitState(uiState.value.copy(downloads = downloads))
         }
     }
-    private suspend fun showError(message: String) {
+
+    private suspend fun handleError(message: String) {
         emitEffect(SnackbarUIEffect.ShowSnackbar(
             message = message
         ))

@@ -1,5 +1,6 @@
 package killua.dev.setup.ui.Pages
 
+import Model.CurrentState
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
@@ -18,19 +19,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import killua.dev.core.utils.navigateSingle
-import Model.CurrentState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Settings
 import killua.dev.setup.SetupRoutes
 import killua.dev.setup.ui.SetupPageViewModel
 import killua.dev.setup.ui.SetupUIIntent
 import ui.LocalNavController
-import ui.components.NavigationButton
 import ui.components.PermissionButton
 import ui.components.Section
 import ui.components.SetOnResume
 import ui.components.SetupScaffold
 import ui.tokens.SizeTokens
+
 @ExperimentalFoundationApi
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,7 +87,6 @@ fun PermissionsPage(viewModel: SetupPageViewModel = viewModel()) {
                     }
                 }
             )
-            NavigationButton(enabled = true,{},"Downloads", Icons.Outlined.Settings)
         }
         Spacer(modifier = Modifier.size(SizeTokens.Level24))
         Section(title = "You're invited to log in to your Twitter account.") {

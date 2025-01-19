@@ -2,7 +2,6 @@ package killua.dev.twitterdownloader.ui
 
 import Model.DownloadItem
 import Model.SnackbarUIEffect
-import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import api.Model.TwitterRequestResult
@@ -29,21 +28,21 @@ data class DownloadUIState(
     val isLoading: Boolean = false,
 ) : UIState
 
-sealed class MainpageUIIntent : UIIntent{
-    data class ExecuteDownload(val twitterID: String): MainpageUIIntent()
+sealed class MainPageUIIntent : UIIntent{
+    data class ExecuteDownload(val twitterID: String): MainPageUIIntent()
 }
 
 @HiltViewModel
-class MainpageViewmodel @Inject constructor(
+class MainPageViewmodel @Inject constructor(
     private val twitterApiService: TwitterApiService,
     private val downloadRepository: DownloadRepository,
     private val downloadManager: DownloadManager,
-) : BaseViewModel<MainpageUIIntent, DownloadUIState, SnackbarUIEffect>(DownloadUIState(isLoading = false)) {
+) : BaseViewModel<MainPageUIIntent, DownloadUIState, SnackbarUIEffect>(DownloadUIState(isLoading = false)) {
     private val mutex = Mutex()
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    override suspend fun onEvent(state: DownloadUIState, intent: MainpageUIIntent) {
+    override suspend fun onEvent(state: DownloadUIState, intent: MainPageUIIntent) {
         when(intent){
-            is MainpageUIIntent.ExecuteDownload -> {
+            is MainPageUIIntent.ExecuteDownload -> {
                 mutex.withLock{
                     handleNewDownload(intent.twitterID)
                 }

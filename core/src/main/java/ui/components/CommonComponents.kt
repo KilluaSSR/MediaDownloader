@@ -1,6 +1,7 @@
 package ui.components
 
 import Model.CurrentState
+import android.R
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -41,7 +42,7 @@ fun Section(title: String, content: @Composable ColumnScope.() -> Unit){
         modifier = Modifier.padding(SizeTokens.Level16,0.dp),
         verticalArrangement = Arrangement.spacedBy(SizeTokens.Level8)
     ){
-        LableTextLarge(text = title, fontWeight = FontWeight.SemiBold)
+        LabelLargeText(text = title, fontWeight = FontWeight.SemiBold)
         content()
     }
 }
@@ -52,7 +53,7 @@ fun MainButtonSection(title: String, content: @Composable ColumnScope.() -> Unit
         verticalArrangement = Arrangement.spacedBy(SizeTokens.Level8),
         horizontalAlignment = Alignment.CenterHorizontally
     ){
-        LableTextLarge(text = title, fontWeight = FontWeight.SemiBold)
+        LabelLargeText(text = title, fontWeight = FontWeight.SemiBold)
         content()
     }
 }
@@ -151,48 +152,35 @@ fun PermissionButton(
         state = state
     ){
         Column (modifier = Modifier.weight(1f)){
-            LableTextLarge(text = title, color = state.textColor)
+            LabelLargeText(text = title, color = state.textColor)
             BodySmallText(text = description, color = state.textColor)
         }
     }
 }
 
 @Composable
-fun NavigationButton(
-    enabled: Boolean = true,
-    onClick: () -> Unit,
+fun ActionsBotton(
+    modifier: Modifier = Modifier,
+    enabled: Boolean,
     title: String,
-    icon: ImageVector
+    icon: ImageVector,
+    actionIcon: ImageVector? = null,
+    onClick: () -> Unit
 ){
-    val interactionSource = remember { MutableInteractionSource() }
-    Card(
-        modifier = Modifier.wrapContentHeight(),
-        shape = RoundedCornerShape(SizeTokens.Level16),
-        onClick = onClick,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-        ),
+    ActionButton(
+        modifier = modifier,
         enabled = enabled,
-        interactionSource = interactionSource,
-    ) {
-        ActionButtonContent(
-            modifier = Modifier,
-            enabled = enabled,
-            icon = icon,
-            onClick = onClick,
-            interactionSource = interactionSource
-        ){
-            LableTextLarge(text = title, color = MaterialTheme.colorScheme.onTertiaryContainer)
+        icon = icon,
+        onClick = onClick,
+        state = CurrentState.Success,
+        trainlingIcon = {
+            if (actionIcon != null)
+                Icon(
+                    imageVector = actionIcon,
+                    contentDescription = null
+                )
         }
+    ){
+        AutoLabelLargeText(modifier = Modifier.weight(1f), text = title, enabled = enabled)
     }
-
-}
-@Preview
-@Composable
-fun PermissionButtonPreview(){
-    NavigationButton(
-        onClick = {},
-        title = "Notification",
-        icon = Icons.Rounded.KeyboardDoubleArrowRight
-    )
 }

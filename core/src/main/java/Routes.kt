@@ -36,7 +36,7 @@ data class MainPageButtonsEssentials(
 )
 val MainPageButtons = listOf(
     MainPageButtonsEssentials(
-        "Download",
+        "Download Now",
         Icons.Rounded.Download,
         MainRoutes.Download.route
     ),

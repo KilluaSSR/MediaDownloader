@@ -1,49 +1,32 @@
-package db
+package killua.dev.core.db
 
 import android.content.Context
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-data class Userdata(
-    val screenname: String,
-    val name: String,
-    val userct0: String,
-    val userauth: String,
-)
+private fun PackageManager.getPackageInfoCompat(packageName: String, flags: Int = 0): PackageInfo =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(flags.toLong()))
+    } else {
+        getPackageInfo(packageName, flags)
+    }
+
+
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
-    name = "user_data"
+    name = "Datastore"
 )
-object UserPreferences {
-    private val SCREENNAME_KEY = stringPreferencesKey("screenname")
-    private val NAME_KEY = stringPreferencesKey("name")
-    private val USERCT0_KEY = stringPreferencesKey("userct0")
-    private val USERAUTH_KEY = stringPreferencesKey("userauth")
 
-    suspend fun saveUserdata(context: Context, userdata: Userdata) {
-        context.dataStore.edit { preferences ->
-            preferences[SCREENNAME_KEY] = userdata.screenname
-            preferences[NAME_KEY] = userdata.name
-            preferences[USERCT0_KEY] = userdata.userct0
-            preferences[USERAUTH_KEY] = userdata.userauth
-        }
-    }
-
-    fun getUserdata(context: Context): Flow<Userdata?> {
-        return context.dataStore.data.map { preferences ->
-            val screenname = preferences[SCREENNAME_KEY]
-            val name = preferences[NAME_KEY]
-            val userct0 = preferences[USERCT0_KEY]
-            val userauth = preferences[USERAUTH_KEY]
-            if (screenname != null && name != null && userct0 != null && userauth != null) {
-                Userdata(screenname, name, userct0, userauth)
-            } else {
-                null
-            }
-        }
-    }
-}
+internal fun Context.readStoreString(key: Preferences.Key<String>, defValue: String) = dataStore.data.map { preferences -> preferences[key] ?: defValue }
+fun Context.readStoreBoolean(key: Preferences.Key<Boolean>, defValue: Boolean) = dataStore.data.map { preferences -> preferences[key] ?: defValue }
+internal fun Context.readStoreInt(key: Preferences.Key<Int>, defValue: Int) = dataStore.data.map { preferences -> preferences[key] ?: defValue }
+internal fun Context.readStoreLong(key: Preferences.Key<Long>, defValue: Long) = dataStore.data.map { preferences -> preferences[key] ?: defValue }
+internal suspend fun Context.saveStoreString(key: Preferences.Key<String>, value: String) = dataStore.edit { settings -> settings[key] = value }
+suspend fun Context.saveStoreBoolean(key: Preferences.Key<Boolean>, value: Boolean) = dataStore.edit { settings -> settings[key] = value }
+internal suspend fun Context.saveStoreInt(key: Preferences.Key<Int>, value: Int) = dataStore.edit { settings -> settings[key] = value }
+internal suspend fun Context.saveStoreLong(key: Preferences.Key<Long>, value: Long) = dataStore.edit { settings -> settings[key] = value }
