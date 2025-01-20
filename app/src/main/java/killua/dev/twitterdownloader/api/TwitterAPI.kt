@@ -2,8 +2,8 @@ package killua.dev.twitterdownloader.api
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import api.Constants.GetTweetDetailFeatures
-import api.Constants.TwitterAPIURL
+import killua.dev.twitterdownloader.api.Constants.GetTweetDetailFeatures
+import killua.dev.twitterdownloader.api.Constants.TwitterAPIURL
 import api.Model.GraphQLResponse
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder

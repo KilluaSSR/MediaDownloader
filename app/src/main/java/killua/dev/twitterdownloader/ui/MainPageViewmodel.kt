@@ -106,7 +106,7 @@ class MainPageViewmodel @Inject constructor(
             downloadManager.enqueueDownload(download)
 
             val downloads =
-                 uiState.value.downloads + DownloadItem.fromDownload(
+                uiState.value.downloads + DownloadItem.fromDownload(
                     download
                 )
             emitState(

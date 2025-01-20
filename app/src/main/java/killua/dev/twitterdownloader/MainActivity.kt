@@ -10,7 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import killua.dev.base.ui.LocalNavController
-import killua.dev.twitterdownloader.ui.Pages.MainPage
+import killua.dev.twitterdownloader.ui.pages.MainPage
 import killua.dev.twitterdownloader.ui.theme.TwitterDownloaderTheme
 
 @AndroidEntryPoint

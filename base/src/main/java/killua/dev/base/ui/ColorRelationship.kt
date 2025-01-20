@@ -2,6 +2,7 @@ package killua.dev.base.ui
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 
@@ -9,32 +10,35 @@ data class ContainerColorPair(
     val container: Color,
     val onContainer: Color
 )
-
 @Composable
 fun getRandomColors(): List<ContainerColorPair> {
-    return remember {
-        val colorPairs = listOf(
+    val colorScheme = MaterialTheme.colorScheme
+
+    val colorPairs = remember(colorScheme) {
+        listOf(
             ContainerColorPair(
-                MaterialTheme.colorScheme.primaryContainer,
-                MaterialTheme.colorScheme.onPrimaryContainer
+                colorScheme.primaryContainer,
+                colorScheme.onPrimaryContainer
             ),
             ContainerColorPair(
-                MaterialTheme.colorScheme.secondaryContainer,
-                MaterialTheme.colorScheme.onSecondaryContainer
+                colorScheme.secondaryContainer,
+                colorScheme.onSecondaryContainer
             ),
             ContainerColorPair(
-                MaterialTheme.colorScheme.tertiaryContainer,
-                MaterialTheme.colorScheme.onTertiaryContainer
+                colorScheme.tertiaryContainer,
+                colorScheme.onTertiaryContainer
             ),
             ContainerColorPair(
-                MaterialTheme.colorScheme.errorContainer,
-                MaterialTheme.colorScheme.onErrorContainer
+                colorScheme.errorContainer,
+                colorScheme.onErrorContainer
             )
         )
-        colorPairs.shuffled()
     }
-}
 
+    return remember(colorPairs) {
+        derivedStateOf { colorPairs.shuffled() }
+    }.value
+}
 @Composable
 fun getColorRelationship(containerColor: Color): Color {
     return when (containerColor) {

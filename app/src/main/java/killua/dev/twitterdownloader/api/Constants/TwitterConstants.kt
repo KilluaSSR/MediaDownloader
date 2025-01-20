@@ -1,9 +1,9 @@
-package api.Constants
+package killua.dev.twitterdownloader.api.Constants
 
 object TwitterAPIURL {
-    val Host = "https://x.com"
-    val TweetDetailUrl = Host + "/i/api/graphql/tivxwX7ezCWlYBkrhxoR0A/TweetDetail"
-    val Bearer =
+    const val Host = "https://x.com"
+    const val TweetDetailUrl = Host + "/i/api/graphql/tivxwX7ezCWlYBkrhxoR0A/TweetDetail"
+    const val Bearer =
         "AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA"
 }
 

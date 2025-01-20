@@ -1,7 +1,7 @@
 package killua.dev.twitterdownloader.utils
 
-import api.Constants.TwitterAPIURL
-import api.Constants.USER_AGENT
+import killua.dev.twitterdownloader.api.Constants.TwitterAPIURL
+import killua.dev.twitterdownloader.api.Constants.USER_AGENT
 import okhttp3.Request
 
 fun <T : Request.Builder> T.addTwitterHeaders(ct0: String): T {

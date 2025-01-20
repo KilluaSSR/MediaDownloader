@@ -1,4 +1,4 @@
-package killua.dev.twitterdownloader.ui.Pages
+package killua.dev.twitterdownloader.ui.pages
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,7 +11,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import killua.dev.base.ui.components.ActionsBotton
@@ -85,10 +84,4 @@ fun MainPage(
 
         }
     }
-}
-
-@Preview
-@Composable
-fun mainpagedemo() {
-    MainPage()
 }
