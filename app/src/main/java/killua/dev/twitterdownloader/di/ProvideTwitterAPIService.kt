@@ -1,15 +1,15 @@
 package killua.dev.twitterdownloader.di
 
-import killua.dev.twitterdownloader.api.TwitterApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import killua.dev.twitterdownloader.api.TwitterApiService
+import killua.dev.twitterdownloader.repository.CredentialRepository
+import killua.dev.twitterdownloader.repository.LoginCredentials
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import killua.dev.twitterdownloader.repository.CredentialRepository
-import killua.dev.twitterdownloader.repository.LoginCredentials
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
@@ -35,6 +35,7 @@ object ProvideTwitterApiService {
         return TwitterApiService(client, credentials)
     }
 }
+
 @Retention(AnnotationRetention.RUNTIME)
 @Qualifier
 annotation class ApplicationScope

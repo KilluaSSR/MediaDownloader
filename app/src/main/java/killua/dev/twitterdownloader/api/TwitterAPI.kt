@@ -5,17 +5,17 @@ import androidx.annotation.RequiresApi
 import api.Constants.GetTweetDetailFeatures
 import api.Constants.TwitterAPIURL
 import api.Model.GraphQLResponse
-import killua.dev.twitterdownloader.api.Model.TwitterRequestResult
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import killua.dev.twitterdownloader.core.utils.TweetData
-import killua.dev.twitterdownloader.core.utils.addTwitterHeaders
-import killua.dev.twitterdownloader.core.utils.extractTwitterUser
-import killua.dev.twitterdownloader.core.utils.getAllHighestBitrateUrls
-import killua.dev.twitterdownloader.core.utils.toTweetVariablesSingleMedia
+import killua.dev.base.utils.toTweetVariablesSingleMedia
+import killua.dev.twitterdownloader.api.Model.TwitterRequestResult
+import killua.dev.twitterdownloader.repository.LoginCredentials
+import killua.dev.twitterdownloader.utils.TweetData
+import killua.dev.twitterdownloader.utils.addTwitterHeaders
+import killua.dev.twitterdownloader.utils.extractTwitterUser
+import killua.dev.twitterdownloader.utils.getAllHighestBitrateUrls
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import killua.dev.twitterdownloader.repository.LoginCredentials
 import java.net.URLEncoder
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -26,6 +26,7 @@ class TwitterApiService @Inject constructor(
     private val credentials: LoginCredentials
 ) {
     private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
+
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     fun getTweetDetailAsync(tweetId: String): TwitterRequestResult {
         if (tweetId.isBlank()) return TwitterRequestResult.Error(message = "ID cannot be empty")
@@ -62,11 +63,17 @@ class TwitterApiService @Inject constructor(
             TwitterRequestResult.Error(message = e.message ?: "未知错误")
         }
     }
+
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun buildUrl(baseUrl: String, params: Map<String, String>): String {
         if (params.isEmpty()) return baseUrl
         val query = params.map {
-            "${URLEncoder.encode(it.key, Charsets.UTF_8)}=${URLEncoder.encode(it.value, Charsets.UTF_8)}"
+            "${URLEncoder.encode(it.key, Charsets.UTF_8)}=${
+                URLEncoder.encode(
+                    it.value,
+                    Charsets.UTF_8
+                )
+            }"
         }.joinToString("&")
         return "$baseUrl?$query"
     }

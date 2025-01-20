@@ -41,7 +41,7 @@ android {
 dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.kotlinx.coroutines.core)
-    implementation(project(":app"))
+    implementation(project(":base"))
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.serialization.json.v151)

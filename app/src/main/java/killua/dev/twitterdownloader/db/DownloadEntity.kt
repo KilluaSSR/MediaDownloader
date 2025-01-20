@@ -33,6 +33,7 @@ data class Download @OptIn(ExperimentalUuidApi::class) constructor(
 
     @ColumnInfo(name = "mime_type") val mimeType: String? = null,
 )
+
 class UriTypeConverter {
     @TypeConverter
     fun fromUri(uri: Uri?): String? {

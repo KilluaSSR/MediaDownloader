@@ -14,19 +14,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
+import killua.dev.base.ui.components.ActionsBotton
+import killua.dev.base.ui.components.Section
+import killua.dev.base.ui.components.paddingTop
+import killua.dev.base.ui.getRandomColors
+import killua.dev.base.ui.tokens.SizeTokens
+import killua.dev.base.utils.navigateSingle
 import killua.dev.twitterdownloader.MainPageButtons
 import killua.dev.twitterdownloader.MainRoutes
-import killua.dev.twitterdownloader.ui.components.paddingTop
-import killua.dev.twitterdownloader.ui.getRandomColors
-import killua.dev.twitterdownloader.core.utils.navigateSingle
+import killua.dev.twitterdownloader.ui.FavouriteCard
+import killua.dev.twitterdownloader.ui.InputDialog
+import killua.dev.twitterdownloader.ui.MainPageTopBar
 import killua.dev.twitterdownloader.ui.MainPageViewmodel
-import killua.dev.twitterdownloader.ui.components.ActionsBotton
-import killua.dev.twitterdownloader.ui.components.FavouriteCard
-import killua.dev.twitterdownloader.ui.components.InputDialog
-import killua.dev.twitterdownloader.ui.components.MainPageTopBar
-import killua.dev.twitterdownloader.ui.components.MainScaffold
-import killua.dev.twitterdownloader.ui.components.Section
-import killua.dev.twitterdownloader.ui.tokens.SizeTokens
+import killua.dev.twitterdownloader.ui.MainScaffold
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -35,7 +35,7 @@ fun MainPage(
 ) {
     val randomColors = getRandomColors()
     val navController = rememberNavController()
-    var showDialog by remember { mutableStateOf(false)}
+    var showDialog by remember { mutableStateOf(false) }
     MainScaffold(
         topBar = {
             MainPageTopBar(navController)
@@ -48,14 +48,14 @@ fun MainPage(
 
             }
         )
-        Column (
+        Column(
             modifier = Modifier
                 .paddingTop(SizeTokens.Level8)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(SizeTokens.Level24)
-        ){
+        ) {
             Section(title = "Overview") {
-                FavouriteCard("KilluaDev","风过荒野",1024) {}
+                FavouriteCard("KilluaDev", "风过荒野", 1024) {}
             }
 
             Section(title = "Actions") {
@@ -65,7 +65,7 @@ fun MainPage(
                     verticalArrangement = Arrangement.spacedBy(SizeTokens.Level8),
                     maxItemsInEachRow = 2,
                 ) {
-                    MainPageButtons.forEachIndexed { index, item->
+                    MainPageButtons.forEachIndexed { index, item ->
                         ActionsBotton(
                             modifier = Modifier.weight(1f),
                             enabled = true,
@@ -73,9 +73,9 @@ fun MainPage(
                             icon = item.icon,
                             color = randomColors[index].container
                         ) {
-                            if(item.route == MainRoutes.Download.route){
+                            if (item.route == MainRoutes.Download.route) {
                                 showDialog = true
-                            }else{
+                            } else {
                                 navController.navigateSingle(item.route)
                             }
                         }
@@ -89,6 +89,6 @@ fun MainPage(
 
 @Preview
 @Composable
-fun mainpagedemo(){
+fun mainpagedemo() {
     MainPage()
 }

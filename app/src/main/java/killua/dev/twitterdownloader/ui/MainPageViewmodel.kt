@@ -1,20 +1,20 @@
 package killua.dev.twitterdownloader.ui
 
-import killua.dev.twitterdownloader.Model.DownloadItem
-import killua.dev.twitterdownloader.Model.SnackbarUIEffect
 import android.os.Build
 import androidx.annotation.RequiresApi
-import killua.dev.twitterdownloader.api.Model.TwitterRequestResult
-import killua.dev.twitterdownloader.api.Model.TwitterUser
-import killua.dev.twitterdownloader.api.TwitterApiService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import db.Download
 import db.DownloadStatus
-import killua.dev.twitterdownloader.core.utils.TweetData
+import killua.dev.base.ui.BaseViewModel
+import killua.dev.base.ui.SnackbarUIEffect
+import killua.dev.twitterdownloader.Model.DownloadItem
+import killua.dev.twitterdownloader.api.Model.TwitterRequestResult
+import killua.dev.twitterdownloader.api.Model.TwitterUser
+import killua.dev.twitterdownloader.api.TwitterApiService
 import killua.dev.twitterdownloader.download.DownloadManager
+import killua.dev.twitterdownloader.repository.DownloadRepository
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import killua.dev.twitterdownloader.repository.DownloadRepository
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -24,47 +24,68 @@ import javax.inject.Inject
 data class DownloadUIState(
     val downloads: List<DownloadItem> = emptyList(),
     val isLoading: Boolean = false,
-) : UIState
+) : killua.dev.base.ui.UIState
 
-sealed class MainPageUIIntent : UIIntent{
-    data class ExecuteDownload(val twitterID: String): MainPageUIIntent()
+sealed class MainPageUIIntent : killua.dev.base.ui.UIIntent {
+    data class ExecuteDownload(val twitterID: String) : MainPageUIIntent()
 }
+
 @HiltViewModel
 class MainPageViewmodel @Inject constructor(
     private val twitterApiService: TwitterApiService,
     private val downloadRepository: DownloadRepository,
     private val downloadManager: DownloadManager,
-) : BaseViewModel<MainPageUIIntent, DownloadUIState, SnackbarUIEffect>(DownloadUIState(isLoading = false)) {
+) : BaseViewModel<MainPageUIIntent, DownloadUIState, SnackbarUIEffect>(
+    DownloadUIState(isLoading = false)
+) {
     private val mutex = Mutex()
+
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override suspend fun onEvent(state: DownloadUIState, intent: MainPageUIIntent) {
-        when(intent){
+        when (intent) {
             is MainPageUIIntent.ExecuteDownload -> {
-                mutex.withLock{
+                mutex.withLock {
                     handleNewDownload(intent.twitterID)
                 }
             }
         }
     }
+
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    private suspend fun handleNewDownload(tweetId: String) = withMainContext {
-        try {
-            emitState(uiState.value.copy(isLoading = true))
-            when (val result = twitterApiService.getTweetDetailAsync(tweetId)) {
-                is TwitterRequestResult.Success -> {
-                    val user = result.data.user
-                    result.data.videoUrls.forEach {
-                        createAndStartDownload(it,user)
+    private suspend fun handleNewDownload(tweetId: String) =
+        withMainContext {
+            try {
+                emitState(
+                    uiState.value.copy(
+                        isLoading = true
+                    )
+                )
+                when (val result = twitterApiService.getTweetDetailAsync(tweetId)) {
+                    is TwitterRequestResult.Success -> {
+                        val user = result.data.user
+                        result.data.videoUrls.forEach {
+                            createAndStartDownload(it, user)
+                        }
                     }
+
+                    is TwitterRequestResult.Error -> emitEffect(
+                        SnackbarUIEffect.ShowSnackbar(result.message)
+                    )
                 }
-                is TwitterRequestResult.Error -> emitEffect(SnackbarUIEffect.ShowSnackbar(result.message))
+            } catch (e: Exception) {
+                emitEffect(
+                    SnackbarUIEffect.ShowSnackbar(
+                        e.message ?: "Internal Error"
+                    )
+                )
+            } finally {
+                emitState(
+                    uiState.value.copy(
+                        isLoading = false
+                    )
+                )
             }
-        } catch (e: Exception) {
-            emitEffect(SnackbarUIEffect.ShowSnackbar(e.message ?: "Internal Error"))
-        } finally {
-            emitState(uiState.value.copy(isLoading = false))
         }
-    }
 
     private suspend fun createAndStartDownload(videoUrl: String, user: TwitterUser?) {
         try {
@@ -84,8 +105,15 @@ class MainPageViewmodel @Inject constructor(
             downloadRepository.insert(download)
             downloadManager.enqueueDownload(download)
 
-            val downloads = uiState.value.downloads + DownloadItem.fromDownload(download)
-            emitState(uiState.value.copy(downloads = downloads))
+            val downloads =
+                 uiState.value.downloads + DownloadItem.fromDownload(
+                    download
+                )
+            emitState(
+                uiState.value.copy(
+                    downloads = downloads
+                )
+            )
         } catch (e: Exception) {
             handleError("添加下载任务失败", e)
         }
@@ -96,8 +124,13 @@ class MainPageViewmodel @Inject constructor(
             .format(Date())
         return "${screenName ?: "video"}_${timestamp}.mp4"
     }
+
     private suspend fun handleError(message: String, error: Exception) {
-        emitState(uiState.value.copy(isLoading = false))
+        emitState(
+            uiState.value.copy(
+                isLoading = false
+            )
+        )
         emitEffect(SnackbarUIEffect.ShowSnackbar("$message: ${error.message ?: "未知错误"}"))
     }
 }

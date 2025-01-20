@@ -12,10 +12,10 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import killua.dev.twitterdownloader.db.UserPreferences
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 import killua.dev.twitterdownloader.repository.CredentialRepository
 import killua.dev.twitterdownloader.repository.LoginCredentials
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -49,6 +49,7 @@ abstract class CredentialModule {
         }
     }
 }
+
 @Singleton
 class CredentialRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -56,7 +57,7 @@ class CredentialRepositoryImpl @Inject constructor(
     override suspend fun getCredentials(): LoginCredentials? {
         val userdata = UserPreferences.getUserdata(context).first()
         return userdata?.let {
-            LoginCredentials(it.userct0,it.userauth)
+            LoginCredentials(it.userct0, it.userauth)
         }
     }
 }

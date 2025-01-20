@@ -26,6 +26,7 @@ class DownloadRepository @Inject constructor(
         fileSize = fileSize,
         completedAt = System.currentTimeMillis()
     )
+
     suspend fun getAllDownloads() = downloadDao.getAllByDateDesc()
 
     suspend fun getDownloadingItems() = downloadDao.getDownloading()
@@ -38,5 +39,9 @@ class DownloadRepository @Inject constructor(
         )
     }
 
-    suspend fun updateError(uuid: String, status: DownloadStatus = DownloadStatus.FAILED, errorMessage: String?) = downloadDao.updateError(uuid, status, errorMessage)
+    suspend fun updateError(
+        uuid: String,
+        status: DownloadStatus = DownloadStatus.FAILED,
+        errorMessage: String?
+    ) = downloadDao.updateError(uuid, status, errorMessage)
 }

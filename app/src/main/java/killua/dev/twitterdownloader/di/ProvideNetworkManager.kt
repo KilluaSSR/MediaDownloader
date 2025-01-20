@@ -6,7 +6,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import killua.dev.twitterdownloader.core.utils.NetworkManager
+import killua.dev.twitterdownloader.utils.NetworkManager
 import javax.inject.Singleton
 
 @Module

@@ -10,7 +10,7 @@ import kotlin.uuid.ExperimentalUuidApi
 
 @Dao
 interface DownloadDao {
-    
+
     @Query("SELECT * FROM Download")
     suspend fun getAll(): List<Download>
 
@@ -49,14 +49,16 @@ interface DownloadDao {
     @Query("UPDATE Download SET status = :status, progress = :progress WHERE uuid = :uuid")
     suspend fun updateProgress(uuid: String, status: DownloadStatus, progress: Int)
 
-    @Query("""
+    @Query(
+        """
         UPDATE Download 
         SET status = :status, 
             file_uri = :fileUri, 
             file_size = :fileSize, 
             completed_at = :completedAt 
         WHERE uuid = :uuid
-    """)
+    """
+    )
     suspend fun updateCompleted(
         uuid: String,
         status: DownloadStatus,
@@ -64,7 +66,12 @@ interface DownloadDao {
         fileSize: Long,
         completedAt: Long
     )
+
     @OptIn(ExperimentalUuidApi::class)
     @Query("UPDATE Download SET status = :status, error_message = :errorMessage WHERE uuid = :uuid")
-    suspend fun updateError(uuid: String, status: DownloadStatus = DownloadStatus.FAILED, errorMessage: String?)
+    suspend fun updateError(
+        uuid: String,
+        status: DownloadStatus = DownloadStatus.FAILED,
+        errorMessage: String?
+    )
 }

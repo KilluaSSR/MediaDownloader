@@ -1,24 +1,25 @@
 package killua.dev.twitterdownloader.ui
 
-import killua.dev.twitterdownloader.Model.DownloadItem
-import killua.dev.twitterdownloader.Model.SnackbarUIEffect
 import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import db.DownloadState
 import db.DownloadStatus
+import killua.dev.base.ui.BaseViewModel
+import killua.dev.base.ui.SnackbarUIEffect
+import killua.dev.twitterdownloader.Model.DownloadItem
 import killua.dev.twitterdownloader.download.DownloadManager
 import killua.dev.twitterdownloader.download.VideoDownloadWorker
+import killua.dev.twitterdownloader.repository.DownloadRepository
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import killua.dev.twitterdownloader.repository.DownloadRepository
 import java.io.File
 import javax.inject.Inject
 
-sealed class DownloadedPageUIIntent : UIIntent{
+sealed class DownloadedPageUIIntent : killua.dev.base.ui.UIIntent {
     data class ResumeDownload(val downloadId: String) : DownloadedPageUIIntent()
     data class PauseDownload(val downloadId: String) : DownloadedPageUIIntent()
     data class CancelDownload(val downloadId: String) : DownloadedPageUIIntent()
@@ -27,6 +28,7 @@ sealed class DownloadedPageUIIntent : UIIntent{
     object PauseAll : DownloadedPageUIIntent()
     object CancelAll : DownloadedPageUIIntent()
 }
+
 @HiltViewModel
 class DownloadedViewModel @Inject constructor(
     private val downloadRepository: DownloadRepository,
@@ -36,24 +38,30 @@ class DownloadedViewModel @Inject constructor(
 ) {
     private val mutex = Mutex()
     private val activeDownloads = mutableSetOf<String>()
+
     init {
         loadDownloads()
         observeAllDownloads()
     }
+
     override suspend fun onEvent(state: DownloadUIState, intent: DownloadedPageUIIntent) {
         when (intent) {
             is DownloadedPageUIIntent.CancelDownload -> mutex.withLock {
                 handleOperation(intent.downloadId) { cancelDownload(it) }
             }
+
             is DownloadedPageUIIntent.DeleteDownload -> mutex.withLock {
                 handleOperation(intent.downloadId) { deleteDownload(it) }
             }
+
             is DownloadedPageUIIntent.PauseDownload -> mutex.withLock {
                 handleOperation(intent.downloadId) { pauseDownload(it) }
             }
+
             is DownloadedPageUIIntent.ResumeDownload -> mutex.withLock {
                 handleOperation(intent.downloadId) { resumeDownload(it) }
             }
+
             is DownloadedPageUIIntent.ResumeAll -> mutex.withLock { handleResumeAll() }
             is DownloadedPageUIIntent.PauseAll -> mutex.withLock { handlePauseAll() }
             is DownloadedPageUIIntent.CancelAll -> mutex.withLock { handleCancelAll() }
@@ -62,16 +70,26 @@ class DownloadedViewModel @Inject constructor(
 
     private fun loadDownloads() = launchOnIO {
         try {
-            emitState(uiState.value.copy(isLoading = true))
+            emitState(
+                uiState.value.copy(
+                    isLoading = true
+                )
+            )
             val downloads = downloadRepository.getAllDownloads()
                 .map { DownloadItem.fromDownload(it) }
                 .also { checkActiveDownloads(it) }
-            emitState(uiState.value.copy(
-                isLoading = false,
-                downloads = downloads
-            ))
+            emitState(
+                uiState.value.copy(
+                    isLoading = false,
+                    downloads = downloads
+                )
+            )
         } catch (e: Exception) {
-            emitState(uiState.value.copy(isLoading = false))
+            emitState(
+                uiState.value.copy(
+                    isLoading = false
+                )
+            )
             emitEffect(SnackbarUIEffect.ShowSnackbar("加载失败：${e.message}"))
         }
     }
@@ -105,6 +123,7 @@ class DownloadedViewModel @Inject constructor(
                     it.copy(downloadState = DownloadState.Downloading(progress))
                 }
             }
+
             WorkInfo.State.SUCCEEDED -> {
                 val fileUri = workInfo.outputData.getString("file_uri")?.let { Uri.parse(it) }
                 val fileSize = workInfo.outputData.getLong("file_size", 0L)
@@ -116,6 +135,7 @@ class DownloadedViewModel @Inject constructor(
                     activeDownloads.remove(downloadId)
                 }
             }
+
             WorkInfo.State.FAILED -> {
                 val error = workInfo.outputData.getString("error") ?: "下载失败"
                 downloadRepository.updateError(downloadId, errorMessage = error)
@@ -124,12 +144,14 @@ class DownloadedViewModel @Inject constructor(
                 }
                 activeDownloads.remove(downloadId)
             }
+
             WorkInfo.State.CANCELLED -> {
                 activeDownloads.remove(downloadId)
                 updateDownload(downloadId) {
                     it.copy(downloadState = DownloadState.Pending)
                 }
             }
+
             else -> {}
         }
     }
@@ -144,6 +166,7 @@ class DownloadedViewModel @Inject constructor(
             emitEffect(SnackbarUIEffect.ShowSnackbar("操作失败：${e.message}"))
         }
     }
+
     private suspend fun handleResumeAll() {
         val pending = uiState.value.downloads.filter {
             it.downloadState is DownloadState.Pending
@@ -161,6 +184,7 @@ class DownloadedViewModel @Inject constructor(
             }
         }
     }
+
     private suspend fun handlePauseAll() {
         val active = uiState.value.downloads.filter {
             it.downloadState is DownloadState.Downloading
@@ -203,6 +227,7 @@ class DownloadedViewModel @Inject constructor(
                 download.status == DownloadStatus.COMPLETED -> {
                     emitEffect(SnackbarUIEffect.ShowSnackbar("该下载已完成"))
                 }
+
                 else -> {
                     downloadManager.enqueueDownload(download)
                     activeDownloads.add(downloadId)
@@ -228,8 +253,13 @@ class DownloadedViewModel @Inject constructor(
         downloadRepository.getById(downloadId)?.let { download ->
             downloadRepository.delete(download)
             activeDownloads.remove(downloadId)
-            val downloads = uiState.value.downloads.filterNot { it.id == downloadId }
-            emitState(uiState.value.copy(downloads = downloads))
+            val downloads =
+                uiState.value.downloads.filterNot { it.id == downloadId }
+            emitState(
+                uiState.value.copy(
+                    downloads = downloads
+                )
+            )
         }
     }
 
@@ -244,8 +274,13 @@ class DownloadedViewModel @Inject constructor(
             }
             downloadRepository.delete(download)
             activeDownloads.remove(downloadId)
-            val downloads = uiState.value.downloads.filterNot { it.id == downloadId }
-            emitState(uiState.value.copy(downloads = downloads))
+            val downloads =
+                uiState.value.downloads.filterNot { it.id == downloadId }
+            emitState(
+                uiState.value.copy(
+                    downloads = downloads
+                )
+            )
         }
     }
 
@@ -257,13 +292,19 @@ class DownloadedViewModel @Inject constructor(
         val index = downloads.indexOfFirst { it.id == downloadId }
         if (index != -1) {
             downloads[index] = update(downloads[index])
-            emitState(uiState.value.copy(downloads = downloads))
+            emitState(
+                uiState.value.copy(
+                    downloads = downloads
+                )
+            )
         }
     }
 
     private suspend fun handleError(message: String) {
-        emitEffect(SnackbarUIEffect.ShowSnackbar(
-            message = message
-        ))
+        emitEffect(
+            SnackbarUIEffect.ShowSnackbar(
+                message = message
+            )
+        )
     }
 }

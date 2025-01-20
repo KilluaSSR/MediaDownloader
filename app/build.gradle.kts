@@ -1,5 +1,4 @@
 import org.gradle.kotlin.dsl.android
-import org.gradle.kotlin.dsl.hilt
 
 plugins {
     alias(libs.plugins.android.application)
@@ -51,6 +50,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.appcompat)
+    implementation(project(":base"))
     implementation(project(":setup"))
     // Compose
     implementation(platform(libs.androidx.compose.bom))

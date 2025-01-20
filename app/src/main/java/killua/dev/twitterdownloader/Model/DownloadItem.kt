@@ -20,7 +20,7 @@ data class DownloadItem(
         get() = downloadState is DownloadState.Completed
 
     val statusText: String
-        get() = when(downloadState) {
+        get() = when (downloadState) {
             is DownloadState.Pending -> "等待下载"
             is DownloadState.Downloading -> "下载中 ${downloadState.progress}%"
             is DownloadState.Completed -> "已完成"
@@ -32,15 +32,17 @@ data class DownloadItem(
             id = download.uuid,
             twitterScreenName = download.twitterScreenName ?: "",
             twitterName = download.twitterName ?: "",
-            downloadState = when(download.status) {
+            downloadState = when (download.status) {
                 DownloadStatus.PENDING -> DownloadState.Pending
                 DownloadStatus.DOWNLOADING -> DownloadState.Downloading(
                     download.progress
                 )
+
                 DownloadStatus.COMPLETED -> DownloadState.Completed(
                     download.fileUri ?: Uri.EMPTY,
                     download.fileSize
                 )
+
                 DownloadStatus.FAILED -> DownloadState.Failed(
                     download.errorMessage ?: "Unknown error"
                 )

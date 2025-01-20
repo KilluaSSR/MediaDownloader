@@ -11,13 +11,14 @@ import androidx.work.WorkManager
 import androidx.work.workDataOf
 import dagger.hilt.android.qualifiers.ApplicationContext
 import db.Download
-import killua.dev.twitterdownloader.core.utils.NetworkManager
-import killua.dev.twitterdownloader.core.utils.StorageManager
+import killua.dev.twitterdownloader.utils.NetworkManager
+import killua.dev.twitterdownloader.utils.StorageManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
+
 @Singleton
 class DownloadManager @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -40,13 +41,15 @@ class DownloadManager @Inject constructor(
                 BACKOFF_DELAY,
                 TimeUnit.MILLISECONDS
             )
-            .setInputData(workDataOf(
-                VideoDownloadWorker.Companion.KEY_URL to download.link,
-                VideoDownloadWorker.Companion.KEY_DOWNLOAD_ID to download.uuid,
-                VideoDownloadWorker.Companion.KEY_SCREEN_NAME to download.twitterScreenName,
-                VideoDownloadWorker.Companion.KEY_FILE_NAME to download.fileName,
-                VideoDownloadWorker.Companion.KEY_RANGE_HEADER to download.rangeHeader
-            ))
+            .setInputData(
+                workDataOf(
+                    VideoDownloadWorker.Companion.KEY_URL to download.link,
+                    VideoDownloadWorker.Companion.KEY_DOWNLOAD_ID to download.uuid,
+                    VideoDownloadWorker.Companion.KEY_SCREEN_NAME to download.twitterScreenName,
+                    VideoDownloadWorker.Companion.KEY_FILE_NAME to download.fileName,
+                    VideoDownloadWorker.Companion.KEY_RANGE_HEADER to download.rangeHeader
+                )
+            )
             .build()
 
         if (networkManager.isNetworkAvailable() && storageManager.hasEnoughSpace(download.fileSize)) {
@@ -70,11 +73,12 @@ class DownloadManager @Inject constructor(
         workManager.cancelAllWork()
     }
 
-    suspend fun resumeAllDownloads() = withContext(Dispatchers.IO){
+    suspend fun resumeAllDownloads() = withContext(Dispatchers.IO) {
         queueManager.getAllPendingDownloads().forEach { download ->
             enqueueDownload(download)
         }
     }
+
     fun isDownloadActive(downloadId: String): Boolean {
         return workManager.getWorkInfosForUniqueWork(downloadId)
             .get()

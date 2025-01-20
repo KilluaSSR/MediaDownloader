@@ -16,10 +16,12 @@ sealed class DownloadState {
         val downloadedSize: Long = 0,
         val totalSize: Long = 0
     ) : DownloadState()
+
     data class Completed(
         val fileUri: Uri,
         val fileSize: Long
     ) : DownloadState()
+
     data class Failed(
         val error: String
     ) : DownloadState()

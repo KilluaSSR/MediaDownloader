@@ -35,6 +35,7 @@ object UserPreferences {
         }
     }
 }
+
 data class Userdata(
     val screenname: String,
     val name: String,

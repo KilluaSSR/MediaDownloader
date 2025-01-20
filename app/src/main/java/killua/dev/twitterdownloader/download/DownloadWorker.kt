@@ -1,11 +1,12 @@
 package killua.dev.twitterdownloader.download
+
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.core.net.toUri
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
-import killua.dev.twitterdownloader.core.utils.FileUtils
+import killua.dev.base.utils.FileUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
@@ -53,10 +54,12 @@ class VideoDownloadWorker(
             if (runAttemptCount < MAX_RETRIES) {
                 Result.retry()
             } else {
-                Result.failure(workDataOf(
-                    KEY_DOWNLOAD_ID to downloadId,
-                    "error" to (e.message ?: "Failed to download")
-                ))
+                Result.failure(
+                    workDataOf(
+                        KEY_DOWNLOAD_ID to downloadId,
+                        "error" to (e.message ?: "Failed to download")
+                    )
+                )
             }
         }
     }
@@ -85,10 +88,12 @@ class VideoDownloadWorker(
         try {
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
-                    return@withContext Result.failure(workDataOf(
-                        KEY_DOWNLOAD_ID to downloadId,
-                        "error" to "ErrorCode: ${response.code}"
-                    ))
+                    return@withContext Result.failure(
+                        workDataOf(
+                            KEY_DOWNLOAD_ID to downloadId,
+                            "error" to "ErrorCode: ${response.code}"
+                        )
+                    )
                 }
 
                 val body = response.body ?: return@withContext Result.failure(
@@ -112,20 +117,24 @@ class VideoDownloadWorker(
                         bytesRead += read
 
                         val progress = ((bytesRead * 100) / totalBytes).toInt()
-                        setProgress(workDataOf(
-                            PROGRESS to progress,
-                            KEY_DOWNLOAD_ID to downloadId,
-                            "bytes_downloaded" to bytesRead,
-                            "total_bytes" to totalBytes
-                        ))
+                        setProgress(
+                            workDataOf(
+                                PROGRESS to progress,
+                                KEY_DOWNLOAD_ID to downloadId,
+                                "bytes_downloaded" to bytesRead,
+                                "total_bytes" to totalBytes
+                            )
+                        )
                     }
                 }
 
-                Result.success(workDataOf(
-                    KEY_DOWNLOAD_ID to downloadId,
-                    "file_uri" to outputFile.toUri().toString(),
-                    "file_size" to outputFile.length()
-                ))
+                Result.success(
+                    workDataOf(
+                        KEY_DOWNLOAD_ID to downloadId,
+                        "file_uri" to outputFile.toUri().toString(),
+                        "file_size" to outputFile.length()
+                    )
+                )
             }
         } catch (e: Exception) {
             if (runAttemptCount < MAX_RETRIES) Result.retry()

@@ -1,6 +1,5 @@
 package killua.dev.setup.ui.Pages
 
-import killua.dev.twitterdownloader.Model.CurrentState
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -20,36 +19,43 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import killua.dev.twitterdownloader.core.utils.ActivityUtil
+import killua.dev.base.ActivityUtil
+import killua.dev.base.CurrentState
+import killua.dev.base.ui.LocalNavController
+import killua.dev.base.ui.components.PermissionButton
+import killua.dev.base.ui.components.Section
+import killua.dev.base.ui.components.SetOnResume
+import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.setup.ui.SetupPageViewModel
+import killua.dev.setup.ui.SetupScaffold
 import killua.dev.setup.ui.SetupUIIntent
 
 @ExperimentalFoundationApi
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PermissionsPage(viewModel: SetupPageViewModel = viewModel()) {
-    val navController = killua.dev.twitterdownloader.ui.LocalNavController.current!!
+    val navController = LocalNavController.current!!
     val context = LocalContext.current
 //    val rootState = viewModel.rootState.collectAsStateWithLifecycle()
     val notificationState = viewModel.notificationState.collectAsStateWithLifecycle()
 //    val storagePermissionState = viewModel.storagePermissionState.collectAsStateWithLifecycle()
 //    val allOptionsValidated = viewModel.allOptionsValidated.collectAsStateWithLifecycle()
-    killua.dev.twitterdownloader.ui.components.SetOnResume {
-        killua.dev.twitterdownloader.ui.BaseViewModel.emitIntentOnIO(SetupUIIntent.OnResume(context))
+    SetOnResume {
+        viewModel.emitIntentOnIO(SetupUIIntent.OnResume(context))
     }
-    killua.dev.twitterdownloader.ui.components.SetupScaffold(
+    SetupScaffold(
         actions = {
             AnimatedVisibility(visible = notificationState.value != CurrentState.Success) {
                 OutlinedButton(
                     onClick = {
-                        killua.dev.twitterdownloader.ui.BaseViewModel.launchOnIO {
+                        viewModel.launchOnIO {
                             //viewModel.emitIntent(SetupUIIntent.ValidatedRoot)
-                            killua.dev.twitterdownloader.ui.BaseViewModel.emitIntent(
+                            viewModel.emitIntent(
                                 SetupUIIntent.ValidateNotifications(
                                     context
                                 )
                             )
-                            killua.dev.twitterdownloader.ui.BaseViewModel.emitIntent(
+                            viewModel.emitIntent(
                                 SetupUIIntent.ValidateStoragePermission(
                                     context
                                 )
@@ -73,20 +79,20 @@ fun PermissionsPage(viewModel: SetupPageViewModel = viewModel()) {
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(killua.dev.twitterdownloader.ui.tokens.SizeTokens.Level24)
+            verticalArrangement = Arrangement.spacedBy(SizeTokens.Level24)
         ) {
 
 
         }
-        Spacer(modifier = size(killua.dev.twitterdownloader.ui.tokens.SizeTokens.Level24))
-        killua.dev.twitterdownloader.ui.components.Section(title = "We want to ask you for something.") {
-            killua.dev.twitterdownloader.ui.components.PermissionButton(
+        Spacer(modifier = Modifier.size(SizeTokens.Level24))
+        Section(title = "We want to ask you for something.") {
+            PermissionButton(
                 title = "Notification Permission",
                 description = "We need to send you notifications to keep you updated.",
                 state = notificationState.value,
                 onClick = {
-                    killua.dev.twitterdownloader.ui.BaseViewModel.launchOnIO {
-                        killua.dev.twitterdownloader.ui.BaseViewModel.emitIntent(
+                    viewModel.launchOnIO {
+                        viewModel.emitIntent(
                             SetupUIIntent.ValidateNotifications(
                                 context
                             )
@@ -96,15 +102,15 @@ fun PermissionsPage(viewModel: SetupPageViewModel = viewModel()) {
                 color = if (notificationState.value == CurrentState.Idle || notificationState.value == CurrentState.Error) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
             )
         }
-        Spacer(modifier = size(killua.dev.twitterdownloader.ui.tokens.SizeTokens.Level24))
-        killua.dev.twitterdownloader.ui.components.Section(title = "You're invited to log in to your Twitter account.") {
-            killua.dev.twitterdownloader.ui.components.PermissionButton(
+        Spacer(modifier = Modifier.size(SizeTokens.Level24))
+        Section(title = "You're invited to log in to your Twitter account.") {
+            PermissionButton(
                 title = "Notification",
                 description = "We need to send you notifications to keep you updated.",
                 state = notificationState.value,
                 onClick = {
-                    killua.dev.twitterdownloader.ui.BaseViewModel.launchOnIO {
-                        killua.dev.twitterdownloader.ui.BaseViewModel.emitIntent(
+                    viewModel.launchOnIO {
+                        viewModel.emitIntent(
                             SetupUIIntent.ValidateNotifications(
                                 context
                             )

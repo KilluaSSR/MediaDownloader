@@ -9,10 +9,9 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
+import killua.dev.base.ui.LocalNavController
 import killua.dev.twitterdownloader.ui.Pages.MainPage
 import killua.dev.twitterdownloader.ui.theme.TwitterDownloaderTheme
-import killua.dev.twitterdownloader.ui.LocalNavController
-import killua.dev.twitterdownloader.ui.animations.AnimatedNavHost
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -24,13 +23,13 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 CompositionLocalProvider(
                     LocalNavController provides navController,
-                    androidx.lifecycle.compose.LocalLifecycleOwner provides LocalLifecycleOwner.current
+                    LocalLifecycleOwner provides LocalLifecycleOwner.current
                 ) {
-                    AnimatedNavHost(
+                    killua.dev.base.ui.animations.AnimatedNavHost(
                         navController = navController,
                         startDestination = MainRoutes.MainPage.route
                     ) {
-                        composable(MainRoutes.MainPage.route){
+                        composable(MainRoutes.MainPage.route) {
                             MainPage()
                         }
                     }

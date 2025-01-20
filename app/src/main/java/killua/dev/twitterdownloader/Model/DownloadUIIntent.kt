@@ -1,8 +1,6 @@
 package killua.dev.twitterdownloader.Model
 
-import killua.dev.twitterdownloader.ui.UIIntent
-
-sealed interface DownloadUIIntent: UIIntent {
+sealed interface DownloadUIIntent : killua.dev.base.ui.UIIntent {
     data class StartDownload(val tweetId: String) : DownloadUIIntent
     data class ResumeDownload(val downloadId: String) : DownloadUIIntent
     data class PauseDownload(val downloadId: String) : DownloadUIIntent

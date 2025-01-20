@@ -21,6 +21,7 @@ object AnySerializer : KSerializer<Any> {
         return decoder.decodeString()
     }
 }
+
 @Serializable
 data class GraphQLResponse(
     @SerialName("data")
