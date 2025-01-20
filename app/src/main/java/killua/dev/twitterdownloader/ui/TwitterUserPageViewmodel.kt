@@ -1,6 +1,6 @@
 package killua.dev.twitterdownloader.ui
 
-import Model.SnackbarUIEffect
+import killua.dev.twitterdownloader.Model.SnackbarUIEffect
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import db.DownloadDao
@@ -13,9 +13,6 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.plus
-import ui.BaseViewModel
-import ui.UIIntent
-import ui.UIState
 import javax.inject.Inject
 
 sealed class TwitterUserPageIntent : UIIntent {

@@ -8,11 +8,9 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.compose.rememberNavController
-import api.TwitterApiService
 import dagger.hilt.android.AndroidEntryPoint
 import killua.dev.setup.ui.theme.TwitterDownloaderTheme
-import okhttp3.OkHttpClient
-import ui.LocalNavController
+import killua.dev.twitterdownloader.ui.LocalNavController
 
 @ExperimentalAnimationApi
 @AndroidEntryPoint
@@ -26,7 +24,7 @@ class MainActivity : ComponentActivity() {
             TwitterDownloaderTheme {
                 val navController = rememberNavController()
                 CompositionLocalProvider(
-                    LocalNavController provides navController,
+                    killua.dev.twitterdownloader.ui.LocalNavController provides navController,
                     androidx.lifecycle.compose.LocalLifecycleOwner provides LocalLifecycleOwner.current
                 ) {
                     Setup()

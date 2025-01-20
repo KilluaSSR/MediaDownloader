@@ -1,22 +1,20 @@
 package killua.dev.twitterdownloader.ui
 
-import Model.DownloadItem
-import Model.SnackbarUIEffect
+import killua.dev.twitterdownloader.Model.DownloadItem
+import killua.dev.twitterdownloader.Model.SnackbarUIEffect
 import android.os.Build
 import androidx.annotation.RequiresApi
-import api.Model.TwitterRequestResult
-import api.Model.TwitterUser
-import api.TwitterApiService
+import killua.dev.twitterdownloader.api.Model.TwitterRequestResult
+import killua.dev.twitterdownloader.api.Model.TwitterUser
+import killua.dev.twitterdownloader.api.TwitterApiService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import db.Download
 import db.DownloadStatus
-import download.DownloadManager
+import killua.dev.twitterdownloader.core.utils.TweetData
+import killua.dev.twitterdownloader.download.DownloadManager
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import repository.DownloadRepository
-import ui.BaseViewModel
-import ui.UIIntent
-import ui.UIState
+import killua.dev.twitterdownloader.repository.DownloadRepository
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -31,7 +29,6 @@ data class DownloadUIState(
 sealed class MainPageUIIntent : UIIntent{
     data class ExecuteDownload(val twitterID: String): MainPageUIIntent()
 }
-
 @HiltViewModel
 class MainPageViewmodel @Inject constructor(
     private val twitterApiService: TwitterApiService,
@@ -55,8 +52,9 @@ class MainPageViewmodel @Inject constructor(
             emitState(uiState.value.copy(isLoading = true))
             when (val result = twitterApiService.getTweetDetailAsync(tweetId)) {
                 is TwitterRequestResult.Success -> {
-                    result.data.videoUrls.forEach { videoUrl ->
-                        createAndStartDownload(videoUrl, result.data.user)
+                    val user = result.data.user
+                    result.data.videoUrls.forEach {
+                        createAndStartDownload(it,user)
                     }
                 }
                 is TwitterRequestResult.Error -> emitEffect(SnackbarUIEffect.ShowSnackbar(result.message))

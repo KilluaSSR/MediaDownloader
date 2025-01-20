@@ -5,81 +5,59 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import killua.dev.core.MainPageButtons
-import killua.dev.core.MainRoutes
-import killua.dev.core.ui.components.paddingTop
+import killua.dev.twitterdownloader.MainPageButtons
+import killua.dev.twitterdownloader.MainRoutes
+import killua.dev.twitterdownloader.ui.components.paddingTop
+import killua.dev.twitterdownloader.ui.getRandomColors
+import killua.dev.twitterdownloader.core.utils.navigateSingle
 import killua.dev.twitterdownloader.ui.MainPageViewmodel
-import ui.LocalNavController
-import ui.animations.AnimatedNavHost
-import ui.components.ActionsBotton
-import ui.components.MainPageTopBar
-import ui.components.MainScaffold
-import ui.components.Section
-import ui.tokens.SizeTokens
+import killua.dev.twitterdownloader.ui.components.ActionsBotton
+import killua.dev.twitterdownloader.ui.components.FavouriteCard
+import killua.dev.twitterdownloader.ui.components.InputDialog
+import killua.dev.twitterdownloader.ui.components.MainPageTopBar
+import killua.dev.twitterdownloader.ui.components.MainScaffold
+import killua.dev.twitterdownloader.ui.components.Section
+import killua.dev.twitterdownloader.ui.tokens.SizeTokens
 
-@Composable
-fun Home(){
-    val navController = LocalNavController.current!!
-    AnimatedNavHost(
-        navController = navController,
-        startDestination = MainRoutes.MainPage.route,
-    ) {
-        composable(MainRoutes.MainPage.route) {
-            MainPage()
-        }
-        composable(MainRoutes.UserinfoPage.route) {
-            MainPage()
-        }
-        composable(MainRoutes.Download.route) {
-            MainPage()
-        }
-        composable(MainRoutes.DownloadedPage.route) {
-            MainPage()
-        }
-        composable(MainRoutes.TwitterUserPage.route) {
-            MainPage()
-        }
-        composable(MainRoutes.SpecificTwitterUserPage.route) {
-            MainPage()
-        }
-        composable(MainRoutes.ReportPage.route) {
-            MainPage()
-        }
-        composable(MainRoutes.SettingPage.route) {
-            MainPage()
-        }
-        composable(MainRoutes.AboutPage.route) {
-            MainPage()
-        }
-        composable(MainRoutes.HelpPage.route) {
-            MainPage()
-        }
-    }
-}
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun MainPage(
+    viewmodel: MainPageViewmodel = viewModel()
 ) {
+    val randomColors = getRandomColors()
     val navController = rememberNavController()
+    var showDialog by remember { mutableStateOf(false)}
     MainScaffold(
         topBar = {
             MainPageTopBar(navController)
         }
     ) {
+        InputDialog(
+            showDialog = showDialog,
+            onDismiss = { showDialog = false },
+            onConfirm = {
+
+            }
+        )
         Column (
             modifier = Modifier
-                .paddingTop(SizeTokens.Level8),
+                .paddingTop(SizeTokens.Level8)
+                .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(SizeTokens.Level24)
         ){
+            Section(title = "Overview") {
+                FavouriteCard("KilluaDev","风过荒野",1024) {}
+            }
+
             Section(title = "Actions") {
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
@@ -87,22 +65,30 @@ fun MainPage(
                     verticalArrangement = Arrangement.spacedBy(SizeTokens.Level8),
                     maxItemsInEachRow = 2,
                 ) {
-                    MainPageButtons.forEach { items->
+                    MainPageButtons.forEachIndexed { index, item->
                         ActionsBotton(
                             modifier = Modifier.weight(1f),
                             enabled = true,
-                            title = items.title,
-                            icon = items.icon
-                        ) { }
+                            title = item.title,
+                            icon = item.icon,
+                            color = randomColors[index].container
+                        ) {
+                            if(item.route == MainRoutes.Download.route){
+                                showDialog = true
+                            }else{
+                                navController.navigateSingle(item.route)
+                            }
+                        }
                     }
                 }
             }
+
         }
     }
 }
 
 @Preview
 @Composable
-fun MainpagePreview() {
+fun mainpagedemo(){
     MainPage()
 }

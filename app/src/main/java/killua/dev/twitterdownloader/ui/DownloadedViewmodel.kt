@@ -1,22 +1,20 @@
 package killua.dev.twitterdownloader.ui
 
-import Model.DownloadItem
-import Model.SnackbarUIEffect
+import killua.dev.twitterdownloader.Model.DownloadItem
+import killua.dev.twitterdownloader.Model.SnackbarUIEffect
 import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import db.DownloadState
 import db.DownloadStatus
-import download.DownloadManager
-import download.VideoDownloadWorker
+import killua.dev.twitterdownloader.download.DownloadManager
+import killua.dev.twitterdownloader.download.VideoDownloadWorker
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import repository.DownloadRepository
-import ui.BaseViewModel
-import ui.UIIntent
+import killua.dev.twitterdownloader.repository.DownloadRepository
 import java.io.File
 import javax.inject.Inject
 

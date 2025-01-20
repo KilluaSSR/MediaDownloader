@@ -4,14 +4,14 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.composable
 import killua.dev.setup.ui.Pages.PermissionsPage
-import ui.LocalNavController
-import ui.animations.AnimatedNavHost
+import killua.dev.twitterdownloader.ui.LocalNavController
+import killua.dev.twitterdownloader.ui.animations.AnimatedNavHost
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Setup(){
-    val navController = LocalNavController.current!!
-    AnimatedNavHost(
+    val navController = killua.dev.twitterdownloader.ui.LocalNavController.current!!
+    killua.dev.twitterdownloader.ui.animations.AnimatedNavHost(
         navController = navController,
         startDestination = SetupRoutes.PermissionsPage.route,
     ) {

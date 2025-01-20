@@ -1,10 +1,10 @@
 package killua.dev.setup.ui
 
+import killua.dev.twitterdownloader.Model.CurrentState
+import killua.dev.twitterdownloader.Model.SnackbarUIEffect
 import android.content.Context
 import dagger.hilt.android.lifecycle.HiltViewModel
-import killua.dev.core.utils.NotificationUtils
-import Model.CurrentState
-import Model.SnackbarUIEffect
+import killua.dev.twitterdownloader.core.utils.NotificationUtils
 import killua.dev.setup.ui.SetupUIIntent.ValidateNotifications
 import killua.dev.setup.ui.SetupUIIntent.ValidateStoragePermission
 import killua.dev.setup.ui.SetupUIIntent.ValidatedRoot
@@ -12,16 +12,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import ui.BaseViewModel
-import ui.UIIntent
-import ui.UIState
 import javax.inject.Inject
 
 data class SetupUIState(
     val rootError: String,
-): UIState
+): killua.dev.twitterdownloader.ui.UIState
 
-sealed class SetupUIIntent : UIIntent{
+sealed class SetupUIIntent : killua.dev.twitterdownloader.ui.UIIntent {
     data object ValidatedRoot: SetupUIIntent()
     data class ValidateNotifications(val context: Context): SetupUIIntent()
     data class ValidateStoragePermission(val context: Context): SetupUIIntent()
@@ -29,7 +26,7 @@ sealed class SetupUIIntent : UIIntent{
 }
 
 @HiltViewModel
-class SetupPageViewModel @Inject constructor() : BaseViewModel<SetupUIIntent, SetupUIState, SnackbarUIEffect>(SetupUIState("")) {
+class SetupPageViewModel @Inject constructor() : killua.dev.twitterdownloader.ui.BaseViewModel<SetupUIIntent, SetupUIState, SnackbarUIEffect>(SetupUIState("")) {
     private val mutex = Mutex()
     private val _rootState: MutableStateFlow<CurrentState> = MutableStateFlow(CurrentState.Idle)
     private val _notificationState: MutableStateFlow<CurrentState> = MutableStateFlow(CurrentState.Idle)

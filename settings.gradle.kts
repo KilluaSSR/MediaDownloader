@@ -21,5 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "TwitterDownloader"
 include(":app")
-include(":core")
 include(":setup")
