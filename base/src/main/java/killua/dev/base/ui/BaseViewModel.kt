@@ -1,5 +1,6 @@
 package killua.dev.base.ui
 
+import androidx.compose.material3.SnackbarHostState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import killua.dev.base.ui.SnackbarUIEffect.ShowSnackbar
@@ -32,8 +33,7 @@ abstract class BaseViewModel<I : UIIntent, S : UIState, E : UIEffect>(state: S) 
         initialValue = initValue
     )
 
-    var snackbarHostState: androidx.compose.material3.SnackbarHostState =
-        androidx.compose.material3.SnackbarHostState()
+    var snackbarHostState: SnackbarHostState = SnackbarHostState()
     private val _uiState = MutableStateFlow(state)
     val uiState: StateFlow<S> = _uiState.asStateFlow()
     suspend fun withMainContext(block: suspend CoroutineScope.() -> Unit) = withContext(

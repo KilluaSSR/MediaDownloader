@@ -24,6 +24,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -52,11 +54,15 @@ import killua.dev.twitterdownloader.MainPageDropdownMenuButtons
 @Composable
 fun MainScaffold(
     topBar: @Composable () -> Unit = {},
-    content: @Composable () -> Unit
-) {
+    snackbarHostState: SnackbarHostState? = null,
+    content: @Composable () -> Unit) {
     Scaffold(
         topBar = topBar,
-        containerColor = MaterialTheme.colorScheme.surface
+        containerColor = MaterialTheme.colorScheme.surface,
+        snackbarHost = {
+            if (snackbarHostState != null)
+                SnackbarHost(hostState = snackbarHostState)
+        }
     ) { innerPadding ->
         Column {
             Box(

@@ -7,6 +7,9 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import killua.dev.base.ActivityUtil
 import killua.dev.base.CurrentState
+import killua.dev.base.datastore.readApplicationUserAuth
+import killua.dev.base.datastore.readApplicationUserCt0
+import killua.dev.base.datastore.readApplicationUserScreenName
 import killua.dev.base.datastore.writeApplicationUserAuth
 import killua.dev.base.datastore.writeApplicationUserCt0
 import killua.dev.base.ui.BaseViewModel
@@ -18,6 +21,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -25,7 +29,6 @@ import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
 data class SetupUIState(
-    val isWebViewVisible: Boolean = false,
     val isLoggedIn: Boolean = false
 ) : killua.dev.base.ui.UIState
 
@@ -33,13 +36,11 @@ sealed class SetupUIIntent : killua.dev.base.ui.UIIntent {
     data class ValidateNotifications(val context: Context) : SetupUIIntent()
     data class OnResume(val context: Context) : SetupUIIntent()
     data class StartApplication(val context: Context) : SetupUIIntent()
-    data class ShowWebView(val show: Boolean, val context: Context) : SetupUIIntent()
-    data class ShutWebView(val show: Boolean = false) : SetupUIIntent()
 }
 
 @HiltViewModel
 class SetupPageViewModel @Inject constructor() :
-    BaseViewModel<SetupUIIntent, SetupUIState, SnackbarUIEffect>(SetupUIState(false,false)) {
+    BaseViewModel<SetupUIIntent, SetupUIState, SnackbarUIEffect>(SetupUIState(false)) {
     private val mutex = Mutex()
     private var cookieCheckJob: Job? = null
     private val _notificationState: MutableStateFlow<CurrentState> =
@@ -65,6 +66,11 @@ class SetupPageViewModel @Inject constructor() :
                     if (NotificationUtils.checkPermission(intent.context)) {
                         _notificationState.value = CurrentState.Success
                     }
+                    val ct0 = intent.context.readApplicationUserCt0().first()
+                    val auth = intent.context.readApplicationUserAuth().first()
+                    if(ct0.isNotBlank() && auth.isNotBlank()){
+                        _loginState.value = CurrentState.Success
+                    }
                 }
             }
             is SetupUIIntent.StartApplication -> {
@@ -73,14 +79,6 @@ class SetupPageViewModel @Inject constructor() :
                 context.getActivity().finish()
             }
 
-            is SetupUIIntent.ShowWebView -> {
-                uiState.value.copy(isWebViewVisible = intent.show)
-                startCookieCheck(context = intent.context)
-            }
-            is SetupUIIntent.ShutWebView -> {
-                uiState.value.copy(isWebViewVisible = intent.show)
-                cookieCheckJob?.cancel()
-            }
         }
     }
     private suspend fun startCookieCheck(context: Context) {
@@ -102,7 +100,7 @@ class SetupPageViewModel @Inject constructor() :
                             }
                         }
                     }
-                    uiState.value.copy(isLoggedIn = true, isWebViewVisible = false)
+                    //uiState.value.copy(isLoggedIn = true, isWebViewVisible = false)
                     break
                 }
                 delay(1000)

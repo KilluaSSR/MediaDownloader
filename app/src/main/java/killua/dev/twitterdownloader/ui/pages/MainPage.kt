@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
+import killua.dev.base.ui.SnackbarUIEffect
 import killua.dev.base.ui.components.ActionsBotton
 import killua.dev.base.ui.components.Section
 import killua.dev.base.ui.components.paddingTop
@@ -44,15 +45,23 @@ fun MainPage(
     MainScaffold(
         topBar = {
             MainPageTopBar(navController)
-        }
+        },
+        snackbarHostState = viewmodel.snackbarHostState
     ) {
         InputDialog(
             showDialog = showDialog,
             onDismiss = { showDialog = false },
             onConfirm = { url ->
                 val tweetID = url.split("?")[0].split("/").last()
-                viewmodel.launchOnIO {
-                    viewmodel.emitIntent(MainPageUIIntent.ExecuteDownload(tweetID))
+                viewmodel.launchOnIO{
+                    if(tweetID.isBlank()){
+                        viewmodel.emitEffect(SnackbarUIEffect.ShowSnackbar("You need to paste the tweet's url here."))
+                    }else if(!url.contains("x.com/") || !url.contains("twitter.com/")) {
+                        viewmodel.emitEffect(SnackbarUIEffect.ShowSnackbar("This is NOT a twitter url!"))
+                    }else {
+                        viewmodel.emitIntent(MainPageUIIntent.ExecuteDownload(tweetID))
+                    }
+
                 }
             }
         )
