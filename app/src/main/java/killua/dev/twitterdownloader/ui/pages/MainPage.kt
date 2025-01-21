@@ -1,16 +1,19 @@
 package killua.dev.twitterdownloader.ui.pages
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import killua.dev.base.ui.components.ActionsBotton
@@ -24,16 +27,19 @@ import killua.dev.twitterdownloader.MainRoutes
 import killua.dev.twitterdownloader.ui.FavouriteCard
 import killua.dev.twitterdownloader.ui.InputDialog
 import killua.dev.twitterdownloader.ui.MainPageTopBar
+import killua.dev.twitterdownloader.ui.MainPageUIIntent
 import killua.dev.twitterdownloader.ui.MainPageViewmodel
 import killua.dev.twitterdownloader.ui.MainScaffold
 
-@OptIn(ExperimentalLayoutApi::class)
+@ExperimentalFoundationApi
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun MainPage(
-    viewmodel: MainPageViewmodel = viewModel()
+
 ) {
     val randomColors = getRandomColors()
     val navController = rememberNavController()
+    val viewmodel : MainPageViewmodel = hiltViewModel()
     var showDialog by remember { mutableStateOf(false) }
     MainScaffold(
         topBar = {
@@ -43,8 +49,11 @@ fun MainPage(
         InputDialog(
             showDialog = showDialog,
             onDismiss = { showDialog = false },
-            onConfirm = {
-
+            onConfirm = { url ->
+                val tweetID = url.split("?")[0].split("/").last()
+                viewmodel.launchOnIO {
+                    viewmodel.emitIntent(MainPageUIIntent.ExecuteDownload(tweetID))
+                }
             }
         )
         Column(

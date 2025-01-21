@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     id("com.google.devtools.ksp")
     id("dagger.hilt.android.plugin")
+    id("com.google.dagger.hilt.android")
     alias(libs.plugins.compose.compiler)
 }
 
@@ -41,6 +42,7 @@ android {
 dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.androidx.hilt.navigation.compose)
     implementation(project(":base"))
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.kotlinx.serialization.json)

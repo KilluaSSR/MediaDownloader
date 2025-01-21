@@ -17,7 +17,7 @@ sealed class NetworkState {
     data class Unavailable(val reason: String? = null) : NetworkState()
 }
 
-@Singleton
+
 class NetworkManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {

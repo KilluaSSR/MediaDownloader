@@ -133,7 +133,7 @@ fun FavouriteCard(
         onColorContainer = MaterialTheme.colorScheme.onPrimaryContainer,
         content = {
             TitleLargeText(
-                text = "$favouriteUserScreenName @$favouriteUser",
+                text = "$favouriteUser @$favouriteUserScreenName",
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
             BodyMediumText(

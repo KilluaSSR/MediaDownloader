@@ -45,8 +45,8 @@ import killua.dev.base.ui.components.paddingTop
 import killua.dev.base.ui.components.paddingVertical
 import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.base.utils.withState
-import killua.dev.twitterdownloader.db.readStoreBoolean
-import killua.dev.twitterdownloader.db.saveStoreBoolean
+import killua.dev.base.datastore.readStoreBoolean
+import killua.dev.base.datastore.saveStoreBoolean
 import kotlinx.coroutines.launch
 
 @Composable

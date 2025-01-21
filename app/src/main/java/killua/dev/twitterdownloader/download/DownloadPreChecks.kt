@@ -10,7 +10,7 @@ import java.net.URL
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
+
 class DownloadPreChecks @Inject constructor(
     @ApplicationContext private val context: Context
 ) {

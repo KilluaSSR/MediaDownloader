@@ -1,49 +1,56 @@
 package killua.dev.setup.ui
 
 import android.content.Context
+import android.content.Intent
+import android.webkit.CookieManager
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import killua.dev.base.ActivityUtil
 import killua.dev.base.CurrentState
+import killua.dev.base.datastore.writeApplicationUserAuth
+import killua.dev.base.datastore.writeApplicationUserCt0
+import killua.dev.base.ui.BaseViewModel
 import killua.dev.base.ui.SnackbarUIEffect
 import killua.dev.base.utils.NotificationUtils
+import killua.dev.base.utils.getActivity
 import killua.dev.setup.ui.SetupUIIntent.ValidateNotifications
-import killua.dev.setup.ui.SetupUIIntent.ValidateStoragePermission
-import killua.dev.setup.ui.SetupUIIntent.ValidatedRoot
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
 data class SetupUIState(
-    val rootError: String,
+    val isWebViewVisible: Boolean = false,
+    val isLoggedIn: Boolean = false
 ) : killua.dev.base.ui.UIState
 
 sealed class SetupUIIntent : killua.dev.base.ui.UIIntent {
-    data object ValidatedRoot : SetupUIIntent()
     data class ValidateNotifications(val context: Context) : SetupUIIntent()
-    data class ValidateStoragePermission(val context: Context) : SetupUIIntent()
     data class OnResume(val context: Context) : SetupUIIntent()
+    data class StartApplication(val context: Context) : SetupUIIntent()
+    data class ShowWebView(val show: Boolean, val context: Context) : SetupUIIntent()
+    data class ShutWebView(val show: Boolean = false) : SetupUIIntent()
 }
 
 @HiltViewModel
 class SetupPageViewModel @Inject constructor() :
-    killua.dev.base.ui.BaseViewModel<SetupUIIntent, SetupUIState, SnackbarUIEffect>(SetupUIState("")) {
+    BaseViewModel<SetupUIIntent, SetupUIState, SnackbarUIEffect>(SetupUIState(false,false)) {
     private val mutex = Mutex()
-    private val _rootState: MutableStateFlow<CurrentState> = MutableStateFlow(CurrentState.Idle)
+    private var cookieCheckJob: Job? = null
     private val _notificationState: MutableStateFlow<CurrentState> =
         MutableStateFlow(CurrentState.Idle)
-    private val _storagePermissionState: MutableStateFlow<CurrentState> = MutableStateFlow(
-        CurrentState.Idle
-    )
-
-    //val rootState: StateFlow<EnvState> = _rootState.stateInScope(EnvState.Idle)
     val notificationState: StateFlow<CurrentState> =
         _notificationState.stateInScope(CurrentState.Idle)
+    private val _loginState: MutableStateFlow<CurrentState> =
+        MutableStateFlow(CurrentState.Idle)
+    val loginState: StateFlow<CurrentState> =
+        _loginState.stateInScope(CurrentState.Idle)
 
-    //val storagePermissionState: StateFlow<EnvState> = _storagePermissionState.stateInScope(EnvState.Idle)
-//    val allOptionsValidated: StateFlow<Boolean> = combine(_notificationState,_storagePermissionState){ notification,storage ->
-//         notification == EnvState.Success && storage == EnvState.Success
-//    }.flowOnIO().stateInScope(false)
     override suspend fun onEvent(state: SetupUIState, intent: SetupUIIntent) {
         when (intent) {
             is ValidateNotifications -> {
@@ -53,26 +60,57 @@ class SetupPageViewModel @Inject constructor() :
                     }
                 }
             }
-
-            is ValidatedRoot -> {}
-            is ValidateStoragePermission -> {
-//                mutex.withLock{
-//                    if(storagePermissionState.value != EnvState.Success){
-//                        StorageUtils.requestPermission(context = intent.context)
-//                    }
-//                }
-            }
-
             is SetupUIIntent.OnResume -> {
                 mutex.withLock {
                     if (NotificationUtils.checkPermission(intent.context)) {
                         _notificationState.value = CurrentState.Success
                     }
-//                    if (StorageUtils.checkPermission(intent.context)){
-//                        _storagePermissionState.value = EnvState.Success
-//                    }
                 }
             }
+            is SetupUIIntent.StartApplication -> {
+                val context = intent.context
+                context.startActivity(Intent(context, ActivityUtil.classMainActivity))
+                context.getActivity().finish()
+            }
+
+            is SetupUIIntent.ShowWebView -> {
+                uiState.value.copy(isWebViewVisible = intent.show)
+                startCookieCheck(context = intent.context)
+            }
+            is SetupUIIntent.ShutWebView -> {
+                uiState.value.copy(isWebViewVisible = intent.show)
+                cookieCheckJob?.cancel()
+            }
         }
+    }
+    private suspend fun startCookieCheck(context: Context) {
+        cookieCheckJob?.cancel()
+        cookieCheckJob = viewModelScope.launch {
+            while (isActive) {
+                val cookieManager = CookieManager.getInstance()
+                val cookie = cookieManager.getCookie("https://x.com")
+                if (cookie != null) {
+                    cookie.split(";").forEach { item ->
+                        when {
+                            item.contains("ct0") -> {
+                                val ct0 = item.substringAfter("=").trim()
+                                context.writeApplicationUserCt0(ct0)
+                            }
+                            item.contains("auth_token") -> {
+                                val auth = item.substringAfter("=").trim()
+                                context.writeApplicationUserAuth(auth)
+                            }
+                        }
+                    }
+                    uiState.value.copy(isLoggedIn = true, isWebViewVisible = false)
+                    break
+                }
+                delay(1000)
+            }
+        }
+    }
+    override fun onCleared() {
+        super.onCleared()
+        cookieCheckJob?.cancel()
     }
 }

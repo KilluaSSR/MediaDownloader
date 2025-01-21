@@ -4,7 +4,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import killua.dev.twitterdownloader.repository.LoginCredentials
+import killua.dev.base.datastore.ApplicationUserData
 import okhttp3.Cookie
 import okhttp3.CookieJar
 import okhttp3.HttpUrl
@@ -19,11 +19,11 @@ import javax.inject.Singleton
 object ProvideTwitterApiClient {
     @Provides
     @Singleton
-    fun buildClient(credentials: LoginCredentials): OkHttpClient {
+    fun buildClient(userData: ApplicationUserData): OkHttpClient {
         val cookieManager = CookieManager().apply {
-            val ct0Cookie = HttpCookie("ct0", credentials.ct0).apply { domain = "x.com" }
+            val ct0Cookie = HttpCookie("ct0", userData.ct0).apply { domain = "x.com" }
             val authCookie =
-                HttpCookie("auth_token", credentials.authToken).apply { domain = "x.com" }
+                HttpCookie("auth_token", userData.auth).apply { domain = "x.com" }
             cookieStore.add(URI("https://x.com"), ct0Cookie)
             cookieStore.add(URI("https://x.com"), authCookie)
         }

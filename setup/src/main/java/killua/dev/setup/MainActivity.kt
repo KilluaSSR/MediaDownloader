@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 CompositionLocalProvider(
                     LocalNavController provides navController,
-                    androidx.lifecycle.compose.LocalLifecycleOwner provides LocalLifecycleOwner.current
+                    LocalLifecycleOwner provides LocalLifecycleOwner.current
                 ) {
                     Setup()
                 }

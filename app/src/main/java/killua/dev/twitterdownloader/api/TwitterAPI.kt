@@ -2,14 +2,14 @@ package killua.dev.twitterdownloader.api
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import killua.dev.twitterdownloader.api.Constants.GetTweetDetailFeatures
-import killua.dev.twitterdownloader.api.Constants.TwitterAPIURL
 import api.Model.GraphQLResponse
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import killua.dev.base.utils.toTweetVariablesSingleMedia
+import killua.dev.twitterdownloader.api.Constants.GetTweetDetailFeatures
+import killua.dev.twitterdownloader.api.Constants.TwitterAPIURL
 import killua.dev.twitterdownloader.api.Model.TwitterRequestResult
-import killua.dev.twitterdownloader.repository.LoginCredentials
+import killua.dev.twitterdownloader.di.UserDataManager
 import killua.dev.twitterdownloader.utils.TweetData
 import killua.dev.twitterdownloader.utils.addTwitterHeaders
 import killua.dev.twitterdownloader.utils.extractTwitterUser
@@ -18,12 +18,11 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.net.URLEncoder
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+
 class TwitterApiService @Inject constructor(
     private val client: OkHttpClient,
-    private val credentials: LoginCredentials
+    val userdata: UserDataManager
 ) {
     private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
 
@@ -40,7 +39,7 @@ class TwitterApiService @Inject constructor(
         val request = Request.Builder()
             .get()
             .url(url)
-            .addTwitterHeaders(credentials.ct0)
+            .addTwitterHeaders(userdata.userData.value.ct0)
             .build()
         return try {
             client.newCall(request).execute().use { response ->

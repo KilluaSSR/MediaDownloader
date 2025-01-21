@@ -19,7 +19,6 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
 class DownloadManager @Inject constructor(
     @ApplicationContext private val context: Context,
     private val workManager: WorkManager,

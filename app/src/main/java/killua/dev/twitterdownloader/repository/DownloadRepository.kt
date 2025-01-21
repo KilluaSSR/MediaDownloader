@@ -7,7 +7,7 @@ import db.DownloadStatus
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
+
 class DownloadRepository @Inject constructor(
     private val downloadDao: DownloadDao
 ) {
