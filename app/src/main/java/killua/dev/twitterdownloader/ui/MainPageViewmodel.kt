@@ -2,17 +2,21 @@ package killua.dev.twitterdownloader.ui
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import db.Download
 import db.DownloadStatus
 import killua.dev.base.ui.BaseViewModel
 import killua.dev.base.ui.SnackbarUIEffect
+import killua.dev.base.ui.UIIntent
+import killua.dev.base.ui.UIState
 import killua.dev.twitterdownloader.Model.DownloadItem
 import killua.dev.twitterdownloader.api.Model.TwitterRequestResult
 import killua.dev.twitterdownloader.api.Model.TwitterUser
 import killua.dev.twitterdownloader.api.TwitterApiService
 import killua.dev.twitterdownloader.download.DownloadManager
 import killua.dev.twitterdownloader.repository.DownloadRepository
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.text.SimpleDateFormat
@@ -24,9 +28,13 @@ import javax.inject.Inject
 data class DownloadUIState(
     val downloads: List<DownloadItem> = emptyList(),
     val isLoading: Boolean = false,
-) : killua.dev.base.ui.UIState
+    val youHaveDownloadedSth: Boolean = false,
+    val favouriteUserName: String = "",
+    val favouriteUserScreenName: String = "",
+    val downloadedTimes: Int = 0
+) : UIState
 
-sealed class MainPageUIIntent : killua.dev.base.ui.UIIntent {
+sealed class MainPageUIIntent : UIIntent {
     data class ExecuteDownload(val twitterID: String) : MainPageUIIntent()
 }
 
@@ -39,7 +47,22 @@ class MainPageViewmodel @Inject constructor(
     DownloadUIState(isLoading = false)
 ) {
     private val mutex = Mutex()
-
+    init {
+        viewModelScope.launch{
+            presentFavouriteCardDetails()
+        }
+    }
+    suspend fun presentFavouriteCardDetails(){
+        val mostDownloaded = downloadRepository.getMostDownloadedUser()
+        if (mostDownloaded != null){
+            emitState(uiState.value.copy(
+                youHaveDownloadedSth = true,
+                favouriteUserName = mostDownloaded.twitterName!!,
+                favouriteUserScreenName = mostDownloaded.twitterScreenName!!,
+                downloadedTimes = mostDownloaded.totalDownloads
+            ))
+        }
+    }
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override suspend fun onEvent(state: DownloadUIState, intent: MainPageUIIntent) {
         when (intent) {
@@ -115,7 +138,7 @@ class MainPageViewmodel @Inject constructor(
                 )
             )
         } catch (e: Exception) {
-            handleError("添加下载任务失败", e)
+            handleError("Failed", e)
         }
     }
 

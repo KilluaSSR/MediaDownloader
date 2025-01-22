@@ -6,6 +6,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import killua.dev.twitterdownloader.Model.MostDownloadedUser
 import kotlin.uuid.ExperimentalUuidApi
 
 @Dao
@@ -66,6 +67,20 @@ interface DownloadDao {
         fileSize: Long,
         completedAt: Long
     )
+
+    @Query("""
+    SELECT 
+        twitter_user_id AS twitterUserId,
+        twitter_screen_name AS twitterScreenName,
+        twitter_name AS twitterName,
+        COUNT(*) AS totalDownloads
+    FROM Download
+    WHERE status = :status
+    GROUP BY twitter_user_id
+    ORDER BY totalDownloads DESC
+    LIMIT 1
+""")
+    suspend fun getMostDownloadedUser(status: DownloadStatus): MostDownloadedUser?
 
     @OptIn(ExperimentalUuidApi::class)
     @Query("UPDATE Download SET status = :status, error_message = :errorMessage WHERE uuid = :uuid")

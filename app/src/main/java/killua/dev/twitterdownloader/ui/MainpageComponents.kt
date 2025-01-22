@@ -130,6 +130,7 @@ fun FavouriteCard(
     favouriteUser: String,
     favouriteUserScreenName: String,
     downloadCount: Int,
+    downloaded: Boolean,
     onClick: () -> Unit
 ) {
     OverviewCard(
@@ -138,14 +139,21 @@ fun FavouriteCard(
         colorContainer = MaterialTheme.colorScheme.primaryContainer,
         onColorContainer = MaterialTheme.colorScheme.onPrimaryContainer,
         content = {
-            TitleLargeText(
-                text = "$favouriteUser @$favouriteUserScreenName",
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-            BodyMediumText(
-                text = "You've downloaded his/her video $downloadCount times",
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
+            if(downloaded){
+                TitleLargeText(
+                    text = "$favouriteUser @$favouriteUserScreenName",
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                BodyMediumText(
+                    text = "You've downloaded his/her video $downloadCount times",
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }else{
+                TitleLargeText(
+                    text = "Nothing here",
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
         }
     ) {
         onClick

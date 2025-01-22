@@ -66,8 +66,7 @@ object ProvideTwitterApiService {
     fun provideTwitterApiService(
         userDataManager: UserDataManager
     ): TwitterApiService {
-        val client = ProvideTwitterApiClient.buildClient(userDataManager.userData.value)
-        return TwitterApiService(client, userDataManager)
+        return TwitterApiService(userDataManager)
     }
 }
 

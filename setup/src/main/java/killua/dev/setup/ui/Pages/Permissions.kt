@@ -87,7 +87,7 @@ fun PermissionsPage() {
         Section(title = "We want to ask you for something.") {
             PermissionButton(
                 title = "Notification Permission",
-                description = "We need to send you notifications to keep you updated.",
+                description = "We want to send you notifications to keep you updated.",
                 state = notificationState.value,
                 onClick = {
                     viewModel.launchOnIO {
@@ -104,12 +104,13 @@ fun PermissionsPage() {
         Spacer(modifier = Modifier.size(SizeTokens.Level24))
         Section(title = "You're invited to log in to your Twitter account.") {
             PermissionButton(
-                enabled = loginState.value != CurrentState.Success,
                 title = "Log in",
                 description = "We need your account's cookie to download videos.",
                 state = loginState.value,
                 onClick = {
-                   navController.navigateSingle(SetupRoutes.BrowserPage.route)
+                   if(loginState.value != CurrentState.Success){
+                       navController.navigateSingle(SetupRoutes.BrowserPage.route)
+                   }
                 },
                 color = if (loginState.value == CurrentState.Idle || loginState.value == CurrentState.Error) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
             )

@@ -5,7 +5,7 @@ import androidx.annotation.RequiresApi
 import api.Model.GraphQLResponse
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import killua.dev.base.utils.toTweetVariablesSingleMedia
+import killua.dev.base.datastore.ApplicationUserData
 import killua.dev.twitterdownloader.api.Constants.GetTweetDetailFeatures
 import killua.dev.twitterdownloader.api.Constants.TwitterAPIURL
 import killua.dev.twitterdownloader.api.Model.TwitterRequestResult
@@ -14,14 +14,19 @@ import killua.dev.twitterdownloader.utils.TweetData
 import killua.dev.twitterdownloader.utils.addTwitterHeaders
 import killua.dev.twitterdownloader.utils.extractTwitterUser
 import killua.dev.twitterdownloader.utils.getAllHighestBitrateUrls
+import okhttp3.Cookie
+import okhttp3.CookieJar
+import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.net.CookieManager
+import java.net.HttpCookie
+import java.net.URI
 import java.net.URLEncoder
 import javax.inject.Inject
 
 
 class TwitterApiService @Inject constructor(
-    private val client: OkHttpClient,
     val userdata: UserDataManager
 ) {
     private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
@@ -29,7 +34,17 @@ class TwitterApiService @Inject constructor(
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     fun getTweetDetailAsync(tweetId: String): TwitterRequestResult {
         if (tweetId.isBlank()) return TwitterRequestResult.Error(message = "ID cannot be empty")
-        val variables = tweetId.toTweetVariablesSingleMedia()
+        val variables = mapOf(
+            "focalTweetId" to tweetId,
+            "with_rux_injections" to false,
+            "rankingMode" to "Relevance",
+            "includePromotedContent" to true,
+            "withCommunity" to true,
+            "withQuickPromoteEligibilityTweetFields" to true,
+            "withBirdwatchNotes" to true,
+            "withVoice" to true
+        )
+        val client = buildClient(userdata.userData.value)
         val params = mapOf(
             "variables" to gson.toJson(variables),
             "features" to GetTweetDetailFeatures,
@@ -41,8 +56,10 @@ class TwitterApiService @Inject constructor(
             .url(url)
             .addTwitterHeaders(userdata.userData.value.ct0)
             .build()
+        println(request)
         return try {
             client.newCall(request).execute().use { response ->
+                println(response.code)
                 if (response.isSuccessful) {
                     val content = response.body?.string().orEmpty()
                     val tweet = gson.fromJson(content, GraphQLResponse::class.java)
@@ -75,5 +92,30 @@ class TwitterApiService @Inject constructor(
             }"
         }.joinToString("&")
         return "$baseUrl?$query"
+    }
+
+    fun buildClient(userData: ApplicationUserData): OkHttpClient {
+        val cookieManager = CookieManager().apply {
+            val ct0Cookie = HttpCookie("ct0", userData.ct0).apply { domain = "x.com" }
+            val authCookie =
+                HttpCookie("auth_token", userData.auth).apply { domain = "x.com" }
+            cookieStore.add(URI("https://x.com"), ct0Cookie)
+            cookieStore.add(URI("https://x.com"), authCookie)
+        }
+        return OkHttpClient.Builder()
+            .cookieJar(object : CookieJar {
+                override fun loadForRequest(url: HttpUrl): List<Cookie> {
+                    return cookieManager.cookieStore.cookies.map {
+                        Cookie.Builder()
+                            .name(it.name)
+                            .value(it.value)
+                            .domain(it.domain)
+                            .build()
+                    }
+                }
+
+                override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {}
+            })
+            .build()
     }
 }

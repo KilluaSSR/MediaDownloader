@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import killua.dev.base.ui.SnackbarUIEffect
@@ -42,6 +43,7 @@ fun MainPage(
     val navController = rememberNavController()
     val viewmodel : MainPageViewmodel = hiltViewModel()
     var showDialog by remember { mutableStateOf(false) }
+    val uiState = viewmodel.uiState.collectAsStateWithLifecycle()
     MainScaffold(
         topBar = {
             MainPageTopBar(navController)
@@ -52,16 +54,15 @@ fun MainPage(
             showDialog = showDialog,
             onDismiss = { showDialog = false },
             onConfirm = { url ->
-                val tweetID = url.split("?")[0].split("/").last()
                 viewmodel.launchOnIO{
-                    if(tweetID.isBlank()){
+                    if(url.isBlank()){
                         viewmodel.emitEffect(SnackbarUIEffect.ShowSnackbar("You need to paste the tweet's url here."))
-                    }else if(!url.contains("x.com/") || !url.contains("twitter.com/")) {
+                    }else if(!url.contains("x.com/") && !url.contains("twitter.com/")) {
                         viewmodel.emitEffect(SnackbarUIEffect.ShowSnackbar("This is NOT a twitter url!"))
                     }else {
+                        val tweetID = url.split("?")[0].split("/").last()
                         viewmodel.emitIntent(MainPageUIIntent.ExecuteDownload(tweetID))
                     }
-
                 }
             }
         )
@@ -72,7 +73,11 @@ fun MainPage(
             verticalArrangement = Arrangement.spacedBy(SizeTokens.Level24)
         ) {
             Section(title = "Overview") {
-                FavouriteCard("KilluaDev", "风过荒野", 1024) {}
+                if(uiState.value.youHaveDownloadedSth){
+                    FavouriteCard(uiState.value.favouriteUserName, uiState.value.favouriteUserScreenName, uiState.value.downloadedTimes,true) {}
+                }else{
+                    FavouriteCard("", "", 0,false) {}
+                }
             }
 
             Section(title = "Actions") {

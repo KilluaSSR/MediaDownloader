@@ -131,7 +131,6 @@ class TwitterUserPageViewmodel @Inject constructor(
 
             is TwitterUserPageIntent.Refresh -> loadUsers()
 
-
             is TwitterUserPageIntent.UserSelected -> emitState(
                 state.copy(selectedUserId = intent.userId)
             )
