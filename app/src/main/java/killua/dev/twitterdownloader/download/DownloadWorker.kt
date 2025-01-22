@@ -28,6 +28,10 @@ class VideoDownloadWorker(
         const val KEY_FILE_NAME = "file_name"
         const val PROGRESS = "progress"
         const val KEY_RANGE_HEADER = "range_header"
+        const val DOWNLOAD_TAG = "download_tag"
+        const val KEY_ERROR_MESSAGE = "error"
+        const val FILE_URI = "file_uri"
+        const val FILE_SIZE = "file_size"
         private const val MAX_RETRIES = 3
     }
 
@@ -57,7 +61,7 @@ class VideoDownloadWorker(
                 Result.failure(
                     workDataOf(
                         KEY_DOWNLOAD_ID to downloadId,
-                        "error" to (e.message ?: "Failed to download")
+                        KEY_ERROR_MESSAGE to (e.message ?: "Failed to download")
                     )
                 )
             }
@@ -91,7 +95,7 @@ class VideoDownloadWorker(
                     return@withContext Result.failure(
                         workDataOf(
                             KEY_DOWNLOAD_ID to downloadId,
-                            "error" to "ErrorCode: ${response.code}"
+                            KEY_ERROR_MESSAGE to "ErrorCode: ${response.code}"
                         )
                     )
                 }
@@ -99,7 +103,7 @@ class VideoDownloadWorker(
                 val body = response.body ?: return@withContext Result.failure(
                     workDataOf(
                         KEY_DOWNLOAD_ID to downloadId,
-                        "error" to "Response body is null"
+                        KEY_ERROR_MESSAGE to "Response body is null"
                     )
                 )
 
@@ -131,8 +135,8 @@ class VideoDownloadWorker(
                 Result.success(
                     workDataOf(
                         KEY_DOWNLOAD_ID to downloadId,
-                        "file_uri" to outputFile.toUri().toString(),
-                        "file_size" to outputFile.length()
+                        FILE_URI to outputFile.toUri().toString(),
+                        FILE_SIZE to outputFile.length()
                     )
                 )
             }
@@ -141,7 +145,7 @@ class VideoDownloadWorker(
             else Result.failure(
                 workDataOf(
                     KEY_DOWNLOAD_ID to downloadId,
-                    "error" to e.message
+                    KEY_ERROR_MESSAGE to e.message
                 )
             )
         }
