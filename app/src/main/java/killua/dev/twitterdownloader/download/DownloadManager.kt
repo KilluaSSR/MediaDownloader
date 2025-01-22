@@ -11,6 +11,8 @@ import androidx.work.WorkManager
 import androidx.work.workDataOf
 import dagger.hilt.android.qualifiers.ApplicationContext
 import db.Download
+import db.DownloadStatus
+import killua.dev.twitterdownloader.repository.DownloadRepository
 import killua.dev.twitterdownloader.utils.NetworkManager
 import killua.dev.twitterdownloader.utils.StorageManager
 import kotlinx.coroutines.Dispatchers

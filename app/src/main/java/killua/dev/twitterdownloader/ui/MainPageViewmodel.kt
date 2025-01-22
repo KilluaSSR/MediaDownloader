@@ -1,7 +1,9 @@
 package killua.dev.twitterdownloader.ui
 
+import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.core.net.toUri
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import db.Download
@@ -15,6 +17,7 @@ import killua.dev.twitterdownloader.api.Model.TwitterRequestResult
 import killua.dev.twitterdownloader.api.Model.TwitterUser
 import killua.dev.twitterdownloader.api.TwitterApiService
 import killua.dev.twitterdownloader.download.DownloadManager
+import killua.dev.twitterdownloader.download.VideoDownloadWorker
 import killua.dev.twitterdownloader.repository.DownloadRepository
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -52,6 +55,7 @@ class MainPageViewmodel @Inject constructor(
             presentFavouriteCardDetails()
         }
     }
+
     suspend fun presentFavouriteCardDetails(){
         val mostDownloaded = downloadRepository.getMostDownloadedUser()
         if (mostDownloaded != null){
@@ -122,9 +126,10 @@ class MainPageViewmodel @Inject constructor(
                 fileUri = null,
                 link = videoUrl,
                 fileName = generateFileName(user?.screenName),
-                fileType = "video/mp4",
+                fileType = "video",
                 fileSize = 0L,
-                status = DownloadStatus.PENDING
+                status = DownloadStatus.PENDING,
+                mimeType = "video/mp4"
             )
 
             downloadRepository.insert(download)

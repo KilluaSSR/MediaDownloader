@@ -29,7 +29,7 @@ class DownloadRepository @Inject constructor(
 
     suspend fun getAllDownloads() = downloadDao.getAllByDateDesc()
 
-    suspend fun getMostDownloadedUser() = downloadDao.getMostDownloadedUser(DownloadStatus.COMPLETED)
+    suspend fun getMostDownloadedUser() = downloadDao.getMostDownloadedUser()
 
     suspend fun getDownloadingItems() = downloadDao.getDownloading()
 
