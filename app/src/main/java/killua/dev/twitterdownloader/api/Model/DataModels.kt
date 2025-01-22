@@ -1,69 +1,62 @@
 package api.Model
 
-import kotlinx.serialization.Contextual
-import kotlinx.serialization.KSerializer
+import killua.dev.twitterdownloader.api.Model.TwitterUser
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.descriptors.buildClassSerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
-
-object AnySerializer : KSerializer<Any> {
-    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("Any")
-
-    override fun serialize(encoder: Encoder, value: Any) {
-        // 简单实现，可根据需要扩展
-        encoder.encodeString(value.toString())
-    }
-
-    override fun deserialize(decoder: Decoder): Any {
-        return decoder.decodeString()
-    }
-}
 
 @Serializable
-data class GraphQLResponse(
+data class TweetData(
+    val user: TwitterUser?,
+    val videoUrls: List<String>
+)
+
+@Serializable
+data class RootDto(
     @SerialName("data")
-    val data: DataContent
+    val data: DataContent? = null
 )
 
 @Serializable
 data class DataContent(
     @SerialName("user")
     val user: UserContent? = null,
+
     @SerialName("bookmark_timeline_v2")
-    val bookmarkTimelineV2: TimelineV2Content? = null,
+    val bookmark_timeline_v2: TimelineV2Content? = null,
+
     @SerialName("user_result_by_screen_name")
-    val userResultByScreenName: UserResults? = null,
+    val user_result_by_screen_name: UserResults? = null,
+
     @SerialName("threaded_conversation_with_injections_v2")
-    val threadedConversationV2: TimelineContent? = null
+    val threaded_conversation_with_injections_v2: TimelineContent? = null
 )
 
 @Serializable
 data class UserContent(
     @SerialName("result")
-    val result: UserResult
+    val result: UserResult? = null
 )
 
 @Serializable
 data class UserResult(
     @SerialName("__typename")
-    val typeName: String,
+    val __typename: String? = null,
+
     @SerialName("timeline_v2")
-    val timelineV2: TimelineV2Content
+    val timeline_v2: TimelineV2Content? = null
 )
 
 @Serializable
 data class TimelineV2Content(
     @SerialName("timeline")
-    val timeline: TimelineContent
+    val timeline: TimelineContent? = null
 )
 
 @Serializable
 data class TimelineContent(
     @SerialName("instructions")
-    val instructions: List<Instruction>,
+    val instructions: List<Instruction>? = null,
+
     @SerialName("metadata")
     val metadata: TimelineMetadata? = null
 )
@@ -71,23 +64,26 @@ data class TimelineContent(
 @Serializable
 data class TimelineMetadata(
     @SerialName("scribeConfig")
-    val scribeConfig: ScribeConfig
+    val scribeConfig: ScribeConfig? = null
 )
 
 @Serializable
 data class ScribeConfig(
     @SerialName("page")
-    val page: String
+    val page: String? = null
 )
 
 @Serializable
 data class Instruction(
     @SerialName("type")
-    val type: String,
+    val type: String? = null,
+
     @SerialName("direction")
     val direction: String? = null,
+
     @SerialName("entries")
     val entries: List<TimelineEntry>? = null,
+
     @SerialName("moduleItems")
     val moduleItems: List<ItemMedia>? = null
 )
@@ -95,25 +91,32 @@ data class Instruction(
 @Serializable
 data class TimelineEntry(
     @SerialName("entryId")
-    val entryId: String,
+    val entryId: String? = null,
+
     @SerialName("sortIndex")
-    val sortIndex: String,
+    val sortIndex: String? = null,
+
     @SerialName("content")
-    val content: EntryContent
+    val content: EntryContent? = null
 )
 
 @Serializable
 data class EntryContent(
     @SerialName("entryType")
-    val entryType: String,
+    val entryType: String? = null,
+
     @SerialName("__typename")
-    val typeName: String,
+    val __typename: String? = null,
+
     @SerialName("itemContent")
     val itemContent: ItemContent? = null,
+
     @SerialName("value")
     val value: String? = null,
+
     @SerialName("items")
     val items: List<ItemMedia>? = null,
+
     @SerialName("cursorType")
     val cursorType: String? = null
 )
@@ -121,25 +124,29 @@ data class EntryContent(
 @Serializable
 data class ItemMedia(
     @SerialName("entryId")
-    val entryId: String,
+    val entryId: String? = null,
+
     @SerialName("item")
-    val item: ItemDetail
+    val item: ItemDetail? = null
 )
 
 @Serializable
 data class ItemDetail(
     @SerialName("itemContent")
-    val itemContent: ItemContent
+    val itemContent: ItemContent? = null
 )
 
 @Serializable
 data class ItemContent(
     @SerialName("itemType")
-    val itemType: String,
+    val itemType: String? = null,
+
     @SerialName("__typename")
-    val typeName: String,
+    val __typename: String? = null,
+
     @SerialName("tweet_results")
-    val tweetResults: TweetResults? = null,
+    val tweet_results: TweetResults? = null,
+
     @SerialName("tweetDisplayType")
     val tweetDisplayType: String? = null
 )
@@ -147,24 +154,29 @@ data class ItemContent(
 @Serializable
 data class TweetResults(
     @SerialName("result")
-    val result: TweetResult
+    val result: TweetResult? = null
 )
 
 @Serializable
 data class TweetResult(
     @SerialName("__typename")
-    val typeName: String,
+    val __typename: String? = null,
+
     @SerialName("rest_id")
-    val restId: String,
+    val rest_id: String? = null,
+
     @SerialName("core")
     val core: CoreInfo? = null,
+
     @SerialName("legacy")
     val legacy: LegacyInfo? = null,
+
     @SerialName("tweet")
     val tweet: TweetResult? = null,
+
     @SerialName("tombstone")
-    @Contextual
     val tombstone: Any? = null,
+
     @SerialName("views")
     val views: ViewInfo? = null
 )
@@ -172,61 +184,71 @@ data class TweetResult(
 @Serializable
 data class ViewInfo(
     @SerialName("count")
-    val count: String,
+    val count: String? = null,
+
     @SerialName("state")
-    val state: String
+    val state: String? = null
 )
 
 @Serializable
 data class CoreInfo(
     @SerialName("user_results")
-    val userResults: UserResults
+    val user_results: UserResults? = null
 )
 
 @Serializable
 data class UserResults(
     @SerialName("result")
-    val result: UserResultInfo
+    val result: UserResultInfo? = null
 )
 
 @Serializable
 data class UserResultInfo(
     @SerialName("__typename")
-    val typeName: String,
+    val __typename: String? = null,
+
     @SerialName("id")
-    val id: String,
+    val id: String? = null,
+
     @SerialName("rest_id")
-    val restId: String,
+    val rest_id: String? = null,
+
     @SerialName("legacy")
-    val legacy: UserLegacy
+    val legacy: UserLegacy? = null
 )
 
 @Serializable
 data class UserLegacy(
     @SerialName("screen_name")
-    val screenName: String,
+    val screen_name: String? = null,
+
     @SerialName("name")
-    val name: String,
+    val name: String? = null,
+
     @SerialName("description")
-    val description: String
+    val description: String? = null
 )
 
 @Serializable
 data class LegacyInfo(
     @SerialName("created_at")
-    val createdAt: String,
+    val created_at: String? = null,
+
     @SerialName("full_text")
-    val fullText: String,
+    val full_text: String? = null,
+
     @SerialName("entities")
-    val entities: Entities,
+    val entities: Entities? = null,
+
     @SerialName("extended_entities")
-    val extendedEntities: ExtendedEntities? = null
+    val extended_entities: ExtendedEntities? = null
 )
 
 @Serializable
 data class Entities(
     @SerialName("hashtags")
-    val hashtags: List<HashTag>,
+    val hashtags: List<HashTag>? = null,
+
     @SerialName("media")
     val media: List<MediaEntity>? = null
 )
@@ -234,37 +256,55 @@ data class Entities(
 @Serializable
 data class ExtendedEntities(
     @SerialName("media")
-    val media: List<MediaEntity>
+    val media: List<MediaEntity>? = null
 )
 
 @Serializable
 data class HashTag(
     @SerialName("text")
-    val text: String
+    val text: String? = null
 )
 
 @Serializable
 data class MediaEntity(
     @SerialName("type")
-    val type: String,
+    val type: String? = null,
+
     @SerialName("media_url_https")
-    val mediaUrlHttps: String,
+    val media_url_https: String? = null,
+
     @SerialName("video_info")
-    val videoInfo: VideoInfo? = null
+    val video_info: VideoInfo? = null
 )
 
 @Serializable
 data class VideoInfo(
     @SerialName("variants")
-    val variants: List<VideoVariant>
+    val variants: List<VideoVariant>? = null
 )
 
 @Serializable
 data class VideoVariant(
     @SerialName("bitrate")
     val bitrate: Long? = null,
-    @SerialName("url")
-    val url: String
-)
 
-private fun LegacyInfo.filter(function: () -> kotlin.Boolean) {}
+    @SerialName("url")
+    val url: String? = null
+)
+fun RootDto.extractTwitterUser(): TwitterUser {
+    val tweetData = this.data?.threaded_conversation_with_injections_v2?.instructions?.firstOrNull()
+        ?.entries?.firstOrNull()?.content?.itemContent?.tweet_results?.result?.let { result ->
+            result.tweet ?: result
+        }
+    val user = tweetData
+        ?.core
+        ?.user_results
+        ?.result
+
+    return TwitterUser(
+        id = user?.rest_id,
+        screenName = user?.legacy?.screen_name,
+        name = user?.legacy?.name,
+        createdTime = 0L
+    )
+}

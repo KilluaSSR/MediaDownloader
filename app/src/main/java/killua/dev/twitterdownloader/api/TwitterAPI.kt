@@ -2,17 +2,17 @@ package killua.dev.twitterdownloader.api
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import api.Model.GraphQLResponse
+import api.Model.RootDto
+import api.Model.extractTwitterUser
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import killua.dev.base.datastore.ApplicationUserData
 import killua.dev.twitterdownloader.api.Constants.GetTweetDetailFeatures
 import killua.dev.twitterdownloader.api.Constants.TwitterAPIURL
+import killua.dev.twitterdownloader.api.Model.TweetData
 import killua.dev.twitterdownloader.api.Model.TwitterRequestResult
 import killua.dev.twitterdownloader.di.UserDataManager
-import killua.dev.twitterdownloader.utils.TweetData
 import killua.dev.twitterdownloader.utils.addTwitterHeaders
-import killua.dev.twitterdownloader.utils.extractTwitterUser
 import killua.dev.twitterdownloader.utils.getAllHighestBitrateUrls
 import okhttp3.Cookie
 import okhttp3.CookieJar
@@ -62,7 +62,7 @@ class TwitterApiService @Inject constructor(
                 println(response.code)
                 if (response.isSuccessful) {
                     val content = response.body?.string().orEmpty()
-                    val tweet = gson.fromJson(content, GraphQLResponse::class.java)
+                    val tweet = gson.fromJson(content, RootDto::class.java)
                     val tweetData = TweetData(
                         user = tweet.extractTwitterUser(),
                         videoUrls = tweet.getAllHighestBitrateUrls()

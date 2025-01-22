@@ -1,7 +1,5 @@
 package killua.dev.twitterdownloader.api.Model
 
-import killua.dev.twitterdownloader.utils.TweetData
-
 sealed class TwitterRequestResult {
     data class Success(
         val data: TweetData

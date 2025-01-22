@@ -87,6 +87,8 @@ class MainPageViewmodel @Inject constructor(
                     is TwitterRequestResult.Success -> {
                         val user = result.data.user
                         result.data.videoUrls.forEach {
+                            println(it)
+                            println(user?.name)
                             createAndStartDownload(it, user)
                         }
                     }

@@ -14,9 +14,6 @@ data class TwitterUser(
     @SerialName("name")
     val name: String? = null,
 
-    @SerialName("description")
-    val description: String? = null,
-
     @SerialName("created_time")
     val createdTime: Long = 0
 )

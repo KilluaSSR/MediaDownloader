@@ -1,39 +1,19 @@
 package killua.dev.twitterdownloader.utils
 
-import api.Model.GraphQLResponse
-import api.Model.LegacyInfo
-import kotlin.collections.orEmpty
+import api.Model.RootDto
 
-
-fun LegacyInfo.getHighestBitrateUrls(): List<String> {
-    val medias = extendedEntities?.media ?: entities.media.orEmpty()
-    return medias
-        .filter { it.type == "video" && it.videoInfo != null }
-        .mapNotNull { mediaEntity ->
-            // 对每个视频分别获取最高码率的URL
-            mediaEntity.videoInfo?.variants
-                ?.filter { it.url.isNotBlank() }
-                ?.maxByOrNull { it.bitrate ?: -1L }
-                ?.url
+fun RootDto.getAllHighestBitrateUrls(): List<String> {
+    val tweetData = this.data?.threaded_conversation_with_injections_v2?.instructions?.firstOrNull()
+        ?.entries?.firstOrNull()?.content?.itemContent?.tweet_results?.result?.let { result ->
+            result.tweet ?: result
         }
-}
-
-fun GraphQLResponse.getAllHighestBitrateUrls(): List<String> {
-    val results = mutableListOf<String>()
-    val instructions = data.threadedConversationV2?.instructions ?: return results
-    for (instruction in instructions) {
-        val entries = instruction.entries ?: continue
-        for (entry in entries) {
-            val itemContent = entry.content.itemContent ?: continue
-            val tweetResult = itemContent.tweetResults?.result ?: continue
-            val actualTweet = when (tweetResult.typeName) {
-                "TweetWithVisibilityResults" -> tweetResult.tweet
-                else -> tweetResult
-            }
-            actualTweet?.legacy?.getHighestBitrateUrls()?.let { urls ->
-                results.addAll(urls)
-            }
-        }
-    }
-    return results
+    val mediaList = tweetData
+        ?.legacy
+        ?.entities
+        ?.media
+    return mediaList?.mapNotNull { media ->
+        media.video_info?.variants
+            ?.maxByOrNull { it.bitrate ?: 0L }
+            ?.url
+    } ?: emptyList()
 }
