@@ -21,12 +21,15 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
+import kotlin.math.log
 
 data class SetupUIState(
     val isLoggedIn: Boolean = false
@@ -51,7 +54,9 @@ class SetupPageViewModel @Inject constructor() :
         MutableStateFlow(CurrentState.Idle)
     val loginState: StateFlow<CurrentState> =
         _loginState.stateInScope(CurrentState.Idle)
-
+    val eligibility: StateFlow<Boolean> = _loginState.map { login ->
+        login == CurrentState.Success
+    }.flowOnIO().stateInScope(false)
     override suspend fun onEvent(state: SetupUIState, intent: SetupUIIntent) {
         when (intent) {
             is ValidateNotifications -> {

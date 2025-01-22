@@ -42,6 +42,7 @@ fun PermissionsPage() {
     val context = LocalContext.current
     val notificationState = viewModel.notificationState.collectAsStateWithLifecycle()
     val loginState = viewModel.loginState.collectAsStateWithLifecycle()
+    val eligibility = viewModel.eligibility.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     SetOnResume {
         viewModel.emitIntentOnIO(SetupUIIntent.OnResume(context))
@@ -64,7 +65,7 @@ fun PermissionsPage() {
                 }
             }
             Button(
-                enabled = notificationState.value == CurrentState.Success,
+                enabled = eligibility.value,
                 onClick = {
                     viewModel.launchOnIO {
                         viewModel.emitIntent(SetupUIIntent.StartApplication(context))
