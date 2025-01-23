@@ -1,5 +1,6 @@
 package killua.dev.twitterdownloader.ui
 
+import android.content.Context
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -19,6 +20,7 @@ import killua.dev.twitterdownloader.api.TwitterApiService
 import killua.dev.twitterdownloader.download.DownloadManager
 import killua.dev.twitterdownloader.download.VideoDownloadWorker
 import killua.dev.twitterdownloader.repository.DownloadRepository
+import killua.dev.twitterdownloader.utils.NavigateTwitterProfile
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -34,11 +36,13 @@ data class DownloadUIState(
     val youHaveDownloadedSth: Boolean = false,
     val favouriteUserName: String = "",
     val favouriteUserScreenName: String = "",
+    val favouriteUserID: String = "",
     val downloadedTimes: Int = 0
 ) : UIState
 
 sealed class MainPageUIIntent : UIIntent {
     data class ExecuteDownload(val twitterID: String) : MainPageUIIntent()
+    data class NavigateToFavouriteUser(val context: Context, val userID: String, val screenName: String) : MainPageUIIntent()
 }
 
 @HiltViewModel
@@ -61,6 +65,7 @@ class MainPageViewmodel @Inject constructor(
         if (mostDownloaded != null){
             emitState(uiState.value.copy(
                 youHaveDownloadedSth = true,
+                favouriteUserID = mostDownloaded.twitterUserId!!,
                 favouriteUserName = mostDownloaded.twitterName!!,
                 favouriteUserScreenName = mostDownloaded.twitterScreenName!!,
                 downloadedTimes = mostDownloaded.totalDownloads
@@ -73,6 +78,12 @@ class MainPageViewmodel @Inject constructor(
             is MainPageUIIntent.ExecuteDownload -> {
                 mutex.withLock {
                     handleNewDownload(intent.twitterID)
+                }
+            }
+
+            is MainPageUIIntent.NavigateToFavouriteUser -> {
+                withMainContext {
+                    intent.context.NavigateTwitterProfile(intent.userID,intent.screenName)
                 }
             }
         }

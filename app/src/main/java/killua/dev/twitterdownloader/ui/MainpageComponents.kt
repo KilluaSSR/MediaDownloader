@@ -154,10 +154,9 @@ fun FavouriteCard(
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
-        }
-    ) {
-        onClick
-    }
+        },
+        onClick = onClick
+    )
 }
 
 @Composable

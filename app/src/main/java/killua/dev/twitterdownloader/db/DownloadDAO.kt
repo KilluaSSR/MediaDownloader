@@ -75,11 +75,12 @@ interface DownloadDao {
         twitter_name AS twitterName,
         COUNT(*) AS totalDownloads
     FROM Download
+    WHERE status = :status
     GROUP BY twitter_user_id
     ORDER BY totalDownloads DESC
     LIMIT 1
 """)
-    suspend fun getMostDownloadedUser(): MostDownloadedUser?
+    suspend fun getMostDownloadedUser(status: DownloadStatus = DownloadStatus.COMPLETED): MostDownloadedUser?
 
     @OptIn(ExperimentalUuidApi::class)
     @Query("UPDATE Download SET status = :status, error_message = :errorMessage WHERE uuid = :uuid")

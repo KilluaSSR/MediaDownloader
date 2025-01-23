@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -24,6 +25,7 @@ import killua.dev.base.ui.components.paddingTop
 import killua.dev.base.ui.getRandomColors
 import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.base.utils.navigateSingle
+import killua.dev.setup.SetupRoutes
 import killua.dev.twitterdownloader.MainPageButtons
 import killua.dev.twitterdownloader.MainRoutes
 import killua.dev.twitterdownloader.ui.FavouriteCard
@@ -32,6 +34,8 @@ import killua.dev.twitterdownloader.ui.MainPageTopBar
 import killua.dev.twitterdownloader.ui.MainPageUIIntent
 import killua.dev.twitterdownloader.ui.MainPageViewmodel
 import killua.dev.twitterdownloader.ui.MainScaffold
+import killua.dev.twitterdownloader.utils.NavigateTwitterProfile
+import killua.dev.twitterdownloader.utils.isTwitterInstalled
 
 @ExperimentalFoundationApi
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -44,6 +48,7 @@ fun MainPage(
     val viewmodel : MainPageViewmodel = hiltViewModel()
     var showDialog by remember { mutableStateOf(false) }
     val uiState = viewmodel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     MainScaffold(
         topBar = {
             MainPageTopBar(navController)
@@ -74,7 +79,11 @@ fun MainPage(
         ) {
             Section(title = "Overview") {
                 if(uiState.value.youHaveDownloadedSth){
-                    FavouriteCard(uiState.value.favouriteUserName, uiState.value.favouriteUserScreenName, uiState.value.downloadedTimes,true) {}
+                    FavouriteCard(uiState.value.favouriteUserName, uiState.value.favouriteUserScreenName, uiState.value.downloadedTimes,true){
+                        viewmodel.launchOnIO {
+                            viewmodel.emitIntent(MainPageUIIntent.NavigateToFavouriteUser(context,uiState.value.favouriteUserID,uiState.value.favouriteUserScreenName))
+                        }
+                    }
                 }else{
                     FavouriteCard("", "", 0,false) {}
                 }
