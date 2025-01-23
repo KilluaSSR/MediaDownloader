@@ -6,7 +6,7 @@ import api.Model.RootDto
 import api.Model.extractTwitterUser
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import killua.dev.base.datastore.ApplicationUserData
+import killua.dev.base.datastore.ApplicationUserDataTwitter
 import killua.dev.twitterdownloader.api.Constants.GetTweetDetailFeatures
 import killua.dev.twitterdownloader.api.Constants.TwitterAPIURL
 import killua.dev.twitterdownloader.api.Model.TweetData
@@ -94,7 +94,7 @@ class TwitterApiService @Inject constructor(
         return "$baseUrl?$query"
     }
 
-    fun buildClient(userData: ApplicationUserData): OkHttpClient {
+    fun buildClient(userData: ApplicationUserDataTwitter): OkHttpClient {
         val cookieManager = CookieManager().apply {
             val ct0Cookie = HttpCookie("ct0", userData.ct0).apply { domain = "x.com" }
             val authCookie =

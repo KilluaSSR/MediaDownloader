@@ -1,10 +1,9 @@
-package killua.dev.twitterdownloader.utils
+package killua.dev.base.utils
 
 import android.content.Context
 import android.os.StatFs
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
-import javax.inject.Singleton
 
 
 class StorageManager @Inject constructor(

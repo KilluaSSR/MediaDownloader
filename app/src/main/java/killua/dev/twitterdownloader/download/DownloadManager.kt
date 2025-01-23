@@ -12,13 +12,12 @@ import androidx.work.WorkManager
 import androidx.work.workDataOf
 import dagger.hilt.android.qualifiers.ApplicationContext
 import db.Download
-import db.DownloadStatus
+import killua.dev.base.utils.StorageManager
 import killua.dev.twitterdownloader.download.VideoDownloadWorker.Companion.FILE_SIZE
 import killua.dev.twitterdownloader.download.VideoDownloadWorker.Companion.FILE_URI
 import killua.dev.twitterdownloader.download.VideoDownloadWorker.Companion.KEY_ERROR_MESSAGE
 import killua.dev.twitterdownloader.repository.DownloadRepository
 import killua.dev.twitterdownloader.utils.NetworkManager
-import killua.dev.twitterdownloader.utils.StorageManager
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -28,7 +27,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-import javax.inject.Singleton
 
 class DownloadManager @Inject constructor(
     @ApplicationContext private val context: Context,

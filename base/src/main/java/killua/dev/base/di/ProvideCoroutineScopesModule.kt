@@ -1,4 +1,4 @@
-package killua.dev.twitterdownloader.di
+package killua.dev.base.di
 
 import dagger.Module
 import dagger.Provides

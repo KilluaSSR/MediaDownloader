@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">TwitterDownloader</string>
-    <string name="title_activity_splash">SplashActivity</string>
+    <string name="title_activity_splash">TwitterDownloader</string>
 </resources>

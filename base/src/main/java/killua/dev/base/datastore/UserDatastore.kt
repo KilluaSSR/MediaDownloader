@@ -16,7 +16,7 @@ private fun PackageManager.getPackageInfoCompat(packageName: String, flags: Int 
     }
 
 
-val Context.dataStore: androidx.datastore.core.DataStore<androidx.datastore.preferences.core.Preferences> by androidx.datastore.preferences.preferencesDataStore(
+val Context.dataStore: androidx.datastore.core.DataStore<androidx.datastore.preferences.core.Preferences> by preferencesDataStore(
     name = "DataStore"
 )
 internal fun Context.readStoreString(key: androidx.datastore.preferences.core.Preferences.Key<String>, defValue: String) = dataStore.data.map { preferences -> preferences[key] ?: defValue }

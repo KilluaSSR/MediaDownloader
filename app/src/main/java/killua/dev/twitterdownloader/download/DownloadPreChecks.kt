@@ -8,7 +8,6 @@ import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
 import java.net.URL
 import javax.inject.Inject
-import javax.inject.Singleton
 
 
 class DownloadPreChecks @Inject constructor(

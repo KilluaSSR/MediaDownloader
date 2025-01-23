@@ -5,7 +5,6 @@ import db.Download
 import db.DownloadDao
 import db.DownloadStatus
 import javax.inject.Inject
-import javax.inject.Singleton
 
 
 class DownloadRepository @Inject constructor(

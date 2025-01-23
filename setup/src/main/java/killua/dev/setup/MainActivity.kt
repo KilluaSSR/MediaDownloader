@@ -19,7 +19,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val context = this
+        this
         setContent {
             TwitterDownloaderTheme {
                 val navController = rememberNavController()

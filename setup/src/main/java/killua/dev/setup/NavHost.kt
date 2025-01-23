@@ -22,6 +22,5 @@ fun Setup() {
         composable(SetupRoutes.BrowserPage.route){
             BrowserPage()
         }
-
     }
 }

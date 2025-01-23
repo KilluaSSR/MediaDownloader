@@ -17,8 +17,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Divider
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Slider
@@ -36,6 +36,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import killua.dev.base.datastore.readStoreBoolean
+import killua.dev.base.datastore.saveStoreBoolean
 import killua.dev.base.ui.animations.AnimatedTextContainer
 import killua.dev.base.ui.components.TitleLargeText
 import killua.dev.base.ui.components.TitleSmallText
@@ -45,8 +47,6 @@ import killua.dev.base.ui.components.paddingTop
 import killua.dev.base.ui.components.paddingVertical
 import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.base.utils.withState
-import killua.dev.base.datastore.readStoreBoolean
-import killua.dev.base.datastore.saveStoreBoolean
 import kotlinx.coroutines.launch
 
 @Composable
@@ -354,7 +354,7 @@ fun Switchable(
             )
         },
         trailingContent = {
-            Divider(
+            HorizontalDivider(
                 modifier = Modifier
                     .height(SizeTokens.Level36)
                     .width(SizeTokens.Level1)

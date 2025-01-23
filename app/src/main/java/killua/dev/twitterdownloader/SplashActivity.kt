@@ -5,14 +5,11 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import dagger.hilt.android.AndroidEntryPoint
-import killua.dev.base.ActivityUtil
 import killua.dev.base.datastore.readApplicationUserAuth
 import killua.dev.base.datastore.readApplicationUserCt0
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
@@ -31,7 +28,7 @@ class SplashActivity : ComponentActivity() {
             auth = this@SplashActivity.readApplicationUserAuth().first()
         }
         if(ct0.isNotBlank() && auth.isNotBlank()){
-            startActivity(Intent(this,killua.dev.twitterdownloader.MainActivity::class.java))
+            startActivity(Intent(this, MainActivity::class.java))
         }else{
             startActivity(Intent(this,killua.dev.setup.MainActivity::class.java))
         }

@@ -1,4 +1,4 @@
-package killua.dev.twitterdownloader.di
+package killua.dev.base.di
 
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -12,7 +12,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers.IO
 import javax.inject.Singleton
 
 @Module

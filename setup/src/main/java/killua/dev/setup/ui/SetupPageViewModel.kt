@@ -5,15 +5,14 @@ import android.content.Intent
 import android.webkit.CookieManager
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import killua.dev.base.ActivityUtil
 import killua.dev.base.CurrentState
 import killua.dev.base.datastore.readApplicationUserAuth
 import killua.dev.base.datastore.readApplicationUserCt0
-import killua.dev.base.datastore.readApplicationUserScreenName
 import killua.dev.base.datastore.writeApplicationUserAuth
 import killua.dev.base.datastore.writeApplicationUserCt0
 import killua.dev.base.ui.BaseViewModel
 import killua.dev.base.ui.SnackbarUIEffect
+import killua.dev.base.utils.ActivityUtil
 import killua.dev.base.utils.NotificationUtils
 import killua.dev.base.utils.getActivity
 import killua.dev.setup.ui.SetupUIIntent.ValidateNotifications
@@ -21,7 +20,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
@@ -29,7 +27,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
-import kotlin.math.log
 
 data class SetupUIState(
     val isLoggedIn: Boolean = false

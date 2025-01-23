@@ -16,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import killua.dev.base.ui.SnackbarUIEffect
 import killua.dev.base.ui.components.ActionsBotton
@@ -25,7 +24,6 @@ import killua.dev.base.ui.components.paddingTop
 import killua.dev.base.ui.getRandomColors
 import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.base.utils.navigateSingle
-import killua.dev.setup.SetupRoutes
 import killua.dev.twitterdownloader.MainPageButtons
 import killua.dev.twitterdownloader.MainRoutes
 import killua.dev.twitterdownloader.ui.FavouriteCard
@@ -34,8 +32,6 @@ import killua.dev.twitterdownloader.ui.MainPageTopBar
 import killua.dev.twitterdownloader.ui.MainPageUIIntent
 import killua.dev.twitterdownloader.ui.MainPageViewmodel
 import killua.dev.twitterdownloader.ui.MainScaffold
-import killua.dev.twitterdownloader.utils.NavigateTwitterProfile
-import killua.dev.twitterdownloader.utils.isTwitterInstalled
 
 @ExperimentalFoundationApi
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)

@@ -1,26 +1,26 @@
 package killua.dev.base.datastore
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 
 // ApplicationUserdata keys
 val APPLICATION_USER_SCREENNAME_KEY =
-    androidx.datastore.preferences.core.stringPreferencesKey("app_user_screenname")
+    stringPreferencesKey("app_user_screenname")
 val APPLICATION_USER_NAME_KEY =
-    androidx.datastore.preferences.core.stringPreferencesKey("app_user_name")
+    stringPreferencesKey("app_user_name")
 val APPLICATION_USER_USERCT0_KEY =
-    androidx.datastore.preferences.core.stringPreferencesKey("app_user_userct0")
+    stringPreferencesKey("app_user_userct0")
 val APPLICATION_USER_USERAUTH_KEY =
-    androidx.datastore.preferences.core.stringPreferencesKey("app_user_userauth")
+    stringPreferencesKey("app_user_userauth")
 
 // AppSettings keys
-val LANGUAGE_KEY = androidx.datastore.preferences.core.stringPreferencesKey("language")
+val LANGUAGE_KEY = stringPreferencesKey("language")
 val NOTIFICATION_ENABLED =
-    androidx.datastore.preferences.core.booleanPreferencesKey("notification_enabled")
-val DOWNLOAD_PATH = androidx.datastore.preferences.core.stringPreferencesKey("download_path")
+    booleanPreferencesKey("notification_enabled")
+val DOWNLOAD_PATH = stringPreferencesKey("download_path")
 val MAX_CONCURRENT_DOWNLOADS =
-    androidx.datastore.preferences.core.intPreferencesKey("max_concurrent_downloads")
+    intPreferencesKey("max_concurrent_downloads")
 
 // Read
 fun Context.readApplicationUserScreenName() = readStoreString(key = APPLICATION_USER_SCREENNAME_KEY, defValue = "")

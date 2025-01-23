@@ -1,7 +1,6 @@
 package killua.dev.setup.ui.Pages
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.webkit.CookieManager
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -25,13 +24,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import killua.dev.base.datastore.writeApplicationUserAuth
 import killua.dev.base.datastore.writeApplicationUserCt0
 import killua.dev.base.ui.LocalNavController
 import killua.dev.base.utils.navigateSingle
-import killua.dev.setup.MainActivity
 import killua.dev.setup.SetupRoutes
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive

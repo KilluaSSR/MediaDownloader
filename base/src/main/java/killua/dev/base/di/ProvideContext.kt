@@ -1,4 +1,4 @@
-package killua.dev.twitterdownloader.di
+package killua.dev.base.di
 
 import android.content.Context
 import dagger.Module
