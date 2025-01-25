@@ -38,7 +38,6 @@ class DownloadedViewModel @Inject constructor(
 ) {
     private val mutex = Mutex()
     private val activeDownloads = mutableSetOf<String>()
-
     init {
         loadDownloads()
         observeAllDownloads()
