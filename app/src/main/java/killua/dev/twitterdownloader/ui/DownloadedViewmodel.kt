@@ -89,7 +89,7 @@ class DownloadedViewModel @Inject constructor(
                     isLoading = false
                 )
             )
-            emitEffect(SnackbarUIEffect.ShowSnackbar("加载失败：${e.message}"))
+            emitEffect(SnackbarUIEffect.ShowSnackbar("Error loading：${e.message}"))
         }
     }
 
@@ -136,7 +136,7 @@ class DownloadedViewModel @Inject constructor(
             }
 
             WorkInfo.State.FAILED -> {
-                val error = workInfo.outputData.getString("error") ?: "下载失败"
+                val error = workInfo.outputData.getString("error") ?: "Download failed"
                 downloadRepository.updateError(downloadId, errorMessage = error)
                 updateDownload(downloadId) {
                     it.copy(downloadState = DownloadState.Failed(error))
@@ -162,7 +162,7 @@ class DownloadedViewModel @Inject constructor(
         try {
             operation(downloadId)
         } catch (e: Exception) {
-            emitEffect(SnackbarUIEffect.ShowSnackbar("操作失败：${e.message}"))
+            emitEffect(SnackbarUIEffect.ShowSnackbar("Error：${e.message}"))
         }
     }
 
@@ -171,7 +171,7 @@ class DownloadedViewModel @Inject constructor(
             it.downloadState is DownloadState.Pending
         }
         if (pending.isEmpty()) {
-            handleError("没有待下载的任务")
+            handleError("No tasks waiting to download")
             return
         }
 
@@ -179,7 +179,7 @@ class DownloadedViewModel @Inject constructor(
             try {
                 resumeDownload(download.id)
             } catch (e: Exception) {
-                handleError("启动下载失败: ${download.id} - ${e.message}")
+                handleError("Error: ${download.id} - ${e.message}")
             }
         }
     }
@@ -189,7 +189,7 @@ class DownloadedViewModel @Inject constructor(
             it.downloadState is DownloadState.Downloading
         }
         if (active.isEmpty()) {
-            handleError("没有正在下载的任务")
+            handleError("Error")
             return
         }
 
@@ -197,7 +197,7 @@ class DownloadedViewModel @Inject constructor(
             try {
                 pauseDownload(download.id)
             } catch (e: Exception) {
-                handleError("暂停失败: ${download.id} - ${e.message}")
+                handleError("Error: ${download.id} - ${e.message}")
             }
         }
     }
@@ -207,7 +207,7 @@ class DownloadedViewModel @Inject constructor(
             it.downloadState !is DownloadState.Completed
         }
         if (downloads.isEmpty()) {
-            handleError("没有可取消的任务")
+            handleError("Error")
             return
         }
 
@@ -215,7 +215,7 @@ class DownloadedViewModel @Inject constructor(
             try {
                 cancelDownload(download.id)
             } catch (e: Exception) {
-                handleError("取消失败: ${download.id} - ${e.message}")
+                handleError("Error: ${download.id} - ${e.message}")
             }
         }
     }
@@ -224,7 +224,7 @@ class DownloadedViewModel @Inject constructor(
         downloadRepository.getById(downloadId)?.let { download ->
             when {
                 download.status == DownloadStatus.COMPLETED -> {
-                    emitEffect(SnackbarUIEffect.ShowSnackbar("该下载已完成"))
+                    emitEffect(SnackbarUIEffect.ShowSnackbar("Completed"))
                 }
 
                 else -> {
@@ -267,7 +267,7 @@ class DownloadedViewModel @Inject constructor(
             download.fileUri?.path?.let { path ->
                 val file = File(path)
                 if (file.exists() && !file.delete()) {
-                    emitEffect(SnackbarUIEffect.ShowSnackbar("文件删除失败"))
+                    emitEffect(SnackbarUIEffect.ShowSnackbar("Failed to delete the file"))
                     return
                 }
             }
