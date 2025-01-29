@@ -1,12 +1,10 @@
 package killua.dev.twitterdownloader.di
 
-import android.content.Context
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import killua.dev.twitterdownloader.DownloadEventManager
+import killua.dev.twitterdownloader.utils.DownloadEventManager
 import javax.inject.Singleton
 
 @Module
@@ -14,5 +12,5 @@ import javax.inject.Singleton
 object ProvideDownloadEventManager{
     @Provides
     @Singleton
-    fun provideDownloadEventManager(@ApplicationContext context: Context): DownloadEventManager = DownloadEventManager(context)
+    fun provideDownloadEventManager(): DownloadEventManager = DownloadEventManager()
 }

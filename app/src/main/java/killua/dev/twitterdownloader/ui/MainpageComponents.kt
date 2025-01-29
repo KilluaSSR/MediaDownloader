@@ -1,5 +1,8 @@
 package killua.dev.twitterdownloader.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -106,20 +109,37 @@ fun FavouriteCard(
         colorContainer = MaterialTheme.colorScheme.primaryContainer,
         onColorContainer = MaterialTheme.colorScheme.onPrimaryContainer,
         content = {
-            if(downloaded){
-                TitleLargeText(
-                    text = "$favouriteUser @$favouriteUserScreenName",
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-                BodyMediumText(
-                    text = "You've downloaded his/her video $downloadCount times",
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }else{
-                TitleLargeText(
-                    text = "Nothing here",
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+            Column {
+                AnimatedVisibility(
+                    visible = downloaded,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    TitleLargeText(
+                        text = "$favouriteUser @$favouriteUserScreenName",
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+                AnimatedVisibility(
+                    visible = downloaded,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    BodyMediumText(
+                        text = "You've downloaded his/her video $downloadCount times",
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+                AnimatedVisibility(
+                    visible = !downloaded,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    TitleLargeText(
+                        text = "Nothing here",
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
             }
         },
         onClick = onClick

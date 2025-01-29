@@ -1,13 +1,8 @@
 package killua.dev.twitterdownloader.download
 
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
-import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.OnLifecycleEvent
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.ExistingWorkPolicy
@@ -19,22 +14,18 @@ import androidx.work.workDataOf
 import dagger.hilt.android.qualifiers.ApplicationContext
 import db.Download
 import killua.dev.base.utils.StorageManager
-import killua.dev.twitterdownloader.DOWNLOAD_COMPLETED_ACTION
 import killua.dev.twitterdownloader.download.VideoDownloadWorker.Companion.FILE_SIZE
 import killua.dev.twitterdownloader.download.VideoDownloadWorker.Companion.FILE_URI
 import killua.dev.twitterdownloader.download.VideoDownloadWorker.Companion.KEY_ERROR_MESSAGE
 import killua.dev.twitterdownloader.repository.DownloadRepository
+import killua.dev.twitterdownloader.utils.DownloadEventManager
 import killua.dev.twitterdownloader.utils.NetworkManager
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -45,7 +36,8 @@ class DownloadManager @Inject constructor(
     private val queueManager: DownloadQueueManager,
     private val storageManager: StorageManager,
     private val networkManager: NetworkManager,
-    private val downloadRepository: DownloadRepository
+    private val downloadRepository: DownloadRepository,
+    private val downloadEventManager: DownloadEventManager
 ) {
     private val BACKOFF_DELAY = 5_000L
     init {
@@ -96,8 +88,7 @@ class DownloadManager @Inject constructor(
                         val fileSize = workInfo.outputData.getLong(FILE_SIZE, 0L)
                         downloadRepository.updateCompleted(downloadId, fileUri!!.toUri(), fileSize)
                         queueManager.markComplete(downloadId)
-                        val intent = Intent(DOWNLOAD_COMPLETED_ACTION)
-                        context.sendBroadcast(intent)
+                        downloadEventManager.notifyDownloadCompleted()
                     }
                     WorkInfo.State.RUNNING -> {
                         val downloadId = workInfo.progress.getString(VideoDownloadWorker.KEY_DOWNLOAD_ID) ?: return@forEach

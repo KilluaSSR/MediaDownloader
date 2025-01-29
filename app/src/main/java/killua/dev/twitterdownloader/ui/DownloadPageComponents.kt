@@ -81,7 +81,7 @@ fun DownloadItemCard(
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = SizeTokens.Level16, vertical = SizeTokens.Level1)
             .clickable(enabled = status == DownloadStatus.COMPLETED) {
                 item.fileUri?.let { uri ->
                     val openIntent = Intent(Intent.ACTION_VIEW).apply {
@@ -91,8 +91,8 @@ fun DownloadItemCard(
                     context.startActivity(openIntent)
                 }
             },
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp)
+        shape = RoundedCornerShape(SizeTokens.Level12),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = SizeTokens.Level4)
     ) {
         Row(
             modifier = Modifier
@@ -106,19 +106,19 @@ fun DownloadItemCard(
                     painter = rememberAsyncImagePainter(item.fileUri),
                     contentDescription = "Downloaded Video Thumbnail",
                     modifier = Modifier
-                        .size(72.dp)
-                        .clip(RoundedCornerShape(8.dp)),
+                        .size(SizeTokens.Level72)
+                        .clip(RoundedCornerShape(SizeTokens.Level8)),
                     contentScale = ContentScale.Crop
                 )
             } else {
                 Box(
                     modifier = Modifier
-                        .size(72.dp)
-                        .background(Color.Gray.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
+                        .size(SizeTokens.Level72)
+                        .background(Color.Gray.copy(alpha = 0.2f), RoundedCornerShape(SizeTokens.Level8))
                 )
             }
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(SizeTokens.Level12))
 
             // 中间内容
             Column(modifier = Modifier.weight(1f)) {
@@ -140,7 +140,7 @@ fun DownloadItemCard(
                 // 状态显示
                 when (status) {
                     DownloadStatus.DOWNLOADING -> {
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(SizeTokens.Level8))
                         LinearProgressIndicator(
                             progress = { item.progress / 100f },
                             modifier = Modifier.fillMaxWidth(),
@@ -154,7 +154,7 @@ fun DownloadItemCard(
                         )
                     }
                     DownloadStatus.COMPLETED -> {
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(SizeTokens.Level4))
                         Text(
                             text = "完成时间: ${formatTimestamp(item.completedAt)}",
                             style = MaterialTheme.typography.bodySmall,
@@ -162,7 +162,7 @@ fun DownloadItemCard(
                         )
                     }
                     DownloadStatus.FAILED -> {
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(SizeTokens.Level4))
                         Text(
                             text = "下载失败",
                             style = MaterialTheme.typography.bodySmall,color = MaterialTheme.colorScheme.error
@@ -172,12 +172,12 @@ fun DownloadItemCard(
                 }
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(SizeTokens.Level8))
 
             // 右侧操作按钮
             Row(
                 modifier = Modifier.align(Alignment.CenterVertically),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(SizeTokens.Level8)
             ) {
                 when (status) {
                     DownloadStatus.DOWNLOADING -> {

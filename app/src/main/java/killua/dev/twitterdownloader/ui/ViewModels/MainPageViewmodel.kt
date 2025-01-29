@@ -11,15 +11,13 @@ import killua.dev.base.ui.BaseViewModel
 import killua.dev.base.ui.SnackbarUIEffect
 import killua.dev.base.ui.UIIntent
 import killua.dev.base.ui.UIState
-import killua.dev.twitterdownloader.DownloadEventManager
 import killua.dev.twitterdownloader.api.Model.TwitterRequestResult
 import killua.dev.twitterdownloader.api.Model.TwitterUser
 import killua.dev.twitterdownloader.api.TwitterApiService
 import killua.dev.twitterdownloader.download.DownloadManager
 import killua.dev.twitterdownloader.repository.DownloadRepository
+import killua.dev.twitterdownloader.utils.DownloadEventManager
 import killua.dev.twitterdownloader.utils.NavigateTwitterProfile
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -61,7 +59,7 @@ class MainPageViewmodel @Inject constructor(
 
     private fun observeDownloadCompleted() {
         viewModelScope.launch {
-            downloadEventManager.downloadCompletedFlow.collect {
+            downloadEventManager.downloadCompletedFlow.collect{
                 presentFavouriteCardDetails()
             }
         }
