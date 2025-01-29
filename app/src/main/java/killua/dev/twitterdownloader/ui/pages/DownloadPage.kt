@@ -4,9 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -16,17 +14,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.NotInterested
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -50,9 +43,9 @@ import killua.dev.twitterdownloader.ui.Destinations.Download.DownloadPageDestina
 import killua.dev.twitterdownloader.ui.DownloadItemCard
 import killua.dev.twitterdownloader.ui.DownloadPageCommands
 import killua.dev.twitterdownloader.ui.DownloadPageTopAppBar
-import killua.dev.twitterdownloader.ui.ViewModels.DownloadedPageUIIntent
-import killua.dev.twitterdownloader.ui.ViewModels.DownloadedViewModel
 import killua.dev.twitterdownloader.ui.MainScaffold
+import killua.dev.twitterdownloader.ui.ViewModels.DownloadPageUIIntent
+import killua.dev.twitterdownloader.ui.ViewModels.DownloadedViewModel
 
 @SuppressLint("UnusedContentLambdaTargetStateParameter")
 @OptIn(ExperimentalAnimationApi::class)
@@ -68,15 +61,8 @@ fun DownloadPage() {
         snackbarHostState = viewModel.snackbarHostState
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            if (uiState.value.isLoading) {
-                LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
             var enabled by remember { mutableStateOf(true) }
             val options = remember { DownloadPageDestinations.entries }
-
             SingleChoiceSegmentedButtonRow(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -94,17 +80,17 @@ fun DownloadPage() {
                                     optionsType = when (index) {
                                         0 -> DownloadPageDestinations.All
                                         1 -> DownloadPageDestinations.Downloading
-                                        2 -> DownloadPageDestinations.Downloaded
+                                        2 -> DownloadPageDestinations.Completed
                                         3 -> DownloadPageDestinations.Failed
                                         else -> throw IllegalArgumentException("Invalid index: $index")
                                     }
                                 ))
                                 viewModel.emitIntent(
                                     when (index) {
-                                        0 -> DownloadedPageUIIntent.NavigateToAll
-                                        1 -> DownloadedPageUIIntent.NavigateToDownloading
-                                        2 -> DownloadedPageUIIntent.NavigateToDownloaded
-                                        3 -> DownloadedPageUIIntent.NavigateToFailed
+                                        0 -> DownloadPageUIIntent.FilterDownloads(DownloadPageDestinations.All)
+                                        1 -> DownloadPageUIIntent.FilterDownloads(DownloadPageDestinations.Downloading)
+                                        2 -> DownloadPageUIIntent.FilterDownloads(DownloadPageDestinations.Completed)
+                                        3 -> DownloadPageUIIntent.FilterDownloads(DownloadPageDestinations.Failed)
                                         else -> throw IllegalArgumentException("Invalid index: $index")
                                     }
                                 )
@@ -121,8 +107,6 @@ fun DownloadPage() {
                     }
                 }
             }
-
-
             AnimatedContent(
                 targetState = uiState.value.optionsType,
                 transitionSpec = {
@@ -185,28 +169,28 @@ fun DownloadPage() {
                                         DownloadPageCommands.Retry -> {
                                             viewModel.launchOnIO {
                                                 viewModel.emitIntent(
-                                                    DownloadedPageUIIntent.ResumeDownload(item.id)
+                                                    DownloadPageUIIntent.ResumeDownload(item.id)
                                                 )
                                             }
                                         }
                                         DownloadPageCommands.Pause -> {
                                             viewModel.launchOnIO {
                                                 viewModel.emitIntent(
-                                                    DownloadedPageUIIntent.PauseDownload(item.id)
+                                                    DownloadPageUIIntent.PauseDownload(item.id)
                                                 )
                                             }
                                         }
                                         DownloadPageCommands.Cancel -> {
                                             viewModel.launchOnIO {
                                                 viewModel.emitIntent(
-                                                    DownloadedPageUIIntent.CancelDownload(item.id)
+                                                    DownloadPageUIIntent.CancelDownload(item.id)
                                                 )
                                             }
                                         }
                                         DownloadPageCommands.Delete -> {
                                             viewModel.launchOnIO {
                                                 viewModel.emitIntent(
-                                                    DownloadedPageUIIntent.DeleteDownload(item.id)
+                                                    DownloadPageUIIntent.CancelDownload(item.id)
                                                 )
                                             }
                                         }

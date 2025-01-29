@@ -4,34 +4,54 @@ import android.net.Uri
 import db.Download
 import db.DownloadDao
 import db.DownloadStatus
+import killua.dev.twitterdownloader.Model.MostDownloadedUser
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 
 class DownloadRepository @Inject constructor(
     private val downloadDao: DownloadDao
 ) {
+
+    // ✅ 监听所有下载项（UI 自动更新）
+    fun observeAllDownloads(): Flow<List<Download>> = downloadDao.observeAllDownloads()
+
+    // ✅ 获取所有下载项（一次性获取）
+    suspend fun getAllDownloads(): List<Download> = downloadDao.getAll()
+
+    // ✅ 通过 UUID 获取下载项
+    suspend fun getById(uuid: String): Download? = downloadDao.getById(uuid)
+
+    // ✅ 插入下载项
     suspend fun insert(download: Download) = downloadDao.insert(download)
-    suspend fun getById(uuid: String) = downloadDao.getById(uuid)
+
+    // ✅ 删除下载项
     suspend fun delete(download: Download) = downloadDao.delete(download)
-    suspend fun getByUserID(userID: String) = downloadDao.getByUserID(userID)
-    suspend fun updateCompleted(
-        uuid: String,
-        fileUri: Uri,
-        fileSize: Long
-    ) = downloadDao.updateCompleted(
-        uuid = uuid,
-        status = DownloadStatus.COMPLETED,
-        fileUri = fileUri,
-        fileSize = fileSize,
-        completedAt = System.currentTimeMillis()
-    )
 
-    suspend fun getAllDownloads() = downloadDao.getAllByDateDesc()
+    // ✅ 通过 Twitter 用户 ID 查询下载记录
+    suspend fun getByUserID(userID: String): List<Download> = downloadDao.getByUserID(userID)
 
-    suspend fun getMostDownloadedUser() = downloadDao.getMostDownloadedUser()
+    // ✅ 获取状态为 "DOWNLOADING" 的任务
+    suspend fun getDownloadingItems(): List<Download> = downloadDao.getDownloading()
 
-    suspend fun getDownloadingItems() = downloadDao.getDownloading()
+    // ✅ 获取下载次数最多的 Twitter 用户
+    suspend fun getMostDownloadedUser(): MostDownloadedUser? = downloadDao.getMostDownloadedUser()
 
+    // ✅ 获取所有 Pending 状态的下载项（等待下载）
+    suspend fun getPendingDownloads(): List<Download> = downloadDao.getByStatus(DownloadStatus.PENDING)
+
+    suspend fun getByStatus(status: DownloadStatus): List<Download> = downloadDao.getByStatus(status)
+
+    suspend fun deleteById(uuid: String) = downloadDao.deleteById(uuid)
+
+    suspend fun getActiveDownloads() = downloadDao.getActiveDownloads()
+
+    // ✅ 更新下载状态
+    suspend fun updateStatus(uuid: String, status: DownloadStatus) {
+        downloadDao.updateProgress(uuid, status, progress = 0)
+    }
+
+    // ✅ 更新下载进度
     suspend fun updateDownloadProgress(uuid: String, progress: Int) {
         downloadDao.updateProgress(
             uuid = uuid,
@@ -40,9 +60,23 @@ class DownloadRepository @Inject constructor(
         )
     }
 
-    suspend fun updateError(
+    // ✅ 下载完成时更新
+    suspend fun updateCompleted(
         uuid: String,
-        status: DownloadStatus = DownloadStatus.FAILED,
-        errorMessage: String?
-    ) = downloadDao.updateError(uuid, status, errorMessage)
+        fileUri: Uri,
+        fileSize: Long
+    ) {
+        downloadDao.updateCompleted(
+            uuid = uuid,
+            status = DownloadStatus.COMPLETED,
+            fileUri = fileUri,
+            fileSize = fileSize,
+            completedAt = System.currentTimeMillis()
+        )
+    }
+
+    // ✅ 记录下载失败信息
+    suspend fun updateError(uuid: String, errorMessage: String?) {
+        downloadDao.updateError(uuid, status = DownloadStatus.FAILED, errorMessage = errorMessage)
+    }
 }

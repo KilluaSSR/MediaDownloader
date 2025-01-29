@@ -11,6 +11,7 @@ import killua.dev.base.ui.BaseViewModel
 import killua.dev.base.ui.SnackbarUIEffect
 import killua.dev.base.ui.UIIntent
 import killua.dev.base.ui.UIState
+import killua.dev.twitterdownloader.DownloadEventManager
 import killua.dev.twitterdownloader.api.Model.TwitterRequestResult
 import killua.dev.twitterdownloader.api.Model.TwitterUser
 import killua.dev.twitterdownloader.api.TwitterApiService
@@ -46,6 +47,7 @@ class MainPageViewmodel @Inject constructor(
     private val twitterApiService: TwitterApiService,
     private val downloadRepository: DownloadRepository,
     private val downloadManager: DownloadManager,
+    private val downloadEventManager: DownloadEventManager
 ) : BaseViewModel<MainPageUIIntent, MainPageUIState, SnackbarUIEffect>(
     MainPageUIState()
 ) {
@@ -53,9 +55,17 @@ class MainPageViewmodel @Inject constructor(
     init {
         viewModelScope.launch{
             presentFavouriteCardDetails()
+            observeDownloadCompleted()
         }
     }
 
+    private fun observeDownloadCompleted() {
+        viewModelScope.launch {
+            downloadEventManager.downloadCompletedFlow.collect {
+                presentFavouriteCardDetails()
+            }
+        }
+    }
     suspend fun presentFavouriteCardDetails(){
         val mostDownloaded = downloadRepository.getMostDownloadedUser()
         if (mostDownloaded != null){
@@ -109,8 +119,6 @@ class MainPageViewmodel @Inject constructor(
                         e.message ?: "Internal Error"
                     )
                 )
-            }finally {
-                presentFavouriteCardDetails()
             }
         }
 

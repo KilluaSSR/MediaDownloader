@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
+import db.Download
 import db.DownloadState
 import db.DownloadStatus
 import killua.dev.base.ui.BaseViewModel
@@ -15,25 +16,41 @@ import killua.dev.twitterdownloader.download.DownloadManager
 import killua.dev.twitterdownloader.download.VideoDownloadWorker
 import killua.dev.twitterdownloader.repository.DownloadRepository
 import killua.dev.twitterdownloader.ui.Destinations.Download.DownloadPageDestinations
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.io.File
 import javax.inject.Inject
 
-sealed class DownloadedPageUIIntent : UIIntent {
-    data class ResumeDownload(val downloadId: String) : DownloadedPageUIIntent()
-    data class PauseDownload(val downloadId: String) : DownloadedPageUIIntent()
-    data class CancelDownload(val downloadId: String) : DownloadedPageUIIntent()
-    data class DeleteDownload(val downloadId: String) : DownloadedPageUIIntent()
-    object ResumeAll : DownloadedPageUIIntent()
-    object PauseAll : DownloadedPageUIIntent()
-    object CancelAll : DownloadedPageUIIntent()
-    object NavigateToAll: DownloadedPageUIIntent()
-    object NavigateToDownloading: DownloadedPageUIIntent()
-    object NavigateToDownloaded: DownloadedPageUIIntent()
-    object NavigateToFailed: DownloadedPageUIIntent()
+//sealed class DownloadedPageUIIntent : UIIntent {
+//    data class ResumeDownload(val downloadId: String) : DownloadedPageUIIntent()
+//    data class PauseDownload(val downloadId: String) : DownloadedPageUIIntent()
+//    data class CancelDownload(val downloadId: String) : DownloadedPageUIIntent()
+//    data class DeleteDownload(val downloadId: String) : DownloadedPageUIIntent()
+//    object ResumeAll : DownloadedPageUIIntent()
+//    object PauseAll : DownloadedPageUIIntent()
+//    object CancelAll : DownloadedPageUIIntent()
+//    object NavigateToAll: DownloadedPageUIIntent()
+//    object NavigateToDownloading: DownloadedPageUIIntent()
+//    object NavigateToDownloaded: DownloadedPageUIIntent()
+//    object NavigateToFailed: DownloadedPageUIIntent()
+//}
+
+
+sealed interface DownloadPageUIIntent : UIIntent {
+    object LoadDownloads : DownloadPageUIIntent
+
+    data class FilterDownloads(val filter: DownloadPageDestinations) : DownloadPageUIIntent
+
+    data class ResumeDownload(val downloadId: String) : DownloadPageUIIntent
+
+    data class PauseDownload(val downloadId: String) : DownloadPageUIIntent
+
+    data class CancelDownload(val downloadId: String) : DownloadPageUIIntent
 }
 
 data class DownloadPageUIState(
@@ -47,293 +64,206 @@ data class DownloadPageUIState(
 class DownloadedViewModel @Inject constructor(
     private val downloadRepository: DownloadRepository,
     private val downloadManager: DownloadManager
-) : BaseViewModel<DownloadedPageUIIntent, DownloadPageUIState, SnackbarUIEffect>(
+) : BaseViewModel<DownloadPageUIIntent, DownloadPageUIState, SnackbarUIEffect>(
     DownloadPageUIState(
         optionIndex = 0,
         isLoading = true,
         optionsType = DownloadPageDestinations.All
     )
 ) {
-    private val mutex = Mutex()
     private val activeDownloads = mutableSetOf<String>()
     init {
-        loadDownloads()
-        observeAllDownloads()
+    observeDownloadsFromDB()
+    observeWorkManager()
     }
-
-    override suspend fun onEvent(state: DownloadPageUIState, intent: DownloadedPageUIIntent) {
-        when (intent) {
-            is DownloadedPageUIIntent.CancelDownload -> mutex.withLock {
-                handleOperation(intent.downloadId) { cancelDownload(it) }
-            }
-
-            is DownloadedPageUIIntent.DeleteDownload -> mutex.withLock {
-                handleOperation(intent.downloadId) { deleteDownload(it) }
-            }
-
-            is DownloadedPageUIIntent.PauseDownload -> mutex.withLock {
-                handleOperation(intent.downloadId) { pauseDownload(it) }
-            }
-
-            is DownloadedPageUIIntent.ResumeDownload -> mutex.withLock {
-                handleOperation(intent.downloadId) { resumeDownload(it) }
-            }
-
-            is DownloadedPageUIIntent.ResumeAll -> mutex.withLock { handleResumeAll() }
-            is DownloadedPageUIIntent.PauseAll -> mutex.withLock { handlePauseAll() }
-            is DownloadedPageUIIntent.CancelAll -> mutex.withLock { handleCancelAll() }
-            is DownloadedPageUIIntent.NavigateToAll -> {loadDownloads()}
-            is DownloadedPageUIIntent.NavigateToDownloaded -> {loadDownloaded()}
-            is DownloadedPageUIIntent.NavigateToDownloading -> {loadDownloading()}
-            is DownloadedPageUIIntent.NavigateToFailed -> {loadError()}
-        }
-    }
-    private fun loadDownloadsWithFilter(
-        filter: ((DownloadItem) -> Boolean)? = null
-    ) = launchOnIO {
-        try {
-            emitState(uiState.value.copy(isLoading = true))
-            var downloads = downloadRepository.getAllDownloads()
-                .map { DownloadItem.fromDownload(it) }
-                .also { checkActiveDownloads(it) }
-
-            filter?.let { downloads = downloads.filter(it) }
-
-            emitState(uiState.value.copy(
-                isLoading = false,
-                downloads = downloads
-            ))
-        } catch (e: Exception) {
-            emitState(uiState.value.copy(isLoading = false))
-            emitEffect(SnackbarUIEffect.ShowSnackbar("Error loading：${e.message}"))
-        }
-    }
-
-    private fun loadError() = loadDownloadsWithFilter {
-        it.downloadState.toDownloadStatus() == DownloadStatus.FAILED
-    }
-
-    private fun loadDownloading() = loadDownloadsWithFilter {
-        it.downloadState.toDownloadStatus() == DownloadStatus.DOWNLOADING
-    }
-
-    private fun loadDownloaded() = loadDownloadsWithFilter {
-        it.downloadState.toDownloadStatus() == DownloadStatus.COMPLETED
-    }
-
-    private fun loadDownloads() = loadDownloadsWithFilter()
-    private fun checkActiveDownloads(downloads: List<DownloadItem>) {
-        downloads.forEach { download ->
-            if (download.downloadState is DownloadState.Downloading) {
-                if (downloadManager.isDownloadActive(download.id)) {
-                    activeDownloads.add(download.id)
+    private fun observeDownloadsFromDB() {
+        launchOnIO {
+            downloadRepository.observeAllDownloads()
+                .collect { downloads ->
+                    emitState(
+                        uiState.value.copy(
+                            downloads = downloads.map { DownloadItem.fromDownload(it) },
+                            isLoading = false
+                        )
+                    )
                 }
-            }
         }
     }
-
-
-    private fun observeAllDownloads() {
+    /**
+     * 监听 WorkManager 后台下载任务 状态变化
+     */
+    private fun observeWorkManager() {
         downloadManager.getWorkInfoFlow()
             .onEach { workInfos ->
                 workInfos.forEach { handleWorkInfoUpdate(it) }
             }
-            .flowOnIO()
+            .flowOn(Dispatchers.IO)
             .launchIn(viewModelScope)
     }
-
+    /**
+     * 处理 WorkManager 任务状态更新，并同步到数据库 + UI
+     */
     private suspend fun handleWorkInfoUpdate(workInfo: WorkInfo) {
         val downloadId = workInfo.progress.getString(VideoDownloadWorker.KEY_DOWNLOAD_ID) ?: return
 
         when (workInfo.state) {
             WorkInfo.State.RUNNING -> {
                 val progress = workInfo.progress.getInt(VideoDownloadWorker.PROGRESS, 0)
-                updateDownload(downloadId) {
-                    it.copy(downloadState = DownloadState.Downloading(progress))
-                }
+                updateDownloadProgress(downloadId, progress)
             }
 
             WorkInfo.State.SUCCEEDED -> {
                 val fileUri = workInfo.outputData.getString("file_uri")?.let { Uri.parse(it) }
                 val fileSize = workInfo.outputData.getLong("file_size", 0L)
                 if (fileUri != null) {
-                    downloadRepository.updateCompleted(downloadId, fileUri, fileSize)
-                    updateDownload(downloadId) {
-                        it.copy(downloadState = DownloadState.Completed(fileUri, fileSize))
-                    }
-                    activeDownloads.remove(downloadId)
+                    markDownloadCompleted(downloadId, fileUri, fileSize)
                 }
             }
 
             WorkInfo.State.FAILED -> {
                 val error = workInfo.outputData.getString("error") ?: "Download failed"
-                downloadRepository.updateError(downloadId, errorMessage = error)
-                updateDownload(downloadId) {
-                    it.copy(downloadState = DownloadState.Failed(error))
-                }
-                activeDownloads.remove(downloadId)
+                markDownloadFailed(downloadId, error)
             }
 
             WorkInfo.State.CANCELLED -> {
-                activeDownloads.remove(downloadId)
-                updateDownload(downloadId) {
-                    it.copy(downloadState = DownloadState.Pending)
-                }
+                markDownloadCancelled(downloadId)
             }
 
             else -> {}
         }
     }
-
-    private suspend inline fun handleOperation(
-        downloadId: String,
-        operation: (String) -> Unit
-    ) {
-        try {
-            operation(downloadId)
-        } catch (e: Exception) {
-            emitEffect(SnackbarUIEffect.ShowSnackbar("Error：${e.message}"))
-        }
+    /**
+     * 更新下载进度
+     */
+    private suspend fun updateDownloadProgress(downloadId: String, progress: Int) {
+        downloadRepository.updateDownloadProgress(downloadId, progress)
     }
 
-    private suspend fun handleResumeAll() {
-        val pending = uiState.value.downloads.filter {
-            it.downloadState is DownloadState.Pending
-        }
-        if (pending.isEmpty()) {
-            handleError("No tasks waiting to download")
-            return
-        }
+    /**
+     * 标记下载完成
+     */
+    private suspend fun markDownloadCompleted(downloadId: String, fileUri: Uri, fileSize: Long) {
+        downloadRepository.updateCompleted(downloadId, fileUri, fileSize)
+        activeDownloads.remove(downloadId)
+    }
 
-        pending.forEach { download ->
-            try {
-                resumeDownload(download.id)
-            } catch (e: Exception) {
-                handleError("Error: ${download.id} - ${e.message}")
+    /**
+     * 标记下载失败
+     */
+    private suspend fun markDownloadFailed(downloadId: String, errorMessage: String) {
+        downloadRepository.updateError(downloadId, errorMessage)
+        activeDownloads.remove(downloadId)
+    }
+
+    /**
+     * 标记任务取消
+     */
+    private suspend fun markDownloadCancelled(downloadId: String) {
+        downloadRepository.updateStatus(downloadId, DownloadStatus.PENDING)
+        activeDownloads.remove(downloadId)
+    }
+
+    override suspend fun onEvent(state: DownloadPageUIState, intent: DownloadPageUIIntent) {
+        when (intent) {
+            is DownloadPageUIIntent.LoadDownloads -> {
+                observeDownloadsFromDB()
             }
-        }
-    }
 
-    private suspend fun handlePauseAll() {
-        val active = uiState.value.downloads.filter {
-            it.downloadState is DownloadState.Downloading
-        }
-        if (active.isEmpty()) {
-            handleError("Error")
-            return
-        }
-
-        active.forEach { download ->
-            try {
-                pauseDownload(download.id)
-            } catch (e: Exception) {
-                handleError("Error: ${download.id} - ${e.message}")
-            }
-        }
-    }
-
-    private suspend fun handleCancelAll() {
-        val downloads = uiState.value.downloads.filter {
-            it.downloadState !is DownloadState.Completed
-        }
-        if (downloads.isEmpty()) {
-            handleError("Error")
-            return
-        }
-
-        downloads.forEach { download ->
-            try {
-                cancelDownload(download.id)
-            } catch (e: Exception) {
-                handleError("Error: ${download.id} - ${e.message}")
-            }
-        }
-    }
-
-    private suspend fun resumeDownload(downloadId: String) {
-        downloadRepository.getById(downloadId)?.let { download ->
-            when {
-                download.status == DownloadStatus.COMPLETED -> {
-                    emitEffect(SnackbarUIEffect.ShowSnackbar("Completed"))
-                }
-
-                else -> {
-                    downloadManager.enqueueDownload(download)
-                    activeDownloads.add(downloadId)
-                    updateDownload(downloadId) {
-                        it.copy(downloadState = DownloadState.Downloading(0))
+            is DownloadPageUIIntent.FilterDownloads -> {
+                launchOnIO {
+                    val filteredDownloads = when (intent.filter) {
+                        DownloadPageDestinations.All -> downloadRepository.getAllDownloads()
+                        DownloadPageDestinations.Downloading -> downloadRepository.getDownloadingItems()
+                        DownloadPageDestinations.Completed -> downloadRepository.getByStatus(DownloadStatus.COMPLETED)
+                        DownloadPageDestinations.Failed -> downloadRepository.getByStatus(DownloadStatus.FAILED)
                     }
+                    emitState(state.copy(downloads = filteredDownloads.map { DownloadItem.fromDownload(it) }))
+                }
+            }
+
+            is DownloadPageUIIntent.ResumeDownload -> {
+                launchOnIO {
+                    downloadRepository.updateStatus(intent.downloadId, DownloadStatus.DOWNLOADING)
+                }
+            }
+
+            is DownloadPageUIIntent.PauseDownload -> {
+                launchOnIO {
+                    downloadRepository.updateStatus(intent.downloadId, DownloadStatus.PENDING)
+                }
+
+            }
+
+            is DownloadPageUIIntent.CancelDownload -> {
+                launchOnIO {
+                    downloadRepository.delete(downloadRepository.getById(intent.downloadId)!!)
                 }
             }
         }
     }
 
+    /**
+     * 恢复单个下载
+     */
+    private suspend fun resumeDownload(downloadId: String) {
+        val download = downloadRepository.getById(downloadId) ?: return
+        if (download.status == DownloadStatus.COMPLETED) return
+        downloadManager.enqueueDownload(download)
+        activeDownloads.add(downloadId)
+    }
+
+    /**
+     * 暂停单个下载
+     */
     private suspend fun pauseDownload(downloadId: String) {
         downloadManager.cancelDownload(downloadId)
-        downloadRepository.updateDownloadProgress(downloadId, 0)
+        downloadRepository.updateStatus(downloadId, DownloadStatus.PENDING)
         activeDownloads.remove(downloadId)
-        updateDownload(downloadId) {
-            it.copy(downloadState = DownloadState.Pending)
-        }
     }
 
+    /**
+     * 取消单个下载
+     */
     private suspend fun cancelDownload(downloadId: String) {
         downloadManager.cancelDownload(downloadId)
-        downloadRepository.getById(downloadId)?.let { download ->
-            downloadRepository.delete(download)
-            activeDownloads.remove(downloadId)
-            val downloads =
-                uiState.value.downloads.filterNot { it.id == downloadId }
-            emitState(
-                uiState.value.copy(
-                    downloads = downloads
-                )
-            )
-        }
+        downloadRepository.deleteById(downloadId)
+        activeDownloads.remove(downloadId)
     }
 
+    /**
+     * 删除下载任务
+     */
     private suspend fun deleteDownload(downloadId: String) {
-        downloadRepository.getById(downloadId)?.let { download ->
-            download.fileUri?.path?.let { path ->
-                val file = File(path)
-                if (file.exists() && !file.delete()) {
-                    emitEffect(SnackbarUIEffect.ShowSnackbar("Failed to delete the file"))
-                    return
-                }
-            }
-            downloadRepository.delete(download)
-            activeDownloads.remove(downloadId)
-            val downloads =
-                uiState.value.downloads.filterNot { it.id == downloadId }
-            emitState(
-                uiState.value.copy(
-                    downloads = downloads
-                )
-            )
-        }
+        val download = downloadRepository.getById(downloadId) ?: return
+        download.fileUri?.path?.let { File(it).delete() }
+        downloadRepository.delete(download)
+        activeDownloads.remove(downloadId)
     }
 
-    private suspend fun updateDownload(
-        downloadId: String,
-        update: (DownloadItem) -> DownloadItem
-    ) {
-        val downloads = uiState.value.downloads.toMutableList()
-        val index = downloads.indexOfFirst { it.id == downloadId }
-        if (index != -1) {
-            downloads[index] = update(downloads[index])
-            emitState(
-                uiState.value.copy(
-                    downloads = downloads
-                )
-            )
-        }
+    /**
+     * 恢复所有暂停的下载
+     */
+    private suspend fun handleResumeAll() {
+        val pendingDownloads = downloadRepository.getPendingDownloads()
+        if (pendingDownloads.isEmpty()) return
+        pendingDownloads.forEach { resumeDownload(it.uuid) }
     }
 
-    private suspend fun handleError(message: String) {
-        emitEffect(
-            SnackbarUIEffect.ShowSnackbar(
-                message = message
-            )
-        )
+    /**
+     * 暂停所有进行中的下载
+     */
+    private suspend fun handlePauseAll() {
+        val activeDownloads = downloadRepository.getDownloadingItems()
+        if (activeDownloads.isEmpty()) return
+        activeDownloads.forEach { pauseDownload(it.uuid) }
+    }
+
+    /**
+     * 取消所有未完成的下载
+     */
+    private suspend fun handleCancelAll() {
+        val allDownloads = downloadRepository.getActiveDownloads()
+        if (allDownloads.isEmpty()) return
+        allDownloads.forEach { cancelDownload(it.uuid) }
     }
 }
