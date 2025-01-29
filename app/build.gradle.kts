@@ -46,6 +46,8 @@ android {
 }
 
 dependencies {
+
+    implementation(libs.coil.compose)
     // AndroidX Core
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)

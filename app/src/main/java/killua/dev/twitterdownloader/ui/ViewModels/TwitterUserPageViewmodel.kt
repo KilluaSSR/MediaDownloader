@@ -1,4 +1,4 @@
-package killua.dev.twitterdownloader.ui
+package killua.dev.twitterdownloader.ui.ViewModels
 
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -6,6 +6,8 @@ import db.DownloadDao
 import db.DownloadStatus
 import killua.dev.base.ui.BaseViewModel
 import killua.dev.base.ui.SnackbarUIEffect
+import killua.dev.base.ui.UIIntent
+import killua.dev.base.ui.UIState
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +18,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.plus
 import javax.inject.Inject
 
-sealed class TwitterUserPageIntent : killua.dev.base.ui.UIIntent {
+sealed class TwitterUserPageIntent : UIIntent {
     data class Search(val query: String) : TwitterUserPageIntent()
     data class Sort(val sortType: SortType) : TwitterUserPageIntent()
     object Refresh : TwitterUserPageIntent()
@@ -30,7 +32,7 @@ data class TwitterUserPageState(
     val originalUsers: Map<String, QueryResult> = emptyMap(),
     val filteredUsers: Map<String, QueryResult> = emptyMap(),
     val selectedUserId: String? = null
-) : killua.dev.base.ui.UIState
+) : UIState
 
 data class QueryResult(
     val twitterScreenName: String,

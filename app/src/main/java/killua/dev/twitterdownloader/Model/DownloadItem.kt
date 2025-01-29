@@ -19,14 +19,6 @@ data class DownloadItem(
     val isCompleted: Boolean
         get() = downloadState is DownloadState.Completed
 
-    val statusText: String
-        get() = when (downloadState) {
-            is DownloadState.Pending -> "等待下载"
-            is DownloadState.Downloading -> "下载中 ${downloadState.progress}%"
-            is DownloadState.Completed -> "已完成"
-            is DownloadState.Failed -> "下载失败"
-        }
-
     companion object {
         fun fromDownload(download: Download) = DownloadItem(
             id = download.uuid,

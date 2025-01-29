@@ -18,6 +18,8 @@ data class Download @OptIn(ExperimentalUuidApi::class) constructor(
     @ColumnInfo(name = "file_uri") val fileUri: Uri?,
     @ColumnInfo(name = "link") val link: String?,
 
+    @ColumnInfo(name = "tweetID") val tweetID: String?,
+
     @ColumnInfo(name = "file_name") val fileName: String,
     @ColumnInfo(name = "file_type") val fileType: String,
     @ColumnInfo(name = "file_size") val fileSize: Long,

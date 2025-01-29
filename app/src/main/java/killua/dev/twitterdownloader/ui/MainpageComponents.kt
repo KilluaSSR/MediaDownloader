@@ -47,6 +47,7 @@ import killua.dev.base.ui.components.InnerBottomPadding
 import killua.dev.base.ui.components.InnerTopPadding
 import killua.dev.base.ui.components.OverviewCard
 import killua.dev.base.ui.components.TitleLargeText
+import killua.dev.base.ui.components.TopBar
 import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.base.utils.navigateSingle
 import killua.dev.twitterdownloader.MainPageDropdownMenuButtons
@@ -64,24 +65,12 @@ fun MainScaffold(
                 SnackbarHost(hostState = snackbarHostState)
         }
     ) { innerPadding ->
-        Column {
-            Box(
-                modifier = Modifier.Companion
-                    .weight(1f)
-                    .fillMaxWidth()
-            ) {
-                LazyColumn(modifier = Modifier.Companion.fillMaxSize()) {
-                    item {
-                        InnerTopPadding(innerPadding)
-                    }
-                    item {
-                        content()
-                    }
-                    item {
-                        InnerBottomPadding(innerPadding)
-                    }
-                }
-            }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            content()
         }
     }
 
@@ -89,39 +78,17 @@ fun MainScaffold(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainPageTopBar(navController: NavHostController) {
-    var isMenuExpanded by remember {
-        mutableStateOf(
-            false
-        )
-    }
-    TopAppBar(
-        title = { Text("Twitter Downloader") },
-        actions = {
-            IconButton(
-                onClick = { isMenuExpanded = true }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ExpandMore,
-                    null
-                )
-                DropdownMenu(
-                    expanded = isMenuExpanded,
-                    onDismissRequest = { isMenuExpanded = false },
-                    modifier = Modifier.Companion
-                ) {
-                    MainPageDropdownMenuButtons.forEach {
-                        DropdownMenuItem(
-                            text = { Text(it.title) },
-                            onClick = {
-                                navController.navigateSingle(it.title)
-                            }
-                        )
-                    }
+fun MainTopBar(navController: NavHostController) {
+    TopBar(navController, "Twitter Downloader") {
+        MainPageDropdownMenuButtons.forEach {
+            DropdownMenuItem(
+                text = { Text(it.title) },
+                onClick = {
+                    navController.navigateSingle(it.route)
                 }
-            }
+            )
         }
-    )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

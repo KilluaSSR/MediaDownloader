@@ -18,7 +18,7 @@ sealed class MainRoutes(val route: String) {
     data object MainPage : MainRoutes(route = "main_page")
     data object UserinfoPage : MainRoutes(route = "userinfo_page")
     data object Download : MainRoutes(route = "downloading")
-    data object DownloadedPage : MainRoutes(route = "downloaded_page")
+    data object DownloadPage : MainRoutes(route = "downloaded_page")
     data object TwitterUserPage : MainRoutes(route = "twitter_user_page")
     data object SpecificTwitterUserPage :
         MainRoutes(route = "specific_twitter_user_page/{$ARG_USER_ID}") {
@@ -46,7 +46,7 @@ val MainPageButtons = listOf(
     MainPageButtonsEssentials(
         "Downloaded",
         Icons.Rounded.DownloadDone,
-        MainRoutes.DownloadedPage.route
+        MainRoutes.DownloadPage.route
     ),
     MainPageButtonsEssentials(
         "Twitter Users",

@@ -1,4 +1,4 @@
-package killua.dev.twitterdownloader.ui
+package killua.dev.twitterdownloader.ui.ViewModels
 
 import android.net.Uri
 import androidx.lifecycle.viewModelScope
@@ -8,10 +8,13 @@ import db.DownloadState
 import db.DownloadStatus
 import killua.dev.base.ui.BaseViewModel
 import killua.dev.base.ui.SnackbarUIEffect
+import killua.dev.base.ui.UIIntent
+import killua.dev.base.ui.UIState
 import killua.dev.twitterdownloader.Model.DownloadItem
 import killua.dev.twitterdownloader.download.DownloadManager
 import killua.dev.twitterdownloader.download.VideoDownloadWorker
 import killua.dev.twitterdownloader.repository.DownloadRepository
+import killua.dev.twitterdownloader.ui.Destinations.Download.DownloadPageDestinations
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.sync.Mutex
@@ -19,7 +22,7 @@ import kotlinx.coroutines.sync.withLock
 import java.io.File
 import javax.inject.Inject
 
-sealed class DownloadedPageUIIntent : killua.dev.base.ui.UIIntent {
+sealed class DownloadedPageUIIntent : UIIntent {
     data class ResumeDownload(val downloadId: String) : DownloadedPageUIIntent()
     data class PauseDownload(val downloadId: String) : DownloadedPageUIIntent()
     data class CancelDownload(val downloadId: String) : DownloadedPageUIIntent()
@@ -27,14 +30,29 @@ sealed class DownloadedPageUIIntent : killua.dev.base.ui.UIIntent {
     object ResumeAll : DownloadedPageUIIntent()
     object PauseAll : DownloadedPageUIIntent()
     object CancelAll : DownloadedPageUIIntent()
+    object NavigateToAll: DownloadedPageUIIntent()
+    object NavigateToDownloading: DownloadedPageUIIntent()
+    object NavigateToDownloaded: DownloadedPageUIIntent()
+    object NavigateToFailed: DownloadedPageUIIntent()
 }
+
+data class DownloadPageUIState(
+    val optionIndex: Int,
+    val optionsType: DownloadPageDestinations,
+    val isLoading: Boolean,
+    val downloads: List<DownloadItem> = emptyList(),
+) : UIState
 
 @HiltViewModel
 class DownloadedViewModel @Inject constructor(
     private val downloadRepository: DownloadRepository,
     private val downloadManager: DownloadManager
-) : BaseViewModel<DownloadedPageUIIntent, DownloadUIState, SnackbarUIEffect>(
-    DownloadUIState(isLoading = false)
+) : BaseViewModel<DownloadedPageUIIntent, DownloadPageUIState, SnackbarUIEffect>(
+    DownloadPageUIState(
+        optionIndex = 0,
+        isLoading = true,
+        optionsType = DownloadPageDestinations.All
+    )
 ) {
     private val mutex = Mutex()
     private val activeDownloads = mutableSetOf<String>()
@@ -43,7 +61,7 @@ class DownloadedViewModel @Inject constructor(
         observeAllDownloads()
     }
 
-    override suspend fun onEvent(state: DownloadUIState, intent: DownloadedPageUIIntent) {
+    override suspend fun onEvent(state: DownloadPageUIState, intent: DownloadedPageUIIntent) {
         when (intent) {
             is DownloadedPageUIIntent.CancelDownload -> mutex.withLock {
                 handleOperation(intent.downloadId) { cancelDownload(it) }
@@ -64,35 +82,46 @@ class DownloadedViewModel @Inject constructor(
             is DownloadedPageUIIntent.ResumeAll -> mutex.withLock { handleResumeAll() }
             is DownloadedPageUIIntent.PauseAll -> mutex.withLock { handlePauseAll() }
             is DownloadedPageUIIntent.CancelAll -> mutex.withLock { handleCancelAll() }
+            is DownloadedPageUIIntent.NavigateToAll -> {loadDownloads()}
+            is DownloadedPageUIIntent.NavigateToDownloaded -> {loadDownloaded()}
+            is DownloadedPageUIIntent.NavigateToDownloading -> {loadDownloading()}
+            is DownloadedPageUIIntent.NavigateToFailed -> {loadError()}
         }
     }
-
-    private fun loadDownloads() = launchOnIO {
+    private fun loadDownloadsWithFilter(
+        filter: ((DownloadItem) -> Boolean)? = null
+    ) = launchOnIO {
         try {
-            emitState(
-                uiState.value.copy(
-                    isLoading = true
-                )
-            )
-            val downloads = downloadRepository.getAllDownloads()
+            emitState(uiState.value.copy(isLoading = true))
+            var downloads = downloadRepository.getAllDownloads()
                 .map { DownloadItem.fromDownload(it) }
                 .also { checkActiveDownloads(it) }
-            emitState(
-                uiState.value.copy(
-                    isLoading = false,
-                    downloads = downloads
-                )
-            )
+
+            filter?.let { downloads = downloads.filter(it) }
+
+            emitState(uiState.value.copy(
+                isLoading = false,
+                downloads = downloads
+            ))
         } catch (e: Exception) {
-            emitState(
-                uiState.value.copy(
-                    isLoading = false
-                )
-            )
+            emitState(uiState.value.copy(isLoading = false))
             emitEffect(SnackbarUIEffect.ShowSnackbar("Error loading：${e.message}"))
         }
     }
 
+    private fun loadError() = loadDownloadsWithFilter {
+        it.downloadState.toDownloadStatus() == DownloadStatus.FAILED
+    }
+
+    private fun loadDownloading() = loadDownloadsWithFilter {
+        it.downloadState.toDownloadStatus() == DownloadStatus.DOWNLOADING
+    }
+
+    private fun loadDownloaded() = loadDownloadsWithFilter {
+        it.downloadState.toDownloadStatus() == DownloadStatus.COMPLETED
+    }
+
+    private fun loadDownloads() = loadDownloadsWithFilter()
     private fun checkActiveDownloads(downloads: List<DownloadItem>) {
         downloads.forEach { download ->
             if (download.downloadState is DownloadState.Downloading) {
@@ -102,6 +131,7 @@ class DownloadedViewModel @Inject constructor(
             }
         }
     }
+
 
     private fun observeAllDownloads() {
         downloadManager.getWorkInfoFlow()
