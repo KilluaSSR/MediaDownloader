@@ -69,7 +69,7 @@ fun PermissionsPage() {
                     viewModel.launchOnIO {
                         viewModel.emitIntent(SetupUIIntent.StartApplication(context))
                     }
-                    //context.getActivity().finish()
+                    context.getActivity().finish()
                 }
             ) {
                 Text(text = "Continue")

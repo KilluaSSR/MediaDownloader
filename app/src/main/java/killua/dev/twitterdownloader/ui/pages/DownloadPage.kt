@@ -137,11 +137,7 @@ fun DownloadPage() {
                             )
                             Spacer(modifier = Modifier.size(SizeTokens.Level16))
                             Text(
-                                text = "没有下载内容",
-                                modifier = Modifier.alpha(0.3f)
-                            )
-                            Text(
-                                text = "请先开始下载视频",
+                                text = "Nothing to show",
                                 modifier = Modifier.alpha(0.3f)
                             )
                         }

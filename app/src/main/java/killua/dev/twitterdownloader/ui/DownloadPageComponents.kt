@@ -1,9 +1,7 @@
 package killua.dev.twitterdownloader.ui
 
 import android.content.Intent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
+import android.media.MediaMetadataRetriever
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -25,22 +22,20 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -48,7 +43,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
 import db.DownloadStatus
 import killua.dev.base.ui.components.TopBar
 import killua.dev.base.ui.tokens.SizeTokens
@@ -102,14 +96,23 @@ fun DownloadItemCard(
         ) {
             // 左侧封面图
             if (status == DownloadStatus.COMPLETED && item.fileUri != null) {
-                Image(
-                    painter = rememberAsyncImagePainter(item.fileUri),
-                    contentDescription = "Downloaded Video Thumbnail",
-                    modifier = Modifier
-                        .size(SizeTokens.Level72)
-                        .clip(RoundedCornerShape(SizeTokens.Level8)),
-                    contentScale = ContentScale.Crop
-                )
+                val bitmap = remember(item.fileUri){
+                    val retriever = MediaMetadataRetriever()
+                    retriever.setDataSource(context, item.fileUri)
+                    val frame = retriever.getFrameAtTime(0)
+                    retriever.release()
+                    frame
+                }
+                if(bitmap != null){
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(SizeTokens.Level72)
+                            .clip(RoundedCornerShape(SizeTokens.Level8)),
+                        contentScale = ContentScale.Crop
+                    )
+                }
             } else {
                 Box(
                     modifier = Modifier
