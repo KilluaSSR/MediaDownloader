@@ -219,10 +219,10 @@ fun DownloadItemCard(
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
-                        IconButton(onClick = { onCommand(item, DownloadPageCommands.Delete) }) {
+                        IconButton(onClick = { onCommand(item, DownloadPageCommands.Cancel) }) {
                             Icon(
-                                Icons.Default.Delete,
-                                contentDescription = "Delete",
+                                Icons.Default.Cancel,
+                                contentDescription = "Cancel",
                                 tint = MaterialTheme.colorScheme.error
                             )
                         }
@@ -250,10 +250,10 @@ fun DownloadItemCard(
                                 )
                             }
                         }
-                        IconButton(onClick = { onCommand(item, DownloadPageCommands.Delete) }) {
+                        IconButton(onClick = { onCommand(item, DownloadPageCommands.Cancel) }) {
                             Icon(
-                                Icons.Default.Delete,
-                                contentDescription = "Delete",
+                                Icons.Default.Cancel,
+                                contentDescription = "Cancel",
                                 tint = MaterialTheme.colorScheme.error
                             )
                         }

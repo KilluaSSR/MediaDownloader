@@ -46,7 +46,6 @@ import killua.dev.twitterdownloader.ui.DownloadItemCard
 import killua.dev.twitterdownloader.ui.DownloadPageCommands
 import killua.dev.twitterdownloader.ui.DownloadPageTopAppBar
 import killua.dev.twitterdownloader.ui.MainScaffold
-import killua.dev.twitterdownloader.ui.ViewModels.DownloadPageUIIntent
 import killua.dev.twitterdownloader.ui.ViewModels.DownloadPageUIIntent.*
 import killua.dev.twitterdownloader.ui.ViewModels.DownloadedViewModel
 
@@ -64,12 +63,12 @@ fun DownloadPage() {
             navController,
             retryAllOnClick = {
                 viewModel.launchOnIO {
-                    viewModel.emitIntent(DownloadPageUIIntent.RetryAll)
+                    viewModel.emitIntent(RetryAll)
                 }
             },
             cancelOnClick = {
                 viewModel.launchOnIO {
-                    viewModel.emitIntent(DownloadPageUIIntent.CancelAll)
+                    viewModel.emitIntent(CancelAll)
             }}
         ) },
         snackbarHostState = viewModel.snackbarHostState
@@ -101,10 +100,10 @@ fun DownloadPage() {
                                 ))
                                 viewModel.emitIntent(
                                     when (index) {
-                                        0 -> DownloadPageUIIntent.FilterDownloads(DownloadPageDestinations.All)
-                                        1 -> DownloadPageUIIntent.FilterDownloads(DownloadPageDestinations.Downloading)
-                                        2 -> DownloadPageUIIntent.FilterDownloads(DownloadPageDestinations.Completed)
-                                        3 -> DownloadPageUIIntent.FilterDownloads(DownloadPageDestinations.Failed)
+                                        0 -> FilterDownloads(DownloadPageDestinations.All)
+                                        1 -> FilterDownloads(DownloadPageDestinations.Downloading)
+                                        2 -> FilterDownloads(DownloadPageDestinations.Completed)
+                                        3 -> FilterDownloads(DownloadPageDestinations.Failed)
                                         else -> throw IllegalArgumentException("Invalid index: $index")
                                     }
                                 )
@@ -198,7 +197,7 @@ fun DownloadPage() {
                                             DownloadPageCommands.Retry -> {
                                                 viewModel.launchOnIO {
                                                     viewModel.emitIntent(
-                                                        ResumeDownload(item.id)
+                                                        RetryDownload(item.id)
                                                     )
                                                 }
                                             }
@@ -219,7 +218,7 @@ fun DownloadPage() {
                                             DownloadPageCommands.Delete -> {
                                                 viewModel.launchOnIO {
                                                     viewModel.emitIntent(
-                                                        CancelDownload(item.id)
+                                                        CancelDownload(item.id)  //Same
                                                     )
                                                 }
                                             }

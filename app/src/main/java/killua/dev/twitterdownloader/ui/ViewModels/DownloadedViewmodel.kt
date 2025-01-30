@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.work.WorkInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import db.Download
@@ -19,16 +18,13 @@ import killua.dev.twitterdownloader.download.VideoDownloadWorker
 import killua.dev.twitterdownloader.repository.DownloadRepository
 import killua.dev.twitterdownloader.repository.ThumbnailRepository
 import killua.dev.twitterdownloader.ui.Destinations.Download.DownloadPageDestinations
-import killua.dev.twitterdownloader.utils.NavigateTwitterProfile
 import killua.dev.twitterdownloader.utils.NavigateTwitterTweet
-import killua.dev.twitterdownloader.utils.loadCachedThumbnailOrCreate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.io.File
-import java.util.UUID
 import javax.inject.Inject
 
 
@@ -266,8 +262,10 @@ class DownloadedViewModel @Inject constructor(
      */
     private suspend fun cancelDownload(downloadId: String) {
         downloadManager.cancelDownload(downloadId)
-        downloadRepository.deleteById(downloadId)
         activeDownloads.remove(downloadId)
+        val download = downloadRepository.getById(downloadId) ?: return
+        download.fileUri?.path?.let { File(it).delete() }
+        downloadRepository.deleteById(downloadId)
     }
 
     /**
@@ -278,24 +276,6 @@ class DownloadedViewModel @Inject constructor(
         download.fileUri?.path?.let { File(it).delete() }
         downloadRepository.delete(download)
         activeDownloads.remove(downloadId)
-    }
-
-    /**
-     * 恢复所有暂停的下载
-     */
-    private suspend fun handleResumeAll() {
-        val pendingDownloads = downloadRepository.getPendingDownloads()
-        if (pendingDownloads.isEmpty()) return
-        pendingDownloads.forEach { resumeDownload(it.uuid) }
-    }
-
-    /**
-     * 暂停所有进行中的下载
-     */
-    private suspend fun handlePauseAll() {
-        val activeDownloads = downloadRepository.getDownloadingItems()
-        if (activeDownloads.isEmpty()) return
-        activeDownloads.forEach { pauseDownload(it.uuid) }
     }
 
     /**
@@ -329,8 +309,8 @@ class DownloadedViewModel @Inject constructor(
             status = DownloadStatus.PENDING,
             mimeType = "video/mp4"
         )
-        downloadRepository.insert(download)
-        downloadManager.enqueueDownload(download)
+        downloadRepository.insert(newdownload)
+        downloadManager.enqueueDownload(newdownload)
     }
 
     private suspend fun handleRetryAll(){
