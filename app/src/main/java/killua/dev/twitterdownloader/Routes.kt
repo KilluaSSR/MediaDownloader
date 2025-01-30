@@ -5,9 +5,9 @@ import androidx.compose.material.icons.automirrored.rounded.Help
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.StarBorder
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.rounded.DownloadDone
 import androidx.compose.material.icons.rounded.Report
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class MainRoutes(val route: String) {
@@ -61,10 +61,10 @@ val MainPageButtons = listOf(
 
 
     )
-val MainPageDropdownMenuButtons = listOf(
+val MainPageMenuButtons = listOf(
     MainPageButtonsEssentials(
         "Settings",
-        Icons.Outlined.Settings,
+        Icons.Rounded.Settings,
         MainRoutes.SettingPage.route
     ),
     MainPageButtonsEssentials(

@@ -62,7 +62,8 @@ enum class DownloadPageCommands {
 fun DownloadPageTopAppBar(
     navController: NavHostController,
     retryAllOnClick: () -> Unit,
-    cancelOnClick: () -> Unit
+    cancelOnClick: () -> Unit,
+    showMoreOnClick: () -> Unit
 ) {
     TopBar(navController, "Downloaded", extraIcons = {
         IconButton(
@@ -81,7 +82,9 @@ fun DownloadPageTopAppBar(
                 "Cancel all active downloads"
             )
         }
-    }) {}
+    },
+        showMoreOnClick = showMoreOnClick
+    )
 }
 
 @Composable

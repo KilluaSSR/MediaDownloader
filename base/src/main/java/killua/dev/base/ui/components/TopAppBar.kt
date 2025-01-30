@@ -19,12 +19,7 @@ import androidx.navigation.NavHostController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(navController: NavHostController, title: String, enableNavIcon: Boolean = true, extraIcons: @Composable ()-> Unit = {}, dropdownMenu: @Composable ()-> Unit) {
-    var isMenuExpanded by remember {
-        mutableStateOf(
-            false
-        )
-    }
+fun TopBar(navController: NavHostController, title: String, enableNavIcon: Boolean = true, extraIcons: @Composable ()-> Unit = {}, showMoreOnClick: ()-> Unit) {
     TopAppBar(
         title = { Text(title) },
         navigationIcon = {
@@ -42,19 +37,12 @@ fun TopBar(navController: NavHostController, title: String, enableNavIcon: Boole
         actions = {
             extraIcons()
             IconButton(
-                onClick = { isMenuExpanded = true }
+                onClick = showMoreOnClick
             ) {
                 Icon(
                     imageVector = Icons.Default.ExpandMore,
                     null
                 )
-                DropdownMenu(
-                    expanded = isMenuExpanded,
-                    onDismissRequest = { isMenuExpanded = false },
-                    modifier = Modifier.Companion
-                ) {
-                    dropdownMenu()
-                }
             }
         }
     )

@@ -7,11 +7,14 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,6 +35,7 @@ import killua.dev.twitterdownloader.MainPageButtons
 import killua.dev.twitterdownloader.MainRoutes
 import killua.dev.twitterdownloader.ui.FavouriteCard
 import killua.dev.twitterdownloader.ui.InputDialog
+import killua.dev.twitterdownloader.ui.MainPageBottomSheet
 import killua.dev.twitterdownloader.ui.MainTopBar
 import killua.dev.twitterdownloader.ui.ViewModels.MainPageUIIntent
 import killua.dev.twitterdownloader.ui.ViewModels.MainPageViewmodel
@@ -49,12 +53,21 @@ fun MainPage(
     var showDialog by remember { mutableStateOf(false) }
     val uiState = viewmodel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+    var showBottomSheet by remember { mutableStateOf(false) }
     MainScaffold(
         topBar = {
-            MainTopBar(navController)
+            MainTopBar(navController, {showBottomSheet = true})
         },
         snackbarHostState = viewmodel.snackbarHostState
     ) {
+        if(showBottomSheet){
+            MainPageBottomSheet(
+                onDismiss = {showBottomSheet = false},
+                sheetState
+            )
+        }
         InputDialog(
             showDialog = showDialog,
             onDismiss = { showDialog = false },

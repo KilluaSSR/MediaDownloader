@@ -18,7 +18,9 @@ import killua.dev.twitterdownloader.download.VideoDownloadWorker
 import killua.dev.twitterdownloader.repository.DownloadRepository
 import killua.dev.twitterdownloader.repository.ThumbnailRepository
 import killua.dev.twitterdownloader.ui.Destinations.Download.DownloadPageDestinations
+import killua.dev.twitterdownloader.ui.ViewModels.DownloadPageUIIntent.UpdateFilterOptions
 import killua.dev.twitterdownloader.utils.NavigateTwitterTweet
+import killua.dev.twitterdownloader.utils.VideoDurationRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
@@ -26,6 +28,18 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
+sealed class DurationFilter {
+    object All : DurationFilter()
+    object UnderOneMinute : DurationFilter()
+    object OneToThreeMinutes : DurationFilter()
+    object ThreeToTenMinutes : DurationFilter()
+    object MoreThanTemMinutes : DurationFilter()
+}
+
+data class FilterOptions(
+    val selectedAuthors: Set<String> = emptySet(),
+    val durationFilter: DurationFilter = DurationFilter.All
+)
 
 
 sealed interface DownloadPageUIIntent : UIIntent {
@@ -45,6 +59,8 @@ sealed interface DownloadPageUIIntent : UIIntent {
 
     data object RetryAll: DownloadPageUIIntent
 
+    data class UpdateFilterOptions(val filterOptions: FilterOptions) : DownloadPageUIIntent
+
     data class GoToTwitter(val downloadId: String, val context: Context) : DownloadPageUIIntent
 }
 
@@ -53,14 +69,17 @@ data class DownloadPageUIState(
     val optionsType: DownloadPageDestinations,
     val isLoading: Boolean,
     val downloads: List<DownloadItem> = emptyList(),
-    val thumbnailCache: Map<Uri, Bitmap?> = emptyMap()
+    val thumbnailCache: Map<Uri, Bitmap?> = emptyMap(),
+    val availableAuthors: Set<String> = emptySet(),
+    val filterOptions: FilterOptions = FilterOptions()
 ) : UIState
 
 @HiltViewModel
 class DownloadedViewModel @Inject constructor(
     private val downloadRepository: DownloadRepository,
     private val downloadManager: DownloadManager,
-    private val thumbnailRepository: ThumbnailRepository
+    private val thumbnailRepository: ThumbnailRepository,
+    private val videoDurationRepository: VideoDurationRepository
 ) : BaseViewModel<DownloadPageUIIntent, DownloadPageUIState, SnackbarUIEffect>(
     DownloadPageUIState(
         optionIndex = 0,
@@ -77,6 +96,8 @@ class DownloadedViewModel @Inject constructor(
         launchOnIO {
             downloadRepository.observeAllDownloads()
                 .collect { downloads ->
+                    val authors = downloads.mapNotNull { it.twitterName }.toSet()
+                    val filteredDownloads = applyFilters(downloads)
                     val uris = downloads
                         .mapNotNull { it.fileUri }
 
@@ -85,14 +106,38 @@ class DownloadedViewModel @Inject constructor(
                     }
                     emitState(
                         uiState.value.copy(
-                            downloads = downloads.map { DownloadItem.fromDownload(it) },
+                            downloads = filteredDownloads.map { DownloadItem.fromDownload(it) },
                             thumbnailCache = thumbnails,
+                            availableAuthors = authors,
                             isLoading = false
                         )
                     )
                 }
         }
     }
+
+    private suspend fun applyFilters(downloads: List<Download>): List<Download> {
+        val selectedAuthors = uiState.value.filterOptions.selectedAuthors
+
+        return downloads.filter { download ->
+            val authorMatch = selectedAuthors.isEmpty() ||
+                    (download.twitterName != null && download.twitterName in selectedAuthors)
+            val duration = download.fileUri?.let {
+                videoDurationRepository.getVideoDuration(it)
+            } ?: 0L
+
+            val durationMatch = when (uiState.value.filterOptions.durationFilter) {
+                DurationFilter.All -> true
+                DurationFilter.UnderOneMinute -> duration <= 60
+                DurationFilter.OneToThreeMinutes -> duration in 61..180
+                DurationFilter.ThreeToTenMinutes -> duration in 181..600
+                DurationFilter.MoreThanTemMinutes -> duration > 600
+            }
+
+            authorMatch && durationMatch
+        }
+    }
+
     /**
      * 监听 WorkManager 后台下载任务 状态变化
      */
@@ -233,6 +278,14 @@ class DownloadedViewModel @Inject constructor(
                         intent.context.NavigateTwitterTweet(userScreenName!!,tweetID)
                     }
                 }
+            }
+            is UpdateFilterOptions -> {
+                emitState(state.copy(filterOptions = intent.filterOptions))
+                val downloads = downloadRepository.getAllDownloads()
+                val filtered = applyFilters(downloads)
+                emitState(uiState.value.copy(
+                    downloads = filtered.map { DownloadItem.fromDownload(it) }
+                ))
             }
         }
     }

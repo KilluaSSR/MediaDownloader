@@ -20,16 +20,21 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.NotInterested
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +43,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.base.ui.LocalNavController
+import killua.dev.base.ui.components.BottomSheet
 import killua.dev.base.ui.components.paddingBottom
 import killua.dev.base.ui.components.paddingHorizontal
 import killua.dev.base.ui.tokens.SizeTokens
@@ -45,19 +51,26 @@ import killua.dev.twitterdownloader.ui.Destinations.Download.DownloadPageDestina
 import killua.dev.twitterdownloader.ui.DownloadItemCard
 import killua.dev.twitterdownloader.ui.DownloadPageCommands
 import killua.dev.twitterdownloader.ui.DownloadPageTopAppBar
+import killua.dev.twitterdownloader.ui.FilterContent
 import killua.dev.twitterdownloader.ui.MainScaffold
+import killua.dev.twitterdownloader.ui.ViewModels.DownloadPageUIIntent
 import killua.dev.twitterdownloader.ui.ViewModels.DownloadPageUIIntent.*
 import killua.dev.twitterdownloader.ui.ViewModels.DownloadedViewModel
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedContentLambdaTargetStateParameter")
-@OptIn(ExperimentalAnimationApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalAnimationApi::class, ExperimentalFoundationApi::class,
+    ExperimentalMaterial3Api::class
+)
 @Composable
 fun DownloadPage() {
     val navController = LocalNavController.current!!
     val context = LocalContext.current
     val viewModel: DownloadedViewModel = hiltViewModel()
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
-
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+    var showBottomSheet by remember { mutableStateOf(false) }
     MainScaffold(
         topBar = { DownloadPageTopAppBar(
             navController,
@@ -69,10 +82,29 @@ fun DownloadPage() {
             cancelOnClick = {
                 viewModel.launchOnIO {
                     viewModel.emitIntent(CancelAll)
-            }}
+            }},
+            showMoreOnClick = {
+                showBottomSheet = true
+            }
         ) },
         snackbarHostState = viewModel.snackbarHostState
     ) {
+        if(showBottomSheet){
+            BottomSheet(
+                onDismissRequest = { showBottomSheet = false },
+                sheetState = sheetState
+            ) {
+                FilterContent(
+                    availableAuthors = uiState.value.availableAuthors,
+                    currentFilter = uiState.value.filterOptions,
+                    onFilterChange = { newFilter ->
+                        viewModel.launchOnIO {
+                            viewModel.emitIntent(DownloadPageUIIntent.UpdateFilterOptions(newFilter))
+                        }
+                    }
+                )
+            }
+        }
         Column(modifier = Modifier.fillMaxSize()) {
             var enabled by remember { mutableStateOf(true) }
             val options = remember { DownloadPageDestinations.entries }
