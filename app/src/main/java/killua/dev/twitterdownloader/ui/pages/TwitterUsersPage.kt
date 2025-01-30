@@ -9,7 +9,7 @@ import killua.dev.twitterdownloader.ui.TwitterUsersPageTopAppBar
 @Composable
 fun TwitterUserInfoPage(){
     val navController = LocalNavController.current!!
-    val context = LocalContext.current
+    LocalContext.current
     //val viewModel: DownloadedViewModel = hiltViewModel()
     //val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     MainScaffold (

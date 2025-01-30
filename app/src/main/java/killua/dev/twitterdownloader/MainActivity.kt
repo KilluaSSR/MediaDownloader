@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             TwitterDownloaderTheme {
                 val navController = rememberNavController()
-                val scope = rememberCoroutineScope()
+                rememberCoroutineScope()
                 CompositionLocalProvider(
                     LocalNavController provides navController,
                     LocalLifecycleOwner provides LocalLifecycleOwner.current

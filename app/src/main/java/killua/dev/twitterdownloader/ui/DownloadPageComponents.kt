@@ -1,7 +1,7 @@
 package killua.dev.twitterdownloader.ui
 
 import android.content.Intent
-import android.media.MediaMetadataRetriever
+import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -30,7 +30,8 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,12 +43,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import coil.compose.rememberAsyncImagePainter
 import db.DownloadStatus
 import killua.dev.base.ui.components.TopBar
 import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.twitterdownloader.Model.DownloadItem
 import killua.dev.twitterdownloader.utils.formatTimestamp
+import killua.dev.twitterdownloader.utils.loadCachedThumbnailOrCreate
 
 enum class DownloadPageCommands{
     Open,
@@ -96,16 +97,13 @@ fun DownloadItemCard(
         ) {
             // 左侧封面图
             if (status == DownloadStatus.COMPLETED && item.fileUri != null) {
-                val bitmap = remember(item.fileUri){
-                    val retriever = MediaMetadataRetriever()
-                    retriever.setDataSource(context, item.fileUri)
-                    val frame = retriever.getFrameAtTime(0)
-                    retriever.release()
-                    frame
+                val thumbnail by produceState<Bitmap?>(initialValue = null, key1 = item.fileUri) {
+                    value = loadCachedThumbnailOrCreate(context, item.fileUri)
                 }
-                if(bitmap != null){
+
+                if(thumbnail != null){
                     Image(
-                        bitmap = bitmap.asImageBitmap(),
+                        bitmap = thumbnail!!.asImageBitmap(),
                         contentDescription = null,
                         modifier = Modifier
                             .size(SizeTokens.Level72)

@@ -4,8 +4,6 @@ import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
-import db.Download
-import db.DownloadState
 import db.DownloadStatus
 import killua.dev.base.ui.BaseViewModel
 import killua.dev.base.ui.SnackbarUIEffect
@@ -20,25 +18,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import java.io.File
 import javax.inject.Inject
-
-//sealed class DownloadedPageUIIntent : UIIntent {
-//    data class ResumeDownload(val downloadId: String) : DownloadedPageUIIntent()
-//    data class PauseDownload(val downloadId: String) : DownloadedPageUIIntent()
-//    data class CancelDownload(val downloadId: String) : DownloadedPageUIIntent()
-//    data class DeleteDownload(val downloadId: String) : DownloadedPageUIIntent()
-//    object ResumeAll : DownloadedPageUIIntent()
-//    object PauseAll : DownloadedPageUIIntent()
-//    object CancelAll : DownloadedPageUIIntent()
-//    object NavigateToAll: DownloadedPageUIIntent()
-//    object NavigateToDownloading: DownloadedPageUIIntent()
-//    object NavigateToDownloaded: DownloadedPageUIIntent()
-//    object NavigateToFailed: DownloadedPageUIIntent()
-//}
 
 
 sealed interface DownloadPageUIIntent : UIIntent {
