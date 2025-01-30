@@ -8,6 +8,7 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.NotInterested
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -45,10 +47,11 @@ import killua.dev.twitterdownloader.ui.DownloadPageCommands
 import killua.dev.twitterdownloader.ui.DownloadPageTopAppBar
 import killua.dev.twitterdownloader.ui.MainScaffold
 import killua.dev.twitterdownloader.ui.ViewModels.DownloadPageUIIntent
+import killua.dev.twitterdownloader.ui.ViewModels.DownloadPageUIIntent.*
 import killua.dev.twitterdownloader.ui.ViewModels.DownloadedViewModel
 
 @SuppressLint("UnusedContentLambdaTargetStateParameter")
-@OptIn(ExperimentalAnimationApi::class)
+@OptIn(ExperimentalAnimationApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun DownloadPage() {
     val navController = LocalNavController.current!!
@@ -57,7 +60,18 @@ fun DownloadPage() {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
 
     MainScaffold(
-        topBar = { DownloadPageTopAppBar(navController) },
+        topBar = { DownloadPageTopAppBar(
+            navController,
+            retryAllOnClick = {
+                viewModel.launchOnIO {
+                    viewModel.emitIntent(DownloadPageUIIntent.RetryAll)
+                }
+            },
+            cancelOnClick = {
+                viewModel.launchOnIO {
+                    viewModel.emitIntent(DownloadPageUIIntent.CancelAll)
+            }}
+        ) },
         snackbarHostState = viewModel.snackbarHostState
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -107,6 +121,25 @@ fun DownloadPage() {
                     }
                 }
             }
+            if(uiState.value.isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Loading...",
+                            modifier = Modifier.alpha(0.3f)
+                        )
+
+                        Spacer(modifier = Modifier.size(SizeTokens.Level16))
+                        LinearProgressIndicator(
+                            modifier = Modifier
+                                .size(width = SizeTokens.Level128, height = SizeTokens.Level8)
+                        )
+                    }
+                }
+            }
             AnimatedContent(
                 targetState = uiState.value.optionsType,
                 transitionSpec = {
@@ -142,61 +175,72 @@ fun DownloadPage() {
                             )
                         }
                     }
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(SizeTokens.Level8)
-                    ) {
-                        items(uiState.value.downloads) { download ->
-                            DownloadItemCard(
-                                item = download,
-                                onCommand = { item, cmd ->
-                                    when (cmd) {
-                                        DownloadPageCommands.Open -> {
-                                            item.fileUri?.let { uri ->
-                                                val openIntent = Intent(Intent.ACTION_VIEW).apply {
-                                                    setDataAndType(uri, "video/*")
-                                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                } else{
+                        LazyColumn(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(SizeTokens.Level8)
+                        ) {
+                            items(uiState.value.downloads) { download ->
+                                DownloadItemCard(
+                                    item = download,
+                                    onCommand = { item, cmd ->
+                                        when (cmd) {
+                                            DownloadPageCommands.Open -> {
+                                                item.fileUri?.let { uri ->
+                                                    val openIntent = Intent(Intent.ACTION_VIEW).apply {
+                                                        setDataAndType(uri, "video/*")
+                                                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                                    }
+                                                    context.startActivity(openIntent)
                                                 }
-                                                context.startActivity(openIntent)
                                             }
-                                        }
-                                        DownloadPageCommands.Resume,
-                                        DownloadPageCommands.Retry -> {
-                                            viewModel.launchOnIO {
-                                                viewModel.emitIntent(
-                                                    DownloadPageUIIntent.ResumeDownload(item.id)
-                                                )
+                                            DownloadPageCommands.Resume,
+                                            DownloadPageCommands.Retry -> {
+                                                viewModel.launchOnIO {
+                                                    viewModel.emitIntent(
+                                                        ResumeDownload(item.id)
+                                                    )
+                                                }
                                             }
-                                        }
-                                        DownloadPageCommands.Pause -> {
-                                            viewModel.launchOnIO {
-                                                viewModel.emitIntent(
-                                                    DownloadPageUIIntent.PauseDownload(item.id)
-                                                )
+                                            DownloadPageCommands.Pause -> {
+                                                viewModel.launchOnIO {
+                                                    viewModel.emitIntent(
+                                                        PauseDownload(item.id)
+                                                    )
+                                                }
                                             }
-                                        }
-                                        DownloadPageCommands.Cancel -> {
-                                            viewModel.launchOnIO {
-                                                viewModel.emitIntent(
-                                                    DownloadPageUIIntent.CancelDownload(item.id)
-                                                )
+                                            DownloadPageCommands.Cancel -> {
+                                                viewModel.launchOnIO {
+                                                    viewModel.emitIntent(
+                                                        CancelDownload(item.id)
+                                                    )
+                                                }
                                             }
-                                        }
-                                        DownloadPageCommands.Delete -> {
-                                            viewModel.launchOnIO {
-                                                viewModel.emitIntent(
-                                                    DownloadPageUIIntent.CancelDownload(item.id)
-                                                )
+                                            DownloadPageCommands.Delete -> {
+                                                viewModel.launchOnIO {
+                                                    viewModel.emitIntent(
+                                                        CancelDownload(item.id)
+                                                    )
+                                                }
                                             }
+
+                                            DownloadPageCommands.GoToTwitter -> {
+                                                viewModel.launchOnIO {
+                                                    viewModel.emitIntent(
+                                                        GoToTwitter(item.id,context)
+                                                    )
+                                                }
+                                            }
+                                            DownloadPageCommands.FilterHisAll -> TODO()
                                         }
-                                    }
-                                }
-                            )
+                                    },
+                                    thumbnailCache = uiState.value.thumbnailCache,
+                                    modifier = Modifier.animateItemPlacement()
+                                )
+                            }
                         }
                     }
                 }
             }
         }
-    }
 }

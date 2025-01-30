@@ -1,6 +1,8 @@
 package killua.dev.twitterdownloader.repository
 
 import android.net.Uri
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import db.Download
 import db.DownloadDao
 import db.DownloadStatus
@@ -23,6 +25,7 @@ class DownloadRepository @Inject constructor(
     suspend fun getById(uuid: String): Download? = downloadDao.getById(uuid)
 
     // ✅ 插入下载项
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(download: Download) = downloadDao.insert(download)
 
     // ✅ 删除下载项

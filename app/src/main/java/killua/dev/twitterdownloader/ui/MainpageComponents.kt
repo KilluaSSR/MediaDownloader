@@ -76,7 +76,6 @@ fun MainScaffold(
             content()
         }
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

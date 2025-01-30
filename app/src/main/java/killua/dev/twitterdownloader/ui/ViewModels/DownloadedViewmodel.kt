@@ -1,9 +1,13 @@
 package killua.dev.twitterdownloader.ui.ViewModels
 
+import android.content.Context
+import android.graphics.Bitmap
 import android.net.Uri
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.work.WorkInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
+import db.Download
 import db.DownloadStatus
 import killua.dev.base.ui.BaseViewModel
 import killua.dev.base.ui.SnackbarUIEffect
@@ -13,12 +17,18 @@ import killua.dev.twitterdownloader.Model.DownloadItem
 import killua.dev.twitterdownloader.download.DownloadManager
 import killua.dev.twitterdownloader.download.VideoDownloadWorker
 import killua.dev.twitterdownloader.repository.DownloadRepository
+import killua.dev.twitterdownloader.repository.ThumbnailRepository
 import killua.dev.twitterdownloader.ui.Destinations.Download.DownloadPageDestinations
+import killua.dev.twitterdownloader.utils.NavigateTwitterProfile
+import killua.dev.twitterdownloader.utils.NavigateTwitterTweet
+import killua.dev.twitterdownloader.utils.loadCachedThumbnailOrCreate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import java.io.File
+import java.util.UUID
 import javax.inject.Inject
 
 
@@ -29,9 +39,17 @@ sealed interface DownloadPageUIIntent : UIIntent {
 
     data class ResumeDownload(val downloadId: String) : DownloadPageUIIntent
 
+    data class RetryDownload(val downloadId: String) : DownloadPageUIIntent
+
     data class PauseDownload(val downloadId: String) : DownloadPageUIIntent
 
     data class CancelDownload(val downloadId: String) : DownloadPageUIIntent
+
+    data object CancelAll: DownloadPageUIIntent
+
+    data object RetryAll: DownloadPageUIIntent
+
+    data class GoToTwitter(val downloadId: String, val context: Context) : DownloadPageUIIntent
 }
 
 data class DownloadPageUIState(
@@ -39,12 +57,14 @@ data class DownloadPageUIState(
     val optionsType: DownloadPageDestinations,
     val isLoading: Boolean,
     val downloads: List<DownloadItem> = emptyList(),
+    val thumbnailCache: Map<Uri, Bitmap?> = emptyMap()
 ) : UIState
 
 @HiltViewModel
 class DownloadedViewModel @Inject constructor(
     private val downloadRepository: DownloadRepository,
-    private val downloadManager: DownloadManager
+    private val downloadManager: DownloadManager,
+    private val thumbnailRepository: ThumbnailRepository
 ) : BaseViewModel<DownloadPageUIIntent, DownloadPageUIState, SnackbarUIEffect>(
     DownloadPageUIState(
         optionIndex = 0,
@@ -61,9 +81,16 @@ class DownloadedViewModel @Inject constructor(
         launchOnIO {
             downloadRepository.observeAllDownloads()
                 .collect { downloads ->
+                    val uris = downloads
+                        .mapNotNull { it.fileUri }
+
+                    val thumbnails = uris.associateWith { uri ->
+                        thumbnailRepository.getThumbnail(uri)
+                    }
                     emitState(
                         uiState.value.copy(
                             downloads = downloads.map { DownloadItem.fromDownload(it) },
+                            thumbnailCache = thumbnails,
                             isLoading = false
                         )
                     )
@@ -155,10 +182,19 @@ class DownloadedViewModel @Inject constructor(
                     val filteredDownloads = when (intent.filter) {
                         DownloadPageDestinations.All -> downloadRepository.getAllDownloads()
                         DownloadPageDestinations.Downloading -> downloadRepository.getDownloadingItems()
-                        DownloadPageDestinations.Completed -> downloadRepository.getByStatus(DownloadStatus.COMPLETED)
-                        DownloadPageDestinations.Failed -> downloadRepository.getByStatus(DownloadStatus.FAILED)
+                        DownloadPageDestinations.Completed -> downloadRepository.getByStatus(
+                            DownloadStatus.COMPLETED
+                        )
+
+                        DownloadPageDestinations.Failed -> downloadRepository.getByStatus(
+                            DownloadStatus.FAILED
+                        )
                     }
-                    emitState(state.copy(downloads = filteredDownloads.map { DownloadItem.fromDownload(it) }))
+                    emitState(state.copy(downloads = filteredDownloads.map {
+                        DownloadItem.fromDownload(
+                            it
+                        )
+                    }))
                 }
             }
 
@@ -180,8 +216,31 @@ class DownloadedViewModel @Inject constructor(
                     downloadRepository.delete(downloadRepository.getById(intent.downloadId)!!)
                 }
             }
+
+            DownloadPageUIIntent.CancelAll -> handleCancelAll()
+            DownloadPageUIIntent.RetryAll -> handleRetryAll()
+            is DownloadPageUIIntent.RetryDownload -> {
+                launchOnIO {
+                    retryDownload(intent.downloadId)
+                }
+            }
+
+            is DownloadPageUIIntent.GoToTwitter -> {
+                launchOnIO {
+                    val download = downloadRepository.getById(intent.downloadId)
+                    if (download == null){
+                        launchOnIO { emitEffect(SnackbarUIEffect.ShowSnackbar("Not Found")) }
+                    }
+                    val userScreenName = download?.twitterScreenName
+                    val tweetID = download?.tweetID
+                    withMainContext {
+                        intent.context.NavigateTwitterTweet(userScreenName!!,tweetID)
+                    }
+                }
+            }
         }
     }
+
 
     /**
      * 恢复单个下载
@@ -244,7 +303,62 @@ class DownloadedViewModel @Inject constructor(
      */
     private suspend fun handleCancelAll() {
         val allDownloads = downloadRepository.getActiveDownloads()
-        if (allDownloads.isEmpty()) return
+        if (allDownloads.isEmpty()) {
+            viewModelScope.launch{
+                emitEffect(SnackbarUIEffect.ShowSnackbar("No active downloads"))
+            }
+            return
+        }
         allDownloads.forEach { cancelDownload(it.uuid) }
+    }
+
+    private suspend fun retryDownload(downloadId: String){
+        val download = downloadRepository.getById(downloadId) ?: return
+        cancelDownload(downloadId)
+        val newdownload = Download(
+            uuid =download.uuid,
+            twitterUserId = download.twitterUserId,
+            twitterScreenName = download.twitterScreenName,
+            twitterName = download.twitterName,
+            tweetID = download.tweetID,
+            fileUri = null,
+            link = download.link,
+            fileName = download.fileName,
+            fileType = "video",
+            fileSize = 0L,
+            status = DownloadStatus.PENDING,
+            mimeType = "video/mp4"
+        )
+        downloadRepository.insert(download)
+        downloadManager.enqueueDownload(download)
+    }
+
+    private suspend fun handleRetryAll(){
+        val failedDownloads = downloadRepository.getByStatus(status = DownloadStatus.FAILED)
+        if (failedDownloads.isEmpty()) {
+            viewModelScope.launch{
+                emitEffect(SnackbarUIEffect.ShowSnackbar("No failed downloads"))
+            }
+            return
+        }
+        failedDownloads.forEach { it->
+            cancelDownload(it.uuid)
+            val download = Download(
+                uuid =it.uuid,
+                twitterUserId = it.twitterUserId,
+                twitterScreenName = it.twitterScreenName,
+                twitterName = it.twitterName,
+                tweetID = it.tweetID,
+                fileUri = null,
+                link = it.link,
+                fileName = it.fileName,
+                fileType = "video",
+                fileSize = 0L,
+                status = DownloadStatus.PENDING,
+                mimeType = "video/mp4"
+            )
+            downloadRepository.insert(download)
+            downloadManager.enqueueDownload(download)
+        }
     }
 }

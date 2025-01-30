@@ -24,6 +24,12 @@ fun Context.NavigateTwitterProfile(userID: String? = null, screenName: String){
     startActivity(intent)
 }
 
+fun Context.NavigateTwitterTweet(userScreenName:String, tweetID: String? = null){
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://x.com/$userScreenName/status/$tweetID"))
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    startActivity(intent)
+}
+
 fun Context.isTwitterInstalled(): Boolean = try {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         packageManager.getPackageInfo("com.twitter.android", PackageManager.PackageInfoFlags.of(0))
