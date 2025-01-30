@@ -26,7 +26,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
-
+var allTwitterDownloads : Set<String?> = setOf()
 data class MainPageUIState(
     val youHaveDownloadedSth: Boolean = false,
     val favouriteUserName: String = "",
@@ -54,6 +54,15 @@ class MainPageViewmodel @Inject constructor(
         viewModelScope.launch{
             presentFavouriteCardDetails()
             observeDownloadCompleted()
+            loadPreviousDownloads()
+        }
+    }
+
+    private fun loadPreviousDownloads(){
+        viewModelScope.launch{
+            downloadRepository.getAllDownloads().forEach{download->
+                allTwitterDownloads += download.tweetID
+            }
         }
     }
 

@@ -21,7 +21,7 @@ import killua.dev.base.utils.navigateSingle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(navController: NavHostController, title: String, content: @Composable ()-> Unit) {
+fun TopBar(navController: NavHostController, title: String, enableNavIcon: Boolean = true, content: @Composable ()-> Unit, ) {
     var isMenuExpanded by remember {
         mutableStateOf(
             false
@@ -30,13 +30,15 @@ fun TopBar(navController: NavHostController, title: String, content: @Composable
     TopAppBar(
         title = { Text(title) },
         navigationIcon = {
-            IconButton(
-                onClick = { navController.popBackStack() }
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = null
-                )
+            if(enableNavIcon){
+                IconButton(
+                    onClick = { navController.popBackStack() }
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = null
+                    )
+                }
             }
         },
         actions = {

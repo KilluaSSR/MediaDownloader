@@ -30,13 +30,13 @@ import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.base.utils.navigateSingle
 import killua.dev.twitterdownloader.MainPageButtons
 import killua.dev.twitterdownloader.MainRoutes
-import killua.dev.twitterdownloader.allTwitterDownloads
 import killua.dev.twitterdownloader.ui.FavouriteCard
 import killua.dev.twitterdownloader.ui.InputDialog
 import killua.dev.twitterdownloader.ui.MainTopBar
 import killua.dev.twitterdownloader.ui.ViewModels.MainPageUIIntent
 import killua.dev.twitterdownloader.ui.ViewModels.MainPageViewmodel
 import killua.dev.twitterdownloader.ui.MainScaffold
+import killua.dev.twitterdownloader.ui.ViewModels.allTwitterDownloads
 
 @ExperimentalFoundationApi
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)

@@ -32,5 +32,6 @@ class SplashActivity : ComponentActivity() {
         }else{
             startActivity(Intent(this,killua.dev.setup.MainActivity::class.java))
         }
+        finish()
     }
 }

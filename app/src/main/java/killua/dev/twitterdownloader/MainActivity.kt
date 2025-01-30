@@ -16,11 +16,9 @@ import killua.dev.base.ui.animations.AnimatedNavHost
 import killua.dev.twitterdownloader.ui.pages.DownloadPage
 import killua.dev.twitterdownloader.ui.pages.MainPage
 import killua.dev.twitterdownloader.ui.theme.TwitterDownloaderTheme
-var allTwitterDownloads : Set<String?> = setOf()
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
-
     @OptIn(ExperimentalFoundationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,13 +31,6 @@ class MainActivity : ComponentActivity() {
                     LocalNavController provides navController,
                     LocalLifecycleOwner provides LocalLifecycleOwner.current
                 ) {
-//                    LaunchedEffect(Unit) {
-//                        scope.launch{
-//                            downloadRepository.getAllDownloads().forEach{downloads ->
-//                                allTwitterDownloads += downloads.tweetID
-//                            }
-//                        }
-//                    }
                     AnimatedNavHost(
                         navController = navController,
                         startDestination = MainRoutes.MainPage.route

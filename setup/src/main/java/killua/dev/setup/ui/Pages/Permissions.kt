@@ -25,6 +25,7 @@ import killua.dev.base.ui.components.PermissionButton
 import killua.dev.base.ui.components.Section
 import killua.dev.base.ui.components.SetOnResume
 import killua.dev.base.ui.tokens.SizeTokens
+import killua.dev.base.utils.getActivity
 import killua.dev.base.utils.navigateSingle
 import killua.dev.setup.SetupRoutes
 import killua.dev.setup.ui.SetupPageViewModel
@@ -68,6 +69,7 @@ fun PermissionsPage() {
                     viewModel.launchOnIO {
                         viewModel.emitIntent(SetupUIIntent.StartApplication(context))
                     }
+                    //context.getActivity().finish()
                 }
             ) {
                 Text(text = "Continue")

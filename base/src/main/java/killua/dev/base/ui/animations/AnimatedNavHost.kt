@@ -1,15 +1,19 @@
 package killua.dev.base.ui.animations
 
+import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+
 @androidx.compose.runtime.Composable
 fun AnimatedNavHost(
-    navController: androidx.navigation.NavHostController,
+    navController: NavHostController,
     startDestination: String,
-    modifier: androidx.compose.ui.Modifier = androidx.compose.ui.Modifier.Companion,
+    modifier: Modifier = Modifier.Companion,
     contentAlignment: androidx.compose.ui.Alignment = androidx.compose.ui.Alignment.Companion.Center,
     route: String? = null,
     builder: androidx.navigation.NavGraphBuilder.() -> Unit
 ) {
-    androidx.navigation.compose.NavHost(
+    NavHost(
         navController = navController,
         startDestination = startDestination,
         modifier = modifier,

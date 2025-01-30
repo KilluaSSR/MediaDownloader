@@ -82,7 +82,7 @@ fun MainScaffold(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainTopBar(navController: NavHostController) {
-    TopBar(navController, "Twitter Downloader") {
+    TopBar(navController, "Twitter Downloader", enableNavIcon = false) {
         MainPageDropdownMenuButtons.forEach {
             DropdownMenuItem(
                 text = { Text(it.title) },
