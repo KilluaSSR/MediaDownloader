@@ -26,6 +26,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import killua.dev.base.ui.LocalNavController
 import killua.dev.base.ui.SnackbarUIEffect
 import killua.dev.base.ui.components.ActionsBotton
+import killua.dev.base.ui.components.DevelopingAlert
 import killua.dev.base.ui.components.Section
 import killua.dev.base.ui.components.paddingTop
 import killua.dev.base.ui.getRandomColors
@@ -55,6 +56,7 @@ fun MainPage(
     val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
+    var showDevelopingAlert by remember { mutableStateOf(false) }
     var showBottomSheet by remember { mutableStateOf(false) }
     MainScaffold(
         topBar = {
@@ -66,6 +68,13 @@ fun MainPage(
             MainPageBottomSheet(
                 onDismiss = {showBottomSheet = false},
                 sheetState
+            ){
+                showDevelopingAlert = true
+            }
+        }
+        if (showDevelopingAlert) {
+            DevelopingAlert(
+                onDismiss = { showDevelopingAlert = false }
             )
         }
         InputDialog(
@@ -123,7 +132,11 @@ fun MainPage(
                             if (item.route == MainRoutes.Download.route) {
                                 showDialog = true
                             } else {
-                                navController.navigateSingle(item.route)
+                                if (item.route == MainRoutes.DownloadPage.route){
+                                    navController.navigateSingle(item.route)
+                                }else{
+                                    showDevelopingAlert = true
+                                }
                             }
                         }
                     }

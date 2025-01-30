@@ -229,13 +229,15 @@ fun InputDialog(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainPageBottomSheet(onDismiss: () -> Unit,sheetState: SheetState){
+fun MainPageBottomSheet(onDismiss: () -> Unit,sheetState: SheetState, showDevelopingAlert: ()-> Unit){
     val navController = LocalNavController.current!!
     BottomSheet(onDismiss, sheetState) {
         MainPageMenuButtons.forEach { item->
             BottomSheetItem(item.icon,item.title) {
-                navController.navigateSingle(item.route)
+//                navController.navigateSingle(item.route)
+                showDevelopingAlert()
             }
         }
+
     }
 }
