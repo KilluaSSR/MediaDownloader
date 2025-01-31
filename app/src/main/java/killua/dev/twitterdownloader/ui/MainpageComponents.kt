@@ -49,6 +49,7 @@ import killua.dev.base.ui.components.TopBar
 import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.base.utils.navigateSingle
 import killua.dev.twitterdownloader.MainPageMenuButtons
+import killua.dev.twitterdownloader.MainRoutes
 
 @Composable
 fun MainScaffold(
@@ -234,8 +235,12 @@ fun MainPageBottomSheet(onDismiss: () -> Unit,sheetState: SheetState, showDevelo
     BottomSheet(onDismiss, sheetState) {
         MainPageMenuButtons.forEach { item->
             BottomSheetItem(item.icon,item.title) {
-//                navController.navigateSingle(item.route)
-                showDevelopingAlert()
+                if(item.route == MainRoutes.SettingPage.route){
+                    navController.navigateSingle(item.route)
+                }else{
+                    showDevelopingAlert()
+                }
+
             }
         }
 

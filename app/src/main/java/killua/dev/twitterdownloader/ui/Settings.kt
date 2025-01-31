@@ -21,6 +21,7 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -32,9 +33,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.base.datastore.readStoreBoolean
 import killua.dev.base.datastore.saveStoreBoolean
@@ -377,7 +380,7 @@ fun Switchable(
 @Composable
 fun Switchable(
     enabled: Boolean = true,
-    key: androidx.datastore.preferences.core.Preferences.Key<Boolean>,
+    key: Preferences.Key<Boolean>,
     defValue: Boolean = true,
     icon: ImageVector? = null,
     title: String,
@@ -413,7 +416,7 @@ fun Switchable(
 
 @ExperimentalAnimationApi
 @Composable
-fun Slideable(
+private fun Slideable(
     enabled: Boolean = true,
     readOnly: Boolean = false,
     title: String,
@@ -528,7 +531,8 @@ fun Title(
     enabled: Boolean = true,
     title: String,
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
-    content: @Composable ColumnScope.() -> Unit
+    color: Color = MaterialTheme.colorScheme.primary,
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     Column {
         TitleSmallText(
@@ -537,7 +541,8 @@ fun Title(
                 .paddingVertical(SizeTokens.Level12),
             enabled = enabled,
             text = title,
-            fontWeight = FontWeight.Companion.Medium
+            fontWeight = FontWeight.Companion.Medium,
+            color = color
         )
         Column(verticalArrangement = verticalArrangement) {
             content()

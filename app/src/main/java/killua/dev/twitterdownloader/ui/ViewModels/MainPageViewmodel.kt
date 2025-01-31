@@ -1,6 +1,5 @@
 package killua.dev.twitterdownloader.ui.ViewModels
 
-import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.viewModelScope
@@ -9,8 +8,8 @@ import db.Download
 import db.DownloadStatus
 import killua.dev.base.ui.BaseViewModel
 import killua.dev.base.ui.SnackbarUIEffect
-import killua.dev.base.ui.UIIntent
-import killua.dev.base.ui.UIState
+import killua.dev.twitterdownloader.Model.MainPageUIIntent
+import killua.dev.twitterdownloader.Model.MainPageUIState
 import killua.dev.twitterdownloader.api.Model.TwitterRequestResult
 import killua.dev.twitterdownloader.api.Model.TwitterUser
 import killua.dev.twitterdownloader.api.TwitterApiService
@@ -26,20 +25,8 @@ import java.util.Date
 import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
+
 var allTwitterDownloads : Set<String?> = setOf()
-data class MainPageUIState(
-    val youHaveDownloadedSth: Boolean = false,
-    val favouriteUserName: String = "",
-    val favouriteUserScreenName: String = "",
-    val favouriteUserID: String = "",
-    val downloadedTimes: Int = 0
-) : UIState
-
-sealed class MainPageUIIntent : UIIntent {
-    data class ExecuteDownload(val tweetID: String) : MainPageUIIntent()
-    data class NavigateToFavouriteUser(val context: Context, val userID: String, val screenName: String) : MainPageUIIntent()
-}
-
 @HiltViewModel
 class MainPageViewmodel @Inject constructor(
     private val twitterApiService: TwitterApiService,

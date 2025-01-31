@@ -15,6 +15,7 @@ import killua.dev.base.ui.LocalNavController
 import killua.dev.base.ui.animations.AnimatedNavHost
 import killua.dev.twitterdownloader.ui.pages.DownloadPage
 import killua.dev.twitterdownloader.ui.pages.MainPage
+import killua.dev.twitterdownloader.ui.pages.SettingsPage
 import killua.dev.twitterdownloader.ui.theme.TwitterDownloaderTheme
 
 @AndroidEntryPoint
@@ -40,6 +41,9 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(MainRoutes.DownloadPage.route){
                             DownloadPage()
+                        }
+                        composable(MainRoutes.SettingPage.route){
+                            SettingsPage()
                         }
                     }
                 }

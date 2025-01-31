@@ -1,7 +1,6 @@
 package killua.dev.twitterdownloader.download
 
 import android.content.Context
-import android.content.Intent
 import androidx.core.net.toUri
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints

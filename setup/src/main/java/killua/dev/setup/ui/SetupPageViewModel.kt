@@ -28,16 +28,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
-data class SetupUIState(
-    val isLoggedIn: Boolean = false
-) : killua.dev.base.ui.UIState
-
-sealed class SetupUIIntent : killua.dev.base.ui.UIIntent {
-    data class ValidateNotifications(val context: Context) : SetupUIIntent()
-    data class OnResume(val context: Context) : SetupUIIntent()
-    data class StartApplication(val context: Context) : SetupUIIntent()
-}
-
 @HiltViewModel
 class SetupPageViewModel @Inject constructor() :
     BaseViewModel<SetupUIIntent, SetupUIState, SnackbarUIEffect>(SetupUIState(false)) {

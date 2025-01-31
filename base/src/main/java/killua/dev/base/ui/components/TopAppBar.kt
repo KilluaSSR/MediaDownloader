@@ -1,5 +1,6 @@
 package killua.dev.base.ui.components
 
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ExpandMore
@@ -7,8 +8,10 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -16,6 +19,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import killua.dev.base.ui.LocalNavController
+import killua.dev.base.utils.maybePopBackStack
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MainTopBar(navController: NavHostController, showMoreOnClick : ()-> Unit ) {
+    TopBar(navController, "Twitter Downloader", enableNavIcon = false,
+        showMoreOnClick = showMoreOnClick
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,5 +59,27 @@ fun TopBar(navController: NavHostController, title: String, enableNavIcon: Boole
                 )
             }
         }
+    )
+}
+
+@ExperimentalMaterial3Api
+@Composable
+fun SecondaryLargeTopBar(
+    scrollBehavior: TopAppBarScrollBehavior?,
+    title: String,
+    actions: @Composable RowScope.() -> Unit = {},
+    onBackClick: (() -> Unit)? = null
+) {
+    val navController = LocalNavController.current!!
+    LargeTopAppBar(
+        title = { Text(text = title) },
+        scrollBehavior = scrollBehavior,
+        navigationIcon = {
+            ArrowBackButton {
+                if (onBackClick != null) onBackClick.invoke()
+                else navController.maybePopBackStack()
+            }
+        },
+        actions = actions,
     )
 }

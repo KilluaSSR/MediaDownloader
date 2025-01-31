@@ -1,4 +1,4 @@
-package killua.dev.setup.ui
+package killua.dev.setup.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

@@ -29,7 +29,7 @@ import killua.dev.base.utils.getActivity
 import killua.dev.base.utils.navigateSingle
 import killua.dev.setup.SetupRoutes
 import killua.dev.setup.ui.SetupPageViewModel
-import killua.dev.setup.ui.SetupScaffold
+import killua.dev.setup.ui.components.SetupScaffold
 import killua.dev.setup.ui.SetupUIIntent
 
 @SuppressLint("SetJavaScriptEnabled")
