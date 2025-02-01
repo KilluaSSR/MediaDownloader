@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
 import androidx.work.CoroutineWorker
@@ -23,6 +24,8 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.io.BufferedInputStream
+import java.io.OutputStream
 import java.util.concurrent.TimeUnit
 
 class VideoDownloadWorker(
@@ -52,23 +55,31 @@ class VideoDownloadWorker(
         val fileName = inputData.getString(KEY_FILE_NAME) ?: return Result.failure()
         val MAX_RETRIES = context.readMaxRetries().first()
         val isNotificationEnabled = context.readNotificationEnabled().first()
+
         return try {
-            val result = downloadVideoToMediaStore(url, fileName, screenName, downloadId)
-            if (result is Result.Failure && runAttemptCount < MAX_RETRIES) {
-                Result.retry()
-            } else if (result is Result.Success){
-                if(isNotificationEnabled){
-                    showDownloadComplete(downloadId,result.outputData.getString(FILE_URI)!!.toUri(), result.outputData.getString(KEY_NAME)!!)
+            withContext(Dispatchers.IO) {
+                val result = downloadVideoToMediaStore(url, fileName, screenName, downloadId)
+                when {
+                    result is Result.Failure && runAttemptCount < MAX_RETRIES -> Result.retry()
+                    result is Result.Success -> {
+                        if (isNotificationEnabled) {
+                            showDownloadComplete(
+                                downloadId,
+                                result.outputData.getString(FILE_URI)!!.toUri(),
+                                result.outputData.getString(KEY_NAME)!!
+                            )
+                        }
+                        result
+                    }
+                    else -> result
                 }
-                result
-            }else{
-                result
             }
         } catch (e: Exception) {
+            Log.e("VideoDownloadWorker", "Download failed", e)
             if (runAttemptCount < MAX_RETRIES) {
                 Result.retry()
             } else {
-                if(isNotificationEnabled){
+                if (isNotificationEnabled) {
                     showDownloadFailed(downloadId, e.message ?: "Failed to download")
                 }
                 Result.failure(
@@ -87,101 +98,102 @@ class VideoDownloadWorker(
         screenName: String,
         downloadId: String
     ): Result = withContext(Dispatchers.IO) {
-        val MAX_RETRIES = context.readMaxRetries().first()
-        val contentValues = ContentValues().apply {
-            put(MediaStore.Video.Media.DISPLAY_NAME, fileName)
-            put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
-            put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/TwitterDownloader/$screenName")
-            put(MediaStore.Video.Media.IS_PENDING, 1)
-        }
-        val collectionUri = MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
-        val itemUri = context.contentResolver.insert(collectionUri, contentValues)
-            ?: return@withContext Result.failure(
-                workDataOf(
-                    KEY_DOWNLOAD_ID to downloadId,
-                    KEY_ERROR_MESSAGE to "Unable to insert into MediaStore"
-                )
-            )
-        val client = OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .build()
+        var itemUri: Uri? = null
+        var output: OutputStream? = null
+        var input: BufferedInputStream? = null
 
-        val request = Request.Builder().url(url).build()
         try {
-            client.newCall(request).execute().use { response ->
+            val contentValues = ContentValues().apply {
+                put(MediaStore.Video.Media.DISPLAY_NAME, fileName)
+                put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
+                put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/TwitterDownloader/$screenName")
+                put(MediaStore.Video.Media.IS_PENDING, 1)
+            }
+
+            itemUri = context.contentResolver.insert(
+                MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
+                contentValues
+            ) ?: throw IllegalStateException("Unable to insert into MediaStore")
+
+            val client = OkHttpClient.Builder()
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .build()
+
+            client.newCall(Request.Builder().url(url).build()).execute().use { response ->
                 if (!response.isSuccessful) {
-                    return@withContext Result.failure(
-                        workDataOf(
-                            KEY_DOWNLOAD_ID to downloadId,
-                            KEY_ERROR_MESSAGE to "ErrorCode: ${response.code}"
-                        )
-                    )
+                    throw IllegalStateException("Network error: ${response.code}")
                 }
-                val body = response.body
-                    ?: return@withContext Result.failure(
-                        workDataOf(
-                            KEY_DOWNLOAD_ID to downloadId,
-                            KEY_ERROR_MESSAGE to "Response body is null"
-                        )
-                    )
-                val totalBytes = body.contentLength()
 
-                context.contentResolver.openOutputStream(itemUri)?.use { output ->
-                    val buffer = ByteArray(16384)
-                    var bytesRead = 0L
-                    val input = body.byteStream()
-                    while (isActive) {
-                        val read = input.read(buffer)
-                        if (read == -1) break
-                        output.write(buffer, 0, read)
-                        bytesRead += read
+                val responseBody = response.body ?: throw IllegalStateException("Response body is null")
+                val totalBytes = responseBody.contentLength()
+                var bytesRead = 0L
 
-                        if (totalBytes > 0) {
-                            val progress = ((bytesRead * 100) / totalBytes).toInt()
-                            setProgress(
-                                workDataOf(
-                                    PROGRESS to progress,
-                                    KEY_DOWNLOAD_ID to downloadId,
-                                    "bytes_downloaded" to bytesRead,
-                                    "total_bytes" to totalBytes
+                withContext(Dispatchers.IO) {
+                    try {
+                        output = context.contentResolver.openOutputStream(itemUri)
+                            ?: throw IllegalStateException("Failed to open output stream")
+                        input = responseBody.byteStream().buffered()
+
+                        val buffer = ByteArray(8192)
+                        while (isActive) {
+                            val read = input?.read(buffer) ?: -1
+                            if (read == -1) break
+
+                            output?.let {
+                                it.write(buffer, 0, read)
+                                it.flush()
+                            }
+
+                            bytesRead += read
+
+                            if (totalBytes > 0) {
+                                val progress = ((bytesRead * 100) / totalBytes).toInt()
+                                setProgress(
+                                    workDataOf(
+                                        PROGRESS to progress,
+                                        KEY_DOWNLOAD_ID to downloadId
+                                    )
                                 )
+                            }
+                        }
+
+                        // 完成下载，更新文件状态
+                        val updateValues = ContentValues().apply {
+                            put(MediaStore.Video.Media.IS_PENDING, 0)
+                        }
+                        context.contentResolver.update(itemUri, updateValues, null, null)
+
+                        Result.success(
+                            workDataOf(
+                                KEY_DOWNLOAD_ID to downloadId,
+                                FILE_URI to itemUri.toString(),
+                                FILE_SIZE to totalBytes,
+                                KEY_NAME to fileName
                             )
+                        )
+                    } finally {
+                        try {
+                            input?.close()
+                            output?.close()
+                        } catch (e: Exception) {
+                            Log.e("VideoDownloadWorker", "Error closing streams", e)
                         }
                     }
-                } ?: return@withContext Result.failure(
-                    workDataOf(
-                        KEY_DOWNLOAD_ID to downloadId,
-                        KEY_ERROR_MESSAGE to "Failed to open outputStream"
-                    )
-                )
-
-                val updateValues = ContentValues().apply {
-                    put(MediaStore.Video.Media.IS_PENDING, 0)
                 }
-                context.contentResolver.update(itemUri, updateValues, null, null)
-
-                val finalSize = response.body!!.contentLength()
-                return@withContext Result.success(
-                    workDataOf(
-                        KEY_DOWNLOAD_ID to downloadId,
-                        FILE_URI to itemUri.toString(),
-                        FILE_SIZE to finalSize
-                    )
-                )
             }
         } catch (e: Exception) {
-            if (runAttemptCount < MAX_RETRIES) {
-                return@withContext Result.retry()
-            } else {
-                context.contentResolver.delete(itemUri, null, null)
-                return@withContext Result.failure(
-                    workDataOf(
-                        KEY_DOWNLOAD_ID to downloadId,
-                        KEY_ERROR_MESSAGE to e.message
-                    )
-                )
+            // 清理未完成的文件
+            try {
+                input?.close()
+                output?.close()
+                itemUri?.let { uri ->
+                    context.contentResolver.delete(uri, null, null)
+                }
+            } catch (cleanupError: Exception) {
+                Log.e("VideoDownloadWorker", "Error during cleanup", cleanupError)
             }
+            throw e
         }
     }
 

@@ -46,6 +46,7 @@ import killua.dev.base.ui.components.paddingBottom
 import killua.dev.base.ui.components.paddingHorizontal
 import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.base.Model.DownloadPageDestinations
+import killua.dev.base.ui.components.FileNotFountAlert
 import killua.dev.twitterdownloader.ui.DownloadItemCard
 import killua.dev.twitterdownloader.ui.DownloadPageCommands
 import killua.dev.twitterdownloader.ui.DownloadPageTopAppBar
@@ -86,6 +87,7 @@ fun DownloadPage() {
         ) },
         snackbarHostState = viewModel.snackbarHostState
     ) {
+        var showFileNotFoundAlert by remember { mutableStateOf(false) }
         if(showBottomSheet){
             BottomSheet(
                 onDismissRequest = { showBottomSheet = false },
@@ -101,6 +103,9 @@ fun DownloadPage() {
                     }
                 )
             }
+        }
+        if(showFileNotFoundAlert){
+            FileNotFountAlert { showFileNotFoundAlert = false }
         }
         Column(modifier = Modifier.fillMaxSize()) {
             var enabled by remember { mutableStateOf(true) }
@@ -213,15 +218,6 @@ fun DownloadPage() {
                                     item = download,
                                     onCommand = { item, cmd ->
                                         when (cmd) {
-                                            DownloadPageCommands.Open -> {
-                                                item.fileUri?.let { uri ->
-                                                    val openIntent = Intent(Intent.ACTION_VIEW).apply {
-                                                        setDataAndType(uri, "video/*")
-                                                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                                    }
-                                                    context.startActivity(openIntent)
-                                                }
-                                            }
                                             DownloadPageCommands.Resume,
                                             DownloadPageCommands.Retry -> {
                                                 viewModel.launchOnIO {
@@ -263,7 +259,8 @@ fun DownloadPage() {
                                         }
                                     },
                                     thumbnailCache = uiState.value.thumbnailCache,
-                                    modifier = Modifier.animateItemPlacement()
+                                    modifier = Modifier.animateItemPlacement(),
+                                    fileNotFoundClick = { showFileNotFoundAlert = true }
                                 )
                             }
                         }

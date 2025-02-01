@@ -15,16 +15,16 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import db.Download
 import db.DownloadStatus
 import killua.dev.base.datastore.readNotificationEnabled
-import killua.dev.base.utils.StorageManager
 import killua.dev.twitterdownloader.download.VideoDownloadWorker.Companion.FILE_SIZE
 import killua.dev.twitterdownloader.download.VideoDownloadWorker.Companion.FILE_URI
 import killua.dev.twitterdownloader.download.VideoDownloadWorker.Companion.KEY_ERROR_MESSAGE
 import killua.dev.twitterdownloader.repository.DownloadRepository
 import killua.dev.base.utils.DownloadEventManager
-import killua.dev.base.utils.NetworkManager
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
@@ -41,18 +41,28 @@ class DownloadManager @Inject constructor(
     @ApplicationContext private val context: Context,
     private val workManager: WorkManager,
     private val queueManager: DownloadQueueManager,
-    private val storageManager: StorageManager,
-    private val networkManager: NetworkManager,
     private val downloadRepository: DownloadRepository,
     private val downloadEventManager: DownloadEventManager,
 
 ) {
     private val BACKOFF_DELAY = 5_000L
+
+    private val managerScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     init {
+        queueManager.onReadyToDownload = { download ->
+            startWork(download)
+        }
         observeWorkInfo()
     }
 
     suspend fun enqueueDownload(download: Download) {
+        val canStartNow = queueManager.enqueue(download)
+        if (canStartNow) {
+            startWork(download)
+        }
+    }
+
+    private fun startWork(download: Download) {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .setRequiresStorageNotLow(true)
@@ -78,15 +88,14 @@ class DownloadManager @Inject constructor(
             )
             .build()
 
-        if (networkManager.isNetworkAvailable() && storageManager.hasEnoughSpace(download.fileSize)) {
-            queueManager.enqueue(download)
-            workManager.enqueueUniqueWork(
-                download.uuid,
-                ExistingWorkPolicy.APPEND_OR_REPLACE,
-                workRequest
-            )
-        }
+        // 使用 UniqueWork 避免重复
+        workManager.enqueueUniqueWork(
+            download.uuid,
+            ExistingWorkPolicy.APPEND_OR_REPLACE,
+            workRequest
+        )
     }
+
     @OptIn(DelicateCoroutinesApi::class)
     private fun observeWorkInfo() {
 
@@ -131,21 +140,10 @@ class DownloadManager @Inject constructor(
             .launchIn(GlobalScope)
         }
 
-    fun getWorkInfoFlow() = workManager.getWorkInfosForUniqueWorkFlow("download_tag")
 
-    fun cancelDownload(downloadId: String) {
+    suspend fun cancelDownload(downloadId: String) {
         workManager.cancelUniqueWork(downloadId)
         queueManager.markComplete(downloadId)
-    }
-
-    fun pauseAllDownloads() {
-        workManager.cancelAllWork()
-    }
-
-    suspend fun resumeAllDownloads() = withContext(Dispatchers.IO) {
-        queueManager.getAllPendingDownloads().forEach { download ->
-            enqueueDownload(download)
-        }
     }
 
     fun isDownloadActive(downloadId: String): Boolean {

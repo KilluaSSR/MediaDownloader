@@ -11,15 +11,18 @@ import androidx.compose.ui.Modifier
 import killua.dev.base.ui.tokens.SizeTokens
 
 @Composable
-fun DevelopingAlert(
+fun OKAlert(
+    title: String,
+    mainText: String,
     onDismiss: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = MaterialTheme.colorScheme.surface,
+        modifier = Modifier.padding(SizeTokens.Level8),
         title = {
             Text(
-                text = "Sorry",
+                text = title,
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -29,7 +32,7 @@ fun DevelopingAlert(
                 modifier = Modifier.padding(top = SizeTokens.Level8)
             ) {
                 Text(
-                    text = "This feature is under development, it's unavailable, currently.",
+                    text = mainText,
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -39,11 +42,13 @@ fun DevelopingAlert(
             TextButton(
                 onClick = onDismiss,
                 modifier = Modifier.padding(
-                    horizontal = SizeTokens.Level20,
-                    vertical = SizeTokens.Level8
+                    vertical = SizeTokens.Level2
                 )
             ) {
-                Text("OK")
+                Text(
+                    text = "OK",
+                    style = MaterialTheme.typography.labelLarge
+                )
             }
         }
     )

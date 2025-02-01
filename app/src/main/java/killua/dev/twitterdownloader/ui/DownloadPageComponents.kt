@@ -48,7 +48,6 @@ import killua.dev.twitterdownloader.Model.TwitterDownloadItem
 import killua.dev.base.utils.formatTimestamp
 
 enum class DownloadPageCommands {
-    Open,
     Resume,
     Pause,
     Retry,
@@ -92,7 +91,8 @@ fun DownloadItemCard(
     item: TwitterDownloadItem,
     thumbnailCache: Map<Uri, Bitmap?>,
     onCommand: (TwitterDownloadItem, DownloadPageCommands) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    fileNotFoundClick: () -> Unit
 ) {
     val context = LocalContext.current
     val status = item.downloadState.toDownloadStatus()
@@ -102,11 +102,19 @@ fun DownloadItemCard(
             .padding(horizontal = SizeTokens.Level16, vertical = SizeTokens.Level1)
             .clickable(enabled = status == DownloadStatus.COMPLETED) {
                 item.fileUri?.let { uri ->
-                    val openIntent = Intent(Intent.ACTION_VIEW).apply {
-                        setDataAndType(uri, "video/*")
-                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    try {
+                        context.contentResolver.openInputStream(uri)?.use {
+                            val openIntent = Intent(Intent.ACTION_VIEW).apply {
+                                setDataAndType(uri, "video/*")
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            }
+                            context.startActivity(openIntent)
+                        } ?: run {
+                            fileNotFoundClick()
+                        }
+                    } catch (e: Exception) {
+                        fileNotFoundClick()
                     }
-                    context.startActivity(openIntent)
                 }
             },
         shape = RoundedCornerShape(SizeTokens.Level12),
