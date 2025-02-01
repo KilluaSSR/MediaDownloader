@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import killua.dev.base.ui.LocalNavController
+import killua.dev.base.ui.MainRoutes
 import killua.dev.base.ui.animations.AnimatedNavHost
 import killua.dev.twitterdownloader.ui.pages.DownloadPage
 import killua.dev.twitterdownloader.ui.pages.MainPage

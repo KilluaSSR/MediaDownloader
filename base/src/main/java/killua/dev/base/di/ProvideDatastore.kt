@@ -10,6 +10,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import killua.dev.base.datastore.PreferencesDataSource
+import killua.dev.base.repository.SettingsRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Singleton
@@ -27,4 +29,19 @@ object DataStoreModule {
         PreferenceDataStoreFactory.create(scope = CoroutineScope(scope.coroutineContext + ioDispatcher)) {
             context.preferencesDataStoreFile("Datastore")
         }
+
+    @Provides
+    @Singleton
+    fun providePreferencesDataSource(
+        dataStore: DataStore<Preferences>
+    ): PreferencesDataSource = PreferencesDataSource(dataStore)
+
+    @Provides
+    @Singleton
+    fun provideSettingsRepository(
+        preferencesDataSource: PreferencesDataSource,
+        @ApplicationScope scope: CoroutineScope
+    ): SettingsRepository = SettingsRepository(
+        preferencesDataSource = preferencesDataSource, scope
+    )
 }

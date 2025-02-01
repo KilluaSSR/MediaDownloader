@@ -6,8 +6,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import killua.dev.twitterdownloader.utils.VideoDurationRepository
-import killua.dev.twitterdownloader.utils.VideoDurationRepositoryImpl
+import killua.dev.base.utils.VideoDurationRepository
+import killua.dev.base.utils.VideoDurationRepositoryImpl
 import javax.inject.Singleton
 
 @Module

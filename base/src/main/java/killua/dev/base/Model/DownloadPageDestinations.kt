@@ -1,4 +1,4 @@
-package killua.dev.twitterdownloader.ui.Destinations.Download
+package killua.dev.base.Model
 
 enum class DownloadPageDestinations {
     All,

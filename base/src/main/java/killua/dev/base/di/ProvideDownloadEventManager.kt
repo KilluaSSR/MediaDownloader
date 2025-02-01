@@ -1,10 +1,10 @@
-package killua.dev.twitterdownloader.di
+package killua.dev.base.di
 
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import killua.dev.twitterdownloader.utils.DownloadEventManager
+import killua.dev.base.utils.DownloadEventManager
 import javax.inject.Singleton
 
 @Module

@@ -29,14 +29,13 @@ import killua.dev.base.ui.components.paddingTop
 import killua.dev.base.ui.getRandomColors
 import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.base.utils.navigateSingle
-import killua.dev.twitterdownloader.MainPageButtons
-import killua.dev.twitterdownloader.MainRoutes
+import killua.dev.base.ui.MainPageButtons
+import killua.dev.base.ui.MainRoutes
 import killua.dev.twitterdownloader.Model.MainPageUIIntent
 import killua.dev.twitterdownloader.ui.FavouriteCard
 import killua.dev.twitterdownloader.ui.InputDialog
 import killua.dev.twitterdownloader.ui.MainPageBottomSheet
 import killua.dev.twitterdownloader.ui.ViewModels.MainPageViewmodel
-import killua.dev.twitterdownloader.ui.ViewModels.allTwitterDownloads
 
 @ExperimentalFoundationApi
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -81,11 +80,8 @@ fun MainPage(
                         viewmodel.emitEffect(SnackbarUIEffect.ShowSnackbar("You need to paste the tweet's url here."))
                     }else if(!url.contains("x.com/") && !url.contains("twitter.com/")) {
                         viewmodel.emitEffect(SnackbarUIEffect.ShowSnackbar("This is NOT a twitter url!"))
-                    }else if(allTwitterDownloads.contains(url.split("?")[0].split("/").last())){
-                        viewmodel.emitEffect(SnackbarUIEffect.ShowSnackbar("No need to download again, it's already in your list."))
                     }else {
                         val tweetID = url.split("?")[0].split("/").last()
-                        allTwitterDownloads += tweetID
                         viewmodel.emitIntent(MainPageUIIntent.ExecuteDownload(tweetID))
                     }
                 }

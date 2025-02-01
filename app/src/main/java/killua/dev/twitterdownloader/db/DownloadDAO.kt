@@ -61,6 +61,28 @@ interface DownloadDao {
     """)
     suspend fun updateProgress(uuid: String, status: DownloadStatus, progress: Int)
 
+
+    @Query("""
+        UPDATE Download 
+        SET status = :status
+        WHERE uuid = :uuid AND status != 'DOWNLOADING'
+    """)
+    suspend fun updateDownloadingStatus(uuid: String, status: DownloadStatus = DownloadStatus.DOWNLOADING)
+
+    @Query("""
+        UPDATE Download 
+        SET status = :status
+        WHERE uuid = :uuid AND status != 'COMPLETED'
+    """)
+    suspend fun updateCompletedStatus(uuid: String, status: DownloadStatus = DownloadStatus.COMPLETED)
+
+    @Query("""
+        UPDATE Download 
+        SET status = :status
+        WHERE uuid = :uuid AND status != 'FAILED'
+    """)
+    suspend fun updateFailedStatus(uuid: String, status: DownloadStatus = DownloadStatus.FAILED)
+
     // ✅ 下载完成时更新
     @Query("""
         UPDATE Download 

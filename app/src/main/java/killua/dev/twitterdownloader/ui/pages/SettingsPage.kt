@@ -14,7 +14,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -29,11 +28,10 @@ import killua.dev.base.datastore.writeMaxRetries
 import killua.dev.base.ui.LocalNavController
 import killua.dev.base.ui.components.SettingsScaffold
 import killua.dev.base.ui.tokens.SizeTokens
-import killua.dev.twitterdownloader.ui.Clickable
-import killua.dev.twitterdownloader.ui.Selectable
-import killua.dev.twitterdownloader.ui.Slideable
-import killua.dev.twitterdownloader.ui.Switchable
-import killua.dev.twitterdownloader.ui.Title
+import killua.dev.base.ui.components.Clickable
+import killua.dev.base.ui.components.Slideable
+import killua.dev.base.ui.components.Switchable
+import killua.dev.base.ui.components.Title
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 

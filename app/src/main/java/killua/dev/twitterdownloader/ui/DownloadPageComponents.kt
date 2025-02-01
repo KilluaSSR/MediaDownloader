@@ -44,8 +44,8 @@ import androidx.navigation.NavHostController
 import db.DownloadStatus
 import killua.dev.base.ui.components.TopBar
 import killua.dev.base.ui.tokens.SizeTokens
-import killua.dev.twitterdownloader.Model.DownloadItem
-import killua.dev.twitterdownloader.utils.formatTimestamp
+import killua.dev.twitterdownloader.Model.TwitterDownloadItem
+import killua.dev.base.utils.formatTimestamp
 
 enum class DownloadPageCommands {
     Open,
@@ -89,9 +89,9 @@ fun DownloadPageTopAppBar(
 
 @Composable
 fun DownloadItemCard(
-    item: DownloadItem,
+    item: TwitterDownloadItem,
     thumbnailCache: Map<Uri, Bitmap?>,
-    onCommand: (DownloadItem, DownloadPageCommands) -> Unit,
+    onCommand: (TwitterDownloadItem, DownloadPageCommands) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current

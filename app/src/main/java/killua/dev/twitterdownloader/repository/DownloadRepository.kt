@@ -63,6 +63,10 @@ class DownloadRepository @Inject constructor(
         )
     }
 
+    suspend fun updateDownloadingStatus(uuid: String) = downloadDao.updateDownloadingStatus(uuid = uuid)
+    suspend fun updateCompletedStatus(uuid: String) = downloadDao.updateCompletedStatus(uuid = uuid)
+    suspend fun updateFailedStatus(uuid: String) = downloadDao.updateFailedStatus(uuid = uuid)
+
     // ✅ 下载完成时更新
     suspend fun updateCompleted(
         uuid: String,

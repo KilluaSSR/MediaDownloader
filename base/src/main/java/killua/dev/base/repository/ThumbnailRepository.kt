@@ -1,11 +1,11 @@
-package killua.dev.twitterdownloader.repository
+package killua.dev.base.repository
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.LruCache
 import dagger.hilt.android.qualifiers.ApplicationContext
-import killua.dev.twitterdownloader.utils.loadCachedThumbnailOrCreate
+import killua.dev.base.utils.loadCachedThumbnailOrCreate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

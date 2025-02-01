@@ -35,7 +35,7 @@ fun Context.readNotificationEnabled() = readStoreBoolean(key = NOTIFICATION_ENAB
 fun Context.readDownloadPath() = readStoreString(key = DOWNLOAD_PATH, defValue = "")
 fun Context.readMaxConcurrentDownloads() = readStoreInt(key = MAX_CONCURRENT_DOWNLOADS, defValue = 3)
 fun Context.readMaxRetries() = readStoreInt(key = MAX_RETRIES, defValue = 3)
-fun Context.readOnlyWifi() = readStoreBoolean(key = WIFI, defValue = false)
+fun Context.readOnlyWifi() = readStoreBoolean(key = WIFI, defValue = true)
 //Write
 suspend fun Context.writeApplicationUserScreenName(screenName: String) = saveStoreString(key = APPLICATION_USER_SCREENNAME_KEY, value = screenName)
 suspend fun Context.writeApplicationUserName(name: String) = saveStoreString(key = APPLICATION_USER_NAME_KEY, value = name)

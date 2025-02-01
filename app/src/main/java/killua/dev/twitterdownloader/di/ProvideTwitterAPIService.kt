@@ -39,18 +39,16 @@ class UserDataManager @Inject constructor(
     private val context: Context,
     private val scope: CoroutineScope
 ) {
-    private val _userData = MutableStateFlow(ApplicationUserDataTwitter("", "", "", ""))
+    private val _userData = MutableStateFlow(ApplicationUserDataTwitter("", ""))
     val userData: StateFlow<ApplicationUserDataTwitter> = _userData.asStateFlow()
 
     init {
         scope.launch {
             combine(
-                context.readApplicationUserScreenName(),
-                context.readApplicationUserName(),
                 context.readApplicationUserCt0(),
                 context.readApplicationUserAuth()
-            ) { screenName, userName, ct0, auth ->
-                ApplicationUserDataTwitter(screenName, userName, ct0, auth)
+            ) {  ct0, auth ->
+                ApplicationUserDataTwitter(ct0, auth)
             }.collect {
                 _userData.value = it
             }

@@ -1,4 +1,4 @@
-package killua.dev.twitterdownloader.utils
+package killua.dev.base.utils
 
 import android.content.Context
 import android.graphics.Bitmap

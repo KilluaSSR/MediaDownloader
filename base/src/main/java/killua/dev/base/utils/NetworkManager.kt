@@ -1,4 +1,4 @@
-package killua.dev.twitterdownloader.utils
+package killua.dev.base.utils
 
 import android.content.Context
 import android.net.ConnectivityManager
@@ -55,9 +55,19 @@ class NetworkManager @Inject constructor(
         connectivityManager.registerNetworkCallback(request, networkCallback)
     }
 
-    fun isWifiConnected(): Boolean = _networkState.value is NetworkState.WifiConnected
+    fun isWifiConnected(): Boolean {
+        val capabilities = connectivityManager.getNetworkCapabilities(
+            connectivityManager.activeNetwork
+        )
+        return capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true
+    }
 
-    fun isNetworkAvailable(): Boolean = _networkState.value !is NetworkState.Unavailable
+    fun isNetworkAvailable(): Boolean {
+        val capabilities = connectivityManager.getNetworkCapabilities(
+            connectivityManager.activeNetwork
+        )
+        return capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
+    }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun unregister() {

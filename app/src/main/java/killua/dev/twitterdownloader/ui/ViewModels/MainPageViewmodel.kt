@@ -6,8 +6,10 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import db.Download
 import db.DownloadStatus
+import killua.dev.base.repository.SettingsRepository
 import killua.dev.base.ui.BaseViewModel
 import killua.dev.base.ui.SnackbarUIEffect
+import killua.dev.base.ui.SnackbarUIEffect.*
 import killua.dev.twitterdownloader.Model.MainPageUIIntent
 import killua.dev.twitterdownloader.Model.MainPageUIState
 import killua.dev.twitterdownloader.api.Model.TwitterRequestResult
@@ -15,7 +17,8 @@ import killua.dev.twitterdownloader.api.Model.TwitterUser
 import killua.dev.twitterdownloader.api.TwitterApiService
 import killua.dev.twitterdownloader.download.DownloadManager
 import killua.dev.twitterdownloader.repository.DownloadRepository
-import killua.dev.twitterdownloader.utils.DownloadEventManager
+import killua.dev.base.utils.DownloadEventManager
+import killua.dev.base.utils.DownloadPreChecks
 import killua.dev.twitterdownloader.utils.NavigateTwitterProfile
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -26,13 +29,14 @@ import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
 
-var allTwitterDownloads : Set<String?> = setOf()
+
 @HiltViewModel
 class MainPageViewmodel @Inject constructor(
     private val twitterApiService: TwitterApiService,
     private val downloadRepository: DownloadRepository,
     private val downloadManager: DownloadManager,
-    private val downloadEventManager: DownloadEventManager
+    private val downloadEventManager: DownloadEventManager,
+    private val downloadPreChecks: DownloadPreChecks
 ) : BaseViewModel<MainPageUIIntent, MainPageUIState, SnackbarUIEffect>(
     MainPageUIState()
 ) {
@@ -41,15 +45,6 @@ class MainPageViewmodel @Inject constructor(
         viewModelScope.launch{
             presentFavouriteCardDetails()
             observeDownloadCompleted()
-            loadPreviousDownloads()
-        }
-    }
-
-    private fun loadPreviousDownloads(){
-        viewModelScope.launch{
-            downloadRepository.getAllDownloads().forEach{download->
-                allTwitterDownloads += download.tweetID
-            }
         }
     }
 
@@ -75,12 +70,7 @@ class MainPageViewmodel @Inject constructor(
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override suspend fun onEvent(state: MainPageUIState, intent: MainPageUIIntent) {
         when (intent) {
-            is MainPageUIIntent.ExecuteDownload -> {
-                mutex.withLock {
-                    handleNewDownload(intent.tweetID)
-                }
-            }
-
+            is MainPageUIIntent.ExecuteDownload -> { mutex.withLock { handleNewDownload(intent.tweetID) } }
             is MainPageUIIntent.NavigateToFavouriteUser -> {
                 withMainContext {
                     intent.context.NavigateTwitterProfile(intent.userID,intent.screenName)
@@ -90,8 +80,8 @@ class MainPageViewmodel @Inject constructor(
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    private suspend fun handleNewDownload(tweetId: String) =
-        withMainContext {
+    private suspend fun handleNewDownload(tweetId: String) {
+        downloadPreChecks.canStartDownload().onSuccess {
             try {
                 when (val result = twitterApiService.getTweetDetailAsync(tweetId)) {
                     is TwitterRequestResult.Success -> {
@@ -104,7 +94,7 @@ class MainPageViewmodel @Inject constructor(
 
                     }
                     is TwitterRequestResult.Error -> emitEffect(
-                        SnackbarUIEffect.ShowSnackbar(result.message)
+                        SnackbarUIEffect.ShowSnackbar("Twitter request error")
                     )
                 }
             } catch (e: Exception) {
@@ -114,7 +104,11 @@ class MainPageViewmodel @Inject constructor(
                     )
                 )
             }
+        }.onFailure { error ->
+            emitEffect(SnackbarUIEffect.ShowSnackbar(error.message.toString()))
         }
+    }
+
 
     private suspend fun createAndStartDownload(videoUrl: String, user: TwitterUser?, tweetID: String) {
         try {
@@ -147,6 +141,6 @@ class MainPageViewmodel @Inject constructor(
     }
 
     private suspend fun handleError(message: String, error: Exception) {
-        emitEffect(SnackbarUIEffect.ShowSnackbar("$message: ${error.message ?: "未知错误"}"))
+        emitEffect(ShowSnackbar("$message: ${error.message ?: "未知错误"}"))
     }
 }

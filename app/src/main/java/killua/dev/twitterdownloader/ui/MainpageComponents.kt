@@ -48,8 +48,8 @@ import killua.dev.base.ui.components.TitleLargeText
 import killua.dev.base.ui.components.TopBar
 import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.base.utils.navigateSingle
-import killua.dev.twitterdownloader.MainPageMenuButtons
-import killua.dev.twitterdownloader.MainRoutes
+import killua.dev.base.ui.MainPageMenuButtons
+import killua.dev.base.ui.MainRoutes
 
 @Composable
 fun MainScaffold(

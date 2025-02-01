@@ -20,11 +20,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.NotInterested
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -47,7 +45,7 @@ import killua.dev.base.ui.components.BottomSheet
 import killua.dev.base.ui.components.paddingBottom
 import killua.dev.base.ui.components.paddingHorizontal
 import killua.dev.base.ui.tokens.SizeTokens
-import killua.dev.twitterdownloader.ui.Destinations.Download.DownloadPageDestinations
+import killua.dev.base.Model.DownloadPageDestinations
 import killua.dev.twitterdownloader.ui.DownloadItemCard
 import killua.dev.twitterdownloader.ui.DownloadPageCommands
 import killua.dev.twitterdownloader.ui.DownloadPageTopAppBar
@@ -56,7 +54,6 @@ import killua.dev.twitterdownloader.ui.MainScaffold
 import killua.dev.twitterdownloader.ui.ViewModels.DownloadPageUIIntent
 import killua.dev.twitterdownloader.ui.ViewModels.DownloadPageUIIntent.*
 import killua.dev.twitterdownloader.ui.ViewModels.DownloadedViewModel
-import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedContentLambdaTargetStateParameter")
 @OptIn(ExperimentalAnimationApi::class, ExperimentalFoundationApi::class,

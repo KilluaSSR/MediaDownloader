@@ -4,23 +4,29 @@ import android.net.Uri
 import db.Download
 import db.DownloadState
 import db.DownloadStatus
+import killua.dev.base.Model.DownloadItem
 
-data class DownloadItem(
-    val id: String,
+data class TwitterDownloadItem(
+    override val id: String,
     val twitterScreenName: String,
     val twitterName: String,
-    val downloadState: DownloadState,
-    val link: String,
-    val progress: Int = 0,
-    val fileUri: Uri? = null,
-    val createdAt: Long,
-    val completedAt: Long? = null
+    override val downloadState: DownloadState,
+    override val link: String,
+    override val progress: Int = 0,
+    override val fileUri: Uri? = null,
+    override val createdAt: Long,
+    override val completedAt: Long? = null
+) : DownloadItem(
+    id = id,
+    downloadState = downloadState,
+    link = link,
+    progress = progress,
+    fileUri = fileUri,
+    createdAt = createdAt,
+    completedAt = completedAt
 ) {
-    val isCompleted: Boolean
-        get() = downloadState is DownloadState.Completed
-
     companion object {
-        fun fromDownload(download: Download) = DownloadItem(
+        fun fromDownload(download: Download) = TwitterDownloadItem(
             id = download.uuid,
             twitterScreenName = download.twitterScreenName ?: "",
             twitterName = download.twitterName ?: "",
@@ -29,12 +35,10 @@ data class DownloadItem(
                 DownloadStatus.DOWNLOADING -> DownloadState.Downloading(
                     download.progress
                 )
-
                 DownloadStatus.COMPLETED -> DownloadState.Completed(
                     download.fileUri ?: Uri.EMPTY,
                     download.fileSize
                 )
-
                 DownloadStatus.FAILED -> DownloadState.Failed(
                     download.errorMessage ?: "Unknown error"
                 )

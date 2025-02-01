@@ -1,4 +1,4 @@
-package killua.dev.twitterdownloader
+package killua.dev.base.ui
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Help
@@ -58,8 +58,6 @@ val MainPageButtons = listOf(
         Icons.Default.AccountBox,
         MainRoutes.UserinfoPage.route
     ),
-
-
     )
 val MainPageMenuButtons = listOf(
     MainPageButtonsEssentials(

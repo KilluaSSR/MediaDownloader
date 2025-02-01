@@ -1,4 +1,4 @@
-package killua.dev.twitterdownloader.ui
+package killua.dev.base.ui.components
 
 
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -42,12 +42,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.base.datastore.readStoreBoolean
 import killua.dev.base.datastore.saveStoreBoolean
 import killua.dev.base.ui.animations.AnimatedTextContainer
-import killua.dev.base.ui.components.TitleLargeText
-import killua.dev.base.ui.components.TitleSmallText
-import killua.dev.base.ui.components.paddingBottom
-import killua.dev.base.ui.components.paddingHorizontal
-import killua.dev.base.ui.components.paddingTop
-import killua.dev.base.ui.components.paddingVertical
 import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.base.utils.withState
 import kotlinx.coroutines.launch

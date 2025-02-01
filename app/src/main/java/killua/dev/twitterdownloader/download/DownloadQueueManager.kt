@@ -1,13 +1,17 @@
 package killua.dev.twitterdownloader.download
 
 import db.Download
+import killua.dev.base.repository.SettingsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.ConcurrentHashMap
+import javax.inject.Inject
 
 
-class DownloadQueueManager {
-    private val maxConcurrentDownloads = 3
+class DownloadQueueManager @Inject constructor(
+   private val settingsRepository: SettingsRepository
+) {
+    private val maxConcurrentDownloads = settingsRepository.getMaxConcurrentDownloadsSync()
     private val activeDownloads = ConcurrentHashMap<String, Boolean>()
     private val pendingDownloads = ConcurrentHashMap<String, Download>()
 
