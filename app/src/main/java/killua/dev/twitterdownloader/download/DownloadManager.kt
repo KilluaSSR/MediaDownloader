@@ -15,21 +15,23 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import db.Download
 import db.DownloadStatus
 import killua.dev.base.datastore.readNotificationEnabled
+import killua.dev.base.utils.DownloadEventManager
 import killua.dev.twitterdownloader.download.VideoDownloadWorker.Companion.FILE_SIZE
 import killua.dev.twitterdownloader.download.VideoDownloadWorker.Companion.FILE_URI
 import killua.dev.twitterdownloader.download.VideoDownloadWorker.Companion.KEY_ERROR_MESSAGE
 import killua.dev.twitterdownloader.repository.DownloadRepository
-import killua.dev.base.utils.DownloadEventManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.withContext
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -45,6 +47,8 @@ class DownloadManager @Inject constructor(
     private val downloadEventManager: DownloadEventManager,
 
 ) {
+    private val _downloadProgress = MutableSharedFlow<Pair<String, Int>>(replay = 0)
+    val downloadProgress = _downloadProgress.asSharedFlow()
     private val BACKOFF_DELAY = 5_000L
 
     private val managerScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -98,12 +102,10 @@ class DownloadManager @Inject constructor(
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun observeWorkInfo() {
-
         workManager.getWorkInfosByTagFlow("download_tag").onEach {workInfos ->
             workInfos.forEach { workInfo ->
                 when (workInfo.state) {
                     WorkInfo.State.SUCCEEDED -> {
-                        val isNotificationEnabled = context.readNotificationEnabled().first()
                         val downloadId = workInfo.outputData.getString(VideoDownloadWorker.KEY_DOWNLOAD_ID) ?: return@forEach
                         val fileUri = workInfo.outputData.getString(FILE_URI)
                         val fileSize = workInfo.outputData.getLong(FILE_SIZE, 0L)
@@ -113,6 +115,7 @@ class DownloadManager @Inject constructor(
                             downloadEventManager.notifyDownloadCompleted()
                         }
                         setCompleted += downloadId
+
                     }
                     WorkInfo.State.RUNNING -> {
                         val downloadId = workInfo.progress.getString(VideoDownloadWorker.KEY_DOWNLOAD_ID) ?: return@forEach
@@ -120,8 +123,8 @@ class DownloadManager @Inject constructor(
                         if(!setDownloading.contains(downloadId)){
                             updateMarkedDownloading(downloadId)
                         }
+                        _downloadProgress.emit(downloadId to progress)
                         setDownloading += downloadId
-                        //downloadRepository.updateDownloadProgress(downloadId,progress)
                     }
                     WorkInfo.State.FAILED -> {
                         val downloadId = workInfo.outputData.getString(VideoDownloadWorker.KEY_DOWNLOAD_ID) ?: return@forEach
@@ -129,7 +132,6 @@ class DownloadManager @Inject constructor(
                             downloadRepository.updateError(downloadId, errorMessage = workInfo.outputData.getString(KEY_ERROR_MESSAGE))
                             queueManager.markComplete(downloadId)
                         }
-
                         setFailed += downloadId
                     }
                     else -> {}
@@ -138,7 +140,7 @@ class DownloadManager @Inject constructor(
         }
             .flowOn(Dispatchers.IO)
             .launchIn(GlobalScope)
-        }
+    }
 
 
     suspend fun cancelDownload(downloadId: String) {

@@ -13,10 +13,16 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowOutward
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -28,7 +34,9 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
-import killua.dev.base.CurrentState
+import db.DownloadStatus
+import killua.dev.base.Model.DownloadPageCommands
+import killua.dev.base.states.SettingsCurrentState
 import killua.dev.base.ui.getColorRelationship
 import killua.dev.base.ui.tokens.SizeTokens
 
@@ -152,7 +160,7 @@ fun PermissionButton(
     enabled: Boolean = true,
     onClick: () -> Unit,
     title: String,
-    state: CurrentState,
+    state: SettingsCurrentState,
     color: Color,
     description: String,
     onSetting: (() -> Unit)? = null
@@ -233,6 +241,71 @@ fun Modifier.intrinsicIcon() = layout { measurable, constraints ->
         val placeable = measurable.measure(constraints)
         layout(placeable.width, placeable.height) {
             placeable.place(0, 0)
+        }
+    }
+}
+
+@Composable
+private fun DownloadActionButton(
+    onClick: () -> Unit,
+    icon: ImageVector,
+    contentDescription: String?,
+    tint: Color
+) {
+    IconButton(onClick = onClick) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            tint = tint
+        )
+    }
+}
+
+
+@Composable
+fun DownloadActions(
+    status: DownloadStatus,
+    onCommand: (DownloadPageCommands) -> Unit
+) {
+    Row {
+        DownloadActionButton(
+            onClick = { onCommand(DownloadPageCommands.GoTo) },
+            icon = Icons.Default.ArrowOutward,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary
+        )
+
+        when (status) {
+            DownloadStatus.DOWNLOADING, DownloadStatus.PENDING -> {
+                DownloadActionButton(
+                    onClick = { onCommand(DownloadPageCommands.Cancel) },
+                    icon = Icons.Default.Cancel,
+                    contentDescription = "Cancel",
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
+            DownloadStatus.FAILED -> {
+                DownloadActionButton(
+                    onClick = { onCommand(DownloadPageCommands.Retry) },
+                    icon = Icons.Default.Refresh,
+                    contentDescription = "Retry",
+                    tint = MaterialTheme.colorScheme.secondary
+                )
+                DownloadActionButton(
+                    onClick = { onCommand(DownloadPageCommands.Cancel) },
+                    icon = Icons.Default.Cancel,
+                    contentDescription = "Cancel",
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
+            DownloadStatus.COMPLETED -> {
+                DownloadActionButton(
+                    onClick = { onCommand(DownloadPageCommands.Delete) },
+                    icon = Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
         }
     }
 }

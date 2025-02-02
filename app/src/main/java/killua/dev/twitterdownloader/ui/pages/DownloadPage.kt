@@ -1,7 +1,6 @@
 package killua.dev.twitterdownloader.ui.pages
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -40,19 +39,18 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import killua.dev.base.Model.DownloadPageCommands
 import killua.dev.base.ui.LocalNavController
 import killua.dev.base.ui.components.BottomSheet
 import killua.dev.base.ui.components.paddingBottom
 import killua.dev.base.ui.components.paddingHorizontal
 import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.base.Model.DownloadPageDestinations
+import killua.dev.base.ui.components.DownloadPageTopAppBar
 import killua.dev.base.ui.components.FileNotFountAlert
-import killua.dev.twitterdownloader.ui.DownloadItemCard
-import killua.dev.twitterdownloader.ui.DownloadPageCommands
-import killua.dev.twitterdownloader.ui.DownloadPageTopAppBar
+import killua.dev.twitterdownloader.ui.components.DownloadItemCard
 import killua.dev.twitterdownloader.ui.FilterContent
-import killua.dev.twitterdownloader.ui.MainScaffold
-import killua.dev.twitterdownloader.ui.ViewModels.DownloadPageUIIntent
+import killua.dev.twitterdownloader.ui.components.MainScaffold
 import killua.dev.twitterdownloader.ui.ViewModels.DownloadPageUIIntent.*
 import killua.dev.twitterdownloader.ui.ViewModels.DownloadedViewModel
 
@@ -98,7 +96,7 @@ fun DownloadPage() {
                     currentFilter = uiState.value.filterOptions,
                     onFilterChange = { newFilter ->
                         viewModel.launchOnIO {
-                            viewModel.emitIntent(DownloadPageUIIntent.UpdateFilterOptions(newFilter))
+                            viewModel.emitIntent(UpdateFilterOptions(newFilter))
                         }
                     }
                 )
@@ -248,7 +246,7 @@ fun DownloadPage() {
                                                 }
                                             }
 
-                                            DownloadPageCommands.GoToTwitter -> {
+                                            DownloadPageCommands.GoTo -> {
                                                 viewModel.launchOnIO {
                                                     viewModel.emitIntent(
                                                         GoToTwitter(item.id,context)
@@ -260,7 +258,8 @@ fun DownloadPage() {
                                     },
                                     thumbnailCache = uiState.value.thumbnailCache,
                                     modifier = Modifier.animateItemPlacement(),
-                                    fileNotFoundClick = { showFileNotFoundAlert = true }
+                                    fileNotFoundClick = { showFileNotFoundAlert = true },
+                                    downloadProgress = uiState.value.downloadProgress
                                 )
                             }
                         }

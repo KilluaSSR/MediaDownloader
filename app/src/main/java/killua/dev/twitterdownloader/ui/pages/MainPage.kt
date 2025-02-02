@@ -32,9 +32,9 @@ import killua.dev.base.utils.navigateSingle
 import killua.dev.base.ui.MainPageButtons
 import killua.dev.base.ui.MainRoutes
 import killua.dev.twitterdownloader.Model.MainPageUIIntent
-import killua.dev.twitterdownloader.ui.FavouriteCard
-import killua.dev.twitterdownloader.ui.InputDialog
-import killua.dev.twitterdownloader.ui.MainPageBottomSheet
+import killua.dev.twitterdownloader.ui.components.FavouriteCard
+import killua.dev.twitterdownloader.ui.components.TwitterURLInputDialog
+import killua.dev.twitterdownloader.ui.components.MainPageBottomSheet
 import killua.dev.twitterdownloader.ui.ViewModels.MainPageViewmodel
 
 @ExperimentalFoundationApi
@@ -71,7 +71,7 @@ fun MainPage(
                 onDismiss = { showDevelopingAlert = false }
             )
         }
-        InputDialog(
+        TwitterURLInputDialog(
             showDialog = showDialog,
             onDismiss = { showDialog = false },
             onConfirm = { url ->

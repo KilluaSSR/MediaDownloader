@@ -3,8 +3,8 @@ package killua.dev.twitterdownloader.ui.pages
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import killua.dev.base.ui.LocalNavController
-import killua.dev.twitterdownloader.ui.MainScaffold
-import killua.dev.twitterdownloader.ui.TwitterUsersPageTopAppBar
+import killua.dev.twitterdownloader.ui.components.MainScaffold
+import killua.dev.twitterdownloader.ui.components.TwitterUsersPageTopAppBar
 
 @Composable
 fun TwitterUserInfoPage(){

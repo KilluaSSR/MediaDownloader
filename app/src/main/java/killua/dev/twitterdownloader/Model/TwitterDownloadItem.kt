@@ -32,9 +32,7 @@ data class TwitterDownloadItem(
             twitterName = download.twitterName ?: "",
             downloadState = when (download.status) {
                 DownloadStatus.PENDING -> DownloadState.Pending
-                DownloadStatus.DOWNLOADING -> DownloadState.Downloading(
-                    download.progress
-                )
+                DownloadStatus.DOWNLOADING -> DownloadState.Downloading()
                 DownloadStatus.COMPLETED -> DownloadState.Completed(
                     download.fileUri ?: Uri.EMPTY,
                     download.fileSize

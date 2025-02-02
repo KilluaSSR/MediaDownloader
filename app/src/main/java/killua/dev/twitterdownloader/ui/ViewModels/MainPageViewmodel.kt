@@ -67,6 +67,7 @@ class MainPageViewmodel @Inject constructor(
             ))
         }
     }
+
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override suspend fun onEvent(state: MainPageUIState, intent: MainPageUIIntent) {
         when (intent) {

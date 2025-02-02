@@ -5,7 +5,7 @@ import android.content.Intent
 import android.webkit.CookieManager
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import killua.dev.base.CurrentState
+import killua.dev.base.states.SettingsCurrentState
 import killua.dev.base.datastore.readApplicationUserAuth
 import killua.dev.base.datastore.readApplicationUserCt0
 import killua.dev.base.datastore.writeApplicationUserAuth
@@ -33,22 +33,22 @@ class SetupPageViewModel @Inject constructor() :
     BaseViewModel<SetupUIIntent, SetupUIState, SnackbarUIEffect>(SetupUIState(false)) {
     private val mutex = Mutex()
     private var cookieCheckJob: Job? = null
-    private val _notificationState: MutableStateFlow<CurrentState> =
-        MutableStateFlow(CurrentState.Idle)
-    val notificationState: StateFlow<CurrentState> =
-        _notificationState.stateInScope(CurrentState.Idle)
-    private val _loginState: MutableStateFlow<CurrentState> =
-        MutableStateFlow(CurrentState.Idle)
-    val loginState: StateFlow<CurrentState> =
-        _loginState.stateInScope(CurrentState.Idle)
+    private val _notificationState: MutableStateFlow<SettingsCurrentState> =
+        MutableStateFlow(SettingsCurrentState.Idle)
+    val notificationState: StateFlow<SettingsCurrentState> =
+        _notificationState.stateInScope(SettingsCurrentState.Idle)
+    private val _loginState: MutableStateFlow<SettingsCurrentState> =
+        MutableStateFlow(SettingsCurrentState.Idle)
+    val loginState: StateFlow<SettingsCurrentState> =
+        _loginState.stateInScope(SettingsCurrentState.Idle)
     val eligibility: StateFlow<Boolean> = _loginState.map { login ->
-        login == CurrentState.Success
+        login == SettingsCurrentState.Success
     }.flowOnIO().stateInScope(false)
     override suspend fun onEvent(state: SetupUIState, intent: SetupUIIntent) {
         when (intent) {
             is ValidateNotifications -> {
                 mutex.withLock {
-                    if (notificationState.value != CurrentState.Success) {
+                    if (notificationState.value != SettingsCurrentState.Success) {
                         NotificationUtils.requestPermission(intent.context)
                     }
                 }
@@ -56,12 +56,12 @@ class SetupPageViewModel @Inject constructor() :
             is SetupUIIntent.OnResume -> {
                 mutex.withLock {
                     if (NotificationUtils.checkPermission(intent.context)) {
-                        _notificationState.value = CurrentState.Success
+                        _notificationState.value = SettingsCurrentState.Success
                     }
                     val ct0 = intent.context.readApplicationUserCt0().first()
                     val auth = intent.context.readApplicationUserAuth().first()
                     if(ct0.isNotBlank() && auth.isNotBlank()){
-                        _loginState.value = CurrentState.Success
+                        _loginState.value = SettingsCurrentState.Success
                     }
                 }
             }

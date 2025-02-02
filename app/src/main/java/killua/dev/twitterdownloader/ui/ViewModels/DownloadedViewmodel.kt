@@ -16,24 +16,16 @@ import killua.dev.twitterdownloader.download.DownloadManager
 import killua.dev.twitterdownloader.repository.DownloadRepository
 import killua.dev.base.repository.ThumbnailRepository
 import killua.dev.base.Model.DownloadPageDestinations
+import killua.dev.base.Model.DownloadProgress
+import killua.dev.base.ui.filters.DurationFilter
+import killua.dev.base.ui.filters.FilterOptions
 import killua.dev.twitterdownloader.utils.NavigateTwitterTweet
 import killua.dev.base.utils.VideoDurationRepository
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 
-sealed class DurationFilter {
-    object All : DurationFilter()
-    object UnderOneMinute : DurationFilter()
-    object OneToThreeMinutes : DurationFilter()
-    object ThreeToTenMinutes : DurationFilter()
-    object MoreThanTemMinutes : DurationFilter()
-}
 
-data class FilterOptions(
-    val selectedAuthors: Set<String> = emptySet(),
-    val durationFilter: DurationFilter = DurationFilter.All
-)
 
 sealed interface DownloadPageUIIntent : UIIntent {
     object LoadDownloads : DownloadPageUIIntent
@@ -52,13 +44,12 @@ data class DownloadPageUIState(
     val optionIndex: Int,
     val optionsType: DownloadPageDestinations,
     val isLoading: Boolean,
-    // 用于保存数据库中的所有下载项（未过滤）
     val unfilteredDownloads: List<TwitterDownloadItem> = emptyList(),
-    // 当前屏幕要显示的下载项（已过滤）
     val downloads: List<TwitterDownloadItem> = emptyList(),
     val thumbnailCache: Map<Uri, Bitmap?> = emptyMap(),
     val availableAuthors: Set<String> = emptySet(),
-    val filterOptions: FilterOptions = FilterOptions()
+    val filterOptions: FilterOptions = FilterOptions(),
+    val downloadProgress: Map<String, DownloadProgress> = emptyMap()
 ) : UIState
 
 @HiltViewModel
@@ -78,6 +69,23 @@ class DownloadedViewModel @Inject constructor(
 
     init {
         observeDownloadsFromDB()
+        viewModelScope.launch {
+            downloadManager.downloadProgress.collect { (downloadId, progress) ->
+                val currentProgress = uiState.value.downloadProgress[downloadId]
+                emitState(
+                    uiState.value.copy(
+                        downloadProgress = uiState.value.downloadProgress + (downloadId to
+                                DownloadProgress(
+                                    progress = progress,
+                                    isCompleted = currentProgress?.isCompleted == true,
+                                    isFailed = currentProgress?.isFailed == true,
+                                    errorMessage = currentProgress?.errorMessage
+                                )
+                        )
+                    )
+                )
+            }
+        }
     }
 
     private fun observeDownloadsFromDB() {
@@ -245,12 +253,6 @@ class DownloadedViewModel @Inject constructor(
         downloadRepository.deleteById(downloadId)
     }
 
-    private suspend fun deleteDownload(downloadId: String) {
-        val download = downloadRepository.getById(downloadId) ?: return
-        download.fileUri?.path?.let { File(it).delete() }
-        downloadRepository.delete(download)
-        activeDownloads.remove(downloadId)
-    }
 
     private suspend fun handleCancelAll() {
         val allDownloads = downloadRepository.getActiveDownloads()

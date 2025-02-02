@@ -1,6 +1,7 @@
 package killua.dev.base.ui
 
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import killua.dev.base.ui.SnackbarUIEffect.ShowSnackbar
@@ -62,11 +63,11 @@ abstract class BaseViewModel<I : UIIntent, S : UIState, E : UIEffect>(state: S) 
                     effect.withDismissAction,
                     effect.duration
                 )) {
-                    androidx.compose.material3.SnackbarResult.ActionPerformed -> {
+                    SnackbarResult.ActionPerformed -> {
                         effect.onActionPerformed?.invoke()
                     }
 
-                    androidx.compose.material3.SnackbarResult.Dismissed -> {
+                    SnackbarResult.Dismissed -> {
                         effect.onDismissed?.invoke()
                     }
                 }

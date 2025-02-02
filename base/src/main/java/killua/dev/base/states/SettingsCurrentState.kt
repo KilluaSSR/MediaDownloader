@@ -1,4 +1,4 @@
-package killua.dev.base
+package killua.dev.base.states
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.AccessTime
@@ -10,11 +10,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 
-sealed class CurrentState {
-    data object Idle : CurrentState()
-    data object Processing : CurrentState()
-    data object Success : CurrentState()
-    data object Error : CurrentState()
+sealed class SettingsCurrentState {
+    data object Idle : SettingsCurrentState()
+    data object Processing : SettingsCurrentState()
+    data object Success : SettingsCurrentState()
+    data object Error : SettingsCurrentState()
 
     val leadingIcon: ImageVector
         @Composable

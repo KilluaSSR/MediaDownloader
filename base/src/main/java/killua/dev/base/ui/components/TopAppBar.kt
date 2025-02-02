@@ -3,7 +3,9 @@ package killua.dev.base.ui.components
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -81,5 +83,34 @@ fun SecondaryLargeTopBar(
             }
         },
         actions = actions,
+    )
+}
+
+@Composable
+fun DownloadPageTopAppBar(
+    navController: NavHostController,
+    retryAllOnClick: () -> Unit,
+    cancelOnClick: () -> Unit,
+    showMoreOnClick: () -> Unit
+) {
+    TopBar(navController, "Downloaded", extraIcons = {
+        IconButton(
+            onClick = retryAllOnClick
+        ) {
+            Icon(
+                imageVector = Icons.Default.Refresh,
+                "Retry all failed downloads"
+            )
+        }
+        IconButton(
+            onClick = cancelOnClick
+        ) {
+            Icon(
+                imageVector = Icons.Default.Cancel,
+                "Cancel all active downloads"
+            )
+        }
+    },
+        showMoreOnClick = showMoreOnClick
     )
 }

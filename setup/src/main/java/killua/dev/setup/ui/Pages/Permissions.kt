@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import killua.dev.base.CurrentState
+import killua.dev.base.states.SettingsCurrentState
 import killua.dev.base.ui.LocalNavController
 import killua.dev.base.ui.components.PermissionButton
 import killua.dev.base.ui.components.Section
@@ -48,7 +48,7 @@ fun PermissionsPage() {
     }
     SetupScaffold(
         actions = {
-            AnimatedVisibility(visible = notificationState.value != CurrentState.Success) {
+            AnimatedVisibility(visible = notificationState.value != SettingsCurrentState.Success) {
                 OutlinedButton(
                     onClick = {
                         viewModel.launchOnIO {
@@ -99,7 +99,7 @@ fun PermissionsPage() {
                         )
                     }
                 },
-                color = if (notificationState.value == CurrentState.Idle || notificationState.value == CurrentState.Error) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
+                color = if (notificationState.value == SettingsCurrentState.Idle || notificationState.value == SettingsCurrentState.Error) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
             )
         }
         Spacer(modifier = Modifier.size(SizeTokens.Level24))
@@ -109,11 +109,11 @@ fun PermissionsPage() {
                 description = "We need your account's cookie to download videos.",
                 state = loginState.value,
                 onClick = {
-                   if(loginState.value != CurrentState.Success){
+                   if(loginState.value != SettingsCurrentState.Success){
                        navController.navigateSingle(SetupRoutes.BrowserPage.route)
                    }
                 },
-                color = if (loginState.value == CurrentState.Idle || loginState.value == CurrentState.Error) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
+                color = if (loginState.value == SettingsCurrentState.Idle || loginState.value == SettingsCurrentState.Error) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
             )
 
         }
