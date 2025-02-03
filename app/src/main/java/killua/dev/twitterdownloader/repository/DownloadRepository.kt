@@ -50,6 +50,7 @@ class DownloadRepository @Inject constructor(
     suspend fun getActiveDownloads() = downloadDao.getActiveDownloads()
 
     // ✅ 更新下载状态
+
     suspend fun updateStatus(uuid: String, status: DownloadStatus) {
         downloadDao.updateProgress(uuid, status, progress = 0)
     }

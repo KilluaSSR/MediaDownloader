@@ -20,6 +20,7 @@ import killua.dev.twitterdownloader.repository.DownloadRepository
 import killua.dev.base.utils.DownloadEventManager
 import killua.dev.base.utils.DownloadPreChecks
 import killua.dev.base.utils.generateTwitterVideoFileName
+import killua.dev.twitterdownloader.Model.TwitterDownloadItem
 import killua.dev.twitterdownloader.download.DownloadQueueManager
 import killua.dev.twitterdownloader.download.DownloadTask
 import killua.dev.twitterdownloader.utils.NavigateTwitterProfile
@@ -45,9 +46,11 @@ class MainPageViewmodel @Inject constructor(
 ) {
     private val mutex = Mutex()
     init {
-        viewModelScope.launch{
-            presentFavouriteCardDetails()
+        launchOnIO {
             observeDownloadCompleted()
+            downloadRepository.observeAllDownloads().collect {
+                presentFavouriteCardDetails()
+            }
         }
     }
 
@@ -58,9 +61,9 @@ class MainPageViewmodel @Inject constructor(
             }
         }
     }
-    suspend fun presentFavouriteCardDetails(){
+    suspend fun presentFavouriteCardDetails() {
         val mostDownloaded = downloadRepository.getMostDownloadedUser()
-        if (mostDownloaded != null){
+        if (mostDownloaded != null) {
             emitState(uiState.value.copy(
                 youHaveDownloadedSth = true,
                 favouriteUserID = mostDownloaded.twitterUserId!!,
