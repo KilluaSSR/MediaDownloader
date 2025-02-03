@@ -81,7 +81,7 @@ class MainPageViewmodel @Inject constructor(
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    private suspend fun handleNewDownload(tweetId: String) {
+    private fun handleNewDownload(tweetId: String) {
         downloadPreChecks.canStartDownload().onSuccess {
             try {
                 when (val result = twitterApiService.getTweetDetailAsync(tweetId)) {
@@ -94,24 +94,30 @@ class MainPageViewmodel @Inject constructor(
                         }
 
                     }
-                    is TwitterRequestResult.Error -> emitEffect(
-                        SnackbarUIEffect.ShowSnackbar("Twitter request error")
-                    )
+                    is TwitterRequestResult.Error -> {
+                        viewModelScope.launch{
+                            emitEffect(ShowSnackbar("Twitter request error"))
+                        }
+                    }
                 }
             } catch (e: Exception) {
-                emitEffect(
-                    SnackbarUIEffect.ShowSnackbar(
-                        e.message ?: "Internal Error"
+                viewModelScope.launch{
+                    emitEffect(
+                        ShowSnackbar(
+                            e.message ?: "Internal Error"
+                        )
                     )
-                )
+                }
             }
         }.onFailure { error ->
-            emitEffect(SnackbarUIEffect.ShowSnackbar(error.message.toString()))
+            viewModelScope.launch{
+                emitEffect(ShowSnackbar(error.message.toString()))
+            }
         }
     }
 
 
-    private suspend fun createAndStartDownload(videoUrl: String, user: TwitterUser?, tweetID: String) {
+    private fun createAndStartDownload(videoUrl: String, user: TwitterUser?, tweetID: String) {
         try {
             val download = Download(
                 uuid = UUID.randomUUID().toString(),
@@ -127,8 +133,9 @@ class MainPageViewmodel @Inject constructor(
                 status = DownloadStatus.PENDING,
                 mimeType = "video/mp4"
             )
-
-            downloadRepository.insert(download)
+            viewModelScope.launch{
+                downloadRepository.insert(download)
+            }
             downloadManager.enqueueDownload(download)
         } catch (e: Exception) {
             handleError("Failed", e)
@@ -141,7 +148,9 @@ class MainPageViewmodel @Inject constructor(
         return "${screenName ?: "video"}_${timestamp}.mp4"
     }
 
-    private suspend fun handleError(message: String, error: Exception) {
-        emitEffect(ShowSnackbar("$message: ${error.message ?: "未知错误"}"))
+    private fun handleError(message: String, error: Exception) {
+        viewModelScope.launch{
+            emitEffect(ShowSnackbar("$message: ${error.message ?: "未知错误"}"))
+        }
     }
 }

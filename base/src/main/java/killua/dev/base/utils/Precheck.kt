@@ -4,8 +4,11 @@ import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import killua.dev.base.datastore.readOnlyWifi
 import killua.dev.base.repository.SettingsRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -17,9 +20,20 @@ class DownloadPreChecks @Inject constructor(
     @ApplicationContext private val context: Context,
     private val networkManager: NetworkManager
 ) {
-    suspend fun isWifiOnly() = context.readOnlyWifi().first()
-    suspend fun canStartDownload(): Result<Unit> = withContext(Dispatchers.IO) {
-        when {
+    private val wifiOnlyFlow = MutableStateFlow(true)
+
+    init {
+        CoroutineScope(Dispatchers.IO).launch {
+            context.readOnlyWifi().collect { isWifiOnly ->
+                wifiOnlyFlow.value = isWifiOnly
+            }
+        }
+    }
+
+    fun isWifiOnly() = wifiOnlyFlow.value
+
+    fun canStartDownload(): Result<Unit> {
+        return when {
             !networkManager.isNetworkAvailable() ->
                 Result.failure(DownloadCheckError.NoNetwork)
             isWifiOnly() && !networkManager.isWifiConnected() ->

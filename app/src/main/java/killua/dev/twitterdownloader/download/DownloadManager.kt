@@ -14,7 +14,6 @@ import androidx.work.workDataOf
 import dagger.hilt.android.qualifiers.ApplicationContext
 import db.Download
 import db.DownloadStatus
-import killua.dev.base.datastore.readNotificationEnabled
 import killua.dev.base.utils.DownloadEventManager
 import killua.dev.twitterdownloader.download.VideoDownloadWorker.Companion.FILE_SIZE
 import killua.dev.twitterdownloader.download.VideoDownloadWorker.Companion.FILE_URI
@@ -27,11 +26,10 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import java.util.concurrent.ConcurrentHashMap
+import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -50,7 +48,6 @@ class DownloadManager @Inject constructor(
     private val _downloadProgress = MutableSharedFlow<Pair<String, Int>>(replay = 0)
     val downloadProgress = _downloadProgress.asSharedFlow()
     private val BACKOFF_DELAY = 5_000L
-
     private val managerScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     init {
         queueManager.onReadyToDownload = { download ->
@@ -59,7 +56,7 @@ class DownloadManager @Inject constructor(
         observeWorkInfo()
     }
 
-    suspend fun enqueueDownload(download: Download) {
+    fun enqueueDownload(download: Download) {
         val canStartNow = queueManager.enqueue(download)
         if (canStartNow) {
             startWork(download)
@@ -143,7 +140,7 @@ class DownloadManager @Inject constructor(
     }
 
 
-    suspend fun cancelDownload(downloadId: String) {
+    fun cancelDownload(downloadId: String) {
         workManager.cancelUniqueWork(downloadId)
         queueManager.markComplete(downloadId)
     }
@@ -157,32 +154,42 @@ class DownloadManager @Inject constructor(
             } == true
     }
 
-    private suspend fun updateDownloadProgress(downloadId: String, progress: Int) {
-        downloadRepository.updateDownloadProgress(downloadId, progress)
+    private fun updateDownloadProgress(downloadId: String, progress: Int) {
+        managerScope.launch{
+            downloadRepository.updateDownloadProgress(downloadId, progress)
+        }
     }
 
-    private suspend fun updateMarkedDownloading(downloadId: String){
-        downloadRepository.updateDownloadingStatus(downloadId)
+    private fun updateMarkedDownloading(downloadId: String){
+        managerScope.launch{
+            downloadRepository.updateDownloadingStatus(downloadId)
+        }
     }
 
     /**
      * 标记下载完成
      */
-    private suspend fun markDownloadCompleted(downloadId: String, fileUri: Uri, fileSize: Long) {
-        downloadRepository.updateCompleted(downloadId, fileUri, fileSize)
+    private fun markDownloadCompleted(downloadId: String, fileUri: Uri, fileSize: Long) {
+        managerScope.launch{
+            downloadRepository.updateCompleted(downloadId, fileUri, fileSize)
+        }
     }
 
     /**
      * 标记下载失败
      */
-    private suspend fun markDownloadFailed(downloadId: String, errorMessage: String) {
-        downloadRepository.updateError(downloadId, errorMessage)
+    private fun markDownloadFailed(downloadId: String, errorMessage: String) {
+        managerScope.launch{
+            downloadRepository.updateError(downloadId, errorMessage)
+        }
     }
 
     /**
      * 标记任务取消
      */
-    private suspend fun markDownloadCancelled(downloadId: String) {
-        downloadRepository.updateStatus(downloadId, DownloadStatus.PENDING)
+    private fun markDownloadCancelled(downloadId: String) {
+        managerScope.launch{
+            downloadRepository.updateStatus(downloadId, DownloadStatus.PENDING)
+        }
     }
 }

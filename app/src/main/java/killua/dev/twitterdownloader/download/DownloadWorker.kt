@@ -18,7 +18,9 @@ import androidx.work.workDataOf
 import killua.dev.base.R
 import killua.dev.base.datastore.readMaxRetries
 import killua.dev.base.datastore.readNotificationEnabled
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
@@ -46,7 +48,7 @@ class VideoDownloadWorker(
         const val FILE_URI = "file_uri"
         const val FILE_SIZE = "file_size"
     }
-
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     @SuppressLint("RestrictedApi")
     override suspend fun doWork(): Result {
         val url = inputData.getString(KEY_URL) ?: return Result.failure()
@@ -57,7 +59,7 @@ class VideoDownloadWorker(
         val isNotificationEnabled = context.readNotificationEnabled().first()
 
         return try {
-            withContext(Dispatchers.IO) {
+            withContext(scope.coroutineContext) {
                 val result = downloadVideoToMediaStore(url, fileName, screenName, downloadId)
                 when {
                     result is Result.Failure && runAttemptCount < MAX_RETRIES -> Result.retry()
@@ -97,7 +99,7 @@ class VideoDownloadWorker(
         fileName: String,
         screenName: String,
         downloadId: String
-    ): Result = withContext(Dispatchers.IO) {
+    ): Result = withContext(scope.coroutineContext) {
         var itemUri: Uri? = null
         var output: OutputStream? = null
         var input: BufferedInputStream? = null
@@ -137,10 +139,10 @@ class VideoDownloadWorker(
 
                         val buffer = ByteArray(8192)
                         while (isActive) {
-                            val read = input?.read(buffer) ?: -1
+                            val read = input.read(buffer)
                             if (read == -1) break
 
-                            output?.let {
+                            output.let {
                                 it.write(buffer, 0, read)
                                 it.flush()
                             }
