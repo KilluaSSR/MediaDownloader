@@ -19,6 +19,9 @@ import killua.dev.twitterdownloader.download.DownloadManager
 import killua.dev.twitterdownloader.repository.DownloadRepository
 import killua.dev.base.utils.DownloadEventManager
 import killua.dev.base.utils.DownloadPreChecks
+import killua.dev.base.utils.generateTwitterVideoFileName
+import killua.dev.twitterdownloader.download.DownloadQueueManager
+import killua.dev.twitterdownloader.download.DownloadTask
 import killua.dev.twitterdownloader.utils.NavigateTwitterProfile
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -34,7 +37,7 @@ import javax.inject.Inject
 class MainPageViewmodel @Inject constructor(
     private val twitterApiService: TwitterApiService,
     private val downloadRepository: DownloadRepository,
-    private val downloadManager: DownloadManager,
+    private val downloadQueueManager: DownloadQueueManager,
     private val downloadEventManager: DownloadEventManager,
     private val downloadPreChecks: DownloadPreChecks
 ) : BaseViewModel<MainPageUIIntent, MainPageUIState, SnackbarUIEffect>(
@@ -96,7 +99,7 @@ class MainPageViewmodel @Inject constructor(
                     }
                     is TwitterRequestResult.Error -> {
                         viewModelScope.launch{
-                            emitEffect(ShowSnackbar("Twitter request error"))
+                            emitEffect(ShowSnackbar("Twitter request error", withDismissAction = true, actionLabel = "OKAY"))
                         }
                     }
                 }
@@ -111,23 +114,25 @@ class MainPageViewmodel @Inject constructor(
             }
         }.onFailure { error ->
             viewModelScope.launch{
-                emitEffect(ShowSnackbar(error.message.toString()))
+                emitEffect(ShowSnackbar(error.message.toString(), withDismissAction = true, actionLabel = "OKAY"))
             }
         }
     }
 
 
     private fun createAndStartDownload(videoUrl: String, user: TwitterUser?, tweetID: String) {
+        val uuid = UUID.randomUUID().toString()
+        val fileName = generateTwitterVideoFileName(user?.screenName)
         try {
             val download = Download(
-                uuid = UUID.randomUUID().toString(),
+                uuid = uuid,
                 twitterUserId = user?.id,
                 twitterScreenName = user?.screenName,
                 twitterName = user?.name,
                 tweetID = tweetID,
                 fileUri = null,
                 link = videoUrl,
-                fileName = generateFileName(user?.screenName),
+                fileName = fileName,
                 fileType = "video",
                 fileSize = 0L,
                 status = DownloadStatus.PENDING,
@@ -135,18 +140,15 @@ class MainPageViewmodel @Inject constructor(
             )
             viewModelScope.launch{
                 downloadRepository.insert(download)
+                downloadQueueManager.enqueue(DownloadTask(uuid, videoUrl, fileName, user?.screenName!!))
             }
-            downloadManager.enqueueDownload(download)
+
         } catch (e: Exception) {
             handleError("Failed", e)
         }
     }
 
-    private fun generateFileName(screenName: String?): String {
-        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
-            .format(Date())
-        return "${screenName ?: "video"}_${timestamp}.mp4"
-    }
+
 
     private fun handleError(message: String, error: Exception) {
         viewModelScope.launch{

@@ -39,7 +39,7 @@ import kotlin.math.roundToInt
 @Composable
 fun SettingsPage(){
     val context = LocalContext.current
-    val navController = LocalNavController.current!!
+    LocalNavController.current!!
     //val viewModel = hiltViewModel<IndexViewModel>()
     //val directoryState by viewModel.directoryState.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
@@ -83,8 +83,8 @@ fun SettingsPage(){
                 Slideable(
                     title = "Max retries",
                     value = retry.toFloat(),
-                    valueRange = 1F..3F,
-                    steps = 1,
+                    valueRange = 0F..3F,
+                    steps = 2,
                     desc = remember(retry) {"Current: $retry"}
                 ) {
                     scope.launch{

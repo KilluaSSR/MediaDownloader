@@ -21,6 +21,9 @@ import killua.dev.base.ui.filters.DurationFilter
 import killua.dev.base.ui.filters.FilterOptions
 import killua.dev.twitterdownloader.utils.NavigateTwitterTweet
 import killua.dev.base.utils.VideoDurationRepository
+import killua.dev.base.utils.generateTwitterVideoFileName
+import killua.dev.twitterdownloader.download.DownloadQueueManager
+import killua.dev.twitterdownloader.download.DownloadTask
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
@@ -57,7 +60,8 @@ class DownloadedViewModel @Inject constructor(
     private val downloadRepository: DownloadRepository,
     private val downloadManager: DownloadManager,
     private val thumbnailRepository: ThumbnailRepository,
-    private val videoDurationRepository: VideoDurationRepository
+    private val videoDurationRepository: VideoDurationRepository,
+    private val downloadQueueManager: DownloadQueueManager
 ) : BaseViewModel<DownloadPageUIIntent, DownloadPageUIState, SnackbarUIEffect>(
     DownloadPageUIState(
         optionIndex = 0,
@@ -65,25 +69,25 @@ class DownloadedViewModel @Inject constructor(
         optionsType = DownloadPageDestinations.All
     )
 ) {
-    private val activeDownloads = mutableSetOf<String>()
-
     init {
         observeDownloadsFromDB()
         viewModelScope.launch {
-            downloadManager.downloadProgress.collect { (downloadId, progress) ->
-                val currentProgress = uiState.value.downloadProgress[downloadId]
-                emitState(
-                    uiState.value.copy(
-                        downloadProgress = uiState.value.downloadProgress + (downloadId to
-                                DownloadProgress(
-                                    progress = progress,
-                                    isCompleted = currentProgress?.isCompleted == true,
-                                    isFailed = currentProgress?.isFailed == true,
-                                    errorMessage = currentProgress?.errorMessage
-                                )
+            downloadManager.downloadProgress.collect { progressList ->
+                for ((downloadId, progress) in progressList) {
+                    val currentProgress = uiState.value.downloadProgress[downloadId]
+                    emitState(
+                        uiState.value.copy(
+                            downloadProgress = uiState.value.downloadProgress + (downloadId to
+                                    DownloadProgress(
+                                        progress = progress,
+                                        isCompleted = currentProgress?.isCompleted == true,
+                                        isFailed = currentProgress?.isFailed == true,
+                                        errorMessage = currentProgress?.errorMessage
+                                    )
+                           )
                         )
                     )
-                )
+                }
             }
         }
     }
@@ -170,7 +174,6 @@ class DownloadedViewModel @Inject constructor(
             }
 
             is DownloadPageUIIntent.FilterDownloads -> {
-                // 不再额外查询数据库，仅使用 unfilteredDownloads 做筛选
                 launchOnIO {
                     val filtered = applyFilters(
                         state.unfilteredDownloads,
@@ -188,7 +191,6 @@ class DownloadedViewModel @Inject constructor(
 
             is DownloadPageUIIntent.UpdateFilterOptions -> {
                 val newFilterOptions = intent.filterOptions
-                // 更新筛选条件并重新筛选
                 val filtered = applyFilters(
                     state.unfilteredDownloads,
                     state.optionsType,
@@ -217,6 +219,7 @@ class DownloadedViewModel @Inject constructor(
             is DownloadPageUIIntent.CancelDownload -> {
                 launchOnIO {
                     downloadRepository.delete(downloadRepository.getById(intent.downloadId)!!)
+                    cancelDownload(intent.downloadId)
                 }
             }
 
@@ -246,13 +249,10 @@ class DownloadedViewModel @Inject constructor(
     }
 
     private suspend fun cancelDownload(downloadId: String) {
-        downloadManager.cancelDownload(downloadId)
-        activeDownloads.remove(downloadId)
         val download = downloadRepository.getById(downloadId) ?: return
         download.fileUri?.path?.let { File(it).delete() }
         downloadRepository.deleteById(downloadId)
     }
-
 
     private suspend fun handleCancelAll() {
         val allDownloads = downloadRepository.getActiveDownloads()
@@ -267,6 +267,7 @@ class DownloadedViewModel @Inject constructor(
 
     private suspend fun retryDownload(downloadId: String) {
         val old = downloadRepository.getById(downloadId) ?: return
+        val fileName = generateTwitterVideoFileName(old.twitterScreenName)
         cancelDownload(downloadId)
         val newdownload = Download(
             uuid = old.uuid,
@@ -276,14 +277,14 @@ class DownloadedViewModel @Inject constructor(
             tweetID = old.tweetID,
             fileUri = null,
             link = old.link,
-            fileName = old.fileName,
+            fileName = fileName,
             fileType = "video",
             fileSize = 0L,
             status = DownloadStatus.PENDING,
             mimeType = "video/mp4"
         )
         downloadRepository.insert(newdownload)
-        downloadManager.enqueueDownload(newdownload)
+        downloadQueueManager.enqueue(DownloadTask(old.uuid, old.link!!,fileName, old.twitterScreenName!! ))
     }
 
     private suspend fun handleRetryAll() {
@@ -295,23 +296,7 @@ class DownloadedViewModel @Inject constructor(
             return
         }
         failedDownloads.forEach { old ->
-            cancelDownload(old.uuid)
-            val newdownload = Download(
-                uuid = old.uuid,
-                twitterUserId = old.twitterUserId,
-                twitterScreenName = old.twitterScreenName,
-                twitterName = old.twitterName,
-                tweetID = old.tweetID,
-                fileUri = null,
-                link = old.link,
-                fileName = old.fileName,
-                fileType = "video",
-                fileSize = 0L,
-                status = DownloadStatus.PENDING,
-                mimeType = "video/mp4"
-            )
-            downloadRepository.insert(newdownload)
-            downloadManager.enqueueDownload(newdownload)
+            retryDownload(old.uuid)
         }
     }
 }

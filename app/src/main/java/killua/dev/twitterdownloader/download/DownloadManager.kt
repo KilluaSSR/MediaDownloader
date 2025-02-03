@@ -1,195 +1,253 @@
 package killua.dev.twitterdownloader.download
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
-import androidx.core.net.toUri
-import androidx.work.BackoffPolicy
-import androidx.work.Constraints
-import androidx.work.ExistingWorkPolicy
-import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequestBuilder
+import android.provider.MediaStore
+import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.core.app.NotificationCompat
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import androidx.work.workDataOf
 import dagger.hilt.android.qualifiers.ApplicationContext
 import db.Download
 import db.DownloadStatus
+import killua.dev.base.R
+import killua.dev.base.datastore.readMaxConcurrentDownloads
+import killua.dev.base.datastore.readMaxRetries
+import killua.dev.base.datastore.readNotificationEnabled
+import killua.dev.base.ui.SnackbarUIEffect
 import killua.dev.base.utils.DownloadEventManager
-import killua.dev.twitterdownloader.download.VideoDownloadWorker.Companion.FILE_SIZE
-import killua.dev.twitterdownloader.download.VideoDownloadWorker.Companion.FILE_URI
-import killua.dev.twitterdownloader.download.VideoDownloadWorker.Companion.KEY_ERROR_MESSAGE
 import killua.dev.twitterdownloader.repository.DownloadRepository
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.io.BufferedInputStream
+import java.io.OutputStream
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-
-var setCompleted: Set<String> = setOf()
-var setDownloading: Set<String> = setOf()
-var setFailed: Set<String> = setOf()
-
+import javax.inject.Singleton
+@Singleton
 class DownloadManager @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val workManager: WorkManager,
     private val queueManager: DownloadQueueManager,
     private val downloadRepository: DownloadRepository,
-    private val downloadEventManager: DownloadEventManager,
-
 ) {
-    private val _downloadProgress = MutableSharedFlow<Pair<String, Int>>(replay = 0)
-    val downloadProgress = _downloadProgress.asSharedFlow()
-    private val BACKOFF_DELAY = 5_000L
+    private val _downloadProgress = MutableStateFlow<Map<String, Int>>(emptyMap())
+    val downloadProgress = _downloadProgress.asStateFlow()
+
     private val managerScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    private val channelId = "download_channel"
+
+    private val isNotificationEnabled = MutableStateFlow(false)
+    private val maxRetries = MutableStateFlow(3)
+
     init {
-        queueManager.onReadyToDownload = { download ->
-            startWork(download)
+        managerScope.launch{
+            isNotificationEnabled.value = context.readNotificationEnabled().first()
+            maxRetries.value = context.readMaxRetries().first()
         }
-        observeWorkInfo()
-    }
-
-    fun enqueueDownload(download: Download) {
-        val canStartNow = queueManager.enqueue(download)
-        if (canStartNow) {
-            startWork(download)
-        }
-    }
-
-    private fun startWork(download: Download) {
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .setRequiresStorageNotLow(true)
-            .build()
-
-        val workRequest = OneTimeWorkRequestBuilder<VideoDownloadWorker>()
-            .setConstraints(constraints)
-            .setBackoffCriteria(
-                BackoffPolicy.LINEAR,
-                BACKOFF_DELAY,
-                TimeUnit.MILLISECONDS
-            )
-            .addTag("download_tag")
-            .setInputData(
-                workDataOf(
-                    VideoDownloadWorker.Companion.KEY_URL to download.link,
-                    VideoDownloadWorker.Companion.KEY_DOWNLOAD_ID to download.uuid,
-                    VideoDownloadWorker.Companion.KEY_SCREEN_NAME to download.twitterScreenName,
-                    VideoDownloadWorker.Companion.KEY_NAME to download.twitterName,
-                    VideoDownloadWorker.Companion.KEY_FILE_NAME to download.fileName,
-                    VideoDownloadWorker.Companion.KEY_RANGE_HEADER to download.rangeHeader
-                )
-            )
-            .build()
-
-        // 使用 UniqueWork 避免重复
-        workManager.enqueueUniqueWork(
-            download.uuid,
-            ExistingWorkPolicy.APPEND_OR_REPLACE,
-            workRequest
-        )
-    }
-
-    @OptIn(DelicateCoroutinesApi::class)
-    private fun observeWorkInfo() {
-        workManager.getWorkInfosByTagFlow("download_tag").onEach {workInfos ->
-            workInfos.forEach { workInfo ->
-                when (workInfo.state) {
-                    WorkInfo.State.SUCCEEDED -> {
-                        val downloadId = workInfo.outputData.getString(VideoDownloadWorker.KEY_DOWNLOAD_ID) ?: return@forEach
-                        val fileUri = workInfo.outputData.getString(FILE_URI)
-                        val fileSize = workInfo.outputData.getLong(FILE_SIZE, 0L)
-                        if(!setCompleted.contains(downloadId)){
-                            downloadRepository.updateCompleted(downloadId, fileUri!!.toUri(), fileSize)
-                            queueManager.markComplete(downloadId)
-                            downloadEventManager.notifyDownloadCompleted()
-                        }
-                        setCompleted += downloadId
-
-                    }
-                    WorkInfo.State.RUNNING -> {
-                        val downloadId = workInfo.progress.getString(VideoDownloadWorker.KEY_DOWNLOAD_ID) ?: return@forEach
-                        var progress = workInfo.progress.getInt(VideoDownloadWorker.PROGRESS, 0)
-                        if(!setDownloading.contains(downloadId)){
-                            updateMarkedDownloading(downloadId)
-                        }
-                        _downloadProgress.emit(downloadId to progress)
-                        setDownloading += downloadId
-                    }
-                    WorkInfo.State.FAILED -> {
-                        val downloadId = workInfo.outputData.getString(VideoDownloadWorker.KEY_DOWNLOAD_ID) ?: return@forEach
-                        if(!setFailed.contains(downloadId)){
-                            downloadRepository.updateError(downloadId, errorMessage = workInfo.outputData.getString(KEY_ERROR_MESSAGE))
-                            queueManager.markComplete(downloadId)
-                        }
-                        setFailed += downloadId
-                    }
-                    else -> {}
-                }
+        createNotificationChannel()
+        queueManager.onDownloadStart = { task ->
+            managerScope.launch {
+                downloadFile(task)
             }
         }
-            .flowOn(Dispatchers.IO)
-            .launchIn(GlobalScope)
     }
+    private suspend fun downloadFile(task: DownloadTask) {
+        val (id, url, fileName, screenName,  destinationFolder,) = task
+        println("URL:$url")
+        println("Name: $fileName")
+        var itemUri: Uri? = null
+        var output: OutputStream? = null
+        var input: BufferedInputStream? = null
+        var attempt = 0
+        while(attempt <= maxRetries.value){
+            try {
+                val filePath = "$destinationFolder/$screenName"
+                val contentValues = ContentValues().apply {
+                    put(MediaStore.Video.Media.DISPLAY_NAME, fileName)
+                    put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
+                    put(MediaStore.Video.Media.RELATIVE_PATH, filePath)
+                    put(MediaStore.Video.Media.IS_PENDING, 1)
+                }
 
+                itemUri = context.contentResolver.insert(
+                    MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
+                    contentValues
+                ) ?: throw IllegalStateException("MediaStore insert failed")
 
-    fun cancelDownload(downloadId: String) {
-        workManager.cancelUniqueWork(downloadId)
-        queueManager.markComplete(downloadId)
-    }
+                val client = OkHttpClient.Builder()
+                    .connectTimeout(30, TimeUnit.SECONDS)
+                    .readTimeout(30, TimeUnit.SECONDS)
+                    .build()
 
-    fun isDownloadActive(downloadId: String): Boolean {
-        return workManager.getWorkInfosForUniqueWork(downloadId)
-            .get()
-            ?.any { info ->
-                info.state == WorkInfo.State.RUNNING ||
-                        info.state == WorkInfo.State.ENQUEUED
-            } == true
-    }
+                client.newCall(Request.Builder().url(url).build()).execute().use { response ->
+                    if (!response.isSuccessful) throw IllegalStateException("Network error: ${response.code}")
 
-    private fun updateDownloadProgress(downloadId: String, progress: Int) {
-        managerScope.launch{
-            downloadRepository.updateDownloadProgress(downloadId, progress)
+                    val responseBody = response.body ?: throw IllegalStateException("Response body is null")
+                    val totalBytes = responseBody.contentLength()
+                    var bytesRead = 0L
+
+                    withContext(Dispatchers.IO) {
+                        try {
+                            output = context.contentResolver.openOutputStream(itemUri)
+                                ?: throw IllegalStateException("Failed to open output stream")
+                            input = responseBody.byteStream().buffered()
+
+                            val buffer = ByteArray(8192)
+                            while (isActive) {
+                                val read = input.read(buffer)
+                                if (read == -1) break
+
+                                output.write(buffer, 0, read)
+                                output.flush()
+
+                                bytesRead += read
+                                val progress = if (totalBytes > 0) ((bytesRead * 100) / totalBytes).toInt() else 0
+                                _downloadProgress.update { it + (id to progress) }
+                                //showDownloadProgress(id, progress)
+                            }
+
+                            val updateValues = ContentValues().apply {
+                                put(MediaStore.Video.Media.IS_PENDING, 0)
+                            }
+                            context.contentResolver.update(itemUri, updateValues, null, null)
+                            markDownloadCompleted(task.id, itemUri, totalBytes)
+                            queueManager.markComplete(task, itemUri)
+                            if(isNotificationEnabled.value){
+                                showDownloadComplete(task.id, itemUri, screenName)
+                            }
+                        } finally {
+                            input?.close()
+                            output?.close()
+                        }
+                    }
+
+                }
+                break
+            } catch (e: Exception) {
+                input?.close()
+                output?.close()
+                itemUri?.let { context.contentResolver.delete(it, null, null) }
+                markDownloadFailed(task.id, e.message.toString())
+                queueManager.markFailed(task, e.message ?: "Unknown error")
+                SnackbarUIEffect.ShowSnackbar("$screenName 's video is failed to download. Retrying time $attempt", actionLabel = "STOP!" ,withDismissAction = true, onActionPerformed = {
+                    attempt = maxRetries.value + 1
+                    return@ShowSnackbar
+                })
+                if(isNotificationEnabled.value){
+                    showDownloadFailed(task.id, e.message.toString())
+                }
+                if (attempt >= maxRetries.value) {
+                    break
+                }
+                attempt ++
+            }
         }
-    }
 
-    private fun updateMarkedDownloading(downloadId: String){
-        managerScope.launch{
-            downloadRepository.updateDownloadingStatus(downloadId)
-        }
     }
-
-    /**
-     * 标记下载完成
-     */
     private fun markDownloadCompleted(downloadId: String, fileUri: Uri, fileSize: Long) {
         managerScope.launch{
             downloadRepository.updateCompleted(downloadId, fileUri, fileSize)
         }
     }
 
-    /**
-     * 标记下载失败
-     */
     private fun markDownloadFailed(downloadId: String, errorMessage: String) {
         managerScope.launch{
             downloadRepository.updateError(downloadId, errorMessage)
         }
     }
 
-    /**
-     * 标记任务取消
-     */
+
     private fun markDownloadCancelled(downloadId: String) {
         managerScope.launch{
             downloadRepository.updateStatus(downloadId, DownloadStatus.PENDING)
         }
     }
+
+    private fun createNotificationChannel() {
+        val channel = NotificationChannel(
+            channelId,
+            "Download Notification",
+            NotificationManager.IMPORTANCE_DEFAULT
+        ).apply {
+            description = "Show download's progress and status"
+            setShowBadge(true)
+            enableVibration(true)
+        }
+        notificationManager.createNotificationChannel(channel)
+    }
+
+    fun showDownloadProgress(downloadId: String, progress: Int) {
+        val notification = NotificationCompat.Builder(context, channelId)
+            .setContentTitle("Downloading")
+            .setProgress(100, progress, false)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .setSmallIcon(R.drawable.icon)
+            .build()
+
+        notificationManager.notify(downloadId.hashCode(), notification)
+    }
+
+    fun showDownloadComplete(downloadId: String, fileUri: Uri, name: String) {
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(fileUri, "video/*")
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+        }
+
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            downloadId.hashCode(),
+            intent,
+            PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(context, channelId)
+            .setContentTitle("$name 's video is ready.")
+            .setContentText("Click to open")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .setSmallIcon(R.drawable.icon)
+            .build()
+
+        notificationManager.notify(downloadId.hashCode(), notification)
+    }
+
+    fun showDownloadFailed(downloadId: String, error: String?) {
+        val notification = NotificationCompat.Builder(context, channelId)
+            .setSmallIcon(R.drawable.icon)
+            .setContentTitle("Download failed")
+            .setContentText(error ?: "ERROR")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true)
+            .build()
+
+        notificationManager.notify(downloadId.hashCode(), notification)
+    }
+
+    fun cancelNotification(downloadId: String) {
+        notificationManager.cancel(downloadId.hashCode())
+    }
+
 }
