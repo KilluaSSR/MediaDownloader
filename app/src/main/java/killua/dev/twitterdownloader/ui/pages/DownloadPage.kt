@@ -31,7 +31,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,19 +39,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.base.Model.DownloadPageCommands
+import killua.dev.base.Model.DownloadPageDestinations
 import killua.dev.base.ui.LocalNavController
 import killua.dev.base.ui.components.BottomSheet
+import killua.dev.base.ui.components.DownloadPageTopAppBar
+import killua.dev.base.ui.components.FileNotFountAlert
 import killua.dev.base.ui.components.paddingBottom
 import killua.dev.base.ui.components.paddingHorizontal
 import killua.dev.base.ui.tokens.SizeTokens
-import killua.dev.base.Model.DownloadPageDestinations
-import killua.dev.base.ui.components.DownloadPageTopAppBar
-import killua.dev.base.ui.components.FileNotFountAlert
-import killua.dev.twitterdownloader.ui.components.DownloadItemCard
 import killua.dev.twitterdownloader.ui.FilterContent
-import killua.dev.twitterdownloader.ui.components.MainScaffold
 import killua.dev.twitterdownloader.ui.ViewModels.DownloadPageUIIntent.*
 import killua.dev.twitterdownloader.ui.ViewModels.DownloadedViewModel
+import killua.dev.twitterdownloader.ui.components.DownloadItemCard
+import killua.dev.twitterdownloader.ui.components.MainScaffold
 
 @SuppressLint("UnusedContentLambdaTargetStateParameter")
 @OptIn(ExperimentalAnimationApi::class, ExperimentalFoundationApi::class,
@@ -65,7 +64,6 @@ fun DownloadPage() {
     val viewModel: DownloadedViewModel = hiltViewModel()
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     val sheetState = rememberModalBottomSheetState()
-    val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
     MainScaffold(
         topBar = { DownloadPageTopAppBar(

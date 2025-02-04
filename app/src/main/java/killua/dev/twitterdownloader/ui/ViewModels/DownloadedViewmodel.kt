@@ -7,27 +7,28 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import db.Download
 import db.DownloadStatus
+import killua.dev.base.Model.DownloadPageDestinations
+import killua.dev.base.Model.DownloadProgress
+import killua.dev.base.Model.DownloadTask
+import killua.dev.base.Model.MediaType
+import killua.dev.base.repository.ThumbnailRepository
 import killua.dev.base.ui.BaseViewModel
 import killua.dev.base.ui.SnackbarUIEffect
 import killua.dev.base.ui.UIIntent
 import killua.dev.base.ui.UIState
-import killua.dev.twitterdownloader.Model.TwitterDownloadItem
-import killua.dev.twitterdownloader.download.DownloadManager
-import killua.dev.twitterdownloader.repository.DownloadRepository
-import killua.dev.base.repository.ThumbnailRepository
-import killua.dev.base.Model.DownloadPageDestinations
-import killua.dev.base.Model.DownloadProgress
 import killua.dev.base.ui.filters.DurationFilter
 import killua.dev.base.ui.filters.FilterOptions
-import killua.dev.twitterdownloader.utils.NavigateTwitterTweet
+import killua.dev.base.ui.filters.TypeFilter
+import killua.dev.base.utils.TwitterMediaFileNameStrategy
 import killua.dev.base.utils.VideoDurationRepository
-import killua.dev.base.utils.generateTwitterVideoFileName
+import killua.dev.twitterdownloader.Model.TwitterDownloadItem
+import killua.dev.twitterdownloader.download.DownloadManager
 import killua.dev.twitterdownloader.download.DownloadQueueManager
-import killua.dev.twitterdownloader.download.DownloadTask
+import killua.dev.twitterdownloader.repository.DownloadRepository
+import killua.dev.twitterdownloader.utils.NavigateTwitterTweet
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
-
 
 
 sealed interface DownloadPageUIIntent : UIIntent {
@@ -50,7 +51,7 @@ data class DownloadPageUIState(
     val unfilteredDownloads: List<TwitterDownloadItem> = emptyList(),
     val downloads: List<TwitterDownloadItem> = emptyList(),
     val thumbnailCache: Map<Uri, Bitmap?> = emptyMap(),
-    val availableAuthors: Set<String> = emptySet(),
+    val availableAuthors: List<String> = emptyList(),
     val filterOptions: FilterOptions = FilterOptions(),
     val downloadProgress: Map<String, DownloadProgress> = emptyMap()
 ) : UIState
@@ -95,7 +96,7 @@ class DownloadedViewModel @Inject constructor(
     private fun observeDownloadsFromDB() {
         launchOnIO {
             downloadRepository.observeAllDownloads().collect { downloads ->
-                val authors = downloads.mapNotNull { it.twitterName }.toSet()
+                val authors = downloads.mapNotNull { it.twitterName }.sortedBy { it.length }
                 // 将数据库查询到的内容转为 DownloadItem 列表
                 val unfilteredItems = downloads.map { TwitterDownloadItem.fromDownload(it) }
                     .sortedByDescending { it.createdAt }
@@ -123,10 +124,6 @@ class DownloadedViewModel @Inject constructor(
         }
     }
 
-    /**
-     * 在内存中根据当前目的（All、Downloading、等）和作者筛选、时长筛选
-     * 不再额外查询数据库
-     */
     private suspend fun applyFilters(
         unfiltered: List<TwitterDownloadItem>,
         destination: DownloadPageDestinations,
@@ -162,8 +159,12 @@ class DownloadedViewModel @Inject constructor(
                 DurationFilter.ThreeToTenMinutes -> duration in 181..600
                 DurationFilter.MoreThanTemMinutes -> duration > 600
             }
-
-            authorMatch && durationMatch
+            val typeMatch = when (filterOptions.typeFilter) {
+                TypeFilter.All -> true
+                TypeFilter.Videos -> item.fileType == MediaType.VIDEO
+                TypeFilter.Images -> item.fileType == MediaType.PHOTO
+            }
+            authorMatch && durationMatch && typeMatch
         }
     }
 
@@ -267,8 +268,17 @@ class DownloadedViewModel @Inject constructor(
 
     private suspend fun retryDownload(downloadId: String) {
         val old = downloadRepository.getById(downloadId) ?: return
-        val fileName = generateTwitterVideoFileName(old.twitterScreenName)
+        val mediaType = when(old.fileType) {
+            "video" -> MediaType.VIDEO
+            "photo" -> MediaType.PHOTO
+            else -> MediaType.VIDEO
+        }
+
+        val fileNameStrategy = TwitterMediaFileNameStrategy(mediaType)
+        val fileName = fileNameStrategy.generate(old.twitterScreenName)
+
         cancelDownload(downloadId)
+
         val newdownload = Download(
             uuid = old.uuid,
             twitterUserId = old.twitterUserId,
@@ -278,13 +288,22 @@ class DownloadedViewModel @Inject constructor(
             fileUri = null,
             link = old.link,
             fileName = fileName,
-            fileType = "video",
+            fileType = mediaType.name.lowercase(),
             fileSize = 0L,
             status = DownloadStatus.PENDING,
-            mimeType = "video/mp4"
+            mimeType = mediaType.mimeType
         )
+
         downloadRepository.insert(newdownload)
-        downloadQueueManager.enqueue(DownloadTask(old.uuid, old.link!!,fileName, old.twitterScreenName!! ))
+        downloadQueueManager.enqueue(
+            DownloadTask(
+                id = old.uuid,
+                url = old.link!!,
+                fileName = fileName,
+                screenName = old.twitterScreenName!!,
+                type = mediaType
+            )
+        )
     }
 
     private suspend fun handleRetryAll() {

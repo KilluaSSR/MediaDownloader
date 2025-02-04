@@ -17,6 +17,7 @@ object SizeTokens {
     val Level16 = 16.dp
     val Level20 = 20.dp
     val Level24 = 24.dp
+    val Level28 = 28.dp
     val Level32 = 32.dp
     val Level36 = 36.dp
     val Level40 = 40.dp

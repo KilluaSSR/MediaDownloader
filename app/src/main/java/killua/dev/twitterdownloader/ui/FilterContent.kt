@@ -8,13 +8,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import killua.dev.base.ui.filters.FilterByAuthors
 import killua.dev.base.ui.filters.FilterByDuration
+import killua.dev.base.ui.filters.FilterByType
 import killua.dev.base.ui.filters.FilterOptions
 import killua.dev.base.ui.tokens.SizeTokens
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun FilterContent(
-    availableAuthors: Set<String> = emptySet<String>(),
+    availableAuthors: List<String> = emptyList<String>(),
     availableTags: Set<String> = emptySet<String>(),
     currentFilter: FilterOptions,
     onFilterChange: (FilterOptions) -> Unit
@@ -24,7 +25,8 @@ fun FilterContent(
             .fillMaxWidth()
             .padding(horizontal = SizeTokens.Level16)
     ) {
-        FilterByAuthors(availableAuthors, currentFilter, onFilterChange)
+        FilterByType(currentFilter, onFilterChange)
         FilterByDuration(currentFilter, onFilterChange)
+        FilterByAuthors(availableAuthors, currentFilter, onFilterChange)
     }
 }

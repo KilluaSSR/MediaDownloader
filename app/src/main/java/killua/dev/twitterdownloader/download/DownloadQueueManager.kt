@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import dagger.hilt.android.qualifiers.ApplicationContext
 import db.Download
+import killua.dev.base.Model.DownloadTask
 import killua.dev.base.datastore.readMaxConcurrentDownloads
 import killua.dev.base.repository.SettingsRepository
 import killua.dev.twitterdownloader.repository.DownloadRepository
@@ -22,28 +23,24 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.max
 
-data class DownloadTask(
-    val id: String,
-    val url: String,
-    val fileName: String, // 确保唯一
-    val screenName: String,
-    val destinationFolder: String = "Movies/TwitterDownloader"
-)
+
 @Singleton
 class DownloadQueueManager @Inject constructor(
     @ApplicationContext private val context: Context,
     private val repository: DownloadRepository
 ) {
+
     private val maxConcurrentDownloads = MutableStateFlow(3)
     private val activeDownloads = ConcurrentHashMap<String, Boolean>()
     private val pendingDownloads = LinkedList<DownloadTask>()
-
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     init {
         scope.launch{
             maxConcurrentDownloads.value = context.readMaxConcurrentDownloads().first()
         }
     }
+
     var onDownloadStart: ((DownloadTask) -> Unit)? = null
     var onDownloadComplete: ((DownloadTask, Uri) -> Unit)? = null
     var onDownloadFailed: ((DownloadTask, String) -> Unit)? = null
@@ -59,22 +56,17 @@ class DownloadQueueManager @Inject constructor(
     }
 
     private suspend fun startDownload(downloadTask: DownloadTask) {
-        println("StartFunction")
-        println(activeDownloads.size)
         activeDownloads[downloadTask.id] = true
         updateMarkedDownloading(downloadTask)
         onDownloadStart?.invoke(downloadTask)
     }
 
     private suspend fun updateMarkedDownloading(downloadTask: DownloadTask){
-        println("updateMarkedDownloading")
         repository.updateDownloadingStatus(downloadTask.id)
-
     }
 
     suspend fun markComplete(downloadTask: DownloadTask, fileUri: Uri) {
         activeDownloads.remove(downloadTask.id)
-
         onDownloadComplete?.invoke(downloadTask, fileUri)
         processNextInQueue()
     }
@@ -89,6 +81,5 @@ class DownloadQueueManager @Inject constructor(
         if (activeDownloads.size >= maxConcurrentDownloads.value) return
         val nextTask = pendingDownloads.poll() ?: return
         startDownload(nextTask)
-
     }
 }

@@ -8,6 +8,7 @@ abstract class DownloadItem(
     open val downloadState: DownloadState,
     open val link: String,
     open val progress: Int = 0,
+    open val fileType: MediaType,
     open val fileUri: Uri? = null,
     open val createdAt: Long,
     open val completedAt: Long? = null

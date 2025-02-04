@@ -20,9 +20,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.base.datastore.NOTIFICATION_ENABLED
+import killua.dev.base.datastore.PHOTOS_KEY
 import killua.dev.base.datastore.WIFI
+import killua.dev.base.datastore.readDownloadPhotos
 import killua.dev.base.datastore.readMaxConcurrentDownloads
 import killua.dev.base.datastore.readMaxRetries
+import killua.dev.base.datastore.readOnlyWifi
 import killua.dev.base.datastore.writeMaxConcurrentDownloads
 import killua.dev.base.datastore.writeMaxRetries
 import killua.dev.base.ui.LocalNavController
@@ -57,6 +60,8 @@ fun SettingsPage(){
             val scope = rememberCoroutineScope()
             val concurrent by context.readMaxConcurrentDownloads().collectAsStateWithLifecycle(initialValue = 3)
             val retry by context.readMaxRetries().collectAsStateWithLifecycle(initialValue = 3)
+            val wifi by context.readOnlyWifi().collectAsStateWithLifecycle(initialValue = true)
+            val photos by context.readDownloadPhotos().collectAsStateWithLifecycle(initialValue = false)
             Title(title = "Download") {
                 Switchable(
                     key = NOTIFICATION_ENABLED,
@@ -66,7 +71,12 @@ fun SettingsPage(){
                 Switchable(
                     key = WIFI,
                     title = "Download via WIFI only",
-                    checkedText = "Download is disabled if you're using Cellar Data"
+                    checkedText = if(wifi){"Download is disabled if you're using Cellar Data"} else{"Extra carrier charges may apply"}
+                )
+                Switchable(
+                    key = PHOTOS_KEY,
+                    title = "Download images",
+                    checkedText = if(photos){"Download images too"} else{"Download videos only"}
                 )
                 Slideable(
                     title = "Max concurrent downloads",

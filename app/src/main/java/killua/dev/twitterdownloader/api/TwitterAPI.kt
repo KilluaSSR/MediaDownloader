@@ -3,7 +3,6 @@ package killua.dev.twitterdownloader.api
 import android.os.Build
 import androidx.annotation.RequiresApi
 import api.Model.RootDto
-import api.Model.extractTwitterUser
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import killua.dev.base.datastore.ApplicationUserDataTwitter
@@ -13,7 +12,9 @@ import killua.dev.twitterdownloader.api.Model.TweetData
 import killua.dev.twitterdownloader.api.Model.TwitterRequestResult
 import killua.dev.twitterdownloader.di.UserDataManager
 import killua.dev.twitterdownloader.utils.addTwitterHeaders
+import killua.dev.twitterdownloader.utils.extractTwitterUser
 import killua.dev.twitterdownloader.utils.getAllHighestBitrateUrls
+import killua.dev.twitterdownloader.utils.getAllImageUrls
 import okhttp3.Cookie
 import okhttp3.CookieJar
 import okhttp3.HttpUrl
@@ -27,7 +28,7 @@ import javax.inject.Inject
 
 
 class TwitterApiService @Inject constructor(
-    val userdata: UserDataManager
+    val userdata: UserDataManager,
 ) {
     private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
 
@@ -65,7 +66,8 @@ class TwitterApiService @Inject constructor(
                     val tweet = gson.fromJson(content, RootDto::class.java)
                     val tweetData = TweetData(
                         user = tweet.extractTwitterUser(),
-                        videoUrls = tweet.getAllHighestBitrateUrls()
+                        videoUrls = tweet.getAllHighestBitrateUrls(),
+                        photoUrls = tweet.getAllImageUrls()
                     )
                     TwitterRequestResult.Success(tweetData)
                 } else {
@@ -94,7 +96,7 @@ class TwitterApiService @Inject constructor(
         return "$baseUrl?$query"
     }
 
-    fun buildClient(userData: ApplicationUserDataTwitter): OkHttpClient {
+    private fun buildClient(userData: ApplicationUserDataTwitter): OkHttpClient {
         val cookieManager = CookieManager().apply {
             val ct0Cookie = HttpCookie("ct0", userData.ct0).apply { domain = "x.com" }
             val authCookie =

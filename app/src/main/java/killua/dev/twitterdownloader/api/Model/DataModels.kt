@@ -1,14 +1,7 @@
 package api.Model
 
-import killua.dev.twitterdownloader.api.Model.TwitterUser
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-
-@Serializable
-data class TweetData(
-    val user: TwitterUser?,
-    val videoUrls: List<String>
-)
 
 @Serializable
 data class RootDto(
@@ -291,20 +284,65 @@ data class VideoVariant(
     @SerialName("url")
     val url: String? = null
 )
-fun RootDto.extractTwitterUser(): TwitterUser {
-    val tweetData = this.data?.threaded_conversation_with_injections_v2?.instructions?.firstOrNull()
-        ?.entries?.firstOrNull()?.content?.itemContent?.tweet_results?.result?.let { result ->
-            result.tweet ?: result
-        }
-    val user = tweetData
-        ?.core
-        ?.user_results
-        ?.result
+@Serializable
+data class Tweet(
+    @SerialName("id")
+    val id: String? = null,
 
-    return TwitterUser(
-        id = user?.rest_id,
-        screenName = user?.legacy?.screen_name,
-        name = user?.legacy?.name,
-        createdTime = 0L
+    val userId: String? = null,
+
+    @SerialName("text")
+    val text: String? = null,
+
+    @SerialName("hashtags")
+    val hashtags: List<String> = listOf(),
+
+    @SerialName("created_at")
+    val createdAt: String? = null,
+
+    @SerialName("media")
+    val media: List<Media> = listOf()
+)
+@Serializable
+data class MetadataContainer(
+    @SerialName("current_page")
+    val currentPage: String? = null,
+
+    @SerialName("users")
+    val users: Map<String, UserData> = mapOf()
+) {
+    @Serializable
+    data class UserData(
+        @SerialName("user")
+        val userHistory: List<TwitterUser> = listOf(),
+
+        @SerialName("tweet")
+        val tweets: List<Tweet> = listOf()
     )
 }
+@Serializable
+data class TwitterUser(
+    @SerialName("id")
+    val id: String? = null,
+
+    @SerialName("screen_name")
+    val screenName: String? = null,
+
+    @SerialName("name")
+    val name: String? = null,
+
+    @SerialName("created_time")
+    val createdTime: Long = 0
+)
+
+@Serializable
+data class Media(
+    @SerialName("type")
+    val type: String? = null,
+
+    @SerialName("url")
+    val url: String? = null,
+
+    @SerialName("bitrate")
+    val bitrate: Long? = null
+)

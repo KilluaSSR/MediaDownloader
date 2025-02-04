@@ -5,6 +5,7 @@ import db.Download
 import db.DownloadState
 import db.DownloadStatus
 import killua.dev.base.Model.DownloadItem
+import killua.dev.base.Model.MediaType
 
 data class TwitterDownloadItem(
     override val id: String,
@@ -14,6 +15,7 @@ data class TwitterDownloadItem(
     override val link: String,
     override val progress: Int = 0,
     override val fileUri: Uri? = null,
+    override val fileType: MediaType,
     override val createdAt: Long,
     override val completedAt: Long? = null
 ) : DownloadItem(
@@ -22,6 +24,7 @@ data class TwitterDownloadItem(
     link = link,
     progress = progress,
     fileUri = fileUri,
+    fileType = fileType,
     createdAt = createdAt,
     completedAt = completedAt
 ) {
@@ -41,6 +44,7 @@ data class TwitterDownloadItem(
                     download.errorMessage ?: "Unknown error"
                 )
             },
+            fileType = MediaType.fromString(download.fileType),
             link = download.link ?: "",
             progress = download.progress,
             fileUri = download.fileUri,
