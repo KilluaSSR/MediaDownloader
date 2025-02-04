@@ -18,27 +18,25 @@ class SettingsRepository @Inject constructor(
     private val preferencesDataSource: PreferencesDataSource,
     @ApplicationScope private val scope: CoroutineScope
 ) {
-    // 用 StateFlow 存储最新的设置值，默认值是一个空的 SettingsData
     private val _settingsFlow = MutableStateFlow(SettingsData())
 
     init {
         scope.launch {
             preferencesDataSource.settingsData.collect { settings ->
-                _settingsFlow.value = settings  // 每次更新数据
+                _settingsFlow.value = settings
             }
         }
     }
 
-    // 公开 Flow 给 UI 或其他模块监听
     val settingsFlow: StateFlow<SettingsData> = _settingsFlow.asStateFlow()
 
-    // 同步读取最新值（不会返回旧值）
+
     fun getWifiOnlySync(): Boolean = runBlocking{settingsFlow.first().wifiOnly}
     fun getNotificationEnabledSync(): Boolean = settingsFlow.value.notificationEnabled
     fun getMaxConcurrentDownloadsSync(): Int = settingsFlow.value.maxConcurrentDownloads
     fun getMaxRetriesSync(): Int = settingsFlow.value.maxRetries
 
-    // 挂起函数，一次性读取最新值（如果不想用同步方法）
+
     suspend fun getWifiOnlyOnce(): Boolean = settingsFlow.first().wifiOnly
     suspend fun getNotificationEnabledOnce(): Boolean = settingsFlow.first().notificationEnabled
     suspend fun getMaxConcurrentDownloads(): Int = settingsFlow.first().maxConcurrentDownloads

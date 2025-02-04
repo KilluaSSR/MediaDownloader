@@ -9,6 +9,7 @@ import db.Download
 import db.DownloadStatus
 import killua.dev.base.Model.DownloadTask
 import killua.dev.base.Model.MediaType
+import killua.dev.base.repository.SettingsRepository
 import killua.dev.base.ui.BaseViewModel
 import killua.dev.base.ui.SnackbarUIEffect
 import killua.dev.base.ui.SnackbarUIEffect.*
@@ -35,7 +36,7 @@ class MainPageViewmodel @Inject constructor(
     private val downloadRepository: DownloadRepository,
     private val downloadQueueManager: DownloadQueueManager,
     private val downloadEventManager: DownloadEventManager,
-    private val downloadPreChecks: DownloadPreChecks
+    private val downloadPreChecks: DownloadPreChecks,
 ) : BaseViewModel<MainPageUIIntent, MainPageUIState, SnackbarUIEffect>(
     MainPageUIState()
 ) {
@@ -46,7 +47,11 @@ class MainPageViewmodel @Inject constructor(
             downloadRepository.observeAllDownloads().collect {
                 presentFavouriteCardDetails()
             }
+            settingsRepository.settingsFlow.collect{ settings ->
+                settings.photos
+            }
         }
+
     }
 
     private fun observeDownloadCompleted() {
@@ -91,10 +96,17 @@ class MainPageViewmodel @Inject constructor(
                         result.data.videoUrls.forEach {
                             createAndStartDownload(it, user, tweetId, MediaType.VIDEO)
                         }
-                        result.data.photoUrls.forEach{
-
+                        if(downloadPreChecks.isDownloadPhotosEnabled()){
+                            result.data.photoUrls.forEach{
+                                createAndStartDownload(it,user, tweetId, MediaType.PHOTO)
+                            }
+                        }else{
+                            if (result.data.photoUrls.isNotEmpty()){
+                                viewModelScope.launch{
+                                    emitEffect(ShowSnackbar("Download photos switch is not enabled."))
+                                }
+                            }
                         }
-
                     }
                     is TwitterRequestResult.Error -> {
                         viewModelScope.launch{

@@ -24,7 +24,8 @@ class PreferencesDataSource @Inject constructor(
             downloadPath = prefs[DOWNLOAD_PATH] ?: "",
             maxConcurrentDownloads = prefs[MAX_CONCURRENT_DOWNLOADS] ?: 3,
             maxRetries = prefs[MAX_RETRIES] ?: 3,
-            wifiOnly = prefs[WIFI] == true
+            wifiOnly = prefs[WIFI] == true,
+            photos = prefs[PHOTOS_KEY] == true
         )
     }
 

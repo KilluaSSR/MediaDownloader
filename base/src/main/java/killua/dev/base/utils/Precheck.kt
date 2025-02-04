@@ -2,6 +2,7 @@ package killua.dev.base.utils
 
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
+import killua.dev.base.datastore.readDownloadPhotos
 import killua.dev.base.datastore.readOnlyWifi
 import killua.dev.base.repository.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
@@ -21,15 +22,18 @@ class DownloadPreChecks @Inject constructor(
     private val networkManager: NetworkManager
 ) {
     private val wifiOnlyFlow = MutableStateFlow(true)
-
+    private val photosDownload = MutableStateFlow(true)
     init {
         CoroutineScope(Dispatchers.IO).launch {
             context.readOnlyWifi().collect { isWifiOnly ->
                 wifiOnlyFlow.value = isWifiOnly
             }
+            context.readDownloadPhotos().collect{ photos ->
+                photosDownload.value = photos
+            }
         }
     }
-
+    fun isDownloadPhotosEnabled() = photosDownload.value
     fun isWifiOnly() = wifiOnlyFlow.value
 
     fun canStartDownload(): Result<Unit> {

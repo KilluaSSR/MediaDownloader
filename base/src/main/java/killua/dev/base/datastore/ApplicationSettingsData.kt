@@ -6,5 +6,6 @@ data class SettingsData(
     val downloadPath: String = "",
     val maxConcurrentDownloads: Int = 3,
     val maxRetries: Int = 3,
-    val wifiOnly: Boolean = false
+    val wifiOnly: Boolean = false,
+    val photos: Boolean = true
 )
