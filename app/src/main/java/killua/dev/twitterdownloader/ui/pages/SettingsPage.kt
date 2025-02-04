@@ -139,9 +139,8 @@ fun SettingsPage(){
             Title(title = "Dangerous", color = MaterialTheme.colorScheme.error) {
 
                 Clickable(
-                    icon = Icons.Outlined.Delete,
                     title = "Reset",
-                    desc = "Clear your login information (cookies). You need to login again."
+                    value = "Clear your login information (cookies). You need to login again."
                 ){
                     isShowReset = true
                 }

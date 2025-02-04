@@ -19,6 +19,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.base.ui.LocalNavController
+import killua.dev.base.ui.MainPageButtons
+import killua.dev.base.ui.MainRoutes
 import killua.dev.base.ui.SnackbarUIEffect
 import killua.dev.base.ui.components.ActionsBotton
 import killua.dev.base.ui.components.DevelopingAlert
@@ -29,13 +31,12 @@ import killua.dev.base.ui.components.paddingTop
 import killua.dev.base.ui.getRandomColors
 import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.base.utils.navigateSingle
-import killua.dev.base.ui.MainPageButtons
-import killua.dev.base.ui.MainRoutes
 import killua.dev.twitterdownloader.Model.MainPageUIIntent
-import killua.dev.twitterdownloader.ui.components.FavouriteCard
-import killua.dev.twitterdownloader.ui.components.TwitterURLInputDialog
-import killua.dev.twitterdownloader.ui.components.MainPageBottomSheet
 import killua.dev.twitterdownloader.ui.ViewModels.MainPageViewmodel
+import killua.dev.twitterdownloader.ui.components.FavouriteCard
+import killua.dev.twitterdownloader.ui.components.MainPageBottomSheet
+import killua.dev.twitterdownloader.ui.components.ReportDialog
+import killua.dev.twitterdownloader.ui.components.TwitterURLInputDialog
 
 @ExperimentalFoundationApi
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -49,9 +50,10 @@ fun MainPage(
     val uiState = viewmodel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState()
-    val scope = rememberCoroutineScope()
+    rememberCoroutineScope()
     var showDevelopingAlert by remember { mutableStateOf(false) }
     var showBottomSheet by remember { mutableStateOf(false) }
+    var showReportDialog by remember { mutableStateOf(false) }
     MainScaffold(
         topBar = {
             MainTopBar(navController, {showBottomSheet = true})
@@ -61,15 +63,18 @@ fun MainPage(
         if(showBottomSheet){
             MainPageBottomSheet(
                 onDismiss = {showBottomSheet = false},
-                sheetState
-            ){
-                showDevelopingAlert = true
-            }
+                sheetState = sheetState,
+                showDevelopingAlert = { showDevelopingAlert = true },
+                onShowReport = {showReportDialog = true}
+            )
         }
         if (showDevelopingAlert) {
             DevelopingAlert(
                 onDismiss = { showDevelopingAlert = false }
             )
+        }
+        if (showReportDialog){
+            ReportDialog("Report",icon = null, onDismiss = {showReportDialog = false})
         }
         TwitterURLInputDialog(
             showDialog = showDialog,

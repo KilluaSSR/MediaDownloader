@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">TwitterDownloader</string>
     <string name="title_activity_splash">TwitterDownloader</string>
+    <string name="githubAccount">KilluaSSR</string>
+    <string name="twitterAccount">ShakeItOff_pi</string>
+    <string name="mail">xiaotian2001@outlook.com</string>
+    <string name="githubIssues"></string>
 </resources>

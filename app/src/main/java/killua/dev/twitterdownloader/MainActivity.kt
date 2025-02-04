@@ -14,6 +14,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import killua.dev.base.ui.LocalNavController
 import killua.dev.base.ui.MainRoutes
 import killua.dev.base.ui.animations.AnimatedNavHost
+import killua.dev.twitterdownloader.ui.pages.AboutPage
 import killua.dev.twitterdownloader.ui.pages.DownloadPage
 import killua.dev.twitterdownloader.ui.pages.MainPage
 import killua.dev.twitterdownloader.ui.pages.SettingsPage
@@ -45,6 +46,9 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(MainRoutes.SettingPage.route){
                             SettingsPage()
+                        }
+                        composable(MainRoutes.AboutPage.route){
+                            AboutPage()
                         }
                     }
                 }

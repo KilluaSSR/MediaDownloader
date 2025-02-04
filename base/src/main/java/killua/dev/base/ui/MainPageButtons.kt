@@ -21,6 +21,16 @@ data class MainPageButtonsEssentials(
     val route: String,
 )
 
+data class MainPageBottomButtonsEssentials(
+    val title: String,
+    val icon: ImageVector,
+    val action: MainPageButtonsAction
+)
+
+sealed class MainPageButtonsAction {
+    data class Navigate(val route: String) : MainPageButtonsAction()
+    object ShowDialog : MainPageButtonsAction()
+}
 val MainPageButtons = listOf(
     MainPageButtonsEssentials(
         "Download Now",
@@ -43,20 +53,21 @@ val MainPageButtons = listOf(
         MainRoutes.UserinfoPage.route
     ),
 )
+
 val MainPageMenuButtons = listOf(
-    MainPageButtonsEssentials(
+    MainPageBottomButtonsEssentials(
         "Settings",
         Icons.Rounded.Settings,
-        MainRoutes.SettingPage.route
+        MainPageButtonsAction.Navigate(MainRoutes.SettingPage.route)
     ),
-    MainPageButtonsEssentials(
+    MainPageBottomButtonsEssentials(
         "Report",
         Icons.Rounded.Report,
-        MainRoutes.ReportPage.route
+        MainPageButtonsAction.ShowDialog
     ),
-    MainPageButtonsEssentials(
+    MainPageBottomButtonsEssentials(
         "About",
         Icons.AutoMirrored.Rounded.Help,
-        MainRoutes.AboutPage.route
+        MainPageButtonsAction.Navigate(MainRoutes.AboutPage.route)
     )
 )
