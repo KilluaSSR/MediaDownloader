@@ -5,9 +5,13 @@ import androidx.compose.material.icons.automirrored.rounded.Help
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.StarBorder
+import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.DownloadDone
 import androidx.compose.material.icons.rounded.Report
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.rounded.StarBorder
 import androidx.compose.ui.graphics.vector.ImageVector
 
 
@@ -20,7 +24,7 @@ data class MainPageButtonsEssentials(
 val MainPageButtons = listOf(
     MainPageButtonsEssentials(
         "Download Now",
-        Icons.Default.Download,
+        Icons.Rounded.Download,
         MainRoutes.Download.route
     ),
     MainPageButtonsEssentials(
@@ -30,12 +34,12 @@ val MainPageButtons = listOf(
     ),
     MainPageButtonsEssentials(
         "Twitter Users",
-        Icons.Default.StarBorder,
+        Icons.Rounded.Star,
         MainRoutes.TwitterUserPage.route
     ),
     MainPageButtonsEssentials(
         "User Info",
-        Icons.Default.AccountBox,
+        Icons.Rounded.AccountCircle,
         MainRoutes.UserinfoPage.route
     ),
 )

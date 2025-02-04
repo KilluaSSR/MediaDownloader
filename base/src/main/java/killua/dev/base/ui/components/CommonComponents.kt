@@ -100,6 +100,7 @@ fun ActionButtonContent(
             modifier = Modifier.Companion.size(SizeTokens.Level36),
             shape = CircleShape,
             enabled = enabled,
+            color = color,
             onClick = onClick,
             contentColor = color,
             interactionSource = interactionSource
@@ -108,7 +109,7 @@ fun ActionButtonContent(
                 imageVector = icon,
                 contentDescription = null,
                 modifier = Modifier.Companion.size(
-                    SizeTokens.Level8
+                    SizeTokens.Level4
                 ),
                 tint = getColorRelationship(color)
             )
