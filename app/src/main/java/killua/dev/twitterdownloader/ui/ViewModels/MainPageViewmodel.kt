@@ -9,7 +9,6 @@ import db.Download
 import db.DownloadStatus
 import killua.dev.base.Model.DownloadTask
 import killua.dev.base.Model.MediaType
-import killua.dev.base.repository.SettingsRepository
 import killua.dev.base.ui.BaseViewModel
 import killua.dev.base.ui.SnackbarUIEffect
 import killua.dev.base.ui.SnackbarUIEffect.*
@@ -46,9 +45,6 @@ class MainPageViewmodel @Inject constructor(
             observeDownloadCompleted()
             downloadRepository.observeAllDownloads().collect {
                 presentFavouriteCardDetails()
-            }
-            settingsRepository.settingsFlow.collect{ settings ->
-                settings.photos
             }
         }
 
