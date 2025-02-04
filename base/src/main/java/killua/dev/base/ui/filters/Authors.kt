@@ -15,7 +15,7 @@ import killua.dev.base.ui.tokens.SizeTokens
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun FilterByAuthors(
-    availableAuthors: List<String>,
+    availableAuthors: Set<String>,
     currentFilter: FilterOptions,
     onFilterChange: (FilterOptions) -> Unit
 ){

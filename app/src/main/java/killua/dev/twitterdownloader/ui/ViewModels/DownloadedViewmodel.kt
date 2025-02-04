@@ -51,7 +51,7 @@ data class DownloadPageUIState(
     val unfilteredDownloads: List<TwitterDownloadItem> = emptyList(),
     val downloads: List<TwitterDownloadItem> = emptyList(),
     val thumbnailCache: Map<Uri, Bitmap?> = emptyMap(),
-    val availableAuthors: List<String> = emptyList(),
+    val availableAuthors: Set<String> = emptySet(),
     val filterOptions: FilterOptions = FilterOptions(),
     val downloadProgress: Map<String, DownloadProgress> = emptyMap()
 ) : UIState
@@ -96,7 +96,7 @@ class DownloadedViewModel @Inject constructor(
     private fun observeDownloadsFromDB() {
         launchOnIO {
             downloadRepository.observeAllDownloads().collect { downloads ->
-                val authors = downloads.mapNotNull { it.twitterName }.sortedBy { it.length }
+                val authors = downloads.mapNotNull { it.twitterName }.sortedBy { it.length }.toSet()
                 // 将数据库查询到的内容转为 DownloadItem 列表
                 val unfilteredItems = downloads.map { TwitterDownloadItem.fromDownload(it) }
                     .sortedByDescending { it.createdAt }

@@ -1,19 +1,26 @@
 package killua.dev.twitterdownloader.ui.pages
 
+import android.content.Intent
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -26,15 +33,20 @@ import killua.dev.base.datastore.readDownloadPhotos
 import killua.dev.base.datastore.readMaxConcurrentDownloads
 import killua.dev.base.datastore.readMaxRetries
 import killua.dev.base.datastore.readOnlyWifi
+import killua.dev.base.datastore.writeApplicationUserAuth
+import killua.dev.base.datastore.writeApplicationUserCt0
 import killua.dev.base.datastore.writeMaxConcurrentDownloads
 import killua.dev.base.datastore.writeMaxRetries
 import killua.dev.base.ui.LocalNavController
+import killua.dev.base.ui.components.CancellableAlert
 import killua.dev.base.ui.components.SettingsScaffold
 import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.base.ui.components.Clickable
 import killua.dev.base.ui.components.Slideable
 import killua.dev.base.ui.components.Switchable
 import killua.dev.base.ui.components.Title
+import killua.dev.base.utils.ActivityUtil
+import killua.dev.base.utils.getActivity
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -43,14 +55,35 @@ import kotlin.math.roundToInt
 fun SettingsPage(){
     val context = LocalContext.current
     LocalNavController.current!!
-    //val viewModel = hiltViewModel<IndexViewModel>()
-    //val directoryState by viewModel.directoryState.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
-
+    val scope = rememberCoroutineScope()
     SettingsScaffold(
         scrollBehavior = scrollBehavior,
         title = "Settings",
     ) {
+        var isShowReset by remember { mutableStateOf(false) }
+        if(isShowReset){
+            CancellableAlert(
+                title = "Reset now?",
+                mainText = "Your login information will be cleared, and you will need to log in again to continue using",
+                onDismiss = {isShowReset = false},
+                icon = {
+                    Icon(
+                        Icons.Outlined.Warning,
+                        contentDescription = null ,
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier
+                            .size(SizeTokens.Level48))
+                }
+            ) {
+                scope.launch{
+                    context.writeApplicationUserCt0("")
+                    context.writeApplicationUserAuth("")
+                    context.startActivity(Intent(context, ActivityUtil.SetupActivity))
+                    context.getActivity().finish()
+                }
+            }
+        }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -61,7 +94,7 @@ fun SettingsPage(){
             val concurrent by context.readMaxConcurrentDownloads().collectAsStateWithLifecycle(initialValue = 3)
             val retry by context.readMaxRetries().collectAsStateWithLifecycle(initialValue = 3)
             val wifi by context.readOnlyWifi().collectAsStateWithLifecycle(initialValue = true)
-            val photos by context.readDownloadPhotos().collectAsStateWithLifecycle(initialValue = false)
+            val photos by context.readDownloadPhotos().collectAsStateWithLifecycle(initialValue = true)
             Title(title = "Download") {
                 Switchable(
                     key = NOTIFICATION_ENABLED,
@@ -110,7 +143,7 @@ fun SettingsPage(){
                     title = "Reset",
                     desc = "Clear your login information (cookies). You need to login again."
                 ){
-
+                    isShowReset = true
                 }
             }
 
