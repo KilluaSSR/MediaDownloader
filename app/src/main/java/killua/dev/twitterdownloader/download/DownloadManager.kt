@@ -57,7 +57,7 @@ class DownloadManager @Inject constructor(
     }
 
     private suspend fun downloadFile(task: DownloadTask) {
-        val (id, url, _, _, _, screenName, _) = task
+        val (id, url, _, type, _, screenName, _) = task
         var itemUri: Uri? = null
         var output: OutputStream? = null
         var input: BufferedInputStream? = null
@@ -106,7 +106,7 @@ class DownloadManager @Inject constructor(
                             markDownloadCompleted(task.id, itemUri, totalBytes)
                             queueManager.markComplete(task, itemUri)
                             if(isNotificationEnabled.value){
-                                showNotification.showDownloadComplete(task.id, itemUri, screenName)
+                                showNotification.showDownloadComplete(task.id, itemUri, screenName, type)
                             }
                         } finally {
                             input?.close()

@@ -19,6 +19,7 @@ import killua.dev.base.ui.UIState
 import killua.dev.base.ui.filters.DurationFilter
 import killua.dev.base.ui.filters.FilterOptions
 import killua.dev.base.ui.filters.TypeFilter
+import killua.dev.base.utils.FileDelete
 import killua.dev.base.utils.TwitterMediaFileNameStrategy
 import killua.dev.base.utils.VideoDurationRepository
 import killua.dev.twitterdownloader.Model.TwitterDownloadItem
@@ -27,7 +28,6 @@ import killua.dev.twitterdownloader.download.DownloadQueueManager
 import killua.dev.twitterdownloader.repository.DownloadRepository
 import killua.dev.twitterdownloader.utils.NavigateTwitterTweet
 import kotlinx.coroutines.launch
-import java.io.File
 import javax.inject.Inject
 
 
@@ -62,7 +62,8 @@ class DownloadedViewModel @Inject constructor(
     private val downloadManager: DownloadManager,
     private val thumbnailRepository: ThumbnailRepository,
     private val videoDurationRepository: VideoDurationRepository,
-    private val downloadQueueManager: DownloadQueueManager
+    private val downloadQueueManager: DownloadQueueManager,
+    private val fileDelete: FileDelete
 ) : BaseViewModel<DownloadPageUIIntent, DownloadPageUIState, SnackbarUIEffect>(
     DownloadPageUIState(
         optionIndex = 0,
@@ -250,7 +251,10 @@ class DownloadedViewModel @Inject constructor(
 
     private suspend fun cancelDownload(downloadId: String) {
         val download = downloadRepository.getById(downloadId) ?: return
-        download.fileUri?.path?.let { File(it).delete() }
+        println("DOWNLOAD GOT ${download.uuid}, ${downloadId}")
+        download.fileUri?.let { uri ->
+            fileDelete.deleteFile(uri)
+        }
         downloadRepository.deleteById(downloadId)
     }
 
@@ -278,7 +282,7 @@ class DownloadedViewModel @Inject constructor(
 
         cancelDownload(downloadId)
 
-        val newdownload = Download(
+        val newDownload = Download(
             uuid = old.uuid,
             twitterUserId = old.twitterUserId,
             twitterScreenName = old.twitterScreenName,
@@ -293,7 +297,7 @@ class DownloadedViewModel @Inject constructor(
             mimeType = mediaType.mimeType
         )
 
-        downloadRepository.insert(newdownload)
+        downloadRepository.insert(newDownload)
         downloadQueueManager.enqueue(
             DownloadTask(
                 id = old.uuid,

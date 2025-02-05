@@ -15,6 +15,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
+import killua.dev.base.Model.MediaType
 import killua.dev.base.R
 import javax.inject.Inject
 
@@ -83,9 +84,13 @@ class ShowNotification @Inject constructor(
         notificationManager.notify(downloadId.hashCode(), notification)
     }
 
-    fun showDownloadComplete(downloadId: String, fileUri: Uri, name: String) {
+    fun showDownloadComplete(downloadId: String, fileUri: Uri, name: String, type: MediaType) {
+        val (mimeType, notificationTitle) = when (type) {
+            MediaType.VIDEO -> "video/*" to "$name's video is ready"
+            MediaType.PHOTO -> "image/*" to "$name's photo is ready"
+        }
         val intent = Intent(Intent.ACTION_VIEW).apply {
-            setDataAndType(fileUri, "video/*")
+            setDataAndType(fileUri, mimeType)
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
         }
 
@@ -97,7 +102,7 @@ class ShowNotification @Inject constructor(
         )
 
         val notification = NotificationCompat.Builder(context, channelId)
-            .setContentTitle("$name 's video is ready.")
+            .setContentTitle(notificationTitle)
             .setContentText("Click to open")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)

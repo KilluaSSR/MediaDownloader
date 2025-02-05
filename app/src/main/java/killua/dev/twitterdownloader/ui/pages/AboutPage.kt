@@ -43,7 +43,6 @@ fun AboutPage() {
         ) {
             Title(title = "Author", color = MaterialTheme.colorScheme.primary) {
                 Clickable(
-                    icon = drawableToImageVector(killua.dev.base.R.drawable.logo_of_twitter),
                     title = "风过荒野",
                     value = "KilluaDev.kt"
                 ) {
@@ -63,7 +62,7 @@ fun AboutPage() {
                 Clickable(
                     icon = drawableToImageVector(killua.dev.base.R.drawable.github_mark),
                     title = "Github",
-                    value = "@Shakeitoff_pi"
+                    value = "@KilluaSSR"
                 ) {
                     val githubUrl = "https://github.com/${context.getString(R.string.githubAccount)}"
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(githubUrl)).apply {

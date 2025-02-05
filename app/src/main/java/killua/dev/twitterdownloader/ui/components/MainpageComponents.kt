@@ -118,7 +118,7 @@ fun FavouriteCard(
                     exit = fadeOut()
                 ) {
                     BodyMediumText(
-                        text = "You've downloaded his/her video $downloadCount times",
+                        text = "You've downloaded his/her media $downloadCount times",
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
