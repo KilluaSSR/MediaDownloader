@@ -144,12 +144,22 @@ class DownloadedViewModel @Inject constructor(
             }
         }
 
-        // 再根据作者和时长过滤
+        // 再根据作者和时长/类型过滤
         val selectedAuthors = filterOptions.selectedAuthors
         return filteredByDestination.filter { item ->
+            // 作者过滤
             val authorMatch = selectedAuthors.isEmpty() ||
                     (item.twitterName.isNotBlank() && item.twitterName in selectedAuthors)
 
+            // 判断是否选择了具体时长（非 All）
+            val durationFilterSelected = filterOptions.durationFilter != DurationFilter.All
+
+            // 如果选择了具体时长，就只显示视频
+            if (durationFilterSelected && item.fileType != MediaType.VIDEO) {
+                return@filter false
+            }
+
+            // 对视频进行实际时长判断
             val duration = item.fileUri?.let {
                 videoDurationRepository.getVideoDuration(it)
             } ?: 0L
@@ -160,11 +170,18 @@ class DownloadedViewModel @Inject constructor(
                 DurationFilter.ThreeToTenMinutes -> duration in 181..600
                 DurationFilter.MoreThanTemMinutes -> duration > 600
             }
-            val typeMatch = when (filterOptions.typeFilter) {
-                TypeFilter.All -> true
-                TypeFilter.Videos -> item.fileType == MediaType.VIDEO
-                TypeFilter.Images -> item.fileType == MediaType.PHOTO
+
+            // 如果时长过滤是 All，则按用户的类型过滤；否则已在上方统一卡掉非视频内容
+            val typeMatch = if (durationFilterSelected) {
+                true
+            } else {
+                when (filterOptions.typeFilter) {
+                    TypeFilter.All -> true
+                    TypeFilter.Videos -> item.fileType == MediaType.VIDEO
+                    TypeFilter.Images -> item.fileType == MediaType.PHOTO
+                }
             }
+
             authorMatch && durationMatch && typeMatch
         }
     }

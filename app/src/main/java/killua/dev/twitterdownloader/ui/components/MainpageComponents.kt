@@ -1,6 +1,8 @@
 package killua.dev.twitterdownloader.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
@@ -26,16 +28,22 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
 import killua.dev.base.Model.ReportOption
 import killua.dev.base.ui.LocalNavController
@@ -54,6 +62,8 @@ import killua.dev.base.ui.components.InputDialogConfig
 import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.twitterdownloader.utils.openGithubIssues
 import killua.dev.twitterdownloader.utils.openMail
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun MainScaffold(
@@ -182,6 +192,7 @@ fun MainPageBottomSheet(onDismiss: () -> Unit,sheetState: SheetState, showDevelo
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportDialog(
     title: String,
@@ -190,10 +201,61 @@ fun ReportDialog(
 ) {
     var selectedOption by remember { mutableStateOf(ReportOption.Mail) }
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    // 进出动画时长
+    val inAnimDuration = 600
+    val outAnimDuration = 450
+
+    // 控制对话框是否可见
+    var isDialogVisible by remember { mutableStateOf(false) }
+
+    // 根据当前可见状态切换不同动画时长
+    val animationSpec = tween<Float>(
+        durationMillis = if (isDialogVisible) inAnimDuration else outAnimDuration
+    )
+
+    // 透明度动画
+    val dialogAlpha by animateFloatAsState(
+        targetValue = if (isDialogVisible) 1f else 0f,
+        animationSpec = animationSpec
+    )
+
+    // 旋转动画
+    val dialogRotationX by animateFloatAsState(
+        targetValue = if (isDialogVisible) 0f else -90f,
+        animationSpec = animationSpec
+    )
+
+    // 缩放动画
+    val dialogScale by animateFloatAsState(
+        targetValue = if (isDialogVisible) 1f else 0f,
+        animationSpec = animationSpec
+    )
+
+    // 带动画的关闭逻辑
+    val dismissWithAnimation: () -> Unit = {
+        scope.launch {
+            isDialogVisible = false
+            delay(outAnimDuration.toLong())
+            onDismiss()
+        }
+    }
+
+    // 进入时启动显示动画
+    LaunchedEffect(Unit) {
+        isDialogVisible = true
+    }
+
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = { dismissWithAnimation() },
         containerColor = MaterialTheme.colorScheme.surface,
-        modifier = Modifier.padding(SizeTokens.Level6),
+        // 在这里应用动画效果
+        modifier = Modifier
+            .padding(SizeTokens.Level6)
+            .alpha(dialogAlpha)
+            .scale(dialogScale)
+            .graphicsLayer { rotationX = dialogRotationX },
         icon = icon,
         title = {
             Text(
@@ -208,10 +270,9 @@ fun ReportDialog(
             )
         },
         text = {
+            // 原对话框内容，保持原有排版、间距
             Column(
-                modifier = Modifier.padding(
-                    horizontal = SizeTokens.Level2
-                )
+                modifier = Modifier.padding(horizontal = SizeTokens.Level2)
             ) {
                 Row(
                     modifier = Modifier
@@ -269,6 +330,7 @@ fun ReportDialog(
             }
         },
         confirmButton = {
+            // 按钮布局，同样保持原有排版与间距
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -277,12 +339,9 @@ fun ReportDialog(
                         end = SizeTokens.Level6,
                         bottom = SizeTokens.Level6
                     ),
-                horizontalArrangement = Arrangement.spacedBy(
-                    SizeTokens.Level2, // 8dp
-                    Alignment.End
-                )
+                horizontalArrangement = Arrangement.spacedBy(SizeTokens.Level2, Alignment.End)
             ) {
-                TextButton(onClick = onDismiss) {
+                TextButton(onClick = { dismissWithAnimation() }) {
                     Text(
                         text = "Cancel",
                         style = MaterialTheme.typography.labelLarge
@@ -293,7 +352,7 @@ fun ReportDialog(
                         ReportOption.Mail -> openMail(context)
                         ReportOption.GithubIssues -> openGithubIssues(context)
                     }
-                    onDismiss()
+                    dismissWithAnimation()
                 }) {
                     Text(
                         text = "Confirm",
@@ -303,10 +362,4 @@ fun ReportDialog(
             }
         }
     )
-}
-
-@Preview
-@Composable
-fun showReportDialog(){
-    ReportDialog("Report", null, {})
 }
