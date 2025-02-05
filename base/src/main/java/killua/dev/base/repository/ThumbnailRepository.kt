@@ -5,7 +5,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.util.LruCache
 import dagger.hilt.android.qualifiers.ApplicationContext
-import killua.dev.base.utils.loadCachedThumbnailOrCreate
+import killua.dev.base.utils.ThumbnailHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -24,12 +24,11 @@ class ThumbnailRepository @Inject constructor(
 
     private suspend fun loadAndCacheThumbnail(uri: Uri, key: String): Bitmap? {
         return try {
-            val bitmap = loadCachedThumbnailOrCreate(context, uri)
-            if (bitmap != null) {
-                thumbnailCache.put(key, bitmap)
-            }
+            val bitmap = ThumbnailHelper.loadCachedThumbnailOrCreate(context, uri)
+            bitmap?.let { thumbnailCache.put(key, it) }
             bitmap
         } catch (e: Exception) {
+            e.printStackTrace()
             null
         }
     }
