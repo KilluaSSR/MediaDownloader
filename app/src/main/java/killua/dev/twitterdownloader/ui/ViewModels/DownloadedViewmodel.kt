@@ -219,7 +219,6 @@ class DownloadedViewModel @Inject constructor(
 
             is DownloadPageUIIntent.CancelDownload -> {
                 launchOnIO {
-                    downloadRepository.delete(downloadRepository.getById(intent.downloadId)!!)
                     cancelDownload(intent.downloadId)
                 }
             }
