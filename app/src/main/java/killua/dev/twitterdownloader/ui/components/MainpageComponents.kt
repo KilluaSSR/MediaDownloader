@@ -166,8 +166,10 @@ fun MainPageBottomSheet(onDismiss: () -> Unit,sheetState: SheetState, showDevelo
         MainPageMenuButtons.forEach { item ->
             BottomSheetItem(item.icon, item.title) {
                 when (item.action) {
-                    is MainPageButtonsAction.Navigate ->
+                    is MainPageButtonsAction.Navigate -> {
+                        onDismiss()
                         navController.navigateSingle((item.action as MainPageButtonsAction.Navigate).route)
+                    }
                     MainPageButtonsAction.ShowDialog -> {
                         onDismiss()
                         onShowReport()

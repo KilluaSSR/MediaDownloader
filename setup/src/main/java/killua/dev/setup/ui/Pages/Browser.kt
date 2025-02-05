@@ -30,9 +30,11 @@ import killua.dev.base.datastore.writeApplicationUserCt0
 import killua.dev.base.ui.LocalNavController
 import killua.dev.base.utils.navigateSingle
 import killua.dev.setup.SetupRoutes
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @SuppressLint("SuspiciousIndentation", "SetJavaScriptEnabled")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
@@ -77,19 +79,34 @@ fun BrowserPage(){
                                 loadUrl("https://x.com/i/flow/login")
                                 val cookieManager = CookieManager.getInstance()
                                 cookieManager.setAcceptCookie(true)
-                                coroutineScope.launch {
-                                    while (isActive && !loginSuccess.value) {
-                                        delay(1000)
-                                        val cookies = cookieManager.getCookie("https://x.com")
-                                        val ct0Regex = "ct0=([^;]+)".toRegex()
-                                        val authRegex = "auth_token=([^;]+)".toRegex()
-                                        val ct0Match = ct0Regex.find(cookies)?.groupValues?.getOrNull(1)
-                                        val authMatch = authRegex.find(cookies)?.groupValues?.getOrNull(1)
-                                        if(ct0Match !=null && authMatch != null){
-                                            context.writeApplicationUserCt0(ct0Match)
-                                            context.writeApplicationUserAuth(authMatch)
-                                            loginSuccess.value = true
+
+                                coroutineScope.launch(Dispatchers.Main) {
+                                    try {
+                                        while (isActive && !loginSuccess.value) {
+                                            delay(1000)
+                                            val cookies = cookieManager.getCookie("https://x.com")
+                                            if (cookies == null) continue
+
+                                            val ct0Regex = "ct0=([^;]+)".toRegex()
+                                            val authRegex = "auth_token=([^;]+)".toRegex()
+                                            val ct0Match = ct0Regex.find(cookies)?.groupValues?.getOrNull(1)
+                                            val authMatch = authRegex.find(cookies)?.groupValues?.getOrNull(1)
+
+                                            if (ct0Match != null && authMatch != null) {
+                                                withContext(Dispatchers.Main) {
+                                                    context.writeApplicationUserCt0(ct0Match)
+                                                    context.writeApplicationUserAuth(authMatch)
+                                                    cookieManager.removeAllCookies { success ->
+                                                        if (success) {
+                                                            cookieManager.flush()
+                                                        }
+                                                    }
+                                                    loginSuccess.value = true
+                                                }
+                                            }
                                         }
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
                                     }
                                 }
                             }
