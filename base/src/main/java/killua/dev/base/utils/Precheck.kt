@@ -36,6 +36,12 @@ class DownloadPreChecks @Inject constructor(
     fun isDownloadPhotosEnabled() = photosDownload.value
     fun isWifiOnly() = wifiOnlyFlow.value
 
+    fun checkPhotosDownload(): Result<Unit>{
+        return when{
+            isDownloadPhotosEnabled() -> Result.success(Unit)
+            else -> Result.failure(Exception("Download Photos NOT Enabled"))
+        }
+    }
     fun canStartDownload(): Result<Unit> {
         return when {
             !networkManager.isNetworkAvailable() ->

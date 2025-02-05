@@ -92,14 +92,14 @@ class MainPageViewmodel @Inject constructor(
                         result.data.videoUrls.forEach {
                             createAndStartDownload(it, user, tweetId, MediaType.VIDEO)
                         }
-                        if(downloadPreChecks.isDownloadPhotosEnabled()){
-                            result.data.photoUrls.forEach{
-                                createAndStartDownload(it,user, tweetId, MediaType.PHOTO)
-                            }
-                        }else{
-                            if (result.data.photoUrls.isNotEmpty()){
+                        if(result.data.photoUrls.isNotEmpty()){
+                            downloadPreChecks.checkPhotosDownload().onSuccess {
+                                result.data.photoUrls.forEach {
+                                    createAndStartDownload(it, user, tweetId, MediaType.PHOTO)
+                                }
+                            }.onFailure { error ->
                                 viewModelScope.launch{
-                                    emitEffect(ShowSnackbar("Download photos switch is not enabled."))
+                                    emitEffect(ShowSnackbar(error.message.toString(), "OKAY", true))
                                 }
                             }
                         }
