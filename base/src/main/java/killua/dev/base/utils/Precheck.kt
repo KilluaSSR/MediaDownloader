@@ -28,7 +28,10 @@ class DownloadPreChecks @Inject constructor(
             context.readOnlyWifi().collect { isWifiOnly ->
                 wifiOnlyFlow.value = isWifiOnly
             }
-            context.readDownloadPhotos().collect{ photos ->
+        }
+
+        CoroutineScope(Dispatchers.IO).launch {
+            context.readDownloadPhotos().collect { photos ->
                 photosDownload.value = photos
             }
         }
