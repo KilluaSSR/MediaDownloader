@@ -36,7 +36,7 @@ import killua.dev.twitterdownloader.ui.ViewModels.MainPageViewmodel
 import killua.dev.twitterdownloader.ui.components.FavouriteCard
 import killua.dev.twitterdownloader.ui.components.MainPageBottomSheet
 import killua.dev.twitterdownloader.ui.components.ReportDialog
-import killua.dev.twitterdownloader.ui.components.TwitterURLInputDialog
+import killua.dev.twitterdownloader.ui.components.URLInputDialog
 
 @ExperimentalFoundationApi
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -76,15 +76,15 @@ fun MainPage(
         if (showReportDialog){
             ReportDialog("Report",icon = null, onDismiss = {showReportDialog = false})
         }
-        TwitterURLInputDialog(
+        URLInputDialog(
             showDialog = showDialog,
             onDismiss = { showDialog = false },
             onConfirm = { url ->
                 viewmodel.launchOnIO{
                     if(url.isBlank()){
-                        viewmodel.emitEffect(SnackbarUIEffect.ShowSnackbar("You need to paste the tweet's url here."))
-                    }else if(!url.contains("x.com/") && !url.contains("twitter.com/")) {
-                        viewmodel.emitEffect(SnackbarUIEffect.ShowSnackbar("This is NOT a twitter url!"))
+                        viewmodel.emitEffect(SnackbarUIEffect.ShowSnackbar("You need to paste a url here."))
+                    }else if(!url.contains("x.com/") && !url.contains("twitter.com/") && !url.contains("lofter")) {
+                        viewmodel.emitEffect(SnackbarUIEffect.ShowSnackbar("Unsupported url"))
                     }else {
                         val tweetID = url.split("?")[0].split("/").last()
                         viewmodel.emitIntent(MainPageUIIntent.ExecuteDownload(tweetID))

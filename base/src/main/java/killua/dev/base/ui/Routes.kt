@@ -8,7 +8,7 @@ sealed class MainRoutes(val route: String) {
     data object UserinfoPage : MainRoutes(route = "userinfo_page")
     data object Download : MainRoutes(route = "downloading")
     data object DownloadPage : MainRoutes(route = "downloaded_page")
-    data object TwitterUserPage : MainRoutes(route = "twitter_user_page")
+    data object AuthorPage : MainRoutes(route = "author_page")
     data object SpecificTwitterUserPage :
         MainRoutes(route = "specific_twitter_user_page/{$ARG_USER_ID}") {
         fun getRoute(userId: String) = "specific_twitter_user_page/$userId"

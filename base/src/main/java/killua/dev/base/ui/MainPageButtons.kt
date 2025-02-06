@@ -40,9 +40,9 @@ val MainPageButtons = listOf(
         MainRoutes.DownloadPage.route
     ),
     MainPageButtonsEssentials(
-        "Twitter Users",
+        "Authors",
         Icons.Rounded.Star,
-        MainRoutes.TwitterUserPage.route
+        MainRoutes.AuthorPage.route
     ),
     MainPageButtonsEssentials(
         "User Info",

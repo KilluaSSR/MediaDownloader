@@ -73,7 +73,7 @@ class MainPageViewmodel @Inject constructor(
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override suspend fun onEvent(state: MainPageUIState, intent: MainPageUIIntent) {
         when (intent) {
-            is MainPageUIIntent.ExecuteDownload -> { mutex.withLock { handleNewDownload(intent.tweetID) } }
+            is MainPageUIIntent.ExecuteDownload -> { mutex.withLock { handleNewDownload(intent.url) } }
             is MainPageUIIntent.NavigateToFavouriteUser -> {
                 withMainContext {
                     intent.context.NavigateTwitterProfile(intent.userID,intent.screenName)

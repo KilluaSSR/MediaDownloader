@@ -41,9 +41,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
 import killua.dev.base.Model.ReportOption
 import killua.dev.base.ui.LocalNavController
@@ -56,7 +54,6 @@ import killua.dev.base.ui.components.TitleLargeText
 import killua.dev.base.ui.components.TopBar
 import killua.dev.base.utils.navigateSingle
 import killua.dev.base.ui.MainPageMenuButtons
-import killua.dev.base.ui.MainRoutes
 import killua.dev.base.ui.components.CommonInputDialog
 import killua.dev.base.ui.components.InputDialogConfig
 import killua.dev.base.ui.tokens.SizeTokens
@@ -149,14 +146,14 @@ fun FavouriteCard(
 }
 
 @Composable
-fun TwitterURLInputDialog(
+fun URLInputDialog(
     showDialog: Boolean,
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit
 ) {
     val config = InputDialogConfig(
-        title = "Twitter URL here",
-        placeholder = "https://x.com/...",
+        title = "URL here",
+        placeholder = "https://...",
         singleLine = true
     )
 
