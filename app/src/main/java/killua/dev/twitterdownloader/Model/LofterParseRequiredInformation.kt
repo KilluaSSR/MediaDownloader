@@ -1,7 +1,7 @@
 package killua.dev.twitterdownloader.Model
 
 data class LofterParseRequiredInformation(
-    val url: String,
+    val archiveURL: String,
     val authorURL: String,
     val authorID: String,
     val authorName: String,

@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import killua.dev.base.Model.ImageType
 import killua.dev.base.utils.StringUtils
+import killua.dev.base.utils.UserAgentUtils
 import killua.dev.base.utils.isTimeEarlierThan
 import killua.dev.base.utils.isTimeLaterThan
 import killua.dev.base.utils.parseTimestamp
@@ -115,11 +116,11 @@ object LofterParser {
         val data = info.data.toMutableMap()
         val queryNum = 50
         while (true) {
-            when (val result = postFormContent(info.url, info.data, info.header, info.cookies)) {
+            when (val result = postFormContent(info.archiveURL, info.data, info.header, info.cookies)) {
                 is NetworkResult.Success -> {
                     val pageData = result.data
-                    val newBlogsInfo = Regex("""s[\d]*.blogId.*\n.*noticeLinkTitle""")
-                        .findAll(pageData)
+                    val regex = Regex("""s\d+\.blogId=[^;]+;.*?\n.*?noticeLinkTitle""", RegexOption.DOT_MATCHES_ALL)
+                    val newBlogsInfo = regex.findAll(pageData)
                         .map { it.value }
                         .toList()
 
@@ -175,6 +176,7 @@ object LofterParser {
                 ?.getOrNull(1)
                 ?: continue
 
+
             if (imgUrl.isEmpty()) continue
 
             val blogIndex = Regex("""s[\d]*.permalink="(.*?)"""")
@@ -182,6 +184,7 @@ object LofterParser {
                 ?.groupValues
                 ?.getOrNull(1)
                 ?: continue
+
 
             parsedBlogInfo.add(
                 ArchiveInfo(
@@ -209,10 +212,12 @@ object LofterParser {
         for (archive in archiveInfos) {
             when (val result = NetworkHelper.get(
                 url = archive.blogUrl,
-                headers = mapOf("Referer" to "${info.authorDomain}/view")
+                headers = UserAgentUtils.getHeaders() + mapOf("Referer" to info.authorURL+"view"),
+                cookies = info.cookies
             ) { it.decodeToString() }) {
                 is NetworkResult.Success -> {
                     val content = result.data
+
                     if (!matchTags(content, targetTags.toList(), saveNoTags)) continue
 
                     val imageUrls = findImageUrls(content)
@@ -233,7 +238,6 @@ object LofterParser {
                 is NetworkResult.Error -> continue
             }
         }
-
         return BlogInfo(
             authorName = info.authorName,
             authorId = info.authorID,
@@ -265,7 +269,7 @@ object LofterParser {
     private fun findImageUrls(content: String): List<String> {
         var urls = IMG_URL_PATTERN.matcher(content)
             .results()
-            .map { it.group(1) }
+            .map { it.group(1) }  // group(1) 现在直接包含干净的URL
             .filter { it.contains("imglf", true) }
             .toList()
 
@@ -276,7 +280,6 @@ object LofterParser {
                 .filter { it.contains("imglf", true) }
                 .toList()
         }
-
         return urls
     }
 

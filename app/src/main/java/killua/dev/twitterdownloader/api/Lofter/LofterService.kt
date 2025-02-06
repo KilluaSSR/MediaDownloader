@@ -102,14 +102,13 @@ class LofterService @Inject constructor(
         val document = Jsoup.parse(pageContent)
         val authorInfo = parseAuthorInfo(document, authorUrl)
 
-        val archiveUrl = "$authorUrl/dwr/call/plaincall/ArchiveBean.getArchivePostByTime.dwr"
+        val archiveUrl = "${authorUrl}dwr/call/plaincall/ArchiveBean.getArchivePostByTime.dwr"
         val data = makeArchiveData(authorInfo.authorId, 50)
         val header = UserAgentUtils.makeLofterHeaders(authorUrl)
-
         val requiredInfo = LofterParseRequiredInformation(
-            url = archiveUrl,
+            archiveURL = archiveUrl,
             authorID = authorInfo.authorId,
-            authorURL = archiveUrl,
+            authorURL = authorUrl,
             authorName = authorInfo.authorName,
             authorDomain = authorInfo.authorDomain,
             cookies = mapOf(loginKey to loginAuth),
