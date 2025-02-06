@@ -1,8 +1,9 @@
-package killua.dev.twitterdownloader.download
+package killua.dev.twitterdownloader.download.Platforms
 
 import android.content.Context
 import killua.dev.base.Model.DownloadTask
 import killua.dev.base.utils.MediaStoreHelper
+import killua.dev.twitterdownloader.download.BaseMediaDownloader
 import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
 

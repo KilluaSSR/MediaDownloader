@@ -1,22 +1,30 @@
 package killua.dev.twitterdownloader.api.Lofter
 
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import dagger.hilt.android.qualifiers.ApplicationContext
 import killua.dev.base.Model.ImageType
 import killua.dev.base.utils.UserAgentUtils
+import killua.dev.twitterdownloader.Model.LofterParseRequiredInformation
 import killua.dev.twitterdownloader.Model.NetworkResult
+import killua.dev.twitterdownloader.api.Lofter.BuildRequest.makeArchiveData
 import killua.dev.twitterdownloader.api.Lofter.Model.BlogImage
 import killua.dev.twitterdownloader.api.Lofter.Model.BlogInfo
 import killua.dev.twitterdownloader.api.Lofter.utils.LofterParser
+import killua.dev.twitterdownloader.api.Lofter.utils.LofterParser.parseArchivePage
+import killua.dev.twitterdownloader.api.Lofter.utils.LofterParser.parseAuthorInfo
+import killua.dev.twitterdownloader.api.Lofter.utils.LofterParser.parseFromArchiveInfos
 import killua.dev.twitterdownloader.api.NetworkHelper
 import killua.dev.twitterdownloader.utils.extractLofterUserDomain
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.jsoup.Jsoup
 import javax.inject.Inject
 
 class LofterService @Inject constructor(
     @ApplicationContext private val context: Context
-){
+) {
     suspend fun getBlogImages(
         blogUrl: String,
         loginKey: String,
@@ -45,7 +53,7 @@ class LofterService @Inject constructor(
                     is NetworkResult.Error -> throw Exception("Failed:  ${result.message}")
                 }
             }
-            val (authorName, authorId) = LofterParser.parseAuthorInfo(authorViewContent)
+            val (authorName, authorId) = parseAuthorInfo(authorViewContent)
             val authorDomain = blogUrl.extractLofterUserDomain()
             val imagesUrl = LofterParser.parseImages(blogContent)
             val blogInfo = BlogInfo(
@@ -72,4 +80,76 @@ class LofterService @Inject constructor(
             NetworkResult.Error(message = e.message ?: "Failed")
         }
     }
+
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    suspend fun getByAuthorTags(
+        authorUrl: String,
+        loginKey: String,
+        loginAuth: String,
+        startTime: String,
+        endTime: String,
+        tags: Set<String>,
+        saveNoTags: Boolean
+    ): BlogInfo {
+        val pageContent = when (val result = NetworkHelper.get(
+            url = "$authorUrl/view",
+            headers = UserAgentUtils.getHeaders(),
+            cookies = mapOf(loginKey to loginAuth)
+        ) { String(it, Charsets.UTF_8) }) {
+            is NetworkResult.Success -> result.data
+            is NetworkResult.Error -> throw IllegalStateException("Failed to fetch author page")
+        }
+        val document = Jsoup.parse(pageContent)
+        val authorInfo = parseAuthorInfo(document, authorUrl)
+
+        val archiveUrl = "$authorUrl/dwr/call/plaincall/ArchiveBean.getArchivePostByTime.dwr"
+        val data = makeArchiveData(authorInfo.authorId, 50)
+        val header = UserAgentUtils.makeLofterHeaders(authorUrl)
+
+        val requiredInfo = LofterParseRequiredInformation(
+            url = archiveUrl,
+            authorID = authorInfo.authorId,
+            authorURL = archiveUrl,
+            authorName = authorInfo.authorName,
+            authorDomain = authorInfo.authorDomain,
+            cookies = mapOf(loginKey to loginAuth),
+            header = header,
+            data = data,
+            startTime = startTime,
+            endTime = endTime
+        )
+
+        val blogInfos = parseArchivePage(requiredInfo)
+
+        return parseFromArchiveInfos(blogInfos, requiredInfo, tags, saveNoTags)
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

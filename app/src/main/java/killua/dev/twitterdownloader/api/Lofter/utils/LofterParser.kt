@@ -1,12 +1,34 @@
 package killua.dev.twitterdownloader.api.Lofter.utils
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import killua.dev.base.Model.ImageType
 import killua.dev.base.utils.StringUtils
+import killua.dev.base.utils.isTimeEarlierThan
+import killua.dev.base.utils.isTimeLaterThan
+import killua.dev.base.utils.parseTimestamp
+import killua.dev.twitterdownloader.Model.AuthorInfo
+import killua.dev.twitterdownloader.Model.LofterParseRequiredInformation
+import killua.dev.twitterdownloader.Model.NetworkResult
+import killua.dev.twitterdownloader.api.Lofter.Model.ArchiveInfo
+import killua.dev.twitterdownloader.api.Lofter.Model.BlogImage
+import killua.dev.twitterdownloader.api.Lofter.Model.BlogInfo
+import killua.dev.twitterdownloader.api.NetworkHelper
+import kotlinx.coroutines.delay
+import okhttp3.FormBody
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
+import java.net.URLDecoder
+import java.util.regex.Pattern
+import kotlin.random.Random
 
+@OptIn(ExperimentalStdlibApi::class)
 object LofterParser {
     private val imagePattern = "\"(http[s]{0,1}://imglf\\d{0,1}.lf\\d*.[0-9]{0,3}.net.*?)\"".toRegex()
     private val avatarPattern = "[1649]{2}[x,y][1649]{2}".toRegex()
+    private val IMG_URL_PATTERN = Pattern.compile(""""(http[s]?://imglf\d?.lf\d*.[0-9]{0,3}.net.*?)"""")
+    private val OLD_IMG_URL_PATTERN = Pattern.compile(""""(http[s]?://imglf\d.nosdn\d*.[0-9]{0,3}\d.net.*?)"""")
+    private val TAGS_PATTERN = Pattern.compile(""""http[s]?://.*?\.lofter\.com/tag/(.*?)"""")
 
     fun parseAuthorInfo(html: String): Pair<String, String> {
         val doc = Jsoup.parse(html)
@@ -21,6 +43,28 @@ object LofterParser {
             ?: throw Exception("Author ID not found")
 
         return Pair(authorName, authorId)
+    }
+
+    fun parseAuthorInfo(document: Document, authorUrl: String): AuthorInfo {
+        val authorId = document.select("iframe#control_frame").first()
+            ?.attr("src")
+            ?.split("blogId=")
+            ?.getOrNull(1)
+            ?: throw IllegalStateException("Failed to parse author ID")
+
+        val authorDomain = Regex("""https?://([^.]+)\.lofter\.com/""")
+            .find(authorUrl)
+            ?.groupValues
+            ?.getOrNull(1)
+            ?: throw IllegalStateException("Failed to parse author IP")
+
+        val authorName = document.title()
+
+        return AuthorInfo(
+            authorId = authorId,
+            authorDomain = authorDomain,
+            authorName = authorName
+        )
     }
 
     fun parseImages(content: String): List<String> {
@@ -42,6 +86,211 @@ object LofterParser {
         val safeAuthorName = StringUtils.sanitizeFilename(authorName)
         val imageType = ImageType.fromUrl(imageUrl)
         return "$safeAuthorName[$authorDomain] ($index).${imageType.extension}"
+    }
+
+    suspend fun postFormContent(
+        url: String,
+        data: Map<String, String>,
+        headers: Map<String, String>,
+        cookies: Map<String, String>? = null
+    ): NetworkResult<String> {
+        val formBody = FormBody.Builder().apply {
+            data.forEach { (key, value) ->
+                add(key, value)
+            }
+        }.build()
+
+        return NetworkHelper.post(
+            url = url,
+            body = formBody,
+            headers = headers,
+            cookies = cookies ?: emptyMap()
+        ) { bytes ->
+            String(bytes, Charsets.UTF_8)
+        }
+    }
+
+    suspend fun parseArchivePage(info: LofterParseRequiredInformation): MutableList<ArchiveInfo> {
+        val allBlogInfo = mutableListOf<String>()
+        val data = info.data.toMutableMap()
+        val queryNum = 50
+        while (true) {
+            when (val result = postFormContent(info.url, info.data, info.header, info.cookies)) {
+                is NetworkResult.Success -> {
+                    val pageData = result.data
+                    val newBlogsInfo = Regex("""s[\d]*.blogId.*\n.*noticeLinkTitle""")
+                        .findAll(pageData)
+                        .map { it.value }
+                        .toList()
+
+                    allBlogInfo.addAll(newBlogsInfo)
+                    if (newBlogsInfo.size != queryNum) break
+
+                    val currentTimestamp = data["c0-param2"]?.removePrefix("number:")
+                    if (currentTimestamp != null &&
+                        info.startTime != null &&
+                        isTimeEarlierThan(currentTimestamp, info.startTime)) {
+                        break
+                    }
+
+                    val lastIndexRegex =
+                        Regex("""s${queryNum - 1}\.time=(.*);s.*type""")
+                    val nextTimestamp = lastIndexRegex.find(pageData)
+                        ?.groupValues
+                        ?.getOrNull(1)
+                        ?: break
+
+                    data["c0-param2"] = "number:$nextTimestamp"
+                    delay(Random.nextLong(1000, 2000))
+                }
+
+                is NetworkResult.Error -> {
+                    break
+                }
+            }
+        }
+
+        val parsedBlogInfo = mutableListOf<ArchiveInfo>()
+        var blogNum = 0
+
+        for (blogInfo in allBlogInfo) {
+            val timestamp = Regex("""s[\d]*.time=(\d*);""")
+                .find(blogInfo)
+                ?.groupValues
+                ?.getOrNull(1) ?: continue
+
+            if (info.startTime != null && isTimeEarlierThan(timestamp, info.startTime)) {
+                break
+            }
+
+            if (info.endTime != null && isTimeLaterThan(timestamp, info.endTime)) {
+                continue
+            }
+
+            blogNum++
+
+            val imgUrl = Regex("""[\d]*.imgurl="(.*?)"""")
+                .find(blogInfo)
+                ?.groupValues
+                ?.getOrNull(1)
+                ?: continue
+
+            if (imgUrl.isEmpty()) continue
+
+            val blogIndex = Regex("""s[\d]*.permalink="(.*?)"""")
+                .find(blogInfo)
+                ?.groupValues
+                ?.getOrNull(1)
+                ?: continue
+
+            parsedBlogInfo.add(
+                ArchiveInfo(
+                    imgUrl = imgUrl,
+                    blogUrl = "${info.authorURL}post/$blogIndex",
+                    time = parseTimestamp(timestamp.toLong() / 1000)
+                )
+            )
+        }
+
+        return parsedBlogInfo
+    }
+
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    suspend fun parseFromArchiveInfos(
+        archiveInfos: List<ArchiveInfo>,
+        info: LofterParseRequiredInformation,
+        targetTags: Set<String> = setOf(),
+        saveNoTags: Boolean
+    ): BlogInfo {
+        val images = mutableListOf<BlogImage>()
+        var lastTime = ""
+        var lastIndex = 0
+
+        for (archive in archiveInfos) {
+            when (val result = NetworkHelper.get(
+                url = archive.blogUrl,
+                headers = mapOf("Referer" to "${info.authorDomain}/view")
+            ) { it.decodeToString() }) {
+                is NetworkResult.Success -> {
+                    val content = result.data
+                    if (!matchTags(content, targetTags.toList(), saveNoTags)) continue
+
+                    val imageUrls = findImageUrls(content)
+                    val startIndex = if (archive.time == lastTime) lastIndex else 0
+
+                    images.addAll(
+                        createBlogImages(
+                            urls = imageUrls,
+                            time = archive.time,
+                            info = info,
+                            startIndex = startIndex
+                        )
+                    )
+
+                    lastTime = archive.time
+                    lastIndex = startIndex + imageUrls.size
+                }
+                is NetworkResult.Error -> continue
+            }
+        }
+
+        return BlogInfo(
+            authorName = info.authorName,
+            authorId = info.authorID,
+            authorDomain = info.authorDomain,
+            images = images
+        )
+    }
+
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    private fun matchTags(content: String, targetTags: List<String>?, saveNoTags: Boolean): Boolean {
+        // 如果没有目标标签，则全部保存
+        if (targetTags.isNullOrEmpty()) return true
+
+        val pageTags = TAGS_PATTERN.matcher(content)
+            .results()
+            .map { URLDecoder.decode(it.group(1), "UTF-8").replace("\u00a0", " ") }
+            .toList()
+
+        // 如果页面没有标签
+        if (pageTags.isEmpty()) {
+            return saveNoTags // 根据saveNoTags决定是否保存无标签内容
+        }
+
+        // 检查是否有任意一个目标标签匹配
+        return pageTags.any { it in targetTags }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    private fun findImageUrls(content: String): List<String> {
+        var urls = IMG_URL_PATTERN.matcher(content)
+            .results()
+            .map { it.group(1) }
+            .filter { it.contains("imglf", true) }
+            .toList()
+
+        if (urls.isEmpty()) {
+            urls = OLD_IMG_URL_PATTERN.matcher(content)
+                .results()
+                .map { it.group(1) }
+                .filter { it.contains("imglf", true) }
+                .toList()
+        }
+
+        return urls
+    }
+
+    private fun createBlogImages(
+        urls: List<String>,
+        time: String,
+        info: LofterParseRequiredInformation,
+        startIndex: Int
+    ): List<BlogImage> {
+        return urls.mapIndexed { index, url ->
+            val type = ImageType.fromUrl(url)
+            val filename = "${info.authorName}[${info.authorID}] $time(${startIndex + index + 1}).${type.extension}"
+            BlogImage(url = url, filename = filename, type = type)
+        }
     }
 }
 

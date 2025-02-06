@@ -14,3 +14,9 @@ data class BlogInfo(
     val authorDomain: String,
     val images: List<BlogImage>
 )
+
+data class ArchiveInfo(
+    val imgUrl: String,
+    val blogUrl: String,
+    val time: String
+)
