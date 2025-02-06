@@ -48,7 +48,7 @@ android {
 }
 
 dependencies {
-
+    implementation (libs.jsoup)
     implementation(libs.coil.compose)
     // AndroidX Core
     implementation(libs.androidx.core.ktx)

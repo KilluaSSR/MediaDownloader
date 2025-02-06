@@ -3,7 +3,6 @@ package killua.dev.twitterdownloader.ui.ViewModels
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.viewModelScope
-import api.Model.TwitterUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import db.Download
 import db.DownloadStatus
@@ -17,8 +16,9 @@ import killua.dev.base.utils.DownloadPreChecks
 import killua.dev.base.utils.TwitterMediaFileNameStrategy
 import killua.dev.twitterdownloader.Model.MainPageUIIntent
 import killua.dev.twitterdownloader.Model.MainPageUIState
-import killua.dev.twitterdownloader.api.Model.TwitterRequestResult
-import killua.dev.twitterdownloader.api.TwitterApiService
+import killua.dev.twitterdownloader.Model.NetworkResult
+import killua.dev.twitterdownloader.api.Twitter.Model.TwitterUser
+import killua.dev.twitterdownloader.api.Twitter.TwitterDownloadSingleMedia
 import killua.dev.twitterdownloader.download.DownloadQueueManager
 import killua.dev.twitterdownloader.repository.DownloadRepository
 import killua.dev.twitterdownloader.utils.NavigateTwitterProfile
@@ -31,7 +31,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainPageViewmodel @Inject constructor(
-    private val twitterApiService: TwitterApiService,
+    private val twitterDownloadSingleMedia: TwitterDownloadSingleMedia,
     private val downloadRepository: DownloadRepository,
     private val downloadQueueManager: DownloadQueueManager,
     private val downloadEventManager: DownloadEventManager,
@@ -86,8 +86,8 @@ class MainPageViewmodel @Inject constructor(
     private fun handleNewDownload(tweetId: String) {
         downloadPreChecks.canStartDownload().onSuccess {
             try {
-                when (val result = twitterApiService.getTweetDetailAsync(tweetId)) {
-                    is TwitterRequestResult.Success -> {
+                when (val result = twitterDownloadSingleMedia.getTweetDetailAsync(tweetId)) {
+                    is NetworkResult.Success -> {
                         val user = result.data.user
                         result.data.videoUrls.forEach {
                             createAndStartDownload(it, user, tweetId, MediaType.VIDEO)
@@ -104,7 +104,7 @@ class MainPageViewmodel @Inject constructor(
                             }
                         }
                     }
-                    is TwitterRequestResult.Error -> {
+                    is NetworkResult.Error -> {
                         viewModelScope.launch{
                             emitEffect(ShowSnackbar("Twitter request error", withDismissAction = true, actionLabel = "OKAY"))
                         }

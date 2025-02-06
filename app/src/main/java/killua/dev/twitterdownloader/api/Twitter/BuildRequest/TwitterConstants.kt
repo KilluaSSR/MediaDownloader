@@ -1,4 +1,4 @@
-package killua.dev.twitterdownloader.api.Constants
+package killua.dev.twitterdownloader.api.Twitter.BuildRequest
 
 object TwitterAPIURL {
     const val Host = "https://x.com"
@@ -7,8 +7,6 @@ object TwitterAPIURL {
         "AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA"
 }
 
-const val USER_AGENT =
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0"
 const val GetTweetDetailFeatures =
     "{" +
             "\"profile_label_improvements_pcf_label_in_post_enabled\":false," +

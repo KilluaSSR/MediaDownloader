@@ -21,7 +21,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.NotInterested
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -36,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.base.Model.DownloadPageCommands
@@ -51,6 +51,7 @@ import killua.dev.twitterdownloader.ui.FilterContent
 import killua.dev.twitterdownloader.ui.ViewModels.DownloadPageUIIntent.*
 import killua.dev.twitterdownloader.ui.ViewModels.DownloadedViewModel
 import killua.dev.twitterdownloader.ui.components.DownloadItemCard
+import killua.dev.twitterdownloader.ui.components.Loading
 import killua.dev.twitterdownloader.ui.components.MainScaffold
 
 @SuppressLint("UnusedContentLambdaTargetStateParameter")
@@ -146,28 +147,12 @@ fun DownloadPage() {
                         ),
                         selected = (index == uiState.value.optionIndex)
                     ) {
-                        Text(label.name)
+                        Text(label.name, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }
             }
             if(uiState.value.isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "Loading...",
-                            modifier = Modifier.alpha(0.3f)
-                        )
-
-                        Spacer(modifier = Modifier.size(SizeTokens.Level16))
-                        LinearProgressIndicator(
-                            modifier = Modifier
-                                .size(width = SizeTokens.Level128, height = SizeTokens.Level8)
-                        )
-                    }
-                }
+                Loading()
             }
             AnimatedContent(
                 targetState = uiState.value.optionsType,

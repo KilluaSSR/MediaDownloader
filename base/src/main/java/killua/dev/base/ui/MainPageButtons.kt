@@ -2,16 +2,13 @@ package killua.dev.base.ui
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Help
-import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.DownloadDone
+import androidx.compose.material.icons.rounded.QuestionMark
 import androidx.compose.material.icons.rounded.Report
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Star
-import androidx.compose.material.icons.rounded.StarBorder
 import androidx.compose.ui.graphics.vector.ImageVector
 
 
@@ -50,6 +47,11 @@ val MainPageButtons = listOf(
     MainPageButtonsEssentials(
         "User Info",
         Icons.Rounded.AccountCircle,
+        MainRoutes.UserinfoPage.route
+    ),
+    MainPageButtonsEssentials(
+        "Experiment",
+        Icons.Rounded.QuestionMark,
         MainRoutes.UserinfoPage.route
     ),
 )

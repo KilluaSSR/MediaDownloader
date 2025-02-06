@@ -5,7 +5,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 
-// ApplicationUserdata keys
+// Twitter Userdata keys
 val APPLICATION_USER_SCREENNAME_KEY =
     stringPreferencesKey("app_user_screenname")
 val APPLICATION_USER_NAME_KEY =
@@ -15,6 +15,10 @@ val APPLICATION_USER_USERCT0_KEY =
 val APPLICATION_USER_USERAUTH_KEY =
     stringPreferencesKey("app_user_userauth")
 
+// Lofter Userdata keys
+
+val LOFTER_LOGIN_KEY = stringPreferencesKey("lofter_login_key")
+val LOFTER_LOGIN_AUTH = stringPreferencesKey("lofter_login_auth")
 // AppSettings keys
 val LANGUAGE_KEY = stringPreferencesKey("language")
 val NOTIFICATION_ENABLED =
@@ -30,6 +34,8 @@ fun Context.readApplicationUserScreenName() = readStoreString(key = APPLICATION_
 fun Context.readApplicationUserName() = readStoreString(key = APPLICATION_USER_NAME_KEY, defValue = "")
 fun Context.readApplicationUserCt0() = readStoreString(key = APPLICATION_USER_USERCT0_KEY, defValue = "")
 fun Context.readApplicationUserAuth() = readStoreString(key = APPLICATION_USER_USERAUTH_KEY, defValue = "")
+fun Context.readLofterLoginKey() = readStoreString(key = LOFTER_LOGIN_KEY, defValue = "")
+fun Context.readLofterLoginAuth() = readStoreString(key = LOFTER_LOGIN_AUTH, defValue = "")
 fun Context.readLanguage() = readStoreString(key = LANGUAGE_KEY, defValue = "en")
 fun Context.readNotificationEnabled() = readStoreBoolean(key = NOTIFICATION_ENABLED, defValue = true)
 fun Context.readDownloadPath() = readStoreString(key = DOWNLOAD_PATH, defValue = "")
@@ -43,6 +49,8 @@ suspend fun Context.writeApplicationUserScreenName(screenName: String) = saveSto
 suspend fun Context.writeApplicationUserName(name: String) = saveStoreString(key = APPLICATION_USER_NAME_KEY, value = name)
 suspend fun Context.writeApplicationUserCt0(ct0: String) = saveStoreString(key = APPLICATION_USER_USERCT0_KEY, value = ct0)
 suspend fun Context.writeApplicationUserAuth(auth: String) = saveStoreString(key = APPLICATION_USER_USERAUTH_KEY, value = auth)
+suspend fun Context.writeLofterLoginKey(key: String) = saveStoreString(key = LOFTER_LOGIN_KEY, value = key)
+suspend fun Context.writeLofterLoginAuth(auth: String) = saveStoreString(key = LOFTER_LOGIN_AUTH, value = auth)
 suspend fun Context.writeLanguage(language: String) = saveStoreString(key = LANGUAGE_KEY, value = language)
 suspend fun Context.writeNotificationEnabled(enabled: Boolean) = saveStoreBoolean(key = NOTIFICATION_ENABLED, value = enabled)
 suspend fun Context.writeDownloadPath(path: String) = saveStoreString(key = DOWNLOAD_PATH, value = path)

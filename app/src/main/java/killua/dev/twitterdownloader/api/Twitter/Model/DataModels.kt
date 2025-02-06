@@ -1,4 +1,4 @@
-package api.Model
+package killua.dev.twitterdownloader.api.Twitter.Model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

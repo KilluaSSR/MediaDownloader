@@ -21,8 +21,9 @@ fun getRandomColors(): List<ContainerColorPair> {
                 colorScheme.onPrimaryContainer
             ),
             ContainerColorPair(
-                colorScheme.secondaryContainer,
-                colorScheme.onSecondaryContainer
+                colorScheme.surfaceContainer,
+                colorScheme.onSurface
+
             ),
             ContainerColorPair(
                 colorScheme.tertiaryContainer,
@@ -31,6 +32,10 @@ fun getRandomColors(): List<ContainerColorPair> {
             ContainerColorPair(
                 colorScheme.errorContainer,
                 colorScheme.onErrorContainer
+            ),
+            ContainerColorPair(
+                colorScheme.surfaceVariant,
+                colorScheme.onSurfaceVariant
             )
         )
     }

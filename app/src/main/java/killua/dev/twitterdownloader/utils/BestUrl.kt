@@ -1,6 +1,6 @@
 package killua.dev.twitterdownloader.utils
 
-import api.Model.RootDto
+import killua.dev.twitterdownloader.api.Twitter.Model.RootDto
 
 fun RootDto.getAllHighestBitrateUrls(): List<String> {
     val tweetData = this.data?.threaded_conversation_with_injections_v2?.instructions?.firstOrNull()
