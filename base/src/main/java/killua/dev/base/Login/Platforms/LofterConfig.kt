@@ -23,11 +23,12 @@ class LofterConfig : PlatformConfig {
             rules = listOf(
                 CookieRule(
                     name = "login",
-                    pattern = "(${possibleLoginKeys.joinToString("|")})=([^;]+);[^;]*domain=([^;]+);[^;]*expires=([^;]+)",
+                    pattern = "(${possibleLoginKeys.joinToString("|")})=([^;]+)",
                     saveFunction = { context, cookieInfo ->
                         context.writeLofterLoginKey(cookieInfo.key)
                         context.writeLofterLoginAuth(cookieInfo.value)
-                        context.writeLofterCookieExpiration(cookieInfo.expiration ?: "")
+                        val tenDaysLater = System.currentTimeMillis() + (10L * 24 * 60 * 60 * 1000)
+                        context.writeLofterCookieExpiration(tenDaysLater.toString())
                     }
                 )
             ),

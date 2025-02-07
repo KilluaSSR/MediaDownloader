@@ -93,42 +93,37 @@ fun BrowserPage(
                                         val cookies = cookieManager.getCookie(platformConfig.cookieDomain)
                                             ?: continue
 
-                                        // 检查每个规则组
                                         for (group in platformConfig.cookieRuleGroups) {
-                                            var matchedRules = 0
+                                            val matchResults = mutableListOf<Pair<CookieRule, String>>()
 
-                                            // 遍历组内规则
                                             for (rule in group.rules) {
-                                                val matchResult = rule.pattern.toRegex().find(cookies)
+                                                val matchResult = rule.pattern.toRegex()
+                                                    .find(cookies)?.groupValues?.getOrNull(1)
                                                 if (matchResult != null) {
-                                                    val cookieInfo = CookieInfo(
-                                                        key = matchResult.groupValues.getOrElse(1) { "" },
-                                                        value = matchResult.groupValues.getOrElse(2) { "" },
-                                                        domain = matchResult.groupValues.getOrElse(3) { null },
-                                                        expiration = matchResult.groupValues.getOrElse(4) { null }
-                                                    )
-
-                                                    rule.saveFunction(context, cookieInfo)
-                                                    matchedRules++
-
-                                                    // 如果是matchOne模式且已匹配，直接结束
-                                                    if (group.matchOne) {
-                                                        loginSuccess.value = true
-                                                        break
-                                                    }
+                                                    matchResults.add(rule to matchResult)
                                                 }
                                             }
-
-                                            // 非matchOne模式需要所有规则都匹配
-                                            if (!group.matchOne && matchedRules == group.rules.size) {
-                                                loginSuccess.value = true
+                                            val shouldSave = if (group.matchOne) {
+                                                matchResults.isNotEmpty()
+                                            } else {
+                                                matchResults.size == group.rules.size
                                             }
-                                        }
+                                            if (shouldSave) {
+                                                withContext(Dispatchers.Main) {
+                                                    matchResults.forEach { (rule, value) ->
+                                                        rule.saveFunction(context, CookieInfo(
+                                                            key = rule.name,
+                                                            value = value
+                                                        ))
+                                                    }
 
-                                        // 如果登录成功，清理cookie
-                                        if (loginSuccess.value) {
-                                            cookieManager.removeAllCookies { success ->
-                                                if (success) cookieManager.flush()
+                                                    cookieManager.removeAllCookies { success ->
+                                                        if (success) cookieManager.flush()
+                                                    }
+
+                                                    loginSuccess.value = true
+                                                }
+                                                break
                                             }
                                         }
                                     }
