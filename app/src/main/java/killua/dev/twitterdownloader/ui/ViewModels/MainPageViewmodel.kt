@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import db.Download
 import db.DownloadStatus
+import killua.dev.base.Model.AvailablePlatforms
 import killua.dev.base.Model.DownloadTask
 import killua.dev.base.Model.MediaType
 import killua.dev.base.ui.BaseViewModel
@@ -87,13 +88,38 @@ class MainPageViewmodel @Inject constructor(
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override suspend fun onEvent(state: MainPageUIState, intent: MainPageUIIntent) {
         when (intent) {
-            is MainPageUIIntent.ExecuteDownload -> { mutex.withLock { handleNewDownload(intent.url) } }
+            is MainPageUIIntent.ExecuteDownload -> {
+                mutex.withLock {
+                    val platform = classifyLinks(intent.url)
+                    when(platform){
+                        AvailablePlatforms.Twitter -> {
+                            val tweetID = intent.url.split("?")[0].split("/").last()
+                            handleNewDownload(tweetID)
+                        }
+                        AvailablePlatforms.Lofter -> {
+
+                        }
+                    }
+
+                }
+            }
             is MainPageUIIntent.NavigateToFavouriteUser -> {
                 withMainContext {
                     intent.context.NavigateTwitterProfile(intent.userID,intent.screenName)
                 }
             }
         }
+    }
+
+    private fun classifyLinks(urlLink: String): AvailablePlatforms{
+        val patterns: Map<String, AvailablePlatforms> = mapOf(
+            "x.com" to AvailablePlatforms.Twitter,
+            "twitter.com" to AvailablePlatforms.Twitter,
+            ".lofter.com/post/" to AvailablePlatforms.Lofter,
+        )
+        return patterns.entries.firstOrNull{ (pattern, _) ->
+            urlLink.contains(pattern, ignoreCase = true)
+        }?.value!!
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)

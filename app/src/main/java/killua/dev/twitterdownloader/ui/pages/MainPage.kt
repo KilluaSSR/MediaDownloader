@@ -86,8 +86,7 @@ fun MainPage(
                     }else if(!url.contains("x.com/") && !url.contains("twitter.com/") && !url.contains("lofter")) {
                         viewmodel.emitEffect(SnackbarUIEffect.ShowSnackbar("Unsupported url"))
                     }else {
-                        val tweetID = url.split("?")[0].split("/").last()
-                        viewmodel.emitIntent(MainPageUIIntent.ExecuteDownload(tweetID))
+                        viewmodel.emitIntent(MainPageUIIntent.ExecuteDownload(url))
                     }
                 }
             }
