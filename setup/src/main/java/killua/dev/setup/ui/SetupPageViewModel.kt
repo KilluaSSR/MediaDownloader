@@ -5,7 +5,7 @@ import android.content.Intent
 import android.webkit.CookieManager
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import killua.dev.base.states.SettingsCurrentState
+import killua.dev.base.states.CurrentState
 import killua.dev.base.datastore.readApplicationUserAuth
 import killua.dev.base.datastore.readApplicationUserCt0
 import killua.dev.base.datastore.writeApplicationUserAuth
@@ -32,23 +32,22 @@ import javax.inject.Inject
 class SetupPageViewModel @Inject constructor() :
     BaseViewModel<SetupUIIntent, SetupUIState, SnackbarUIEffect>(SetupUIState(false)) {
     private val mutex = Mutex()
-    private var cookieCheckJob: Job? = null
-    private val _notificationState: MutableStateFlow<SettingsCurrentState> =
-        MutableStateFlow(SettingsCurrentState.Idle)
-    val notificationState: StateFlow<SettingsCurrentState> =
-        _notificationState.stateInScope(SettingsCurrentState.Idle)
-    private val _loginState: MutableStateFlow<SettingsCurrentState> =
-        MutableStateFlow(SettingsCurrentState.Idle)
-    val loginState: StateFlow<SettingsCurrentState> =
-        _loginState.stateInScope(SettingsCurrentState.Idle)
+    private val _notificationState: MutableStateFlow<CurrentState> =
+        MutableStateFlow(CurrentState.Idle)
+    val notificationState: StateFlow<CurrentState> =
+        _notificationState.stateInScope(CurrentState.Idle)
+    private val _loginState: MutableStateFlow<CurrentState> =
+        MutableStateFlow(CurrentState.Idle)
+    val loginState: StateFlow<CurrentState> =
+        _loginState.stateInScope(CurrentState.Idle)
     val eligibility: StateFlow<Boolean> = _loginState.map { login ->
-        login == SettingsCurrentState.Success
+        login == CurrentState.Success
     }.flowOnIO().stateInScope(false)
     override suspend fun onEvent(state: SetupUIState, intent: SetupUIIntent) {
         when (intent) {
             is ValidateNotifications -> {
                 mutex.withLock {
-                    if (notificationState.value != SettingsCurrentState.Success) {
+                    if (notificationState.value != CurrentState.Success) {
                         NotificationUtils.requestPermission(intent.context)
                     }
                 }
@@ -56,12 +55,12 @@ class SetupPageViewModel @Inject constructor() :
             is SetupUIIntent.OnResume -> {
                 mutex.withLock {
                     if (NotificationUtils.checkPermission(intent.context)) {
-                        _notificationState.value = SettingsCurrentState.Success
+                        _notificationState.value = CurrentState.Success
                     }
                     val ct0 = intent.context.readApplicationUserCt0().first()
                     val auth = intent.context.readApplicationUserAuth().first()
                     if(ct0.isNotBlank() && auth.isNotBlank()){
-                        _loginState.value = SettingsCurrentState.Success
+                        _loginState.value = CurrentState.Success
                     }
                 }
             }
@@ -72,35 +71,5 @@ class SetupPageViewModel @Inject constructor() :
             }
 
         }
-    }
-    private suspend fun startCookieCheck(context: Context) {
-        cookieCheckJob?.cancel()
-        cookieCheckJob = viewModelScope.launch {
-            while (isActive) {
-                val cookieManager = CookieManager.getInstance()
-                val cookie = cookieManager.getCookie("https://x.com")
-                if (cookie != null) {
-                    cookie.split(";").forEach { item ->
-                        when {
-                            item.contains("ct0") -> {
-                                val ct0 = item.substringAfter("=").trim()
-                                context.writeApplicationUserCt0(ct0)
-                            }
-                            item.contains("auth_token") -> {
-                                val auth = item.substringAfter("=").trim()
-                                context.writeApplicationUserAuth(auth)
-                            }
-                        }
-                    }
-                    //uiState.value.copy(isLoggedIn = true, isWebViewVisible = false)
-                    break
-                }
-                delay(1000)
-            }
-        }
-    }
-    override fun onCleared() {
-        super.onCleared()
-        cookieCheckJob?.cancel()
     }
 }

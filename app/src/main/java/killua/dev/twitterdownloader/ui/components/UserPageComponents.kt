@@ -5,8 +5,8 @@ import androidx.navigation.NavHostController
 import killua.dev.base.ui.components.TopBar
 
 @Composable
-fun TwitterUsersPageTopAppBar(navController: NavHostController){
-    TopBar(navController,"Twitter Users"){
+fun UsersPageTopAppBar(navController: NavHostController){
+    TopBar(navController,"Users"){
 
     }
 }

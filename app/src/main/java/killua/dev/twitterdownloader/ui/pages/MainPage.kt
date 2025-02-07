@@ -130,6 +130,8 @@ fun MainPage(
                             } else {
                                 if (item.route == MainRoutes.DownloadPage.route){
                                     navController.navigateSingle(item.route)
+                                }else if(item.route == MainRoutes.AuthorPage.route){
+                                    navController.navigateSingle(item.route)
                                 }else{
                                     showDevelopingAlert = true
                                 }

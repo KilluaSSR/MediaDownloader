@@ -19,3 +19,15 @@ sealed class MainRoutes(val route: String) {
     data object AboutPage : MainRoutes(route = "about_page")
     data object HelpPage : MainRoutes(route = "help_page")
 }
+
+sealed class UserpageRoutes(val route: String){
+    data object TwitterSubscribe: UserpageRoutes(route = "twitter_subscribe")
+    data object TwitterGetAll: UserpageRoutes(route = "twitter_get_all")
+    data object LofterAuthors: UserpageRoutes(route = "lofter_authors")
+    data object LofterGetAuthorImagesByTags: UserpageRoutes(route = "lofter_get_author_images_by_tags")
+}
+
+
+sealed class CookiesRoutes(val route: String){
+    data object LofterCookiesBrowser: CookiesRoutes(route = "lofter_cookies_browser")
+}

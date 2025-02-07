@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import db.DownloadStatus
 import killua.dev.base.Model.DownloadPageCommands
-import killua.dev.base.states.SettingsCurrentState
+import killua.dev.base.states.CurrentState
 import killua.dev.base.ui.getColorRelationship
 import killua.dev.base.ui.tokens.SizeTokens
 
@@ -161,7 +161,7 @@ fun PermissionButton(
     enabled: Boolean = true,
     onClick: () -> Unit,
     title: String,
-    state: SettingsCurrentState,
+    state: CurrentState,
     color: Color,
     description: String,
     onSetting: (() -> Unit)? = null

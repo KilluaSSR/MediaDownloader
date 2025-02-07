@@ -12,7 +12,7 @@ import androidx.compose.material.icons.rounded.Star
 import androidx.compose.ui.graphics.vector.ImageVector
 
 
-data class MainPageButtonsEssentials(
+data class ButtonsEssentials(
     val title: String,
     val icon: ImageVector,
     val route: String,
@@ -29,27 +29,27 @@ sealed class MainPageButtonsAction {
     object ShowDialog : MainPageButtonsAction()
 }
 val MainPageButtons = listOf(
-    MainPageButtonsEssentials(
+    ButtonsEssentials(
         "Download Now",
         Icons.Rounded.Download,
         MainRoutes.Download.route
     ),
-    MainPageButtonsEssentials(
+    ButtonsEssentials(
         "Downloaded",
         Icons.Rounded.DownloadDone,
         MainRoutes.DownloadPage.route
     ),
-    MainPageButtonsEssentials(
+    ButtonsEssentials(
         "Authors",
         Icons.Rounded.Star,
         MainRoutes.AuthorPage.route
     ),
-    MainPageButtonsEssentials(
+    ButtonsEssentials(
         "User Info",
         Icons.Rounded.AccountCircle,
         MainRoutes.UserinfoPage.route
     ),
-    MainPageButtonsEssentials(
+    ButtonsEssentials(
         "Experiment",
         Icons.Rounded.QuestionMark,
         MainRoutes.UserinfoPage.route

@@ -19,6 +19,7 @@ val APPLICATION_USER_USERAUTH_KEY =
 
 val LOFTER_LOGIN_KEY = stringPreferencesKey("lofter_login_key")
 val LOFTER_LOGIN_AUTH = stringPreferencesKey("lofter_login_auth")
+val LOFTER_EXPIRATION = stringPreferencesKey("lofter_expiration")
 // AppSettings keys
 val LANGUAGE_KEY = stringPreferencesKey("language")
 val NOTIFICATION_ENABLED =
@@ -29,6 +30,7 @@ val MAX_CONCURRENT_DOWNLOADS =
 val MAX_RETRIES = intPreferencesKey("max_retries")
 val WIFI = booleanPreferencesKey("wifi")
 val PHOTOS_KEY = booleanPreferencesKey("photos")
+
 // Read
 fun Context.readApplicationUserScreenName() = readStoreString(key = APPLICATION_USER_SCREENNAME_KEY, defValue = "")
 fun Context.readApplicationUserName() = readStoreString(key = APPLICATION_USER_NAME_KEY, defValue = "")
@@ -43,7 +45,7 @@ fun Context.readMaxConcurrentDownloads() = readStoreInt(key = MAX_CONCURRENT_DOW
 fun Context.readMaxRetries() = readStoreInt(key = MAX_RETRIES, defValue = 3)
 fun Context.readOnlyWifi() = readStoreBoolean(key = WIFI, defValue = true)
 fun Context.readDownloadPhotos() = readStoreBoolean(key = PHOTOS_KEY, defValue = true)
-
+fun Context.readLofterCookieExpiration() = readStoreString(key = LOFTER_EXPIRATION, defValue = "")
 //Write
 suspend fun Context.writeApplicationUserScreenName(screenName: String) = saveStoreString(key = APPLICATION_USER_SCREENNAME_KEY, value = screenName)
 suspend fun Context.writeApplicationUserName(name: String) = saveStoreString(key = APPLICATION_USER_NAME_KEY, value = name)
@@ -58,3 +60,4 @@ suspend fun Context.writeMaxConcurrentDownloads(max: Int) = saveStoreInt(key = M
 suspend fun Context.writeMaxRetries(max: Int) = saveStoreInt(key = MAX_RETRIES, value = max)
 suspend fun Context.writeOnlyWifi(enabled: Boolean) = saveStoreBoolean(key = WIFI, value = enabled)
 suspend fun Context.writeDownloadPhotos(enabled: Boolean) = saveStoreBoolean(key = PHOTOS_KEY, value = enabled)
+suspend fun Context.writeLofterCookieExpiration(expiration: String) = saveStoreString(LOFTER_EXPIRATION, expiration)
