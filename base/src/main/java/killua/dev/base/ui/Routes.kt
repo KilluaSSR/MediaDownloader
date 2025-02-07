@@ -29,6 +29,7 @@ sealed class UserpageRoutes(val route: String){
 
 sealed class PrepareRoutes(val route: String){
     data object LofterPreparePage: PrepareRoutes(route = "lofter_prepare_page")
+    data object LofterPrepareTagsPage: PrepareRoutes(route = "lofter_prepare_tags_page")
 }
 sealed class CookiesRoutes(val route: String){
     data object LofterCookiesBrowser: CookiesRoutes(route = "lofter_cookies_browser")

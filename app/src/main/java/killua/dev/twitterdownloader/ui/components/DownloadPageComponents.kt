@@ -35,13 +35,13 @@ import killua.dev.base.ui.components.DownloadThumbnail
 import killua.dev.base.ui.components.ShowStatus
 import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.base.utils.videoClickable
-import killua.dev.twitterdownloader.Model.TwitterDownloadItem
+import killua.dev.twitterdownloader.Model.DownloadedItem
 
 @Composable
 fun DownloadItemCard(
-    item: TwitterDownloadItem,
+    item: DownloadedItem,
     thumbnailCache: Map<Uri, Bitmap?>,
-    onCommand: (TwitterDownloadItem, DownloadPageCommands) -> Unit,
+    onCommand: (DownloadedItem, DownloadPageCommands) -> Unit,
     downloadProgress: Map<String, DownloadProgress>,
     modifier: Modifier = Modifier,
     fileNotFoundClick: () -> Unit
@@ -77,14 +77,14 @@ fun DownloadItemCard(
             // 中间内容
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = item.twitterName,
+                    text = item.name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "@${item.twitterScreenName}",
+                    text = "@${item.screenName}",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray,
                     maxLines = 1,

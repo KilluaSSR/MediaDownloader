@@ -4,13 +4,15 @@ import android.net.Uri
 import db.Download
 import db.DownloadState
 import db.DownloadStatus
+import killua.dev.base.Model.AvailablePlatforms
 import killua.dev.base.Model.DownloadItem
 import killua.dev.base.Model.MediaType
 
-data class TwitterDownloadItem(
+data class DownloadedItem(
     override val id: String,
-    val twitterScreenName: String,
-    val twitterName: String,
+    val screenName: String,
+    val name: String,
+    val type: AvailablePlatforms,
     override val downloadState: DownloadState,
     override val link: String,
     override val progress: Int = 0,
@@ -29,10 +31,11 @@ data class TwitterDownloadItem(
     completedAt = completedAt
 ) {
     companion object {
-        fun fromDownload(download: Download) = TwitterDownloadItem(
+        fun fromDownload(download: Download) = DownloadedItem(
             id = download.uuid,
-            twitterScreenName = download.twitterScreenName ?: "",
-            twitterName = download.twitterName ?: "",
+            screenName = download.screenName ?: "",
+            name = download.name ?: "",
+            type = download.type,
             downloadState = when (download.status) {
                 DownloadStatus.PENDING -> DownloadState.Pending
                 DownloadStatus.DOWNLOADING -> DownloadState.Downloading()

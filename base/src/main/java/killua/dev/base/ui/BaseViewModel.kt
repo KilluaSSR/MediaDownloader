@@ -52,7 +52,9 @@ abstract class BaseViewModel<I : UIIntent, S : UIState, E : UIEffect>(state: S) 
     fun emitIntentOnIO(intent: I) = launchOnIO { emitIntent(intent) }
     fun launchOnIO(block: suspend CoroutineScope.() -> Unit) =
         viewModelScope.launch(context = Dispatchers.IO, block = block)
-
+    protected suspend fun updateState(transform: (S) -> S) = withMainContext {
+        _uiState.value = transform(_uiState.value)
+    }
     override suspend fun onEvent(state: S, intent: I) {}
     override suspend fun onEffect(effect: E) {
         when (effect) {

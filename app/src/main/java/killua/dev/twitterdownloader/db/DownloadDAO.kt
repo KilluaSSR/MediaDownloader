@@ -38,7 +38,7 @@ interface DownloadDao {
     suspend fun delete(download: Download)
 
     // ✅ 通过 Twitter 用户 ID 查询下载记录
-    @Query("SELECT * FROM Download WHERE twitter_user_id = :userID")
+    @Query("SELECT * FROM Download WHERE user_id = :userID")
     suspend fun getByUserID(userID: String): List<Download>
 
     // ✅ 根据下载状态查询
@@ -109,13 +109,13 @@ interface DownloadDao {
     // ✅ 获取下载次数最多的 Twitter 用户
     @Query("""
         SELECT 
-            twitter_user_id AS twitterUserId,
-            twitter_screen_name AS twitterScreenName,
-            twitter_name AS twitterName,
+            user_id AS twitterUserId,
+            screen_name AS twitterScreenName,
+            name AS twitterName,
             COUNT(*) AS totalDownloads
         FROM Download
         WHERE status = :status
-        GROUP BY twitter_user_id
+        GROUP BY user_id
         ORDER BY totalDownloads DESC
         LIMIT 1
     """)

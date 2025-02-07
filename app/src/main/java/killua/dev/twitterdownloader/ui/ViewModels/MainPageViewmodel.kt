@@ -154,9 +154,9 @@ class MainPageViewmodel @Inject constructor(
         try {
             val download = Download(
                 uuid = uuid,
-                twitterUserId = user?.id,
-                twitterScreenName = user?.screenName,
-                twitterName = user?.name,
+                userId = user?.id,
+                screenName = user?.screenName,
+                name = user?.name,
                 tweetID = tweetID,
                 fileUri = null,
                 link = url,

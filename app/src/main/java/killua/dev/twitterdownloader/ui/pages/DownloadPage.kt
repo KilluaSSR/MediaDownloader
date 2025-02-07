@@ -232,7 +232,7 @@ fun DownloadPage() {
                                             DownloadPageCommands.GoTo -> {
                                                 viewModel.launchOnIO {
                                                     viewModel.emitIntent(
-                                                        GoToTwitter(item.id,context)
+                                                        GoTo(item.id,context)
                                                     )
                                                 }
                                             }

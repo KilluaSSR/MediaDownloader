@@ -24,7 +24,7 @@ import killua.dev.base.utils.navigateSingle
 import killua.dev.twitterdownloader.ui.ViewModels.AuthorPageUIIntent
 import killua.dev.twitterdownloader.ui.ViewModels.AuthorPageViewModel
 import killua.dev.twitterdownloader.ui.components.MainScaffold
-import killua.dev.twitterdownloader.ui.components.UsersPageTopAppBar
+import killua.dev.twitterdownloader.ui.components.AuthorsPageTopAppBar
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -39,7 +39,7 @@ fun AuthorsPage(){
     }
     MainScaffold (
         topBar = {
-            UsersPageTopAppBar(navController)
+            AuthorsPageTopAppBar(navController)
         },
 
     ){
@@ -69,7 +69,7 @@ fun AuthorsPage(){
                     }
                 }
             }
-            Section(title = "Lofter") {
+            Section(title = "Lofter (Disable your VPN before continuing)") {
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(SizeTokens.Level8),
@@ -95,11 +95,12 @@ fun AuthorsPage(){
                             when (index) {
                                 0 -> navController.navigateSingle(item.route)
                                 1 -> {
-                                    if (eligibleToUseLofterGetByTags.value) {
-                                        navController.navigateSingle(item.route)
-                                    } else {
-                                        navController.navigateSingle(PrepareRoutes.LofterPreparePage.route)
-                                    }
+//                                    if (eligibleToUseLofterGetByTags.value) {
+//                                        navController.navigateSingle(item.route)
+//                                    } else {
+//                                        navController.navigateSingle(PrepareRoutes.LofterPreparePage.route)
+//                                    }
+                                    navController.navigateSingle(PrepareRoutes.LofterPreparePage.route)
                                 }
                             }
                         }

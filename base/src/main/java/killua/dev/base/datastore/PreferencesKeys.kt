@@ -3,6 +3,7 @@ import android.content.Context
 import androidx.compose.runtime.key
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 
 // Twitter Userdata keys
@@ -20,6 +21,8 @@ val APPLICATION_USER_USERAUTH_KEY =
 val LOFTER_LOGIN_KEY = stringPreferencesKey("lofter_login_key")
 val LOFTER_LOGIN_AUTH = stringPreferencesKey("lofter_login_auth")
 val LOFTER_EXPIRATION = stringPreferencesKey("lofter_expiration")
+val LOFTER_START_TIME = longPreferencesKey("lofter_start_time")
+val LOFTER_END_TIME = longPreferencesKey("lofter_end_time")
 // AppSettings keys
 val LANGUAGE_KEY = stringPreferencesKey("language")
 val NOTIFICATION_ENABLED =
@@ -30,7 +33,6 @@ val MAX_CONCURRENT_DOWNLOADS =
 val MAX_RETRIES = intPreferencesKey("max_retries")
 val WIFI = booleanPreferencesKey("wifi")
 val PHOTOS_KEY = booleanPreferencesKey("photos")
-
 // Read
 fun Context.readApplicationUserScreenName() = readStoreString(key = APPLICATION_USER_SCREENNAME_KEY, defValue = "")
 fun Context.readApplicationUserName() = readStoreString(key = APPLICATION_USER_NAME_KEY, defValue = "")
@@ -38,6 +40,8 @@ fun Context.readApplicationUserCt0() = readStoreString(key = APPLICATION_USER_US
 fun Context.readApplicationUserAuth() = readStoreString(key = APPLICATION_USER_USERAUTH_KEY, defValue = "")
 fun Context.readLofterLoginKey() = readStoreString(key = LOFTER_LOGIN_KEY, defValue = "")
 fun Context.readLofterLoginAuth() = readStoreString(key = LOFTER_LOGIN_AUTH, defValue = "")
+fun Context.readLofterStartTime() = readStoreLong(key = LOFTER_START_TIME, defValue = 0L)
+fun Context.readLofterEndTime() = readStoreLong(key = LOFTER_END_TIME, defValue = 0L)
 fun Context.readLanguage() = readStoreString(key = LANGUAGE_KEY, defValue = "en")
 fun Context.readNotificationEnabled() = readStoreBoolean(key = NOTIFICATION_ENABLED, defValue = true)
 fun Context.readDownloadPath() = readStoreString(key = DOWNLOAD_PATH, defValue = "")
@@ -61,3 +65,5 @@ suspend fun Context.writeMaxRetries(max: Int) = saveStoreInt(key = MAX_RETRIES, 
 suspend fun Context.writeOnlyWifi(enabled: Boolean) = saveStoreBoolean(key = WIFI, value = enabled)
 suspend fun Context.writeDownloadPhotos(enabled: Boolean) = saveStoreBoolean(key = PHOTOS_KEY, value = enabled)
 suspend fun Context.writeLofterCookieExpiration(expiration: String) = saveStoreString(LOFTER_EXPIRATION, expiration)
+suspend fun Context.writeLofterStartTime(time: Long) = saveStoreLong(LOFTER_START_TIME, time)
+suspend fun Context.writeLofterEndTime(time: Long) = saveStoreLong(LOFTER_END_TIME, time)

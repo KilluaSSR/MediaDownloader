@@ -5,15 +5,17 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverter
+import killua.dev.base.Model.AvailablePlatforms
 import kotlin.uuid.ExperimentalUuidApi
 
 @Entity
 data class Download @OptIn(ExperimentalUuidApi::class) constructor(
     @PrimaryKey val uuid: String,
 
-    @ColumnInfo(name = "twitter_user_id") val twitterUserId: String? = null,
-    @ColumnInfo(name = "twitter_screen_name") val twitterScreenName: String? = null,
-    @ColumnInfo(name = "twitter_name") val twitterName: String? = null,
+    @ColumnInfo(name = "user_id") val userId: String? = null,
+    @ColumnInfo(name = "screen_name") val screenName: String? = null,
+    @ColumnInfo(name = "name") val name: String? = null,
+    @ColumnInfo(name = "type") val type: AvailablePlatforms = AvailablePlatforms.Twitter,
 
     @ColumnInfo(name = "file_uri") val fileUri: Uri?,
     @ColumnInfo(name = "link") val link: String?,

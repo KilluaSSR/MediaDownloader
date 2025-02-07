@@ -24,6 +24,7 @@ import killua.dev.twitterdownloader.ui.pages.MainPage
 import killua.dev.twitterdownloader.ui.pages.SettingsPage
 import killua.dev.twitterdownloader.ui.pages.AuthorsPage
 import killua.dev.twitterdownloader.ui.pages.OtherSetupPages.Lofter.LofterPreparePage
+import killua.dev.twitterdownloader.ui.pages.OtherSetupPages.Lofter.LofterPrepareTagsPage
 import killua.dev.twitterdownloader.ui.theme.TwitterDownloaderTheme
 
 @AndroidEntryPoint
@@ -66,6 +67,10 @@ class MainActivity : ComponentActivity() {
                         composable(PrepareRoutes.LofterPreparePage.route){
                             LofterPreparePage()
                         }
+                        composable(PrepareRoutes.LofterPrepareTagsPage.route){
+                            LofterPrepareTagsPage()
+                        }
+
                         //Prepare Cookies
                         composable(CookiesRoutes.LofterCookiesBrowser.route){
                             BrowserPage(AvailablePlatforms.Lofter)
