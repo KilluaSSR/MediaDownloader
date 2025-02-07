@@ -9,6 +9,9 @@ import androidx.compose.material.icons.rounded.QuestionMark
 import androidx.compose.material.icons.rounded.Report
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 
 
@@ -16,6 +19,7 @@ data class ButtonsEssentials(
     val title: String,
     val icon: ImageVector,
     val route: String,
+    val color: Color = Color.Unspecified
 )
 
 data class MainPageBottomButtonsEssentials(

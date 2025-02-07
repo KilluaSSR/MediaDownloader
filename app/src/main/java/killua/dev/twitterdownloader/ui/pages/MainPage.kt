@@ -31,7 +31,7 @@ import killua.dev.base.ui.components.paddingTop
 import killua.dev.base.ui.getRandomColors
 import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.base.utils.navigateSingle
-import killua.dev.twitterdownloader.Model.MainPageUIIntent
+import killua.dev.twitterdownloader.ui.ViewModels.MainPageUIIntent
 import killua.dev.twitterdownloader.ui.ViewModels.MainPageViewmodel
 import killua.dev.twitterdownloader.ui.components.FavouriteCard
 import killua.dev.twitterdownloader.ui.components.MainPageBottomSheet

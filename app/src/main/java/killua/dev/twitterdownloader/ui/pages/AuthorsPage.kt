@@ -7,15 +7,22 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.base.ui.LocalNavController
+import killua.dev.base.ui.PrepareRoutes
 import killua.dev.base.ui.UserPageLofterButtons
 import killua.dev.base.ui.UserPageTwitterButtons
 import killua.dev.base.ui.components.ActionsBotton
 import killua.dev.base.ui.components.Section
 import killua.dev.base.ui.components.paddingTop
 import killua.dev.base.ui.tokens.SizeTokens
+import killua.dev.base.utils.navigateSingle
+import killua.dev.twitterdownloader.ui.ViewModels.AuthorPageUIIntent
+import killua.dev.twitterdownloader.ui.ViewModels.AuthorPageViewModel
 import killua.dev.twitterdownloader.ui.components.MainScaffold
 import killua.dev.twitterdownloader.ui.components.UsersPageTopAppBar
 
@@ -23,9 +30,13 @@ import killua.dev.twitterdownloader.ui.components.UsersPageTopAppBar
 @Composable
 fun AuthorsPage(){
     val navController = LocalNavController.current!!
-    LocalContext.current
-    //val viewModel: DownloadedViewModel = hiltViewModel()
-    //val uiState = viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val viewModel: AuthorPageViewModel = hiltViewModel()
+    viewModel.uiState.collectAsStateWithLifecycle()
+    val eligibleToUseLofterGetByTags = viewModel.lofterGetByTagsEligibility.collectAsStateWithLifecycle()
+    LaunchedEffect(Unit) {
+        viewModel.emitIntentOnIO(AuthorPageUIIntent.OnEntry(context))
+    }
     MainScaffold (
         topBar = {
             UsersPageTopAppBar(navController)
@@ -53,7 +64,7 @@ fun AuthorsPage(){
                             icon = item.icon,
                             color = MaterialTheme.colorScheme.primaryContainer
                         ) {
-
+                            navController.navigateSingle(item.route)
                         }
                     }
                 }
@@ -71,9 +82,26 @@ fun AuthorsPage(){
                             enabled = true,
                             title = item.title,
                             icon = item.icon,
-                            color = MaterialTheme.colorScheme.primaryContainer
+                            color = when (index) {
+                                0 -> MaterialTheme.colorScheme.primaryContainer
+                                1 -> if (eligibleToUseLofterGetByTags.value) {
+                                    MaterialTheme.colorScheme.primaryContainer
+                                } else {
+                                    MaterialTheme.colorScheme.errorContainer
+                                }
+                                else -> MaterialTheme.colorScheme.primaryContainer
+                            }
                         ) {
-
+                            when (index) {
+                                0 -> navController.navigateSingle(item.route)
+                                1 -> {
+                                    if (eligibleToUseLofterGetByTags.value) {
+                                        navController.navigateSingle(item.route)
+                                    } else {
+                                        navController.navigateSingle(PrepareRoutes.LofterPreparePage.route)
+                                    }
+                                }
+                            }
                         }
                     }
                 }

@@ -16,12 +16,14 @@ import killua.dev.base.Model.AvailablePlatforms
 import killua.dev.base.ui.CookiesRoutes
 import killua.dev.base.ui.LocalNavController
 import killua.dev.base.ui.MainRoutes
+import killua.dev.base.ui.PrepareRoutes
 import killua.dev.base.ui.animations.AnimatedNavHost
 import killua.dev.twitterdownloader.ui.pages.AboutPage
 import killua.dev.twitterdownloader.ui.pages.DownloadPage
 import killua.dev.twitterdownloader.ui.pages.MainPage
 import killua.dev.twitterdownloader.ui.pages.SettingsPage
 import killua.dev.twitterdownloader.ui.pages.AuthorsPage
+import killua.dev.twitterdownloader.ui.pages.OtherSetupPages.Lofter.LofterPreparePage
 import killua.dev.twitterdownloader.ui.theme.TwitterDownloaderTheme
 
 @AndroidEntryPoint
@@ -59,6 +61,11 @@ class MainActivity : ComponentActivity() {
                         }
 
 
+
+                        //Prepare Page
+                        composable(PrepareRoutes.LofterPreparePage.route){
+                            LofterPreparePage()
+                        }
                         //Prepare Cookies
                         composable(CookiesRoutes.LofterCookiesBrowser.route){
                             BrowserPage(AvailablePlatforms.Lofter)

@@ -29,6 +29,6 @@ val UserPageLofterButtons = listOf(
     ButtonsEssentials(
         "Get by Tags",
         Icons.Rounded.Bookmarks,
-        UserpageRoutes.LofterGetAuthorImagesByTags.route
+        UserpageRoutes.LofterGetAuthorImagesByTags.route,
     ),
 )

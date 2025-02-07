@@ -13,6 +13,8 @@ import killua.dev.base.datastore.writeApplicationUserCt0
 import killua.dev.base.states.CurrentState
 import killua.dev.base.ui.BaseViewModel
 import killua.dev.base.ui.SnackbarUIEffect
+import killua.dev.base.ui.UIIntent
+import killua.dev.base.ui.UIState
 import killua.dev.base.utils.NotificationUtils
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -27,6 +29,18 @@ import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import kotlin.text.split
 
+data class LofterPreparePageUIState(
+    val isLoggedIn: Boolean = false,
+    val dateSelected: Boolean = false,
+    val startDate: String = "0",
+    val endDate: String = "0",
+    ) : UIState
+
+sealed class LofterPreparePageUIIntent : UIIntent {
+    data class OnDateChanged(val context: Context) : LofterPreparePageUIIntent()
+    data class OnEntry(val context: Context) : LofterPreparePageUIIntent()
+    data class OnTagsChanged(val context: Context) : LofterPreparePageUIIntent()
+}
 
 @HiltViewModel
 class LofterPreparePageViewModel @Inject constructor(
@@ -52,7 +66,7 @@ class LofterPreparePageViewModel @Inject constructor(
     ) {
         when(intent){
             is LofterPreparePageUIIntent.OnDateChanged -> TODO()
-            is LofterPreparePageUIIntent.OnResume -> {
+            is LofterPreparePageUIIntent.OnEntry -> {
                 mutex.withLock {
                     val loginKey = intent.context.readLofterLoginKey().first()
                     val loginAuth = intent.context.readLofterLoginAuth().first()

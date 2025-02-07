@@ -16,7 +16,7 @@ class LofterConfig : PlatformConfig {
     )
 
     override val loginUrl = "https://www.lofter.com/front/login"
-    override val cookieDomain = "https://www.lofter.com"
+    override val cookieDomain = "https://lofter.com"
     override val titleText = "Login your Lofter account"
     override val cookieRuleGroups: List<CookieRuleGroup> = listOf(
         CookieRuleGroup(

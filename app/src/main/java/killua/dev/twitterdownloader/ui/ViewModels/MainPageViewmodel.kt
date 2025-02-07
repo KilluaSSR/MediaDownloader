@@ -1,5 +1,6 @@
 package killua.dev.twitterdownloader.ui.ViewModels
 
+import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.viewModelScope
@@ -11,11 +12,11 @@ import killua.dev.base.Model.MediaType
 import killua.dev.base.ui.BaseViewModel
 import killua.dev.base.ui.SnackbarUIEffect
 import killua.dev.base.ui.SnackbarUIEffect.*
+import killua.dev.base.ui.UIIntent
+import killua.dev.base.ui.UIState
 import killua.dev.base.utils.DownloadEventManager
 import killua.dev.base.utils.DownloadPreChecks
 import killua.dev.base.utils.TwitterMediaFileNameStrategy
-import killua.dev.twitterdownloader.Model.MainPageUIIntent
-import killua.dev.twitterdownloader.Model.MainPageUIState
 import killua.dev.twitterdownloader.Model.NetworkResult
 import killua.dev.twitterdownloader.api.Twitter.Model.TwitterUser
 import killua.dev.twitterdownloader.api.Twitter.TwitterDownloadSingleMedia
@@ -27,6 +28,19 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.UUID
 import javax.inject.Inject
+
+sealed class MainPageUIIntent : UIIntent {
+    data class ExecuteDownload(val url: String) : MainPageUIIntent()
+    data class NavigateToFavouriteUser(val context: Context, val userID: String, val screenName: String) : MainPageUIIntent()
+}
+
+data class MainPageUIState(
+    val youHaveDownloadedSth: Boolean = false,
+    val favouriteUserName: String = "",
+    val favouriteUserScreenName: String = "",
+    val favouriteUserID: String = "",
+    val downloadedTimes: Int = 0
+) : UIState
 
 
 @HiltViewModel

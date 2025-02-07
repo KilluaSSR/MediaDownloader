@@ -16,15 +16,21 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import killua.dev.base.Model.AvailablePlatforms
 import killua.dev.base.datastore.readLofterLoginKey
 import killua.dev.base.states.CurrentState
 import killua.dev.base.ui.CookiesRoutes
 import killua.dev.base.ui.LocalNavController
+import killua.dev.base.ui.components.AppIcon
+import killua.dev.base.ui.components.BodyMediumText
+import killua.dev.base.ui.components.HeadlineMediumText
 import killua.dev.base.ui.components.PermissionButton
 import killua.dev.base.ui.components.Section
 import killua.dev.base.ui.components.SetOnResume
+import killua.dev.base.ui.components.paddingTop
 import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.base.utils.navigateSingle
 import killua.dev.setup.SetupRoutes
@@ -41,8 +47,8 @@ fun LofterPreparePage() {
     val context = LocalContext.current
     val loginState = viewModel.loginState.collectAsStateWithLifecycle()
     val eligibility = viewModel.eligibility.collectAsStateWithLifecycle()
-    SetOnResume {
-        viewModel.emitIntentOnIO(LofterPreparePageUIIntent.OnResume(context))
+    LaunchedEffect(Unit) {
+        viewModel.emitIntentOnIO(LofterPreparePageUIIntent.OnEntry(context))
     }
 
     SetupScaffold(
@@ -51,7 +57,7 @@ fun LofterPreparePage() {
                 enabled = eligibility.value,
                 onClick = {
                     viewModel.launchOnIO {
-                        navController.popBackStack()
+                        navController.navigateUp()
                     }
                 }
             ) {
@@ -64,49 +70,57 @@ fun LofterPreparePage() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(SizeTokens.Level24)
         ) {
+            Column(
+                modifier = Modifier
+                    .paddingTop(SizeTokens.Level100),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                AppIcon(AvailablePlatforms.Lofter)
+                HeadlineMediumText(modifier = Modifier.paddingTop(SizeTokens.Level12), text = "Lofter Configurations")
+            }
 
-        }
-        Spacer(modifier = Modifier.size(SizeTokens.Level24))
-        Section(title = "Log in to your Lofter account") {
-            PermissionButton(
-                title = "Log in",
-                description = "Your cookie is necessary when downloading pictures from Lofter.",
-                state = loginState.value,
-                onClick = {
-                    if(loginState.value != CurrentState.Success){
-                        navController.navigateSingle(CookiesRoutes.LofterCookiesBrowser.route)
-                    }
-                },
-                color = if (loginState.value == CurrentState.Idle || loginState.value == CurrentState.Error) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
-            )
-        }
-        Spacer(modifier = Modifier.size(SizeTokens.Level24))
-        Section(title = "Date picker") {
-            PermissionButton(
-                title = "Range",
-                description = "We need your account's cookie to download videos.",
-                state = loginState.value,
-                onClick = {
+            Section(title = "Log in to your Lofter account") {
+                PermissionButton(
+                    title = "Log in",
+                    description = "Your cookie is necessary when downloading pictures from Lofter.",
+                    state = loginState.value,
+                    onClick = {
+                        if(loginState.value != CurrentState.Success){
+                            navController.navigateSingle(CookiesRoutes.LofterCookiesBrowser.route)
+                        }
+                    },
+                    color = if (loginState.value == CurrentState.Idle || loginState.value == CurrentState.Error) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
+                )
+            }
 
-                },
-                color = if (loginState.value == CurrentState.Idle || loginState.value == CurrentState.Error) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
-            )
+            Section(title = "Date picker") {
+                PermissionButton(
+                    title = "Range",
+                    description = "We need your account's cookie to download videos.",
+                    state = loginState.value,
+                    onClick = {
+
+                    },
+                    color = if (loginState.value == CurrentState.Idle || loginState.value == CurrentState.Error) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
+                )
+            }
+
+            Section(title = "Tags") {
+                PermissionButton(
+                    title = "Range",
+                    description = "We need your account's cookie to download videos.",
+                    state = loginState.value,
+                    onClick = {
+                        if(loginState.value != CurrentState.Success){
+                            navController.navigateSingle(SetupRoutes.BrowserPage.route)
+                        }
+                    },
+                    color = if (loginState.value == CurrentState.Idle || loginState.value == CurrentState.Error) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
+                )
+
+            }
         }
 
-        Section(title = "Tags") {
-            PermissionButton(
-                title = "Range",
-                description = "We need your account's cookie to download videos.",
-                state = loginState.value,
-                onClick = {
-                    if(loginState.value != CurrentState.Success){
-                        navController.navigateSingle(SetupRoutes.BrowserPage.route)
-                    }
-                },
-                color = if (loginState.value == CurrentState.Idle || loginState.value == CurrentState.Error) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
-            )
-
-        }
 
     }
 }
