@@ -1,10 +1,15 @@
 package killua.dev.twitterdownloader.ui.pages.OtherSetupPages.Lofter
 
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import killua.dev.base.ui.BaseViewModel
 import killua.dev.base.ui.SnackbarUIEffect
 import killua.dev.base.ui.UIIntent
 import killua.dev.base.ui.UIState
+import killua.dev.twitterdownloader.db.LofterTagsRepository
+import killua.dev.twitterdownloader.db.TagEntry
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 object TagUtils {
@@ -17,6 +22,7 @@ object TagUtils {
 }
 
 sealed class LofterPrepareTagsPageUIIntents : UIIntent {
+    object OnEntry : LofterPrepareTagsPageUIIntents()
     data class UpdateInput(val input: String) : LofterPrepareTagsPageUIIntents()
     data class AddTag(val tag: String) : LofterPrepareTagsPageUIIntents()
     data class RemoveTag(val tag: String) : LofterPrepareTagsPageUIIntents()
@@ -29,7 +35,29 @@ data class LofterPrepareTagsPageUIState(
 ): UIState
 
 @HiltViewModel
-class LofterPrepareTagsPageViewModel @Inject constructor() : BaseViewModel<LofterPrepareTagsPageUIIntents,LofterPrepareTagsPageUIState, SnackbarUIEffect>(LofterPrepareTagsPageUIState()) {
+class LofterPrepareTagsPageViewModel @Inject constructor(
+    private val tagsRepository: LofterTagsRepository
+) : BaseViewModel<LofterPrepareTagsPageUIIntents,LofterPrepareTagsPageUIState, SnackbarUIEffect>(LofterPrepareTagsPageUIState()) {
+    fun observeAllTags(){
+        launchOnIO {
+            tagsRepository.observeAllDownloads().collect{
+                val tags = it?.tags
+                emitState(
+                    uiState.value.copy(
+                        tags = tags ?: emptySet()
+                    )
+                )
+            }
+        }
+    }
+
+    fun saveTags(){
+        launchOnIO {
+            val tagsToSave = TagEntry(tags = uiState.value.tags)
+            tagsRepository.insert(tagsToSave)
+        }
+    }
+
     override suspend fun onEvent(state: LofterPrepareTagsPageUIState, intent: LofterPrepareTagsPageUIIntents) {
         when (intent) {
             is LofterPrepareTagsPageUIIntents.UpdateInput -> {
@@ -60,7 +88,11 @@ class LofterPrepareTagsPageViewModel @Inject constructor() : BaseViewModel<Lofte
                 }
             }
             is LofterPrepareTagsPageUIIntents.SaveTags -> {
-                // TODO: 实现保存逻辑
+                saveTags()
+            }
+
+            LofterPrepareTagsPageUIIntents.OnEntry -> {
+                observeAllTags()
             }
         }
     }

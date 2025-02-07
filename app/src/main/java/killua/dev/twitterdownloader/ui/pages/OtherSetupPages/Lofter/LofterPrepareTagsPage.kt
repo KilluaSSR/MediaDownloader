@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -16,21 +15,18 @@ import androidx.compose.material.icons.rounded.Tag
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
-import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.base.ui.LocalNavController
@@ -39,27 +35,33 @@ import killua.dev.base.ui.components.SetupTextField
 import killua.dev.base.ui.components.Title
 import killua.dev.base.ui.components.paddingHorizontal
 import killua.dev.base.ui.tokens.SizeTokens
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
-    ExperimentalLayoutApi::class
-)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class, ExperimentalLayoutApi::class)
 @Composable
 fun LofterPrepareTagsPage(){
     val viewModel: LofterPrepareTagsPageViewModel = hiltViewModel()
+    val navController = LocalNavController.current!!
     LocalContext.current
-    LocalNavController.current!!
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(Unit) {
+        viewModel.emitIntent(LofterPrepareTagsPageUIIntents.OnEntry)
+    }
     InputSetupScaffold(
         scrollBehavior = scrollBehavior,
         title = "Edit Tags",
         actions = {
             Button(
                 onClick = {
-
+                    scope.launch{
+                        viewModel.emitIntent(LofterPrepareTagsPageUIIntents.SaveTags)
+                    }
+                    navController.popBackStack()
                 }
             ) {
-                Text(text = "Continue")
+                Text(text = "Save")
             }
         },
         snackbarHostState = viewModel.snackbarHostState

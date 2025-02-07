@@ -34,6 +34,7 @@ import killua.dev.setup.ui.components.SetupScaffold
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import killua.dev.base.datastore.readLofterEndTime
 import killua.dev.base.datastore.readLofterStartTime
 import killua.dev.base.datastore.writeLofterEndTime
@@ -52,7 +53,7 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LofterPreparePage() {
-    val viewModel: LofterPreparePageViewModel = viewModel()
+    val viewModel: LofterPreparePageViewModel = hiltViewModel()
     val navController = LocalNavController.current!!
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -74,9 +75,7 @@ fun LofterPreparePage() {
             Button(
                 enabled = eligibility.value,
                 onClick = {
-                    viewModel.launchOnIO {
-                        navController.popBackStack()
-                    }
+                    navController.popBackStack()
                 }
             ) {
                 Text(text = "Continue")
@@ -157,7 +156,7 @@ fun LofterPreparePage() {
                     onClick = {
                         navController.navigateSingle(PrepareRoutes.LofterPrepareTagsPage.route)
                     },
-                    color = if (loginState.value == CurrentState.Idle || loginState.value == CurrentState.Error) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
+                    color = if (tagsAddedState.value == CurrentState.Idle || tagsAddedState.value == CurrentState.Error) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
                 )
 
             }

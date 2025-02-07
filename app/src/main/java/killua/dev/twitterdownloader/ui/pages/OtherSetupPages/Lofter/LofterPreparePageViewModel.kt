@@ -18,6 +18,7 @@ import killua.dev.base.ui.SnackbarUIEffect
 import killua.dev.base.ui.UIIntent
 import killua.dev.base.ui.UIState
 import killua.dev.base.utils.NotificationUtils
+import killua.dev.twitterdownloader.db.LofterTagsRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,7 +46,7 @@ sealed class LofterPreparePageUIIntent : UIIntent {
 
 @HiltViewModel
 class LofterPreparePageViewModel @Inject constructor(
-
+    private val tagsRepository: LofterTagsRepository
 ): BaseViewModel<LofterPreparePageUIIntent, LofterPreparePageUIState,SnackbarUIEffect>(
     LofterPreparePageUIState()
 ){
@@ -73,6 +74,12 @@ class LofterPreparePageViewModel @Inject constructor(
         when(intent){
             is LofterPreparePageUIIntent.OnDateChanged -> TODO()
             is LofterPreparePageUIIntent.OnEntry -> {
+                launchOnIO {
+                    val tags = tagsRepository.observeAllDownloads().first()?.tags
+                    if(!tags.isNullOrEmpty()){
+                        _tagsAddedState.value = CurrentState.Success
+                    }
+                }
                 mutex.withLock {
                     val loginKey = intent.context.readLofterLoginKey().first()
                     val loginAuth = intent.context.readLofterLoginAuth().first()

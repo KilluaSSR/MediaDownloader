@@ -8,8 +8,10 @@ import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.TypeConverter
+import db.Download
 import killua.dev.base.Model.AvailablePlatforms
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
 @Entity(tableName = "tags")
 data class TagEntry(
@@ -42,4 +44,14 @@ class TagsConverter {
     @TypeConverter
     fun toTags(value: String): Set<String> =
         if (value.isEmpty()) emptySet() else value.split(",").toSet()
+}
+
+class LofterTagsRepository @Inject constructor(
+    private val tagDao: TagDao
+){
+    fun observeAllDownloads(): Flow<TagEntry?> = tagDao.observeTags()
+
+    // ✅ 插入下载项
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(tag: TagEntry) = tagDao.saveTags(tag)
 }

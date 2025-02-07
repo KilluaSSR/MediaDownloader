@@ -8,6 +8,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import db.DownloadDao
 import db.TwitterDownloadDatabase
+import killua.dev.twitterdownloader.db.TagDao
 import javax.inject.Singleton
 
 @Module
@@ -23,5 +24,11 @@ object ProvideDownloadDatabaseModule {
     @Singleton
     fun provideDownloadDao(database: TwitterDownloadDatabase): DownloadDao {
         return database.downloadDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideTagsDao(database: TwitterDownloadDatabase): TagDao {
+        return database.tagDao()
     }
 }
