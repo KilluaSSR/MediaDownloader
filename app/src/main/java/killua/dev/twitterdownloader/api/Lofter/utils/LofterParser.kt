@@ -34,8 +34,8 @@ object LofterParser {
     fun parseAuthorInfo(html: String): Pair<String, String> {
         val doc = Jsoup.parse(html)
 
-        val authorName = doc.select("h1 a").first()?.text()
-            ?: throw Exception("Author name not found")
+        val authorName = doc.select("h1.w-bttl2.w-bttl-hd > a:last-child").text()
+            ?: throw Exception("未找到作者名")
 
         val authorId = doc.select("body iframe#control_frame").first()
             ?.attr("src")
@@ -59,7 +59,8 @@ object LofterParser {
             ?.getOrNull(1)
             ?: throw IllegalStateException("Failed to parse author IP")
 
-        val authorName = document.title()
+        val authorName = document.select("h1.w-bttl2.w-bttl-hd > a:last-child").text()
+            ?: throw Exception("未找到作者名")
 
         return AuthorInfo(
             authorId = authorId,
