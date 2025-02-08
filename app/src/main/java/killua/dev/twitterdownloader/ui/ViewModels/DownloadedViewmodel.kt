@@ -19,6 +19,7 @@ import killua.dev.base.ui.UIIntent
 import killua.dev.base.ui.UIState
 import killua.dev.base.ui.filters.DurationFilter
 import killua.dev.base.ui.filters.FilterOptions
+import killua.dev.base.ui.filters.PlatformFilter
 import killua.dev.base.ui.filters.TypeFilter
 import killua.dev.base.utils.FileDelete
 import killua.dev.base.utils.MediaFileNameStrategy
@@ -27,6 +28,7 @@ import killua.dev.twitterdownloader.Model.DownloadedItem
 import killua.dev.twitterdownloader.download.DownloadManager
 import killua.dev.twitterdownloader.download.DownloadQueueManager
 import killua.dev.twitterdownloader.repository.DownloadRepository
+import killua.dev.twitterdownloader.utils.NavigateToLofter
 import killua.dev.twitterdownloader.utils.NavigateTwitterTweet
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -147,6 +149,7 @@ class DownloadedViewModel @Inject constructor(
 
         // 再根据作者和时长/类型过滤
         val selectedAuthors = filterOptions.selectedAuthors
+        filterOptions.platformFilter
         return filteredByDestination.filter { item ->
             // 作者过滤
             val authorMatch = selectedAuthors.isEmpty() ||
@@ -183,7 +186,13 @@ class DownloadedViewModel @Inject constructor(
                 }
             }
 
-            authorMatch && durationMatch && typeMatch
+            val platformMatch = when (filterOptions.platformFilter) {
+                PlatformFilter.All -> true
+                PlatformFilter.Twitter -> item.type == AvailablePlatforms.Twitter
+                PlatformFilter.Lofter -> item.type == AvailablePlatforms.Lofter
+            }
+
+            authorMatch && durationMatch && typeMatch && platformMatch
         }
     }
 
@@ -266,7 +275,10 @@ class DownloadedViewModel @Inject constructor(
                             }
                         }
                         AvailablePlatforms.Lofter -> {
-
+                            val link = download.tweetID!!
+                            withMainContext {
+                                intent.context.NavigateToLofter(link)
+                            }
                         }
                     }
                 }

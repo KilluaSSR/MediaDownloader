@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import killua.dev.base.ui.filters.FilterByAuthors
 import killua.dev.base.ui.filters.FilterByDuration
+import killua.dev.base.ui.filters.FilterByPlatforms
 import killua.dev.base.ui.filters.FilterByType
 import killua.dev.base.ui.filters.FilterOptions
 import killua.dev.base.ui.tokens.SizeTokens
@@ -27,6 +28,7 @@ fun FilterContent(
     ) {
         FilterByType(currentFilter, onFilterChange)
         FilterByDuration(currentFilter, onFilterChange)
+        FilterByPlatforms(currentFilter, onFilterChange)
         FilterByAuthors(availableAuthors, currentFilter, onFilterChange)
     }
 }

@@ -14,8 +14,15 @@ sealed class TypeFilter{
     object Images: TypeFilter()
 }
 
+sealed class PlatformFilter{
+    object All: PlatformFilter()
+    object Twitter: PlatformFilter()
+    object Lofter: PlatformFilter()
+}
+
 data class FilterOptions(
     val selectedAuthors: Set<String> = emptySet(),
     val durationFilter: DurationFilter = DurationFilter.All,
-    val typeFilter: TypeFilter = TypeFilter.All
+    val platformFilter: PlatformFilter = PlatformFilter.All,
+    val typeFilter: TypeFilter = TypeFilter.All,
 )

@@ -185,7 +185,7 @@ class MainPageViewmodel @Inject constructor(
                             is NetworkResult.Success -> {
                                 val data = result.data
                                 data.images.forEach {
-                                    createAndStartDownloadLofterSingleMedia(it.url, data.authorId, data.authorDomain, data.authorName, MediaType.PHOTO)
+                                    createAndStartDownloadLofterSingleMedia(url, it.url, data.authorId, data.authorDomain, data.authorName, MediaType.PHOTO)
                                 }
                             }
                             is NetworkResult.Error -> {
@@ -253,7 +253,8 @@ class MainPageViewmodel @Inject constructor(
     }
 
     private fun createAndStartDownloadLofterSingleMedia(
-        url: String,
+        mainURL: String,
+        imageURL: String,
         authorID: String,
         authorDomain: String,
         authorName: String,
@@ -270,9 +271,9 @@ class MainPageViewmodel @Inject constructor(
                 screenName = authorDomain,
                 type = AvailablePlatforms.Lofter,
                 name = authorName,
-                tweetID = null,
+                tweetID = imageURL,
                 fileUri = null,
-                link = url,
+                link = mainURL,
                 fileName = fileName,
                 fileType = mediaType.name.lowercase(),
                 fileSize = 0L,
@@ -284,7 +285,7 @@ class MainPageViewmodel @Inject constructor(
                 downloadQueueManager.enqueue(
                     DownloadTask(
                         id = uuid,
-                        url = url,
+                        url = imageURL,
                         fileName = fileName,
                         screenName = authorDomain,
                         type = mediaType
