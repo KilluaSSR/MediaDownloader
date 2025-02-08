@@ -8,23 +8,30 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import killua.dev.base.ui.AdvancedPageLofterButtons
+import killua.dev.base.ui.AdvancedPageTwitterButtons
 import killua.dev.base.ui.LocalNavController
 import killua.dev.base.ui.PrepareRoutes
-import killua.dev.base.ui.UserPageLofterButtons
-import killua.dev.base.ui.UserPageTwitterButtons
 import killua.dev.base.ui.components.ActionsBotton
+import killua.dev.base.ui.components.CancellableAlert
 import killua.dev.base.ui.components.Section
 import killua.dev.base.ui.components.paddingTop
 import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.base.utils.navigateSingle
 import killua.dev.twitterdownloader.ui.ViewModels.AdvancedPageUIIntent
 import killua.dev.twitterdownloader.ui.ViewModels.AdvancedPageViewModel
-import killua.dev.twitterdownloader.ui.components.MainScaffold
 import killua.dev.twitterdownloader.ui.components.AdvancedPageTopAppBar
+import killua.dev.twitterdownloader.ui.components.MainScaffold
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -33,6 +40,7 @@ fun AdvancedPage(){
     val context = LocalContext.current
     val viewModel: AdvancedPageViewModel = hiltViewModel()
     viewModel.uiState.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
     val eligibleToUseLofterGetByTags = viewModel.lofterGetByTagsEligibility.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
         viewModel.emitIntentOnIO(AdvancedPageUIIntent.OnEntry(context))
@@ -43,6 +51,18 @@ fun AdvancedPage(){
         },
 
     ){
+        var showGetAllMyTwitterBookmarks by remember { mutableStateOf(false) }
+        if(showGetAllMyTwitterBookmarks){
+            CancellableAlert(
+                title = "Get Bookmarks",
+                mainText = "Get all media in my twitter bookmarks",
+                onDismiss = {showGetAllMyTwitterBookmarks = false}
+            ) {
+                scope.launch{
+                    viewModel.emitIntent(AdvancedPageUIIntent.GetMyTwitterBookmark)
+                }
+            }
+        }
         Column(
             modifier = Modifier
                 .paddingTop(SizeTokens.Level8)
@@ -56,7 +76,7 @@ fun AdvancedPage(){
                     verticalArrangement = Arrangement.spacedBy(SizeTokens.Level8),
                     maxItemsInEachRow = 2,
                 ) {
-                    UserPageTwitterButtons.forEachIndexed { index, item ->
+                    AdvancedPageTwitterButtons.forEachIndexed { index, item ->
                         ActionsBotton(
                             modifier = Modifier.weight(1f),
                             enabled = true,
@@ -64,7 +84,11 @@ fun AdvancedPage(){
                             icon = item.icon,
                             color = MaterialTheme.colorScheme.primaryContainer
                         ) {
-                            navController.navigateSingle(item.route)
+                            when(index){
+                                0 ->{showGetAllMyTwitterBookmarks = true}
+                                1 ->{navController.navigateSingle(item.route)}
+                                2 ->{navController.navigateSingle(item.route)}
+                            }
                         }
                     }
                 }
@@ -76,7 +100,7 @@ fun AdvancedPage(){
                     verticalArrangement = Arrangement.spacedBy(SizeTokens.Level8),
                     maxItemsInEachRow = 2,
                 ) {
-                    UserPageLofterButtons.forEachIndexed { index, item ->
+                    AdvancedPageLofterButtons.forEachIndexed { index, item ->
                         ActionsBotton(
                             modifier = Modifier.weight(1f),
                             enabled = true,

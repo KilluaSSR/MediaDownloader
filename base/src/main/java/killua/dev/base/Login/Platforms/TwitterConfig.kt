@@ -5,6 +5,7 @@ import killua.dev.base.Login.CookieRuleGroup
 import killua.dev.base.Login.PlatformConfig
 import killua.dev.base.datastore.writeApplicationUserAuth
 import killua.dev.base.datastore.writeApplicationUserCt0
+import killua.dev.base.datastore.writeApplicationUserID
 
 class TwitterConfig : PlatformConfig {
     override val loginUrl = "https://x.com/i/flow/login"
@@ -27,6 +28,15 @@ class TwitterConfig : PlatformConfig {
                     saveFunction = { context, cookieInfo ->
                         println(cookieInfo.value)
                         context.writeApplicationUserAuth(cookieInfo.value)
+                    }
+                ),
+                CookieRule(
+                    name = "twid",
+                    pattern = "twid=([^;]+)",
+                    saveFunction = { context, cookieInfo ->
+                        val twid = cookieInfo.value.split("u=").last()
+                        println(twid)
+                        context.writeApplicationUserID(twid)
                     }
                 )
             ),

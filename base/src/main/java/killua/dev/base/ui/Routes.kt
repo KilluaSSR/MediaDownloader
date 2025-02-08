@@ -21,6 +21,7 @@ sealed class MainRoutes(val route: String) {
 }
 
 sealed class AdvancedpageRoutes(val route: String){
+    data object TwitterGetMyBookmarks: AdvancedpageRoutes(route = "twitter_my_bookmarks")
     data object TwitterSubscribe: AdvancedpageRoutes(route = "twitter_subscribe")
     data object TwitterGetAll: AdvancedpageRoutes(route = "twitter_get_all")
     data object LofterAuthors: AdvancedpageRoutes(route = "lofter_authors")

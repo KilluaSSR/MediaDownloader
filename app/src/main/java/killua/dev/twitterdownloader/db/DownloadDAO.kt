@@ -108,17 +108,23 @@ interface DownloadDao {
 
     // ✅ 获取下载次数最多的 Twitter 用户
     @Query("""
-        SELECT 
-            user_id AS twitterUserId,
-            screen_name AS twitterScreenName,
-            name AS twitterName,
-            COUNT(*) AS totalDownloads
-        FROM Download
-        WHERE status = :status
-        GROUP BY user_id
-        ORDER BY totalDownloads DESC
-        LIMIT 1
-    """)
+    SELECT 
+        user_id AS twitterUserId,
+        screen_name AS twitterScreenName,
+        name AS twitterName,
+        COUNT(*) AS totalDownloads
+    FROM Download
+    WHERE status = :status 
+        AND user_id IS NOT NULL 
+        AND user_id != ''
+        AND screen_name IS NOT NULL 
+        AND screen_name != ''
+        AND name IS NOT NULL 
+        AND name != ''
+    GROUP BY user_id
+    ORDER BY totalDownloads DESC
+    LIMIT 1
+""")
     suspend fun getMostDownloadedUser(status: DownloadStatus = DownloadStatus.COMPLETED): MostDownloadedUser?
 
     // ✅ 记录下载失败信息

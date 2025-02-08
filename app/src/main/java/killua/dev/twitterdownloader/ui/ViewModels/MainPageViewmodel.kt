@@ -22,7 +22,7 @@ import killua.dev.base.utils.MediaFileNameStrategy
 import killua.dev.twitterdownloader.Model.NetworkResult
 import killua.dev.twitterdownloader.api.Lofter.LofterService
 import killua.dev.twitterdownloader.api.Twitter.Model.TwitterUser
-import killua.dev.twitterdownloader.api.Twitter.TwitterDownloadSingleMedia
+import killua.dev.twitterdownloader.api.Twitter.TwitterDownloadAPI
 import killua.dev.twitterdownloader.download.DownloadQueueManager
 import killua.dev.twitterdownloader.repository.DownloadRepository
 import killua.dev.twitterdownloader.utils.NavigateTwitterProfile
@@ -51,7 +51,7 @@ data class MainPageUIState(
 
 @HiltViewModel
 class MainPageViewmodel @Inject constructor(
-    private val twitterDownloadSingleMedia: TwitterDownloadSingleMedia,
+    private val twitterDownloadAPI: TwitterDownloadAPI,
     private val lofterService: LofterService,
     private val downloadRepository: DownloadRepository,
     private val downloadQueueManager: DownloadQueueManager,
@@ -149,7 +149,7 @@ class MainPageViewmodel @Inject constructor(
                 AvailablePlatforms.Twitter -> {
                     val tweetId = url.split("?")[0].split("/").last()
                     try {
-                        when (val result = twitterDownloadSingleMedia.getTweetDetailAsync(tweetId)) {
+                        when (val result = twitterDownloadAPI.getTwitterSingleMediaDetailAsync(tweetId)) {
                             is NetworkResult.Success -> {
                                 val user = result.data.user
                                 result.data.videoUrls.forEach {

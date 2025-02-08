@@ -126,6 +126,35 @@ class ShowNotification @Inject constructor(
         notificationManager.notify(downloadId.hashCode(), notification)
     }
 
+    fun updateBookmarkProgress(photoCount: Int, videoCount: Int) {
+        val notification = NotificationCompat.Builder(context, channelId)
+            .setContentTitle("Getting your bookmarks")
+            .setContentText("$photoCount photos, $videoCount videos detected")
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .setSmallIcon(R.drawable.icon)
+            .build()
+
+        notificationManager.notify(BOOKMARK_NOTIFICATION_ID, notification)
+    }
+
+    fun completeBookmarkProgress(totalPhotoCount: Int, totalVideoCount: Int) {
+        val notification = NotificationCompat.Builder(context, channelId)
+            .setContentTitle("Completed!")
+            .setContentText("Total: $totalPhotoCount photos, $totalVideoCount videos")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true)
+            .setSmallIcon(R.drawable.icon)
+            .build()
+
+        notificationManager.notify(BOOKMARK_NOTIFICATION_ID, notification)
+    }
+
+    companion object {
+        private const val BOOKMARK_NOTIFICATION_ID = 10086
+    }
+
     fun cancelNotification(downloadId: String) {
         notificationManager.cancel(downloadId.hashCode())
     }

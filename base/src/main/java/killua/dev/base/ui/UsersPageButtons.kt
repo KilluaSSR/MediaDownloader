@@ -6,7 +6,12 @@ import androidx.compose.material.icons.rounded.Bookmarks
 import androidx.compose.material.icons.rounded.Subscriptions
 import androidx.compose.material.icons.rounded.VideoLibrary
 
-val UserPageTwitterButtons = listOf(
+val AdvancedPageTwitterButtons = listOf(
+    ButtonsEssentials(
+        "Get my Bookmarks",
+        Icons.Rounded.Bookmarks,
+        AdvancedpageRoutes.TwitterGetMyBookmarks.route
+    ),
     ButtonsEssentials(
         "Subscribe",
         Icons.Rounded.Subscriptions,
@@ -19,7 +24,7 @@ val UserPageTwitterButtons = listOf(
     )
 )
 
-val UserPageLofterButtons = listOf(
+val AdvancedPageLofterButtons = listOf(
     ButtonsEssentials(
         "Authors",
         Icons.Rounded.AccountCircle,

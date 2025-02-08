@@ -6,16 +6,17 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import killua.dev.base.Model.LofterLoginKey
 import killua.dev.base.datastore.ApplicationUserDataLofter
 import killua.dev.base.datastore.ApplicationUserDataTwitter
 import killua.dev.base.datastore.readApplicationUserAuth
 import killua.dev.base.datastore.readApplicationUserCt0
+import killua.dev.base.datastore.readApplicationUserID
 import killua.dev.base.datastore.readLofterLoginAuth
 import killua.dev.base.datastore.readLofterLoginKey
 import killua.dev.base.di.ApplicationScope
+import killua.dev.base.utils.ShowNotification
 import killua.dev.twitterdownloader.api.Lofter.LofterService
-import killua.dev.twitterdownloader.api.Twitter.TwitterDownloadSingleMedia
+import killua.dev.twitterdownloader.api.Twitter.TwitterDownloadAPI
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -42,7 +43,7 @@ class UserDataManager @Inject constructor(
     private val context: Context,
     private val scope: CoroutineScope
 ) {
-    private val _userData = MutableStateFlow(ApplicationUserDataTwitter("", ""))
+    private val _userData = MutableStateFlow(ApplicationUserDataTwitter("", "", ""))
     val userTwitterData: StateFlow<ApplicationUserDataTwitter> = _userData.asStateFlow()
 
     private val _userLofterData = MutableStateFlow(ApplicationUserDataLofter("", ""))
@@ -53,9 +54,10 @@ class UserDataManager @Inject constructor(
             // Twitter 数据流
             combine(
                 context.readApplicationUserCt0(),
-                context.readApplicationUserAuth()
-            ) { ct0, auth ->
-                ApplicationUserDataTwitter(ct0, auth)
+                context.readApplicationUserAuth(),
+                context.readApplicationUserID()
+            ) { ct0, auth, twid ->
+                ApplicationUserDataTwitter(ct0, auth, twid)
             }.collect {
                 _userData.value = it
             }
@@ -85,9 +87,10 @@ object ProvideAPI {
     @Provides
     @Singleton
     fun provideTwitterSingleMedia(
-        userDataManager: UserDataManager
-    ): TwitterDownloadSingleMedia {
-        return TwitterDownloadSingleMedia(userDataManager)
+        userDataManager: UserDataManager,
+        notification: ShowNotification
+    ): TwitterDownloadAPI {
+        return TwitterDownloadAPI(userDataManager, notification)
     }
 
     @Provides

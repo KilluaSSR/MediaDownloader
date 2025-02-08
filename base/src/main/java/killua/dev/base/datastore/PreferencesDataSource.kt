@@ -14,7 +14,8 @@ class PreferencesDataSource @Inject constructor(
     val applicationUserDataTwitter = preferences.data.map { prefs ->
         ApplicationUserDataTwitter(
             ct0 = prefs[APPLICATION_USER_USERCT0_KEY] ?: "",
-            auth = prefs[APPLICATION_USER_USERAUTH_KEY] ?: ""
+            auth = prefs[APPLICATION_USER_USERAUTH_KEY] ?: "",
+            twid = prefs[APPLICATION_USER_ID] ?: ""
         )
     }
     val settingsData = preferences.data.map { prefs ->

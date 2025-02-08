@@ -346,3 +346,12 @@ data class Media(
     @SerialName("bitrate")
     val bitrate: Long? = null
 )
+
+// 新增数据类
+@Serializable
+data class BookmarkPageData(
+    val user: TwitterUser?,
+    val photoUrls: List<String>,
+    val videoUrls: List<String>,
+    val nextPage: String
+)
