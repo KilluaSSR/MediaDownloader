@@ -8,24 +8,51 @@ import killua.dev.base.datastore.writeLofterLoginAuth
 import killua.dev.base.datastore.writeLofterLoginKey
 
 class LofterConfig : PlatformConfig {
-    private val possibleLoginKeys = listOf(
-        "LOFTER-PHONE-LOGIN-AUTH",
-        "Authorization",
-        "LOFTER_SESS",
-        "NTES_SESS"
-    )
-
     override val loginUrl = "https://www.lofter.com/front/login"
     override val cookieDomain = "https://lofter.com"
     override val titleText = "Login your Lofter account"
-    override val cookieRuleGroups: List<CookieRuleGroup> = listOf(
+    override val cookieRuleGroups = listOf(
         CookieRuleGroup(
             rules = listOf(
                 CookieRule(
-                    name = "login",
-                    pattern = "(${possibleLoginKeys.joinToString("|")})=([^;]+)",
+                    name = "LOFTER-PHONE-LOGIN-AUTH",
+                    pattern = "LOFTER-PHONE-LOGIN-AUTH=([^;]+)",
                     saveFunction = { context, cookieInfo ->
-                        context.writeLofterLoginKey(cookieInfo.key)
+                        println("匹配到 LOFTER-PHONE-LOGIN-AUTH, value: ${cookieInfo.value}")
+                        context.writeLofterLoginKey("LOFTER-PHONE-LOGIN-AUTH")
+                        context.writeLofterLoginAuth(cookieInfo.value)
+                        val tenDaysLater = System.currentTimeMillis() + (10L * 24 * 60 * 60 * 1000)
+                        context.writeLofterCookieExpiration(tenDaysLater.toString())
+                    }
+                ),
+                CookieRule(
+                    name = "LOFTER_SESS",
+                    pattern = "LOFTER_SESS=([^;]+)",
+                    saveFunction = { context, cookieInfo ->
+                        println("匹配到 LOFTER_SESS, value: ${cookieInfo.value}")
+                        context.writeLofterLoginKey("LOFTER_SESS")
+                        context.writeLofterLoginAuth(cookieInfo.value)
+                        val tenDaysLater = System.currentTimeMillis() + (10L * 24 * 60 * 60 * 1000)
+                        context.writeLofterCookieExpiration(tenDaysLater.toString())
+                    }
+                ),
+                CookieRule(
+                    name = "NTES_SESS",
+                    pattern = "NTES_SESS=([^;]+)",
+                    saveFunction = { context, cookieInfo ->
+                        println("匹配到 NTES_SESS, value: ${cookieInfo.value}")
+                        context.writeLofterLoginKey("NTES_SESS")
+                        context.writeLofterLoginAuth(cookieInfo.value)
+                        val tenDaysLater = System.currentTimeMillis() + (10L * 24 * 60 * 60 * 1000)
+                        context.writeLofterCookieExpiration(tenDaysLater.toString())
+                    }
+                ),
+                CookieRule(
+                    name = "Authorization",
+                    pattern = "Authorization=([^;]+)",
+                    saveFunction = { context, cookieInfo ->
+                        println("匹配到 Authorization, value: ${cookieInfo.value}")
+                        context.writeLofterLoginKey("Authorization")
                         context.writeLofterLoginAuth(cookieInfo.value)
                         val tenDaysLater = System.currentTimeMillis() + (10L * 24 * 60 * 60 * 1000)
                         context.writeLofterCookieExpiration(tenDaysLater.toString())

@@ -10,6 +10,7 @@ import db.DownloadStatus
 import killua.dev.base.Model.AvailablePlatforms
 import killua.dev.base.Model.DownloadTask
 import killua.dev.base.Model.MediaType
+import killua.dev.base.Model.patterns
 import killua.dev.base.ui.BaseViewModel
 import killua.dev.base.ui.SnackbarUIEffect
 import killua.dev.base.ui.SnackbarUIEffect.*
@@ -17,8 +18,9 @@ import killua.dev.base.ui.UIIntent
 import killua.dev.base.ui.UIState
 import killua.dev.base.utils.DownloadEventManager
 import killua.dev.base.utils.DownloadPreChecks
-import killua.dev.base.utils.TwitterMediaFileNameStrategy
+import killua.dev.base.utils.MediaFileNameStrategy
 import killua.dev.twitterdownloader.Model.NetworkResult
+import killua.dev.twitterdownloader.api.Lofter.LofterService
 import killua.dev.twitterdownloader.api.Twitter.Model.TwitterUser
 import killua.dev.twitterdownloader.api.Twitter.TwitterDownloadSingleMedia
 import killua.dev.twitterdownloader.download.DownloadQueueManager
@@ -50,6 +52,7 @@ data class MainPageUIState(
 @HiltViewModel
 class MainPageViewmodel @Inject constructor(
     private val twitterDownloadSingleMedia: TwitterDownloadSingleMedia,
+    private val lofterService: LofterService,
     private val downloadRepository: DownloadRepository,
     private val downloadQueueManager: DownloadQueueManager,
     private val downloadEventManager: DownloadEventManager,
@@ -97,8 +100,7 @@ class MainPageViewmodel @Inject constructor(
                     when(platform){
                         AvailablePlatforms.Twitter -> {
                             downloadPreChecks.checkTwitterLoggedIn().onSuccess {
-                                val tweetID = intent.url.split("?")[0].split("/").last()
-                                handleNewDownload(tweetID)
+                                handleNewDownload(intent.url, AvailablePlatforms.Twitter)
                             }.onFailure { error ->
                                 emitState(uiState.value.copy(
                                     showNotLoggedInDialog = true,
@@ -108,7 +110,7 @@ class MainPageViewmodel @Inject constructor(
                         }
                         AvailablePlatforms.Lofter -> {
                             downloadPreChecks.checkLofterLoggedIn().onSuccess {
-
+                                handleNewDownload(intent.url, AvailablePlatforms.Lofter)
                             }.onFailure { error ->
                                 emitState(uiState.value.copy(
                                     showNotLoggedInDialog = true,
@@ -135,51 +137,68 @@ class MainPageViewmodel @Inject constructor(
     }
 
     private fun classifyLinks(urlLink: String): AvailablePlatforms{
-        val patterns: Map<String, AvailablePlatforms> = mapOf(
-            "x.com" to AvailablePlatforms.Twitter,
-            "twitter.com" to AvailablePlatforms.Twitter,
-            ".lofter.com/post/" to AvailablePlatforms.Lofter,
-        )
         return patterns.entries.firstOrNull{ (pattern, _) ->
             urlLink.contains(pattern, ignoreCase = true)
         }?.value!!
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    private fun handleNewDownload(tweetId: String) {
+    private fun handleNewDownload(url: String, platforms: AvailablePlatforms) {
         downloadPreChecks.canStartDownload().onSuccess {
-            try {
-                when (val result = twitterDownloadSingleMedia.getTweetDetailAsync(tweetId)) {
-                    is NetworkResult.Success -> {
-                        val user = result.data.user
-                        result.data.videoUrls.forEach {
-                            createAndStartDownloadTwitterSingleMedia(it, user, tweetId, MediaType.VIDEO)
-                        }
-                        if(result.data.photoUrls.isNotEmpty()){
-                            downloadPreChecks.checkPhotosDownload().onSuccess {
-                                result.data.photoUrls.forEach {
-                                    createAndStartDownloadTwitterSingleMedia(it, user, tweetId, MediaType.PHOTO)
+            when(platforms){
+                AvailablePlatforms.Twitter -> {
+                    val tweetId = url.split("?")[0].split("/").last()
+                    try {
+                        when (val result = twitterDownloadSingleMedia.getTweetDetailAsync(tweetId)) {
+                            is NetworkResult.Success -> {
+                                val user = result.data.user
+                                result.data.videoUrls.forEach {
+                                    createAndStartDownloadTwitterSingleMedia(it, user, tweetId, MediaType.VIDEO)
                                 }
-                            }.onFailure { error ->
+                                if(result.data.photoUrls.isNotEmpty()){
+                                    downloadPreChecks.checkPhotosDownload().onSuccess {
+                                        result.data.photoUrls.forEach {
+                                            createAndStartDownloadTwitterSingleMedia(it, user, tweetId, MediaType.PHOTO)
+                                        }
+                                    }.onFailure { error ->
+                                        viewModelScope.launch{
+                                            emitEffect(ShowSnackbar(error.message.toString(), "OKAY", true))
+                                        }
+                                    }
+                                }
+                            }
+                            is NetworkResult.Error -> {
                                 viewModelScope.launch{
-                                    emitEffect(ShowSnackbar(error.message.toString(), "OKAY", true))
+                                    emitEffect(ShowSnackbar("Twitter request error", withDismissAction = true, actionLabel = "OKAY"))
                                 }
                             }
                         }
-                    }
-                    is NetworkResult.Error -> {
+                    } catch (e: Exception) {
                         viewModelScope.launch{
-                            emitEffect(ShowSnackbar("Twitter request error", withDismissAction = true, actionLabel = "OKAY"))
+                            emitEffect(ShowSnackbar(e.message ?: "Internal Error"))
                         }
                     }
                 }
-            } catch (e: Exception) {
-                viewModelScope.launch{
-                    emitEffect(
-                        ShowSnackbar(
-                            e.message ?: "Internal Error"
-                        )
-                    )
+                AvailablePlatforms.Lofter -> {
+                    try {
+                        when (val result = lofterService.getBlogImages(url)) {
+                            is NetworkResult.Success -> {
+                                val data = result.data
+                                data.images.forEach {
+                                    createAndStartDownloadLofterSingleMedia(it.url, data.authorId, data.authorDomain, data.authorName, MediaType.PHOTO)
+                                }
+                            }
+                            is NetworkResult.Error -> {
+                                viewModelScope.launch{
+                                    emitEffect(ShowSnackbar(result.message.toString(), withDismissAction = true, actionLabel = "OKAY"))
+                                }
+                            }
+                        }
+                    } catch (e: Exception) {
+                        viewModelScope.launch{
+                            emitEffect(ShowSnackbar(e.message ?: "Internal Error"))
+                        }
+                    }
                 }
             }
         }.onFailure { error ->
@@ -189,7 +208,6 @@ class MainPageViewmodel @Inject constructor(
         }
     }
 
-
     private fun createAndStartDownloadTwitterSingleMedia(
         url: String,
         user: TwitterUser?,
@@ -197,7 +215,7 @@ class MainPageViewmodel @Inject constructor(
         mediaType: MediaType
     ) {
         val uuid = UUID.randomUUID().toString()
-        val fileNameStrategy = TwitterMediaFileNameStrategy(mediaType)
+        val fileNameStrategy = MediaFileNameStrategy(mediaType)
         val fileName = fileNameStrategy.generate(user?.screenName)
 
         try {
@@ -205,6 +223,7 @@ class MainPageViewmodel @Inject constructor(
                 uuid = uuid,
                 userId = user?.id,
                 screenName = user?.screenName,
+                type = AvailablePlatforms.Twitter,
                 name = user?.name,
                 tweetID = tweetID,
                 fileUri = null,
@@ -233,7 +252,49 @@ class MainPageViewmodel @Inject constructor(
         }
     }
 
+    private fun createAndStartDownloadLofterSingleMedia(
+        url: String,
+        authorID: String,
+        authorDomain: String,
+        authorName: String,
+        mediaType: MediaType
+    ) {
+        val uuid = UUID.randomUUID().toString()
+        val fileNameStrategy = MediaFileNameStrategy(mediaType)
+        val fileName = fileNameStrategy.generate(authorDomain)
 
+        try {
+            val download = Download(
+                uuid = uuid,
+                userId = authorID,
+                screenName = authorDomain,
+                type = AvailablePlatforms.Lofter,
+                name = authorName,
+                tweetID = null,
+                fileUri = null,
+                link = url,
+                fileName = fileName,
+                fileType = mediaType.name.lowercase(),
+                fileSize = 0L,
+                status = DownloadStatus.PENDING,
+                mimeType = mediaType.mimeType
+            )
+            viewModelScope.launch {
+                downloadRepository.insert(download)
+                downloadQueueManager.enqueue(
+                    DownloadTask(
+                        id = uuid,
+                        url = url,
+                        fileName = fileName,
+                        screenName = authorDomain,
+                        type = mediaType
+                    )
+                )
+            }
+        } catch (e: Exception) {
+            handleError("Failed", e)
+        }
+    }
 
     private fun handleError(message: String, error: Exception) {
         viewModelScope.launch{

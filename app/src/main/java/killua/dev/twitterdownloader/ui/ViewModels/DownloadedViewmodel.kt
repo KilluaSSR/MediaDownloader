@@ -21,7 +21,7 @@ import killua.dev.base.ui.filters.DurationFilter
 import killua.dev.base.ui.filters.FilterOptions
 import killua.dev.base.ui.filters.TypeFilter
 import killua.dev.base.utils.FileDelete
-import killua.dev.base.utils.TwitterMediaFileNameStrategy
+import killua.dev.base.utils.MediaFileNameStrategy
 import killua.dev.base.utils.VideoDurationRepository
 import killua.dev.twitterdownloader.Model.DownloadedItem
 import killua.dev.twitterdownloader.download.DownloadManager
@@ -302,7 +302,7 @@ class DownloadedViewModel @Inject constructor(
             else -> MediaType.VIDEO
         }
 
-        val fileNameStrategy = TwitterMediaFileNameStrategy(mediaType)
+        val fileNameStrategy = MediaFileNameStrategy(mediaType)
         val fileName = fileNameStrategy.generate(old.screenName)
 
         cancelDownload(downloadId)

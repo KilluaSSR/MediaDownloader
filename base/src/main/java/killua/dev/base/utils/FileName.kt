@@ -9,7 +9,7 @@ interface FileNameStrategy {
     fun generate(screenName: String?): String
 }
 
-class TwitterMediaFileNameStrategy(
+class MediaFileNameStrategy(
     private val mediaType: MediaType
 ) : FileNameStrategy {
     override fun generate(screenName: String?): String {

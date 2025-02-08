@@ -14,6 +14,7 @@ import killua.dev.base.datastore.readApplicationUserCt0
 import killua.dev.base.datastore.readLofterLoginAuth
 import killua.dev.base.datastore.readLofterLoginKey
 import killua.dev.base.di.ApplicationScope
+import killua.dev.twitterdownloader.api.Lofter.LofterService
 import killua.dev.twitterdownloader.api.Twitter.TwitterDownloadSingleMedia
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -67,7 +68,7 @@ class UserDataManager @Inject constructor(
                 context.readLofterLoginAuth()
             ) { key, auth ->
                 ApplicationUserDataLofter(
-                    login_key = LofterLoginKey.fromString(key).key,
+                    login_key = key,
                     login_auth = auth
                 )
             }.collect {
@@ -80,13 +81,22 @@ class UserDataManager @Inject constructor(
 
 @Module
 @InstallIn(SingletonComponent::class)
-object ProvideTwitterSingleMedia {
+object ProvideAPI {
     @Provides
     @Singleton
     fun provideTwitterSingleMedia(
         userDataManager: UserDataManager
     ): TwitterDownloadSingleMedia {
         return TwitterDownloadSingleMedia(userDataManager)
+    }
+
+    @Provides
+    @Singleton
+    fun provideLofterService(
+        userDataManager: UserDataManager,
+        @ApplicationScope scope: CoroutineScope
+    ): LofterService {
+        return LofterService(userDataManager,scope)
     }
 }
 

@@ -22,6 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.base.Model.AvailablePlatforms
+import killua.dev.base.Model.platformsDrawable
 import killua.dev.base.ui.LocalNavController
 import killua.dev.base.ui.MainPageButtons
 import killua.dev.base.ui.MainRoutes
@@ -91,7 +92,7 @@ fun MainPage(
                 "Your cookie is necessary when downloading anything from ${uiState.value.loginErrorPlatform.name}",
                 icon = {
                     Icon(
-                        imageVector = drawableToImageVector(killua.dev.base.R.drawable.lofter_logo),
+                        imageVector = drawableToImageVector(platformsDrawable.getValue(uiState.value.loginErrorPlatform)),
                         contentDescription = null,
                         tint = Color.Unspecified
                     )

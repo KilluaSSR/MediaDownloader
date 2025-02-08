@@ -1,12 +1,17 @@
 package killua.dev.twitterdownloader.ui.pages.OtherSetupPages.Lofter
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,19 +22,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import killua.dev.base.Model.AvailablePlatforms
 import killua.dev.base.states.CurrentState
 import killua.dev.base.ui.CookiesRoutes
 import killua.dev.base.ui.LocalNavController
 import killua.dev.base.ui.components.AppIcon
 import killua.dev.base.ui.components.HeadlineMediumText
-import killua.dev.base.ui.components.PermissionButton
+import killua.dev.base.ui.components.ClickableConfigurationButton
 import killua.dev.base.ui.components.Section
 import killua.dev.base.ui.components.paddingTop
 import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.base.utils.navigateSingle
-import killua.dev.setup.SetupRoutes
 import killua.dev.setup.ui.components.SetupScaffold
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -37,10 +40,17 @@ import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import killua.dev.base.datastore.readLofterEndTime
 import killua.dev.base.datastore.readLofterStartTime
+import killua.dev.base.datastore.writeApplicationUserAuth
+import killua.dev.base.datastore.writeApplicationUserCt0
 import killua.dev.base.datastore.writeLofterEndTime
+import killua.dev.base.datastore.writeLofterLoginAuth
+import killua.dev.base.datastore.writeLofterLoginKey
 import killua.dev.base.datastore.writeLofterStartTime
 import killua.dev.base.ui.PrepareRoutes
+import killua.dev.base.ui.components.CancellableAlert
 import killua.dev.base.ui.components.DateRangePickerModal
+import killua.dev.base.utils.ActivityUtil
+import killua.dev.base.utils.getActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -82,6 +92,29 @@ fun LofterPreparePage() {
             }
         }
     ) {
+        var isShowReset by remember { mutableStateOf(false) }
+        if(isShowReset){
+            CancellableAlert(
+                title = "Reset now?",
+                mainText = "Your login information will be cleared, and you will need to log in again to continue using Lofter's functions",
+                onDismiss = {isShowReset = false},
+                icon = {
+                    Icon(
+                        Icons.Outlined.Warning,
+                        contentDescription = null ,
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier
+                            .size(SizeTokens.Level48))
+                }
+            ) {
+                scope.launch{
+                    context.writeLofterLoginKey("")
+                    context.writeLofterLoginAuth("")
+                    viewModel.emitIntent(LofterPreparePageUIIntent.OnLoggedOut)
+                }
+            }
+        }
+
         val dateString by remember(startDate, endDate) {
             mutableStateOf(
                 if (startDate != null && endDate != null) {
@@ -101,8 +134,8 @@ fun LofterPreparePage() {
                         scope.launch(Dispatchers.IO) {
                             context.writeLofterStartTime(start)
                             context.writeLofterEndTime(end)
+                            viewModel.emitIntent(LofterPreparePageUIIntent.OnDateChanged)
                         }
-                        //viewModel.emitIntentOnIO(LofterPreparePageUIIntent.OnDateChanged)
                     }
                 },
                 onDismiss = { showDatePicker = false }
@@ -123,7 +156,7 @@ fun LofterPreparePage() {
             }
 
             Section(title = "Log in to your Lofter account") {
-                PermissionButton(
+                ClickableConfigurationButton(
                     title = "Log in",
                     description = "Your Lofter's cookie is necessary when downloading pictures from it.",
                     state = loginState.value,
@@ -137,7 +170,7 @@ fun LofterPreparePage() {
             }
 
             Section(title = "Date picker") {
-                PermissionButton(
+                ClickableConfigurationButton(
                     title = "Range",
                     description = dateString,
                     state = dateSelectedState.value,
@@ -149,7 +182,7 @@ fun LofterPreparePage() {
             }
 
             Section(title = "Your favorite Tags") {
-                PermissionButton(
+                ClickableConfigurationButton(
                     title = "Edit tags",
                     description = "Images including selected tags will be downloaded.",
                     state = tagsAddedState.value,
@@ -157,6 +190,19 @@ fun LofterPreparePage() {
                         navController.navigateSingle(PrepareRoutes.LofterPrepareTagsPage.route)
                     },
                     color = if (tagsAddedState.value == CurrentState.Idle || tagsAddedState.value == CurrentState.Error) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
+                )
+
+            }
+
+            Section(title = "Log out") {
+                ClickableConfigurationButton(
+                    title = "Log out",
+                    description = "Clear your Lofter account's cookie",
+                    state = CurrentState.Error,
+                    onClick = {
+                        isShowReset = true
+                    },
+                    color = MaterialTheme.colorScheme.errorContainer
                 )
 
             }

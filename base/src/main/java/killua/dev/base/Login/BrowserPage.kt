@@ -98,9 +98,17 @@ fun BrowserPage(
 
                                             for (rule in group.rules) {
                                                 val matchResult = rule.pattern.toRegex()
-                                                    .find(cookies)?.groupValues?.getOrNull(1)
+                                                    .find(cookies)
                                                 if (matchResult != null) {
-                                                    matchResults.add(rule to matchResult)
+                                                    // 只获取第一个捕获组的值作为 String
+                                                    val matchValue = matchResult.groupValues[1]
+                                                    matchResults.add(rule to matchValue)
+
+                                                    // 在调用 saveFunction 时再创建 CookieInfo
+                                                    rule.saveFunction(context, CookieInfo(
+                                                        key = rule.name,
+                                                        value = matchValue
+                                                    ))
                                                 }
                                             }
                                             val shouldSave = if (group.matchOne) {

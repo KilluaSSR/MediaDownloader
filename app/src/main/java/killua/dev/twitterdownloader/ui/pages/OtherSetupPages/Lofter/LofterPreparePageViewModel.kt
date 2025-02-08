@@ -34,14 +34,14 @@ import kotlin.text.split
 
 data class LofterPreparePageUIState(
     val isLoggedIn: Boolean = false,
-    val isDateSelected: Boolean = false,
     val isTagsAdded: Boolean = false
 ): UIState
 
 sealed class LofterPreparePageUIIntent : UIIntent {
-    data class OnDateChanged(val context: Context) : LofterPreparePageUIIntent()
+    data object OnDateChanged : LofterPreparePageUIIntent()
     data class OnEntry(val context: Context) : LofterPreparePageUIIntent()
     data class OnTagsChanged(val context: Context) : LofterPreparePageUIIntent()
+    data object OnLoggedOut: LofterPreparePageUIIntent()
 }
 
 @HiltViewModel
@@ -72,7 +72,9 @@ class LofterPreparePageViewModel @Inject constructor(
         intent: LofterPreparePageUIIntent
     ) {
         when(intent){
-            is LofterPreparePageUIIntent.OnDateChanged -> TODO()
+            is LofterPreparePageUIIntent.OnDateChanged -> {
+                _dateSelectedState.value = CurrentState.Success
+            }
             is LofterPreparePageUIIntent.OnEntry -> {
                 launchOnIO {
                     val tags = tagsRepository.observeAllDownloads().first()?.tags
@@ -94,6 +96,9 @@ class LofterPreparePageViewModel @Inject constructor(
                 }
             }
             is LofterPreparePageUIIntent.OnTagsChanged -> TODO()
+            LofterPreparePageUIIntent.OnLoggedOut -> {
+                _loginState.value = CurrentState.Idle
+            }
         }
     }
 }

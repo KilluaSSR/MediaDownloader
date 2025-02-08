@@ -21,7 +21,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import killua.dev.base.states.CurrentState
 import killua.dev.base.ui.LocalNavController
-import killua.dev.base.ui.components.PermissionButton
+import killua.dev.base.ui.components.ClickableConfigurationButton
 import killua.dev.base.ui.components.Section
 import killua.dev.base.ui.components.SetOnResume
 import killua.dev.base.ui.tokens.SizeTokens
@@ -86,7 +86,7 @@ fun SetupPage() {
         }
         Spacer(modifier = Modifier.size(SizeTokens.Level24))
         Section(title = "We want to ask you for something.") {
-            PermissionButton(
+            ClickableConfigurationButton(
                 title = "Notification Permission",
                 description = "We want to send you notifications to keep you updated.",
                 state = notificationState.value,
@@ -104,7 +104,7 @@ fun SetupPage() {
         }
         Spacer(modifier = Modifier.size(SizeTokens.Level24))
         Section(title = "You're invited to log in to your Twitter account.") {
-            PermissionButton(
+            ClickableConfigurationButton(
                 title = "Log in",
                 description = "We need your account's cookie to download videos.",
                 state = loginState.value,

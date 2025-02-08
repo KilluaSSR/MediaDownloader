@@ -17,6 +17,7 @@ class TwitterConfig : PlatformConfig {
                     name = "ct0",
                     pattern = "ct0=([^;]+)",
                     saveFunction = { context, cookieInfo ->
+                        println(cookieInfo.value)
                         context.writeApplicationUserCt0(cookieInfo.value)
                     }
                 ),
@@ -24,6 +25,7 @@ class TwitterConfig : PlatformConfig {
                     name = "auth_token",
                     pattern = "auth_token=([^;]+)",
                     saveFunction = { context, cookieInfo ->
+                        println(cookieInfo.value)
                         context.writeApplicationUserAuth(cookieInfo.value)
                     }
                 )

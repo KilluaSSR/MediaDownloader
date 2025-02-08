@@ -20,6 +20,12 @@ enum class MediaType(
         mimeType = "image/jpeg",
         collection = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
         baseFolder = "Pictures"
+    ),
+    GIF(
+        extension = "gif",
+        mimeType = "image/gif",
+        collection = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
+        baseFolder = "Pictures"
     );
 
     fun buildPath(platform: AvailablePlatforms): String {
@@ -34,6 +40,7 @@ enum class MediaType(
         fun fromString(value: String): MediaType = when(value.lowercase()) {
             "video" -> VIDEO
             "photo" -> PHOTO
+            "gif" -> GIF
             else -> throw IllegalArgumentException("Unknown media type: $value")
         }
     }

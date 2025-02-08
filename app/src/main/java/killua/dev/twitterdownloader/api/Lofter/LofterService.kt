@@ -7,6 +7,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import killua.dev.base.Model.ImageType
 import killua.dev.base.datastore.readLofterLoginAuth
 import killua.dev.base.datastore.readLofterLoginKey
+import killua.dev.base.di.ApplicationScope
 import killua.dev.base.utils.UserAgentUtils
 import killua.dev.twitterdownloader.Model.LofterParseRequiredInformation
 import killua.dev.twitterdownloader.Model.NetworkResult
@@ -18,69 +19,78 @@ import killua.dev.twitterdownloader.api.Lofter.utils.LofterParser.parseArchivePa
 import killua.dev.twitterdownloader.api.Lofter.utils.LofterParser.parseAuthorInfo
 import killua.dev.twitterdownloader.api.Lofter.utils.LofterParser.parseFromArchiveInfos
 import killua.dev.twitterdownloader.api.NetworkHelper
+import killua.dev.twitterdownloader.di.UserDataManager
 import killua.dev.twitterdownloader.utils.extractLofterUserDomain
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
 import javax.inject.Inject
 
 class LofterService @Inject constructor(
-    @ApplicationContext private val context: Context
+    val userdata: UserDataManager,
+    @ApplicationScope private val scope: CoroutineScope
 ) {
-    suspend fun getBlogImages(blogUrl: String): NetworkResult<List<BlogInfo>> = withContext(Dispatchers.IO) {
-        try {
-            val results = mutableListOf<BlogInfo>()
-            val loginKey = context.readLofterLoginKey().first()
-            val loginAuth = context.readLofterLoginAuth().first()
-            val blogContent = NetworkHelper.get(
-                url = blogUrl,
-                headers = UserAgentUtils.getHeaders(),
-                cookies = mapOf(loginKey to loginAuth)
-            ) { it.decodeToString() }.let { result ->
-                when (result) {
-                    is NetworkResult.Success -> result.data
-                    is NetworkResult.Error -> throw Exception("Failed: ${result.message}")
+    fun getBlogImages(blogUrl: String): NetworkResult<BlogInfo>  {
+        val loginKey = userdata.userLofterData.value.login_key
+        val loginAuth = userdata.userLofterData.value.login_auth
+        val deferred = CompletableDeferred<NetworkResult<BlogInfo>>()
+        scope.launch{
+            try {
+                val blogContent = NetworkHelper.get(
+                    url = blogUrl,
+                    headers = UserAgentUtils.getHeaders(),
+                    cookies = mapOf(loginKey to loginAuth)
+                ) { it.decodeToString() }.let { result ->
+                    when (result) {
+                        is NetworkResult.Success -> result.data
+                        is NetworkResult.Error -> throw Exception("Failed: ${result.message}")
+                    }
                 }
+                val authorViewUrl = "${blogUrl.split("/post")[0]}/view"
+                val authorViewContent = NetworkHelper.get(
+                    url = authorViewUrl,
+                    headers = UserAgentUtils.getHeaders(),
+                    cookies = mapOf(loginKey to loginAuth)
+                ) { it.decodeToString() }.let { result ->
+                    when (result) {
+                        is NetworkResult.Success -> result.data
+                        is NetworkResult.Error -> throw Exception("Failed:  ${result.message}")
+                    }
+                }
+                val (authorName, authorId) = parseAuthorInfo(authorViewContent)
+                val authorDomain = blogUrl.extractLofterUserDomain()
+                val imagesUrl = LofterParser.parseImages(blogContent)
+                val blogInfo = BlogInfo(
+                    authorName = authorName,
+                    authorId = authorId,
+                    authorDomain = authorDomain!!,
+                    images = imagesUrl.mapIndexed { index, imageUrl ->
+                        BlogImage(
+                            url = imageUrl,
+                            filename = LofterParser.generateFilename(
+                                authorName = authorName,
+                                authorDomain = authorDomain,
+                                index = index + 1,
+                                imageUrl = imageUrl
+                            ),
+                            type = ImageType.fromUrl(imageUrl)
+                        )
+                    }
+                )
+                deferred.complete(NetworkResult.Success(blogInfo))
+            }catch (e: Exception) {
+                println(e.message)
+                deferred.complete(NetworkResult.Error(message = e.message ?: "Failed"))
             }
-            val authorViewUrl = "${blogUrl.split("/post")[0]}/view"
-            val authorViewContent = NetworkHelper.get(
-                url = authorViewUrl,
-                headers = UserAgentUtils.getHeaders(),
-                cookies = mapOf(loginKey to loginAuth)
-            ) { it.decodeToString() }.let { result ->
-                when (result) {
-                    is NetworkResult.Success -> result.data
-                    is NetworkResult.Error -> throw Exception("Failed:  ${result.message}")
-                }
-            }
-            val (authorName, authorId) = parseAuthorInfo(authorViewContent)
-            val authorDomain = blogUrl.extractLofterUserDomain()
-            val imagesUrl = LofterParser.parseImages(blogContent)
-            val blogInfo = BlogInfo(
-                authorName = authorName,
-                authorId = authorId,
-                authorDomain = authorDomain!!,
-                images = imagesUrl.mapIndexed { index, imageUrl ->
-                    BlogImage(
-                        url = imageUrl,
-                        filename = LofterParser.generateFilename(
-                            authorName = authorName,
-                            authorDomain = authorDomain,
-                            index = index + 1,
-                            imageUrl = imageUrl
-                        ),
-                        type = ImageType.fromUrl(imageUrl)
-                    )
-                }
-            )
-            results.add(blogInfo)
-            NetworkResult.Success(results)
-        } catch (e: Exception) {
-            println(e.message)
-            NetworkResult.Error(message = e.message ?: "Failed")
         }
+        return runBlocking { deferred.await() }
     }
+
 
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     suspend fun getByAuthorTags(
@@ -90,8 +100,8 @@ class LofterService @Inject constructor(
         tags: Set<String>,
         saveNoTags: Boolean
     ): BlogInfo {
-        val loginKey = context.readLofterLoginKey().first()
-        val loginAuth = context.readLofterLoginAuth().first()
+        val loginKey = userdata.userLofterData.value.login_key
+        val loginAuth = userdata.userLofterData.value.login_auth
         val pageContent = when (val result = NetworkHelper.get(
             url = "$authorUrl/view",
             headers = UserAgentUtils.getHeaders(),

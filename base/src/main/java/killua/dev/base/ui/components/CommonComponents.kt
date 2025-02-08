@@ -157,7 +157,7 @@ fun ActionButton(
 }
 
 @Composable
-fun PermissionButton(
+fun ClickableConfigurationButton(
     enabled: Boolean = true,
     onClick: () -> Unit,
     title: String,
