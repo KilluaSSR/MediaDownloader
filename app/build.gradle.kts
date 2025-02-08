@@ -48,6 +48,10 @@ android {
 }
 
 dependencies {
+    implementation (libs.okdownload)
+    implementation (libs.sqlite)
+    implementation (libs.okdownload.okhttp)
+
     implementation (libs.jsoup)
     implementation(libs.coil.compose)
     // AndroidX Core
