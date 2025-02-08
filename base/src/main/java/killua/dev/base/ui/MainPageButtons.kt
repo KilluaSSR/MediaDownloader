@@ -5,12 +5,9 @@ import androidx.compose.material.icons.automirrored.rounded.Help
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.DownloadDone
-import androidx.compose.material.icons.rounded.QuestionMark
 import androidx.compose.material.icons.rounded.Report
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Star
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -34,7 +31,7 @@ sealed class MainPageButtonsAction {
 }
 val MainPageButtons = listOf(
     ButtonsEssentials(
-        "Download Now",
+        "Download by Link",
         Icons.Rounded.Download,
         MainRoutes.Download.route
     ),
@@ -44,18 +41,13 @@ val MainPageButtons = listOf(
         MainRoutes.DownloadPage.route
     ),
     ButtonsEssentials(
-        "Authors",
+        "Advanced",
         Icons.Rounded.Star,
-        MainRoutes.AuthorPage.route
+        MainRoutes.AdvancedPage.route
     ),
     ButtonsEssentials(
         "User Info",
         Icons.Rounded.AccountCircle,
-        MainRoutes.UserinfoPage.route
-    ),
-    ButtonsEssentials(
-        "Experiment",
-        Icons.Rounded.QuestionMark,
         MainRoutes.UserinfoPage.route
     ),
 )

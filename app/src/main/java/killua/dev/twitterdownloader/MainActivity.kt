@@ -22,7 +22,7 @@ import killua.dev.twitterdownloader.ui.pages.AboutPage
 import killua.dev.twitterdownloader.ui.pages.DownloadPage
 import killua.dev.twitterdownloader.ui.pages.MainPage
 import killua.dev.twitterdownloader.ui.pages.SettingsPage
-import killua.dev.twitterdownloader.ui.pages.AuthorsPage
+import killua.dev.twitterdownloader.ui.pages.AdvancedPage
 import killua.dev.twitterdownloader.ui.pages.OtherSetupPages.Lofter.LofterPreparePage
 import killua.dev.twitterdownloader.ui.pages.OtherSetupPages.Lofter.LofterPrepareTagsPage
 import killua.dev.twitterdownloader.ui.theme.TwitterDownloaderTheme
@@ -51,8 +51,8 @@ class MainActivity : ComponentActivity() {
                         composable(MainRoutes.DownloadPage.route){
                             DownloadPage()
                         }
-                        composable(MainRoutes.AuthorPage.route){
-                            AuthorsPage()
+                        composable(MainRoutes.AdvancedPage.route){
+                            AdvancedPage()
                         }
                         composable(MainRoutes.SettingPage.route){
                             SettingsPage()

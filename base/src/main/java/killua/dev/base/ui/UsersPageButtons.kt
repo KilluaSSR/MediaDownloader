@@ -5,18 +5,17 @@ import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Bookmarks
 import androidx.compose.material.icons.rounded.Subscriptions
 import androidx.compose.material.icons.rounded.VideoLibrary
-import androidx.compose.ui.graphics.vector.ImageVector
 
 val UserPageTwitterButtons = listOf(
     ButtonsEssentials(
         "Subscribe",
         Icons.Rounded.Subscriptions,
-        UserpageRoutes.TwitterSubscribe.route
+        AdvancedpageRoutes.TwitterSubscribe.route
     ),
     ButtonsEssentials(
         "Get all media",
         Icons.Rounded.VideoLibrary,
-        UserpageRoutes.TwitterGetAll.route
+        AdvancedpageRoutes.TwitterGetAll.route
     )
 )
 
@@ -24,11 +23,11 @@ val UserPageLofterButtons = listOf(
     ButtonsEssentials(
         "Authors",
         Icons.Rounded.AccountCircle,
-        UserpageRoutes.LofterAuthors.route
+        AdvancedpageRoutes.LofterAuthors.route
     ),
     ButtonsEssentials(
         "Get by Tags",
         Icons.Rounded.Bookmarks,
-        UserpageRoutes.LofterGetAuthorImagesByTags.route,
+        AdvancedpageRoutes.LofterGetAuthorImagesByTags.route,
     ),
 )

@@ -8,7 +8,7 @@ sealed class MainRoutes(val route: String) {
     data object UserinfoPage : MainRoutes(route = "userinfo_page")
     data object Download : MainRoutes(route = "downloading")
     data object DownloadPage : MainRoutes(route = "downloaded_page")
-    data object AuthorPage : MainRoutes(route = "author_page")
+    data object AdvancedPage : MainRoutes(route = "advanced_page")
     data object SpecificTwitterUserPage :
         MainRoutes(route = "specific_twitter_user_page/{$ARG_USER_ID}") {
         fun getRoute(userId: String) = "specific_twitter_user_page/$userId"
@@ -20,11 +20,11 @@ sealed class MainRoutes(val route: String) {
     data object HelpPage : MainRoutes(route = "help_page")
 }
 
-sealed class UserpageRoutes(val route: String){
-    data object TwitterSubscribe: UserpageRoutes(route = "twitter_subscribe")
-    data object TwitterGetAll: UserpageRoutes(route = "twitter_get_all")
-    data object LofterAuthors: UserpageRoutes(route = "lofter_authors")
-    data object LofterGetAuthorImagesByTags: UserpageRoutes(route = "lofter_get_author_images_by_tags")
+sealed class AdvancedpageRoutes(val route: String){
+    data object TwitterSubscribe: AdvancedpageRoutes(route = "twitter_subscribe")
+    data object TwitterGetAll: AdvancedpageRoutes(route = "twitter_get_all")
+    data object LofterAuthors: AdvancedpageRoutes(route = "lofter_authors")
+    data object LofterGetAuthorImagesByTags: AdvancedpageRoutes(route = "lofter_get_author_images_by_tags")
 }
 
 sealed class PrepareRoutes(val route: String){

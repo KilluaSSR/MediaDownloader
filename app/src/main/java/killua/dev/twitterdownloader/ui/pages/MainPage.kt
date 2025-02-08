@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -164,7 +163,7 @@ fun MainPage(
                             } else {
                                 if (item.route == MainRoutes.DownloadPage.route){
                                     navController.navigateSingle(item.route)
-                                }else if(item.route == MainRoutes.AuthorPage.route){
+                                }else if(item.route == MainRoutes.AdvancedPage.route){
                                     navController.navigateSingle(item.route)
                                 }else{
                                     showDevelopingAlert = true

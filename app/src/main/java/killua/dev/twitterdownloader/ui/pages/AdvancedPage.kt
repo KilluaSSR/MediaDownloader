@@ -21,25 +21,25 @@ import killua.dev.base.ui.components.Section
 import killua.dev.base.ui.components.paddingTop
 import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.base.utils.navigateSingle
-import killua.dev.twitterdownloader.ui.ViewModels.AuthorPageUIIntent
-import killua.dev.twitterdownloader.ui.ViewModels.AuthorPageViewModel
+import killua.dev.twitterdownloader.ui.ViewModels.AdvancedPageUIIntent
+import killua.dev.twitterdownloader.ui.ViewModels.AdvancedPageViewModel
 import killua.dev.twitterdownloader.ui.components.MainScaffold
-import killua.dev.twitterdownloader.ui.components.AuthorsPageTopAppBar
+import killua.dev.twitterdownloader.ui.components.AdvancedPageTopAppBar
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun AuthorsPage(){
+fun AdvancedPage(){
     val navController = LocalNavController.current!!
     val context = LocalContext.current
-    val viewModel: AuthorPageViewModel = hiltViewModel()
+    val viewModel: AdvancedPageViewModel = hiltViewModel()
     viewModel.uiState.collectAsStateWithLifecycle()
     val eligibleToUseLofterGetByTags = viewModel.lofterGetByTagsEligibility.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
-        viewModel.emitIntentOnIO(AuthorPageUIIntent.OnEntry(context))
+        viewModel.emitIntentOnIO(AdvancedPageUIIntent.OnEntry(context))
     }
     MainScaffold (
         topBar = {
-            AuthorsPageTopAppBar(navController)
+            AdvancedPageTopAppBar(navController)
         },
 
     ){

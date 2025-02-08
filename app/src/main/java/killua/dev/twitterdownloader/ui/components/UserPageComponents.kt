@@ -5,8 +5,8 @@ import androidx.navigation.NavHostController
 import killua.dev.base.ui.components.TopBar
 
 @Composable
-fun AuthorsPageTopAppBar(navController: NavHostController){
-    TopBar(navController,"Authors"){
+fun AdvancedPageTopAppBar(navController: NavHostController){
+    TopBar(navController,"Advanced"){
 
     }
 }

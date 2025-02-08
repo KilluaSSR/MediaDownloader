@@ -2,8 +2,6 @@ package killua.dev.twitterdownloader.ui.ViewModels
 
 import android.content.Context
 import dagger.hilt.android.lifecycle.HiltViewModel
-import killua.dev.base.datastore.readApplicationUserAuth
-import killua.dev.base.datastore.readApplicationUserCt0
 import killua.dev.base.datastore.readLofterLoginAuth
 import killua.dev.base.datastore.readLofterLoginKey
 import killua.dev.base.states.CurrentState
@@ -11,7 +9,6 @@ import killua.dev.base.ui.BaseViewModel
 import killua.dev.base.ui.SnackbarUIEffect
 import killua.dev.base.ui.UIIntent
 import killua.dev.base.ui.UIState
-import killua.dev.base.utils.NotificationUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -20,16 +17,16 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
-data class AuthorPageUIState(
+data class AdvancedPageUIState(
     val isLofterLoggedIn: Boolean = false,
     val isEligibleToUseLofterGetByTags: Boolean = false
 ): UIState
 
-sealed class AuthorPageUIIntent : UIIntent {
-    data class OnEntry(val context: Context): AuthorPageUIIntent()
+sealed class AdvancedPageUIIntent : UIIntent {
+    data class OnEntry(val context: Context): AdvancedPageUIIntent()
 }
 @HiltViewModel
-class AuthorPageViewModel @Inject constructor(): BaseViewModel<AuthorPageUIIntent, AuthorPageUIState, SnackbarUIEffect>(AuthorPageUIState()) {
+class AdvancedPageViewModel @Inject constructor(): BaseViewModel<AdvancedPageUIIntent, AdvancedPageUIState, SnackbarUIEffect>(AdvancedPageUIState()) {
     private val mutex = Mutex()
     private val _lofterLoginState: MutableStateFlow<CurrentState> =
         MutableStateFlow(CurrentState.Idle)
@@ -39,9 +36,9 @@ class AuthorPageViewModel @Inject constructor(): BaseViewModel<AuthorPageUIInten
         login == CurrentState.Success
     }.flowOnIO().stateInScope(false)
 
-    override suspend fun onEvent(state: AuthorPageUIState, intent: AuthorPageUIIntent) {
+    override suspend fun onEvent(state: AdvancedPageUIState, intent: AdvancedPageUIIntent) {
         when(intent){
-            is AuthorPageUIIntent.OnEntry -> {
+            is AdvancedPageUIIntent.OnEntry -> {
                 mutex.withLock {
                     val loginKey = intent.context.readLofterLoginKey().first()
                     val loginAuth = intent.context.readLofterLoginAuth().first()
