@@ -74,7 +74,6 @@ class AdvancedPageViewModel @Inject constructor(
             AdvancedPageUIIntent.GetMyTwitterBookmark -> {
                 viewModelScope.launch{
                     twitterDownloadAPI.getBookmarksAllTweets { user, newPhotoUrls, newVideoUrls ->
-                        // 处理视频下载
                         newVideoUrls.forEach { url ->
                             createAndStartDownloadTwitterSingleMedia(url, user, MediaType.VIDEO)
                         }

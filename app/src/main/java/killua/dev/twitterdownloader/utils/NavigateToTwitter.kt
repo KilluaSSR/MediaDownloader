@@ -24,8 +24,12 @@ fun Context.NavigateTwitterProfile(userID: String? = null, screenName: String){
     startActivity(intent)
 }
 
-fun Context.NavigateTwitterTweet(userScreenName:String, tweetID: String? = null){
-    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://x.com/$userScreenName/status/$tweetID"))
+fun Context.NavigateTwitterTweet(userScreenName:String? , tweetID: String? = null, url: String?){
+    val intent = if(userScreenName?.isNotBlank() == true && tweetID?.isNotBlank() == true){
+        Intent(Intent.ACTION_VIEW, Uri.parse("https://x.com/$userScreenName/status/$tweetID"))
+    }else{
+        Intent(Intent.ACTION_VIEW, Uri.parse(url))
+    }
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     startActivity(intent)
 }

@@ -434,7 +434,7 @@ class DownloadedViewModel @Inject constructor(
                             val userScreenName = download.screenName
                             val tweetID = download.tweetID
                             withMainContext {
-                                intent.context.NavigateTwitterTweet(userScreenName!!, tweetID)
+                                intent.context.NavigateTwitterTweet(userScreenName, tweetID, download.link)
                             }
                         }
                         AvailablePlatforms.Lofter -> {
@@ -504,14 +504,14 @@ class DownloadedViewModel @Inject constructor(
                 id = old.uuid,
                 url = old.link!!,
                 fileName = fileName,
-                screenName = old.screenName!!,
+                screenName = old.screenName ?: "",
                 type = mediaType
             )
         )
     }
 
     private suspend fun handleRetryAll() {
-        val failedDownloads = downloadRepository.getByStatus(status = DownloadStatus.FAILED)
+        val failedDownloads = downloadRepository.getActiveDownloads()
         if (failedDownloads.isEmpty()) {
             viewModelScope.launch {
                 emitEffect(SnackbarUIEffect.ShowSnackbar("No failed downloads"))

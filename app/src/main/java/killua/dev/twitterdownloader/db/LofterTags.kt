@@ -56,9 +56,9 @@ class LofterTagsRepository @Inject constructor(
 
     suspend fun clearAllTags() {
         val emptyEntry = TagEntry(
-            id = 1,  // 保持固定 ID
-            tags = emptySet(),  // 清空标签集合
-            updatedAt = System.currentTimeMillis()  // 更新时间戳
+            id = 1,
+            tags = emptySet(),
+            updatedAt = System.currentTimeMillis()
         )
         tagDao.saveTags(emptyEntry)
     }
