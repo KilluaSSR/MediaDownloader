@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -15,14 +17,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import killua.dev.base.Model.AvailablePlatforms
 import killua.dev.base.ui.LocalNavController
 import killua.dev.base.ui.MainPageButtons
 import killua.dev.base.ui.MainRoutes
+import killua.dev.base.ui.PrepareRoutes
 import killua.dev.base.ui.SnackbarUIEffect
 import killua.dev.base.ui.components.ActionsBotton
+import killua.dev.base.ui.components.CancellableAlert
 import killua.dev.base.ui.components.DevelopingAlert
 import killua.dev.base.ui.components.MainScaffold
 import killua.dev.base.ui.components.MainTopBar
@@ -30,6 +36,7 @@ import killua.dev.base.ui.components.Section
 import killua.dev.base.ui.components.paddingTop
 import killua.dev.base.ui.getRandomColors
 import killua.dev.base.ui.tokens.SizeTokens
+import killua.dev.base.utils.drawableToImageVector
 import killua.dev.base.utils.navigateSingle
 import killua.dev.twitterdownloader.ui.ViewModels.MainPageUIIntent
 import killua.dev.twitterdownloader.ui.ViewModels.MainPageViewmodel
@@ -37,6 +44,7 @@ import killua.dev.twitterdownloader.ui.components.FavouriteCard
 import killua.dev.twitterdownloader.ui.components.MainPageBottomSheet
 import killua.dev.twitterdownloader.ui.components.ReportDialog
 import killua.dev.twitterdownloader.ui.components.URLInputDialog
+import kotlinx.coroutines.launch
 
 @ExperimentalFoundationApi
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -50,7 +58,7 @@ fun MainPage(
     val uiState = viewmodel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState()
-    rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
     var showDevelopingAlert by remember { mutableStateOf(false) }
     var showBottomSheet by remember { mutableStateOf(false) }
     var showReportDialog by remember { mutableStateOf(false) }
@@ -75,6 +83,32 @@ fun MainPage(
         }
         if (showReportDialog){
             ReportDialog("Report",icon = null, onDismiss = {showReportDialog = false})
+        }
+
+        if(uiState.value.showNotLoggedInDialog){
+            CancellableAlert(
+                "${uiState.value.loginErrorPlatform.name} NOT logged in",
+                "Your cookie is necessary when downloading anything from ${uiState.value.loginErrorPlatform.name}",
+                icon = {
+                    Icon(
+                        imageVector = drawableToImageVector(killua.dev.base.R.drawable.lofter_logo),
+                        contentDescription = null,
+                        tint = Color.Unspecified
+                    )
+                },
+                onDismiss = {
+                    scope.launch{
+                        viewmodel.emitIntent(MainPageUIIntent.DismissLoginDialog)
+                    }
+                },
+            ) {
+                when(uiState.value.loginErrorPlatform){
+                    AvailablePlatforms.Twitter -> TODO()
+                    AvailablePlatforms.Lofter -> {
+                        navController.navigateSingle(PrepareRoutes.LofterPreparePage.route)
+                    }
+                }
+            }
         }
         URLInputDialog(
             showDialog = showDialog,

@@ -33,6 +33,7 @@ import javax.inject.Inject
 sealed class MainPageUIIntent : UIIntent {
     data class ExecuteDownload(val url: String) : MainPageUIIntent()
     data class NavigateToFavouriteUser(val context: Context, val userID: String, val screenName: String) : MainPageUIIntent()
+    object DismissLoginDialog : MainPageUIIntent()
 }
 
 data class MainPageUIState(
@@ -40,7 +41,9 @@ data class MainPageUIState(
     val favouriteUserName: String = "",
     val favouriteUserScreenName: String = "",
     val favouriteUserID: String = "",
-    val downloadedTimes: Int = 0
+    val downloadedTimes: Int = 0,
+    val showNotLoggedInDialog: Boolean = false,
+    val loginErrorPlatform: AvailablePlatforms = AvailablePlatforms.Twitter
 ) : UIState
 
 
@@ -93,11 +96,25 @@ class MainPageViewmodel @Inject constructor(
                     val platform = classifyLinks(intent.url)
                     when(platform){
                         AvailablePlatforms.Twitter -> {
-                            val tweetID = intent.url.split("?")[0].split("/").last()
-                            handleNewDownload(tweetID)
+                            downloadPreChecks.checkTwitterLoggedIn().onSuccess {
+                                val tweetID = intent.url.split("?")[0].split("/").last()
+                                handleNewDownload(tweetID)
+                            }.onFailure { error ->
+                                emitState(uiState.value.copy(
+                                    showNotLoggedInDialog = true,
+                                    loginErrorPlatform = AvailablePlatforms.Twitter
+                                ))
+                            }
                         }
                         AvailablePlatforms.Lofter -> {
+                            downloadPreChecks.checkLofterLoggedIn().onSuccess {
 
+                            }.onFailure { error ->
+                                emitState(uiState.value.copy(
+                                    showNotLoggedInDialog = true,
+                                    loginErrorPlatform = AvailablePlatforms.Lofter
+                                ))
+                            }
                         }
                     }
 
@@ -107,6 +124,12 @@ class MainPageViewmodel @Inject constructor(
                 withMainContext {
                     intent.context.NavigateTwitterProfile(intent.userID,intent.screenName)
                 }
+            }
+
+            MainPageUIIntent.DismissLoginDialog -> {
+                emitState(uiState.value.copy(
+                    showNotLoggedInDialog = false
+                ))
             }
         }
     }
@@ -130,12 +153,12 @@ class MainPageViewmodel @Inject constructor(
                     is NetworkResult.Success -> {
                         val user = result.data.user
                         result.data.videoUrls.forEach {
-                            createAndStartDownload(it, user, tweetId, MediaType.VIDEO)
+                            createAndStartDownloadTwitterSingleMedia(it, user, tweetId, MediaType.VIDEO)
                         }
                         if(result.data.photoUrls.isNotEmpty()){
                             downloadPreChecks.checkPhotosDownload().onSuccess {
                                 result.data.photoUrls.forEach {
-                                    createAndStartDownload(it, user, tweetId, MediaType.PHOTO)
+                                    createAndStartDownloadTwitterSingleMedia(it, user, tweetId, MediaType.PHOTO)
                                 }
                             }.onFailure { error ->
                                 viewModelScope.launch{
@@ -167,7 +190,7 @@ class MainPageViewmodel @Inject constructor(
     }
 
 
-    private fun createAndStartDownload(
+    private fun createAndStartDownloadTwitterSingleMedia(
         url: String,
         user: TwitterUser?,
         tweetID: String,

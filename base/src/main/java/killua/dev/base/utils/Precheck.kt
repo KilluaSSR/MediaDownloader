@@ -2,13 +2,21 @@ package killua.dev.base.utils
 
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
+import killua.dev.base.datastore.readApplicationUserAuth
+import killua.dev.base.datastore.readApplicationUserCt0
 import killua.dev.base.datastore.readDownloadPhotos
+import killua.dev.base.datastore.readLofterLoginAuth
+import killua.dev.base.datastore.readLofterLoginKey
 import killua.dev.base.datastore.readOnlyWifi
+import killua.dev.base.di.ApplicationScope
 import killua.dev.base.repository.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -16,42 +24,61 @@ import javax.inject.Inject
 sealed class DownloadCheckError(message: String) : Exception(message) {
     object NoNetwork : DownloadCheckError("No network")
     object WifiRequired : DownloadCheckError("Wi-Fi not enabled")
+    object DownloadPhotosNotEnabled: DownloadCheckError("Download Photos NOT Enabled")
+    object LofterNotLoggedInError: DownloadCheckError("You need to log in your Lofter account")
+    object TwitterNotLoggedInError: DownloadCheckError("You need to log in your Twitter account")
 }
 class DownloadPreChecks @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val networkManager: NetworkManager
+    private val networkManager: NetworkManager,
+    @ApplicationScope private val scope: CoroutineScope
 ) {
-    private val wifiOnlyFlow = MutableStateFlow(true)
-    private val photosDownload = MutableStateFlow(true)
-    init {
-        CoroutineScope(Dispatchers.IO).launch {
-            context.readOnlyWifi().collect { isWifiOnly ->
-                wifiOnlyFlow.value = isWifiOnly
-            }
-        }
 
-        CoroutineScope(Dispatchers.IO).launch {
-            context.readDownloadPhotos().collect { photos ->
-                photosDownload.value = photos
-            }
-        }
-    }
-    fun isDownloadPhotosEnabled() = photosDownload.value
-    fun isWifiOnly() = wifiOnlyFlow.value
+    private val _wifiOnlyFlow = context.readOnlyWifi()
+        .stateIn(scope, SharingStarted.Eagerly, true)
 
-    fun checkPhotosDownload(): Result<Unit>{
-        return when{
-            isDownloadPhotosEnabled() -> Result.success(Unit)
-            else -> Result.failure(Exception("Download Photos NOT Enabled"))
-        }
+    private val _photosDownload = context.readDownloadPhotos()
+        .stateIn(scope, SharingStarted.Eagerly, true)
+
+    private val _lofterLoggedIn = combine(
+        context.readLofterLoginAuth(),
+        context.readLofterLoginKey()
+    ) { auth, key ->
+        auth.isNotEmpty() && key.isNotEmpty()
+    }.stateIn(scope, SharingStarted.Eagerly, false)
+
+    private val _twitterLoggedIn = combine(
+        context.readApplicationUserCt0(),
+        context.readApplicationUserAuth()
+    ){ ct0, auth ->
+        auth.isNotEmpty() && ct0.isNotEmpty()
+    }.stateIn(scope, SharingStarted.Eagerly, false)
+
+    private val isWifiOnly get() = _wifiOnlyFlow.value
+    private val isDownloadPhotosEnabled get() = _photosDownload.value
+    private val isLofterLoggedIn get() = _lofterLoggedIn.value
+    private val isTwitterLoggedIn get() = _twitterLoggedIn.value
+
+    fun checkTwitterLoggedIn(): Result<Unit> = when {
+        isTwitterLoggedIn -> Result.success(Unit)
+        else -> Result.failure(DownloadCheckError.TwitterNotLoggedInError)
     }
-    fun canStartDownload(): Result<Unit> {
-        return when {
-            !networkManager.isNetworkAvailable() ->
-                Result.failure(DownloadCheckError.NoNetwork)
-            isWifiOnly() && !networkManager.isWifiConnected() ->
-                Result.failure(DownloadCheckError.WifiRequired)
-            else -> Result.success(Unit)
-        }
+
+    fun checkLofterLoggedIn(): Result<Unit> = when {
+        isLofterLoggedIn -> Result.success(Unit)
+        else -> Result.failure(DownloadCheckError.LofterNotLoggedInError)
+    }
+
+    fun checkPhotosDownload(): Result<Unit> = when {
+        isDownloadPhotosEnabled -> Result.success(Unit)
+        else -> Result.failure(DownloadCheckError.DownloadPhotosNotEnabled)
+    }
+
+    fun canStartDownload(): Result<Unit> = when {
+        !networkManager.isNetworkAvailable() ->
+            Result.failure(DownloadCheckError.NoNetwork)
+        isWifiOnly && !networkManager.isWifiConnected() ->
+            Result.failure(DownloadCheckError.WifiRequired)
+        else -> Result.success(Unit)
     }
 }
