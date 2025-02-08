@@ -56,6 +56,15 @@ fun LofterPrepareTagsPage(){
             Button(
                 onClick = {
                     scope.launch{
+                        viewModel.emitIntent(LofterPrepareTagsPageUIIntents.ClearAll)
+                    }
+                }
+            ) {
+                Text(text = "Clear All")
+            }
+            Button(
+                onClick = {
+                    scope.launch{
                         viewModel.emitIntent(LofterPrepareTagsPageUIIntents.SaveTags)
                     }
                     navController.popBackStack()

@@ -1,7 +1,5 @@
 package killua.dev.twitterdownloader.ui.pages.OtherSetupPages.Lofter
 
-import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import killua.dev.base.ui.BaseViewModel
 import killua.dev.base.ui.SnackbarUIEffect
@@ -9,7 +7,6 @@ import killua.dev.base.ui.UIIntent
 import killua.dev.base.ui.UIState
 import killua.dev.twitterdownloader.db.LofterTagsRepository
 import killua.dev.twitterdownloader.db.TagEntry
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 object TagUtils {
@@ -28,6 +25,7 @@ sealed class LofterPrepareTagsPageUIIntents : UIIntent {
     data class RemoveTag(val tag: String) : LofterPrepareTagsPageUIIntents()
     data class AddBatchTags(val tags: List<String>) : LofterPrepareTagsPageUIIntents()
     object SaveTags: LofterPrepareTagsPageUIIntents()
+    object ClearAll: LofterPrepareTagsPageUIIntents()
 }
 data class LofterPrepareTagsPageUIState(
     val tags: Set<String> = emptySet(),
@@ -93,6 +91,16 @@ class LofterPrepareTagsPageViewModel @Inject constructor(
 
             LofterPrepareTagsPageUIIntents.OnEntry -> {
                 observeAllTags()
+            }
+
+            LofterPrepareTagsPageUIIntents.ClearAll -> {
+                updateState {
+                    it.copy(
+                        tags = emptySet(),
+                        currentInput = ""
+                    )
+                }
+                tagsRepository.clearAllTags()
             }
         }
     }

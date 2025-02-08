@@ -8,7 +8,6 @@ import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.TypeConverter
-import db.Download
 import killua.dev.base.Model.AvailablePlatforms
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -54,4 +53,13 @@ class LofterTagsRepository @Inject constructor(
     // ✅ 插入下载项
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(tag: TagEntry) = tagDao.saveTags(tag)
+
+    suspend fun clearAllTags() {
+        val emptyEntry = TagEntry(
+            id = 1,  // 保持固定 ID
+            tags = emptySet(),  // 清空标签集合
+            updatedAt = System.currentTimeMillis()  // 更新时间戳
+        )
+        tagDao.saveTags(emptyEntry)
+    }
 }
