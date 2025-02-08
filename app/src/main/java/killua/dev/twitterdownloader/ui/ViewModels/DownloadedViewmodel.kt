@@ -94,6 +94,26 @@ class DownloadedViewModel @Inject constructor(
     private val filteredResultsCache = mutableMapOf<DownloadPageDestinations, List<DownloadedItem>>()
     init {
         viewModelScope.launch {
+            downloadManager.downloadProgress.collect { progressList ->
+                for ((downloadId, progress) in progressList) {
+                    val currentProgress = uiState.value.downloadProgress[downloadId]
+                    emitState(
+                        uiState.value.copy(
+                            downloadProgress = uiState.value.downloadProgress + (downloadId to
+                                    DownloadProgress(
+                                        progress = progress,
+                                        isCompleted = currentProgress?.isCompleted == true,
+                                        isFailed = currentProgress?.isFailed == true,
+                                        errorMessage = currentProgress?.errorMessage
+                                    )
+                                    )
+                        )
+                    )
+                }
+            }
+        }
+
+        viewModelScope.launch {
             downloadRepository.observeAllDownloads().collect { downloads ->
                 // 1. 处理作者列表
                 val authors = downloads
