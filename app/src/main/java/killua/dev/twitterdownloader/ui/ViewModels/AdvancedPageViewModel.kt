@@ -98,21 +98,21 @@ class AdvancedPageViewModel @Inject constructor(
             }
             AdvancedPageUIIntent.GetMyTwitterLiked -> {
                 viewModelScope.launch {
-                    twitterDownloadAPI.getLikesAllTweets { likes ->
-                        likes.forEach { like ->
-                            like.videoUrls.forEach { url ->
+                    twitterDownloadAPI.getLikesAllTweets { bookmarks ->
+                        bookmarks.forEach { bookmark ->
+                            bookmark.videoUrls.forEach { url ->
                                 createAndStartDownloadTwitterSingleMedia(
                                     url = url,
-                                    user = like.user,
-                                    tweetID = like.tweetId,
+                                    user = bookmark.user,
+                                    tweetID = bookmark.tweetId,
                                     mediaType = MediaType.VIDEO
                                 )
                             }
-                            like.photoUrls.forEach { url ->
+                            bookmark.photoUrls.forEach { url ->
                                 createAndStartDownloadTwitterSingleMedia(
                                     url = url,
-                                    user = like.user,
-                                    tweetID = like.tweetId,
+                                    user = bookmark.user,
+                                    tweetID = bookmark.tweetId,
                                     mediaType = MediaType.PHOTO
                                 )
                             }

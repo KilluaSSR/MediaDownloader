@@ -34,7 +34,7 @@ class TwitterConfig : PlatformConfig {
                     name = "twid",
                     pattern = "twid=([^;]+)",
                     saveFunction = { context, cookieInfo ->
-                        val twid = cookieInfo.value.split("u=").last()
+                        val twid = cookieInfo.value.split("u=").last().split("\"")[0]
                         println(twid)
                         context.writeApplicationUserID(twid)
                     }

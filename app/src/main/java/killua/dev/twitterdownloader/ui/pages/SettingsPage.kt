@@ -35,6 +35,7 @@ import killua.dev.base.datastore.readMaxRetries
 import killua.dev.base.datastore.readOnlyWifi
 import killua.dev.base.datastore.writeApplicationUserAuth
 import killua.dev.base.datastore.writeApplicationUserCt0
+import killua.dev.base.datastore.writeApplicationUserID
 import killua.dev.base.datastore.writeMaxConcurrentDownloads
 import killua.dev.base.datastore.writeMaxRetries
 import killua.dev.base.ui.LocalNavController
@@ -79,6 +80,7 @@ fun SettingsPage(){
                 scope.launch{
                     context.writeApplicationUserCt0("")
                     context.writeApplicationUserAuth("")
+                    context.writeApplicationUserID("")
                     context.startActivity(Intent(context, ActivityUtil.SetupActivity))
                     context.getActivity().finish()
                 }

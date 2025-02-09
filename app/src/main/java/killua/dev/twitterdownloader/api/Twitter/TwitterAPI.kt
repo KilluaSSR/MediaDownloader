@@ -4,25 +4,23 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.google.gson.Gson
-import killua.dev.twitterdownloader.api.Twitter.Model.RootDto
 import com.google.gson.GsonBuilder
 import killua.dev.base.utils.ShowNotification
-import killua.dev.twitterdownloader.api.NetworkHelper
 import killua.dev.twitterdownloader.Model.NetworkResult
+import killua.dev.twitterdownloader.api.NetworkHelper
 import killua.dev.twitterdownloader.api.Twitter.BuildRequest.GetLikeParams
 import killua.dev.twitterdownloader.api.Twitter.BuildRequest.GetTwitterBookmarkMediaParams
 import killua.dev.twitterdownloader.api.Twitter.BuildRequest.GetTwitterDownloadSpecificMediaParams
 import killua.dev.twitterdownloader.api.Twitter.BuildRequest.TwitterAPIURL
 import killua.dev.twitterdownloader.api.Twitter.Model.Bookmark
-import killua.dev.twitterdownloader.api.Twitter.Model.BookmarkPageData
-import killua.dev.twitterdownloader.api.Twitter.Model.BookmarksPageData
+import killua.dev.twitterdownloader.api.Twitter.Model.MediaPageData
+import killua.dev.twitterdownloader.api.Twitter.Model.RootDto
 import killua.dev.twitterdownloader.api.Twitter.Model.TweetData
 import killua.dev.twitterdownloader.api.Twitter.Model.TwitterUser
 import killua.dev.twitterdownloader.di.UserDataManager
 import killua.dev.twitterdownloader.utils.addTwitterBookmarkHeaders
 import killua.dev.twitterdownloader.utils.addTwitterNormalHeaders
-import killua.dev.twitterdownloader.utils.extractBookmarkPageData
-import killua.dev.twitterdownloader.utils.extractLikePageData
+import killua.dev.twitterdownloader.utils.extractMediaPageData
 import killua.dev.twitterdownloader.utils.extractTwitterUser
 import killua.dev.twitterdownloader.utils.getAllHighestBitrateUrls
 import killua.dev.twitterdownloader.utils.getAllImageUrls
@@ -57,43 +55,42 @@ class TwitterDownloadAPI @Inject constructor(
             }
         )
     }
-
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     suspend fun getBookmarksAllTweets(
-        onNewBookmarks: suspend (List<Bookmark>) -> Unit
+        onNewItems: suspend (List<Bookmark>) -> Unit
     ): NetworkResult<TweetData> = fetchAllMediaTweets(
         getPageData = { cursor -> getTwitterBookmarkAsync(cursor) },
-        onNewBookmarks = onNewBookmarks
-    )
-
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    suspend fun getLikesAllTweets(
-        onNewBookmarks: suspend (List<Bookmark>) -> Unit
-    ): NetworkResult<TweetData> = fetchAllMediaTweets(
-        getPageData = { cursor -> getLikePageAsync(cursor) },
-        onNewBookmarks = onNewBookmarks
+        onNewItems = onNewItems
     )
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private suspend fun getTwitterBookmarkAsync(
         cursor: String,
         count: Int = 20
-    ): NetworkResult<BookmarksPageData> = fetchTwitterPage(
+    ): NetworkResult<MediaPageData> = fetchTwitterPage(
         apiUrl = TwitterAPIURL.BookmarkUrl,
         params = GetTwitterBookmarkMediaParams(count, cursor, userdata.userTwitterData.value.twid, gson),
         addHeaders = { it.addTwitterBookmarkHeaders(userdata.userTwitterData.value.ct0) },
-        extractData = { rootDto, cur -> rootDto.extractBookmarkPageData(cur) }
+        extractData = { rootDto, cur -> rootDto.extractMediaPageData(cur, true) }
     )
 
+
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    private suspend fun getLikePageAsync(
-        cursor: String = "",
-        count: Int = 50
-    ): NetworkResult<BookmarksPageData> = fetchTwitterPage(  // 注意这里改为 BookmarksPageData
+    suspend fun getLikesAllTweets(
+        onNewItems: suspend (List<Bookmark>) -> Unit
+    ): NetworkResult<TweetData> = fetchAllMediaTweets(
+        getPageData = { cursor -> getTwitterLikesAsync(cursor) },
+        onNewItems = onNewItems
+    )
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private suspend fun getTwitterLikesAsync(
+        cursor: String,
+        count: Int = 20
+    ): NetworkResult<MediaPageData> = fetchTwitterPage(
         apiUrl = TwitterAPIURL.LikeUrl,
         params = GetLikeParams(count, cursor, userdata.userTwitterData.value.twid, gson),
         addHeaders = { it.addTwitterNormalHeaders(userdata.userTwitterData.value.ct0) },
-        extractData = { rootDto, cur -> rootDto.extractLikePageData(cur) }
+        extractData = { rootDto, cur -> rootDto.extractMediaPageData(cur, false) }
     )
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -115,11 +112,14 @@ class TwitterDownloadAPI @Inject constructor(
                         "auth_token" to userdata.userTwitterData.value.auth
                     ))
                 }
-
+            println(request)
+            println("cto="+userdata.userTwitterData.value.ct0)
+            println("authtoken="+userdata.userTwitterData.value.auth)
             NetworkHelper.doRequest(request).use { response ->
                 when {
                     response.isSuccessful -> {
                         val content = response.body?.string().orEmpty()
+                        println(content +"Content")
                         val rootDto = try {
                             gson.fromJson(content, RootDto::class.java)
                         } catch (e: Exception) {
@@ -128,58 +128,61 @@ class TwitterDownloadAPI @Inject constructor(
                         }
                         NetworkResult.Success(extractData(rootDto, params["cursor"] ?: ""))
                     }
-                    else -> NetworkResult.Error(
-                        code = response.code,
-                        message = "请求失败: ${response.code} ${response.message}\n${response.body?.string()}"
-                    )
+                    else -> {
+                        println(response.code)
+                        println("BODY" +response.body?.string())
+                        NetworkResult.Error(
+                            code = response.code,
+                            message = "请求失败: ${response.code} ${response.message}\n${response.body?.string()}"
+                        )
+                    }
                 }
             }
         } catch (e: Exception) {
+            println("网络请求失败: ${e.message}")
             NetworkResult.Error(message = "网络请求失败: ${e.message}")
         }
     }
-
     private suspend fun fetchAllMediaTweets(
-        getPageData: suspend (String) -> NetworkResult<BookmarksPageData>,
-        onNewBookmarks: suspend (List<Bookmark>) -> Unit
+        getPageData: suspend (String) -> NetworkResult<MediaPageData>,
+        onNewItems: suspend (List<Bookmark>) -> Unit
     ): NetworkResult<TweetData> {
         var currentPage = ""
-        val allBookmarks = mutableListOf<Bookmark>()
+        val allItems = mutableListOf<Bookmark>()
         var lastUser: TwitterUser? = null
         val processedPages = mutableSetOf<String>()
+
         try {
             while (true) {
                 when (val result = getPageData(currentPage)) {
                     is NetworkResult.Success -> {
                         val pageData = result.data
 
-                        // 添加页面追踪
                         if (currentPage in processedPages) {
                             Log.d("TwitterAPI", "Page already processed: $currentPage")
                             break
                         }
                         processedPages.add(currentPage)
 
-                        val newBookmarks = pageData.bookmark.filter { bookmark ->
-                            bookmark.tweetId !in allBookmarks.map { it.tweetId }
+                        val newItems = pageData.items.filter { item ->
+                            item.tweetId !in allItems.map { it.tweetId }
                         }
 
-                        if (newBookmarks.isNotEmpty()) {
-                            Log.d("TwitterAPI", "Found ${newBookmarks.size} new bookmarks")
-                            allBookmarks.addAll(newBookmarks)
-                            onNewBookmarks(newBookmarks)
+                        if (newItems.isNotEmpty()) {
+                            Log.d("TwitterAPI", "Found ${newItems.size} new items")
+                            allItems.addAll(newItems)
+                            onNewItems(newItems)
                         }
 
                         if (lastUser == null) {
-                            lastUser = newBookmarks.firstOrNull()?.user
+                            lastUser = newItems.firstOrNull()?.user
                         }
 
                         notification.updateBookmarkProgress(
-                            photoCount = allBookmarks.sumOf { it.photoUrls.size },
-                            videoCount = allBookmarks.sumOf { it.videoUrls.size }
+                            photoCount = allItems.sumOf { it.photoUrls.size },
+                            videoCount = allItems.sumOf { it.videoUrls.size }
                         )
 
-                        // 改进翻页判断
                         if (pageData.nextPage.isEmpty() ||
                             currentPage == pageData.nextPage ||
                             pageData.nextPage in processedPages) {
@@ -189,30 +192,28 @@ class TwitterDownloadAPI @Inject constructor(
 
                         currentPage = pageData.nextPage
                         Log.d("TwitterAPI", "Moving to next page: $currentPage")
-                        delay(5000)
+                        delay(1000)
                     }
                     is NetworkResult.Error -> break
                 }
             }
         } catch (e: Exception) {
-            // 继续执行，返回已获取的数据
+            Log.e("TwitterAPI", "Error fetching media: ${e.message}")
         }
 
         notification.completeBookmarkProgress(
-            totalPhotoCount = allBookmarks.sumOf { it.photoUrls.size },
-            totalVideoCount = allBookmarks.sumOf { it.videoUrls.size }
+            totalPhotoCount = allItems.sumOf { it.photoUrls.size },
+            totalVideoCount = allItems.sumOf { it.videoUrls.size }
         )
 
-        // 返回总的媒体信息
         return NetworkResult.Success(
             TweetData(
                 user = lastUser,
-                photoUrls = allBookmarks.flatMap { it.photoUrls }.distinct(),
-                videoUrls = allBookmarks.flatMap { it.videoUrls }.distinct()
+                photoUrls = allItems.flatMap { it.photoUrls }.distinct(),
+                videoUrls = allItems.flatMap { it.videoUrls }.distinct()
             )
         )
     }
-
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun buildUrl(baseUrl: String, params: Map<String, String>): String {
         if (params.isEmpty()) return baseUrl
