@@ -355,3 +355,17 @@ data class BookmarkPageData(
     val videoUrls: List<String>,
     val nextPage: String
 )
+
+@Serializable
+data class BookmarksPageData(
+    val bookmark: List<Bookmark>,
+    val nextPage: String
+)
+
+@Serializable
+data class Bookmark(
+    val user: TwitterUser?,
+    val tweetId: String,
+    val photoUrls: List<String>,
+    val videoUrls: List<String>,
+)

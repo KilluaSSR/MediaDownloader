@@ -1,6 +1,5 @@
 package killua.dev.base.ui.components
 
-import android.R.attr.rotationX
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.window.DialogProperties
 import killua.dev.base.ui.tokens.SizeTokens
 import kotlinx.coroutines.delay
@@ -91,7 +91,8 @@ fun BaseAnimatedDialog(
                     start = SizeTokens.Level12,
                     end = SizeTokens.Level12,
                     top = SizeTokens.Level12
-                )
+                ),
+                fontWeight = FontWeight.Bold
             )
         },
         text = {
@@ -105,7 +106,8 @@ fun BaseAnimatedDialog(
                 Text(
                     text = mainText,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Bold
                 )
             }
         },
@@ -128,63 +130,6 @@ fun BaseAnimatedDialog(
 }
 
 
-@Composable
-private fun BaseAlertDialog(
-    title: String,
-    mainText: String,
-    onDismiss: () -> Unit,
-    icon: @Composable (() -> Unit)? = null,
-    buttons: @Composable () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
-        modifier = Modifier.padding(SizeTokens.Level8),
-        icon = icon,
-        title = {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(
-                    start = SizeTokens.Level12,
-                    end = SizeTokens.Level12,
-                    top = SizeTokens.Level12
-                )
-            )
-        },
-        text = {
-            Column(
-                modifier = Modifier.padding(
-                    top = SizeTokens.Level12,
-                    start = SizeTokens.Level12,
-                    end = SizeTokens.Level12
-                )
-            ) {
-                Text(
-                    text = mainText,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        },
-        confirmButton = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        start = SizeTokens.Level12,
-                        end = SizeTokens.Level8,
-                        bottom = SizeTokens.Level12,
-                        top = SizeTokens.Level2
-                    ),
-                horizontalArrangement = Arrangement.End
-            ) {
-                buttons()
-            }
-        }
-    )
-}
 @Composable
 fun OKAlert(
     title: String,

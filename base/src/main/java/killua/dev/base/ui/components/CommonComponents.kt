@@ -277,15 +277,7 @@ fun DownloadActions(
         )
 
         when (status) {
-            DownloadStatus.DOWNLOADING, DownloadStatus.PENDING -> {
-                DownloadActionButton(
-                    onClick = { onCommand(DownloadPageCommands.Cancel) },
-                    icon = Icons.Default.Cancel,
-                    contentDescription = "Cancel",
-                    tint = MaterialTheme.colorScheme.error
-                )
-            }
-            DownloadStatus.FAILED -> {
+            DownloadStatus.DOWNLOADING, DownloadStatus.PENDING, DownloadStatus.FAILED -> {
                 DownloadActionButton(
                     onClick = { onCommand(DownloadPageCommands.Retry) },
                     icon = Icons.Default.Refresh,

@@ -34,10 +34,8 @@ import killua.dev.twitterdownloader.utils.NavigateToLofter
 import killua.dev.twitterdownloader.utils.NavigateTwitterTweet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
@@ -89,8 +87,6 @@ class DownloadedViewModel @Inject constructor(
 ) {
     private val _thumbnailCache = MutableStateFlow<Map<Uri, Bitmap?>>(emptyMap())
     private val _authors = MutableStateFlow<Set<String>>(emptySet())
-    private val downloadUpdateDebouncer = MutableStateFlow<List<Download>>(emptyList())
-    private var isPreloading = false
     private val filteredResultsCache = mutableMapOf<DownloadPageDestinations, List<DownloadedItem>>()
     init {
         viewModelScope.launch {
@@ -186,47 +182,6 @@ class DownloadedViewModel @Inject constructor(
                 )
             }
         }
-    }
-
-    private suspend fun processDownloads(downloads: List<Download>) {
-        // 异步处理作者列表
-        launchOnIO {
-            val authors = downloads.mapNotNull { it.name }
-                .sortedBy { it.length }
-                .toSet()
-            _authors.value = authors
-        }
-
-        // 异步处理缩略图
-        launchOnIO {
-            val newThumbnails = downloads.mapNotNull { it.fileUri }
-                .filter { uri -> !_thumbnailCache.value.containsKey(uri) }
-                .associateWith { uri -> thumbnailRepository.getThumbnail(uri) }
-
-            _thumbnailCache.value = _thumbnailCache.value + newThumbnails
-        }
-
-        // 4. 处理下载列表,使用 Flow 操作符优化过滤
-        val unfilteredItems = downloads
-            .asFlow()
-            .map { DownloadedItem.fromDownload(it) }
-            .toList()
-            .sortedByDescending { it.createdAt }
-
-        val filteredItems = applyFilters(
-            unfilteredItems,
-            uiState.value.optionsType,
-            uiState.value.filterOptions
-        )
-
-        // 5. 批量更新状态
-        emitState(
-            uiState.value.copy(
-                unfilteredDownloads = unfilteredItems,
-                downloads = filteredItems,
-                isLoading = false
-            )
-        )
     }
 
     private suspend fun applyFilters(
@@ -346,106 +301,35 @@ class DownloadedViewModel @Inject constructor(
 
     override suspend fun onEvent(state: DownloadPageUIState, intent: DownloadPageUIIntent) {
         when (intent) {
-            is DownloadPageUIIntent.LoadDownloads -> {
-                observeDownloadsFromDB()
-            }
+            is DownloadPageUIIntent.LoadDownloads -> observeDownloadsFromDB()
 
-            is DownloadPageUIIntent.FilterDownloads -> {
-                // 1. 优先使用缓存数据
-                filteredResultsCache[intent.filter]?.let { cached ->
-                    emitState(
-                        state.copy(
-                            optionsType = intent.filter,
-                            downloads = cached
-                        )
-                    )
-                    return@onEvent
-                }
+            is DownloadPageUIIntent.FilterDownloads -> handleFilterDownloads(state, intent)
 
-                launchOnIO {
-                    val filtered = applyFilters(
-                        state.unfilteredDownloads,
-                        intent.filter,
-                        state.filterOptions
-                    )
+            is DownloadPageUIIntent.UpdateFilterOptions -> handleUpdateFilterOptions(state, intent)
 
-                    // 3. 更新缓存和显示
-                    filteredResultsCache[intent.filter] = filtered
-                    if (state.optionsType == intent.filter) {
-                        emitState(
-                            state.copy(
-                                downloads = filtered
-                            )
-                        )
-                    }
-                }
-            }
+            is DownloadPageUIIntent.ResumeDownload ->
+                updateDownloadStatus(intent.downloadId, DownloadStatus.DOWNLOADING)
 
-            is DownloadPageUIIntent.UpdateFilterOptions -> {
-                val newFilterOptions = intent.filterOptions
-                val filtered = applyFilters(
-                    state.unfilteredDownloads,
-                    state.optionsType,
-                    newFilterOptions
-                )
-                emitState(
-                    state.copy(
-                        filterOptions = newFilterOptions,
-                        downloads = filtered
-                    )
-                )
-            }
+            is DownloadPageUIIntent.PauseDownload ->
+                updateDownloadStatus(intent.downloadId, DownloadStatus.PENDING)
 
-            is DownloadPageUIIntent.ResumeDownload -> {
-                launchOnIO {
-                    downloadRepository.updateStatus(intent.downloadId, DownloadStatus.DOWNLOADING)
-                }
-            }
+            is DownloadPageUIIntent.CancelDownload ->
+                launchOnIO { cancelDownload(intent.downloadId) }
 
-            is DownloadPageUIIntent.PauseDownload -> {
-                launchOnIO {
-                    downloadRepository.updateStatus(intent.downloadId, DownloadStatus.PENDING)
-                }
-            }
+            DownloadPageUIIntent.CancelAll -> handleBulkOperation(
+                operation = { cancelDownload(it.uuid) },
+                emptyMessage = "No active downloads"
+            )
 
-            is DownloadPageUIIntent.CancelDownload -> {
-                launchOnIO {
-                    cancelDownload(intent.downloadId)
-                }
-            }
+            DownloadPageUIIntent.RetryAll -> handleBulkOperation(
+                operation = { retryDownload(it.uuid) },
+                emptyMessage = "No failed downloads"
+            )
 
-            DownloadPageUIIntent.CancelAll -> handleCancelAll()
-            DownloadPageUIIntent.RetryAll -> handleRetryAll()
-            is DownloadPageUIIntent.RetryDownload -> {
-                launchOnIO {
-                    retryDownload(intent.downloadId)
-                }
-            }
+            is DownloadPageUIIntent.RetryDownload ->
+                launchOnIO { retryDownload(intent.downloadId) }
 
-            is DownloadPageUIIntent.GoTo -> {
-                launchOnIO {
-                    val download = downloadRepository.getById(intent.downloadId)
-                    if (download == null) {
-                        launchOnIO { emitEffect(SnackbarUIEffect.ShowSnackbar("Not Found")) }
-                        return@launchOnIO
-                    }
-                    when(download.type){
-                        AvailablePlatforms.Twitter -> {
-                            val userScreenName = download.screenName
-                            val tweetID = download.tweetID
-                            withMainContext {
-                                intent.context.NavigateTwitterTweet(userScreenName, tweetID, download.link)
-                            }
-                        }
-                        AvailablePlatforms.Lofter -> {
-                            val link = download.tweetID!!
-                            withMainContext {
-                                intent.context.NavigateToLofter(link)
-                            }
-                        }
-                    }
-                }
-            }
+            is DownloadPageUIIntent.GoTo -> handleNavigation(intent)
         }
     }
 
@@ -457,18 +341,6 @@ class DownloadedViewModel @Inject constructor(
         }
         downloadRepository.deleteById(downloadId)
     }
-
-    private suspend fun handleCancelAll() {
-        val allDownloads = downloadRepository.getActiveDownloads()
-        if (allDownloads.isEmpty()) {
-            viewModelScope.launch {
-                emitEffect(SnackbarUIEffect.ShowSnackbar("No active downloads"))
-            }
-            return
-        }
-        allDownloads.forEach { cancelDownload(it.uuid) }
-    }
-
     private suspend fun retryDownload(downloadId: String) {
         val old = downloadRepository.getById(downloadId) ?: return
         val mediaType = when(old.fileType) {
@@ -510,16 +382,104 @@ class DownloadedViewModel @Inject constructor(
         )
     }
 
-    private suspend fun handleRetryAll() {
-        val failedDownloads = downloadRepository.getActiveDownloads()
-        if (failedDownloads.isEmpty()) {
-            viewModelScope.launch {
-                emitEffect(SnackbarUIEffect.ShowSnackbar("No failed downloads"))
-            }
+    private suspend fun handleBulkOperation(
+        operation: suspend (Download) -> Unit,
+        emptyMessage: String
+    ) {
+        val downloads = downloadRepository.getActiveDownloads()
+        if (downloads.isEmpty()) {
+            showMessage(emptyMessage)
             return
         }
-        failedDownloads.forEach { old ->
-            retryDownload(old.uuid)
+        downloads.forEach { operation(it) }
+    }
+
+    private fun handleNavigation(intent: DownloadPageUIIntent.GoTo) {
+        launchOnIO {
+            val download = downloadRepository.getById(intent.downloadId) ?: run {
+                showMessage("Not Found")
+                return@launchOnIO
+            }
+
+            withMainContext {
+                when(download.type) {
+                    AvailablePlatforms.Twitter -> {
+                        intent.context.NavigateTwitterTweet(
+                            download.screenName,
+                            download.tweetID,
+                            download.link
+                        )
+                    }
+                    AvailablePlatforms.Lofter -> {
+                        intent.context.NavigateToLofter(download.tweetID!!)
+                    }
+                }
+            }
+        }
+    }
+    private suspend fun handleFilterDownloads(
+        state: DownloadPageUIState,
+        intent: DownloadPageUIIntent.FilterDownloads
+    ) {
+        filteredResultsCache[intent.filter]?.let { cached ->
+            emitState(state.copy(
+                optionsType = intent.filter,
+                downloads = cached
+            ))
+            return
+        }
+
+        launchOnIO {
+            val filtered = applyFilters(
+                state.unfilteredDownloads,
+                intent.filter,
+                state.filterOptions
+            )
+            filteredResultsCache[intent.filter] = filtered
+            if (state.optionsType == intent.filter) {
+                emitState(state.copy(downloads = filtered))
+            }
+        }
+    }
+    private suspend fun handleUpdateFilterOptions(
+        state: DownloadPageUIState,
+        intent: DownloadPageUIIntent.UpdateFilterOptions
+    ) {
+        val filtered = applyFilters(
+            state.unfilteredDownloads,
+            state.optionsType,
+            intent.filterOptions
+        )
+        emitState(state.copy(
+            filterOptions = intent.filterOptions,
+            downloads = filtered
+        ))
+    }
+
+    private fun Download.toDownloadTask(): DownloadTask {
+        val mediaType = when(fileType) {
+            "video" -> MediaType.VIDEO
+            "photo" -> MediaType.PHOTO
+            else -> MediaType.VIDEO
+        }
+        return DownloadTask(
+            id = uuid,
+            url = link!!,
+            fileName = fileName,
+            screenName = screenName ?: "",
+            type = mediaType
+        )
+    }
+
+    private fun showMessage(message: String) {
+        viewModelScope.launch {
+            emitEffect(SnackbarUIEffect.ShowSnackbar(message))
+        }
+    }
+
+    private suspend fun updateDownloadStatus(downloadId: String, status: DownloadStatus) {
+        launchOnIO {
+            downloadRepository.updateStatus(downloadId, status)
         }
     }
 }

@@ -37,3 +37,23 @@ fun GetTwitterBookmarkMediaParams(count: Int, cursor: String, userId: String, gs
         "fieldToggles" to "{\"withArticlePlainText\":false}"
     )
 }
+
+
+fun GetLikeParams(count: Int, cursor: String, userId: String, gson: Gson): Map<String, String> {
+    val variables = mapOf(
+        "userId" to userId,
+        "count" to count,
+        "includePromotedContent" to false,
+        "withClientEventToken" to false,
+        "withBirdwatchNotes" to false,
+        "withVoice" to true,
+        "withV2Timeline" to true,
+        "cursor" to cursor
+    )
+
+    return mapOf(
+        "variables" to gson.toJson(variables),
+        "features" to GetLikeFeatures,
+        "fieldToggles" to "{\"withArticlePlainText\":false}"
+    )
+}

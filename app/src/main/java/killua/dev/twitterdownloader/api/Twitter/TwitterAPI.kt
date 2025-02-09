@@ -9,15 +9,20 @@ import com.google.gson.GsonBuilder
 import killua.dev.base.utils.ShowNotification
 import killua.dev.twitterdownloader.api.NetworkHelper
 import killua.dev.twitterdownloader.Model.NetworkResult
+import killua.dev.twitterdownloader.api.Twitter.BuildRequest.GetLikeParams
 import killua.dev.twitterdownloader.api.Twitter.BuildRequest.GetTwitterBookmarkMediaParams
 import killua.dev.twitterdownloader.api.Twitter.BuildRequest.GetTwitterDownloadSpecificMediaParams
 import killua.dev.twitterdownloader.api.Twitter.BuildRequest.TwitterAPIURL
+import killua.dev.twitterdownloader.api.Twitter.Model.Bookmark
 import killua.dev.twitterdownloader.api.Twitter.Model.BookmarkPageData
+import killua.dev.twitterdownloader.api.Twitter.Model.BookmarksPageData
 import killua.dev.twitterdownloader.api.Twitter.Model.TweetData
 import killua.dev.twitterdownloader.api.Twitter.Model.TwitterUser
 import killua.dev.twitterdownloader.di.UserDataManager
 import killua.dev.twitterdownloader.utils.addTwitterBookmarkHeaders
-import killua.dev.twitterdownloader.utils.addTwitterSingleMediaHeaders
+import killua.dev.twitterdownloader.utils.addTwitterNormalHeaders
+import killua.dev.twitterdownloader.utils.extractBookmarkPageData
+import killua.dev.twitterdownloader.utils.extractLikePageData
 import killua.dev.twitterdownloader.utils.extractTwitterUser
 import killua.dev.twitterdownloader.utils.getAllHighestBitrateUrls
 import killua.dev.twitterdownloader.utils.getAllImageUrls
@@ -36,260 +41,176 @@ class TwitterDownloadAPI @Inject constructor(
     private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    fun getTwitterSingleMediaDetailAsync(tweetId: String): NetworkResult<TweetData> {
+    suspend fun getTwitterSingleMediaDetailAsync(tweetId: String): NetworkResult<TweetData> {
         if (tweetId.isBlank()) return NetworkResult.Error(message = "ID cannot be empty")
-        val params = GetTwitterDownloadSpecificMediaParams(tweetId, gson)
-        val url = buildUrl(TwitterAPIURL.TweetDetailUrl, params)
-        NetworkHelper.setCookies("x.com", mapOf(
-            "ct0" to userdata.userTwitterData.value.ct0,
-            "auth_token" to userdata.userTwitterData.value.auth
-        ))
-        val request = Request.Builder()
-            .get()
-            .url(url)
-            .addTwitterSingleMediaHeaders(userdata.userTwitterData.value.ct0)
-            .build()
-        println(request)
-        return try {
-            NetworkHelper.doRequest(request).use { response ->
-                when {
-                    response.isSuccessful -> {
-                        val content = response.body?.string().orEmpty()
-                        val tweet = gson.fromJson(content, RootDto::class.java)
-                        NetworkResult.Success(TweetData(
-                            user = tweet.extractTwitterUser(),
-                            videoUrls = tweet.getAllHighestBitrateUrls(),
-                            photoUrls = tweet.getAllImageUrls()
-                        ))
-                    }
-                    else -> NetworkResult.Error(
-                        code = response.code,
-                        message = "Bad request: ${response.message}"
-                    )
-                }
+
+        return fetchTwitterPage(
+            apiUrl = TwitterAPIURL.TweetDetailUrl,
+            params = GetTwitterDownloadSpecificMediaParams(tweetId, gson),
+            addHeaders = { it.addTwitterNormalHeaders(userdata.userTwitterData.value.ct0) },
+            extractData = { rootDto, _ ->
+                TweetData(
+                    user = rootDto.extractTwitterUser(),
+                    videoUrls = rootDto.getAllHighestBitrateUrls(),
+                    photoUrls = rootDto.getAllImageUrls()
+                )
             }
-        } catch (e: Exception) {
-            NetworkResult.Error(message = e.message ?: "Internal Error")
-        }
+        )
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     suspend fun getBookmarksAllTweets(
-        onNewMedia: suspend (TwitterUser?, List<String>, List<String>) -> Unit
-    ): NetworkResult<TweetData> {
-        var currentPage = ""
-        val allPhotoUrls = mutableListOf<String>()
-        val allVideoUrls = mutableListOf<String>()
-        var user: TwitterUser? = null
+        onNewBookmarks: suspend (List<Bookmark>) -> Unit
+    ): NetworkResult<TweetData> = fetchAllMediaTweets(
+        getPageData = { cursor -> getTwitterBookmarkAsync(cursor) },
+        onNewBookmarks = onNewBookmarks
+    )
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    suspend fun getLikesAllTweets(
+        onNewBookmarks: suspend (List<Bookmark>) -> Unit
+    ): NetworkResult<TweetData> = fetchAllMediaTweets(
+        getPageData = { cursor -> getLikePageAsync(cursor) },
+        onNewBookmarks = onNewBookmarks
+    )
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private suspend fun getTwitterBookmarkAsync(
+        cursor: String,
+        count: Int = 20
+    ): NetworkResult<BookmarksPageData> = fetchTwitterPage(
+        apiUrl = TwitterAPIURL.BookmarkUrl,
+        params = GetTwitterBookmarkMediaParams(count, cursor, userdata.userTwitterData.value.twid, gson),
+        addHeaders = { it.addTwitterBookmarkHeaders(userdata.userTwitterData.value.ct0) },
+        extractData = { rootDto, cur -> rootDto.extractBookmarkPageData(cur) }
+    )
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private suspend fun getLikePageAsync(
+        cursor: String = "",
+        count: Int = 50
+    ): NetworkResult<BookmarksPageData> = fetchTwitterPage(  // 注意这里改为 BookmarksPageData
+        apiUrl = TwitterAPIURL.LikeUrl,
+        params = GetLikeParams(count, cursor, userdata.userTwitterData.value.twid, gson),
+        addHeaders = { it.addTwitterNormalHeaders(userdata.userTwitterData.value.ct0) },
+        extractData = { rootDto, cur -> rootDto.extractLikePageData(cur) }
+    )
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private suspend fun <T> fetchTwitterPage(
+        apiUrl: String,
+        params: Map<String, String>,
+        addHeaders: (Request.Builder) -> Request.Builder,
+        extractData: (RootDto, String) -> T
+    ): NetworkResult<T> = withContext(Dispatchers.IO) {
         try {
-            while (true) {
-                when (val result = getTwitterBookmarkAsync(cursor = currentPage)) {
-                    is NetworkResult.Success -> {
-                        val tweetData = result.data
+            val request = Request.Builder()
+                .get()
+                .url(buildUrl(apiUrl, params))
+                .let(addHeaders)
+                .build()
+                .also {
+                    NetworkHelper.setCookies("x.com", mapOf(
+                        "ct0" to userdata.userTwitterData.value.ct0,
+                        "auth_token" to userdata.userTwitterData.value.auth
+                    ))
+                }
 
-                        val newPhotoUrls = tweetData.photoUrls.filter { it !in allPhotoUrls }
-                        val newVideoUrls = tweetData.videoUrls.filter { it !in allVideoUrls }
-
-                        allPhotoUrls.addAll(newPhotoUrls)
-                        allVideoUrls.addAll(newVideoUrls)
-
-                        notification.updateBookmarkProgress(
-                            photoCount = allPhotoUrls.size,
-                            videoCount = allVideoUrls.size
-                        )
-
-                        if (newPhotoUrls.isNotEmpty() || newVideoUrls.isNotEmpty()) {
-                            onNewMedia(tweetData.user ?: user, newPhotoUrls, newVideoUrls)
+            NetworkHelper.doRequest(request).use { response ->
+                when {
+                    response.isSuccessful -> {
+                        val content = response.body?.string().orEmpty()
+                        val rootDto = try {
+                            gson.fromJson(content, RootDto::class.java)
+                        } catch (e: Exception) {
+                            Log.e("TwitterAPI", "JSON Parse Error", e)
+                            return@withContext NetworkResult.Error(message = "JSON解析失败: ${e.message}")
                         }
-
-                        if (user == null) {
-                            user = tweetData.user
-                        }
-
-                        if (tweetData.nextPage.isEmpty() || currentPage == tweetData.nextPage) {
-                            break
-                        }
-                        currentPage = tweetData.nextPage
-                        delay(1000)
+                        NetworkResult.Success(extractData(rootDto, params["cursor"] ?: ""))
                     }
-                    is NetworkResult.Error -> {
-                        notification.completeBookmarkProgress(
-                            totalPhotoCount = allPhotoUrls.distinct().size,
-                            totalVideoCount = allVideoUrls.distinct().size
-                        )
-                        return NetworkResult.Success(
-                            TweetData(
-                                user = user,
-                                photoUrls = allPhotoUrls.distinct(),
-                                videoUrls = allVideoUrls.distinct()
-                            )
-                        )
-                    }
+                    else -> NetworkResult.Error(
+                        code = response.code,
+                        message = "请求失败: ${response.code} ${response.message}\n${response.body?.string()}"
+                    )
                 }
             }
-            notification.completeBookmarkProgress(
-                totalPhotoCount = allPhotoUrls.distinct().size,
-                totalVideoCount = allVideoUrls.distinct().size
-            )
-            return NetworkResult.Success(
-                TweetData(
-                    user = user,
-                    photoUrls = allPhotoUrls.distinct(),
-                    videoUrls = allVideoUrls.distinct()
-                )
-            )
         } catch (e: Exception) {
-            notification.completeBookmarkProgress(
-                totalPhotoCount = allPhotoUrls.distinct().size,
-                totalVideoCount = allVideoUrls.distinct().size
-            )
-            return NetworkResult.Success(
-                TweetData(
-                    user = user,
-                    photoUrls = allPhotoUrls.distinct(),
-                    videoUrls = allVideoUrls.distinct()
-                )
-            )
+            NetworkResult.Error(message = "网络请求失败: ${e.message}")
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    private suspend fun getTwitterBookmarkAsync(cursor: String, count: Int = 20): NetworkResult<BookmarkPageData> {
-        return withContext(Dispatchers.IO) {
-            val params = GetTwitterBookmarkMediaParams(count, cursor, userdata.userTwitterData.value.twid, gson)
-            val url = buildUrl(TwitterAPIURL.BookmarkUrl, params)
+    private suspend fun fetchAllMediaTweets(
+        getPageData: suspend (String) -> NetworkResult<BookmarksPageData>,
+        onNewBookmarks: suspend (List<Bookmark>) -> Unit
+    ): NetworkResult<TweetData> {
+        var currentPage = ""
+        val allBookmarks = mutableListOf<Bookmark>()
+        var lastUser: TwitterUser? = null
+        val processedPages = mutableSetOf<String>()
+        try {
+            while (true) {
+                when (val result = getPageData(currentPage)) {
+                    is NetworkResult.Success -> {
+                        val pageData = result.data
 
-            // 记录请求参数
-            Log.d("TwitterAPI", "Request URL: $url")
-            Log.d("TwitterAPI", "Params: ${gson.toJson(params)}")
-            Log.d("TwitterAPI", "User ID: ${userdata.userTwitterData.value.twid}")
-            Log.d("TwitterAPI", "CT0: ${userdata.userTwitterData.value.ct0}")
-
-            NetworkHelper.setCookies("x.com", mapOf(
-                "ct0" to userdata.userTwitterData.value.ct0,
-                "auth_token" to userdata.userTwitterData.value.auth
-            ))
-
-            val request = Request.Builder()
-                .get()
-                .url(url)
-                .addTwitterBookmarkHeaders(userdata.userTwitterData.value.ct0)
-                .build()
-
-            // 记录请求头
-            Log.d("TwitterAPI", "Request Headers:")
-            request.headers.forEach { header ->
-                Log.d("TwitterAPI", "${header.first}: ${header.second}")
-            }
-
-            try {
-                NetworkHelper.doRequest(request).use { response ->
-                    Log.d("TwitterAPI", "Response Code: ${response.code}")
-                    Log.d("TwitterAPI", "Response Message: ${response.message}")
-
-                    when {
-                        response.isSuccessful -> {
-                            val content = response.body?.string().orEmpty()
-
-                            // 记录响应内容
-                            Log.d("TwitterAPI", "Response Content Length: ${content.length}")
-                            Log.d("TwitterAPI", "Response Content Preview: ${content.take(500)}...")
-
-                            val rootDto = try {
-                                gson.fromJson(content, RootDto::class.java)
-                            } catch (e: Exception) {
-                                Log.e("TwitterAPI", "JSON Parse Error", e)
-                                return@withContext NetworkResult.Error(message = "JSON解析失败: ${e.message}")
-                            }
-
-                            // 记录解析后的数据结构
-                            Log.d("TwitterAPI", "Root DTO null? ${rootDto == null}")
-                            Log.d("TwitterAPI", "Data null? ${rootDto?.data == null}")
-                            Log.d("TwitterAPI", "Timeline null? ${rootDto?.data?.bookmark_timeline_v2?.timeline == null}")
-                            Log.d("TwitterAPI", "Instructions size: ${rootDto?.data?.bookmark_timeline_v2?.timeline?.instructions?.size ?: 0}")
-
-                            var nextPage = cursor
-                            val photoUrls = mutableListOf<String>()
-                            val videoUrls = mutableListOf<String>()
-
-                            rootDto.data?.bookmark_timeline_v2?.timeline?.instructions?.forEach { instruction ->
-                                Log.d("TwitterAPI", "Instruction type: ${instruction.type}")
-
-                                if (instruction.type == "TimelineAddEntries") {
-                                    Log.d("TwitterAPI", "Entries size: ${instruction.entries?.size ?: 0}")
-
-                                    instruction.entries?.forEach { entry ->
-                                        Log.d("TwitterAPI", "Entry ID: ${entry.entryId}")
-
-                                        when {
-                                            entry.entryId?.startsWith("tweet-") == true -> {
-                                                val tweetResult = entry.content?.itemContent?.tweet_results?.result
-                                                Log.d("TwitterAPI", "Tweet Result null? ${tweetResult == null}")
-
-                                                tweetResult?.legacy?.extended_entities?.media?.forEach { media ->
-                                                    Log.d("TwitterAPI", "Media type: ${media.type}")
-
-                                                    when (media.type) {
-                                                        "photo" -> {
-                                                            media.media_url_https?.let {
-                                                                photoUrls.add(it)
-                                                                Log.d("TwitterAPI", "Added photo URL: $it")
-                                                            }
-                                                        }
-                                                        "video" -> {
-                                                            val variants = media.video_info?.variants
-                                                            Log.d("TwitterAPI", "Video variants size: ${variants?.size ?: 0}")
-
-                                                            media.video_info?.variants
-                                                                ?.filter { it.bitrate != null }
-                                                                ?.maxByOrNull { it.bitrate!! }
-                                                                ?.url?.let {
-                                                                    videoUrls.add(it)
-                                                                    Log.d("TwitterAPI", "Added video URL: $it")
-                                                                }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            entry.entryId?.startsWith("cursor-bottom-") == true -> {
-                                                nextPage = entry.content?.value ?: cursor
-                                                Log.d("TwitterAPI", "Next page cursor: $nextPage")
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            Log.d("TwitterAPI", "Final Results:")
-                            Log.d("TwitterAPI", "Photos found: ${photoUrls.size}")
-                            Log.d("TwitterAPI", "Videos found: ${videoUrls.size}")
-                            Log.d("TwitterAPI", "Next page: $nextPage")
-
-                            NetworkResult.Success(
-                                BookmarkPageData(
-                                    user = rootDto.extractTwitterUser(),
-                                    photoUrls = photoUrls,
-                                    videoUrls = videoUrls,
-                                    nextPage = nextPage
-                                )
-                            )
+                        // 添加页面追踪
+                        if (currentPage in processedPages) {
+                            Log.d("TwitterAPI", "Page already processed: $currentPage")
+                            break
                         }
-                        else -> {
-                            // 记录错误响应
-                            val errorBody = response.body?.string()
-                            Log.e("TwitterAPI", "Error Response Body: $errorBody")
-                            NetworkResult.Error(
-                                code = response.code,
-                                message = "请求失败: ${response.code} ${response.message}\n$errorBody"
-                            )
+                        processedPages.add(currentPage)
+
+                        val newBookmarks = pageData.bookmark.filter { bookmark ->
+                            bookmark.tweetId !in allBookmarks.map { it.tweetId }
                         }
+
+                        if (newBookmarks.isNotEmpty()) {
+                            Log.d("TwitterAPI", "Found ${newBookmarks.size} new bookmarks")
+                            allBookmarks.addAll(newBookmarks)
+                            onNewBookmarks(newBookmarks)
+                        }
+
+                        if (lastUser == null) {
+                            lastUser = newBookmarks.firstOrNull()?.user
+                        }
+
+                        notification.updateBookmarkProgress(
+                            photoCount = allBookmarks.sumOf { it.photoUrls.size },
+                            videoCount = allBookmarks.sumOf { it.videoUrls.size }
+                        )
+
+                        // 改进翻页判断
+                        if (pageData.nextPage.isEmpty() ||
+                            currentPage == pageData.nextPage ||
+                            pageData.nextPage in processedPages) {
+                            Log.d("TwitterAPI", "Reached end of pagination")
+                            break
+                        }
+
+                        currentPage = pageData.nextPage
+                        Log.d("TwitterAPI", "Moving to next page: $currentPage")
+                        delay(5000)
                     }
+                    is NetworkResult.Error -> break
                 }
-            } catch (e: Exception) {
-                Log.e("TwitterAPI", "Network Request Failed", e)
-                NetworkResult.Error(message = "网络请求失败: ${e.message}")
             }
+        } catch (e: Exception) {
+            // 继续执行，返回已获取的数据
         }
+
+        notification.completeBookmarkProgress(
+            totalPhotoCount = allBookmarks.sumOf { it.photoUrls.size },
+            totalVideoCount = allBookmarks.sumOf { it.videoUrls.size }
+        )
+
+        // 返回总的媒体信息
+        return NetworkResult.Success(
+            TweetData(
+                user = lastUser,
+                photoUrls = allBookmarks.flatMap { it.photoUrls }.distinct(),
+                videoUrls = allBookmarks.flatMap { it.videoUrls }.distinct()
+            )
+        )
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)

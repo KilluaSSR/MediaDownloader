@@ -4,7 +4,7 @@ import killua.dev.base.utils.USER_AGENT
 import killua.dev.twitterdownloader.api.Twitter.BuildRequest.TwitterAPIURL
 import okhttp3.Request
 
-fun <T : Request.Builder> T.addTwitterSingleMediaHeaders(ct0: String): T {
+fun <T : Request.Builder> T.addTwitterNormalHeaders(ct0: String): T {
     this.addHeader("User-Agent", USER_AGENT)
         .addHeader("Accept", "application/json")
         .addHeader("Authorization", "Bearer ${TwitterAPIURL.Bearer}")

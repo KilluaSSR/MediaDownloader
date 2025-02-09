@@ -55,11 +55,23 @@ fun AdvancedPage(){
         if(showGetAllMyTwitterBookmarks){
             CancellableAlert(
                 title = "Get Bookmarks",
-                mainText = "Get all media in my twitter bookmarks",
+                mainText = "Get the content I bookmarked on Twitter.",
                 onDismiss = {showGetAllMyTwitterBookmarks = false}
             ) {
                 scope.launch{
                     viewModel.emitIntent(AdvancedPageUIIntent.GetMyTwitterBookmark)
+                }
+            }
+        }
+        var showGetMyTwitterLikes by remember { mutableStateOf(false) }
+        if(showGetMyTwitterLikes){
+            CancellableAlert(
+                title = "Get Likes",
+                mainText = "Get the content I liked on Twitter.\nNote that if you have a lot of liked content, it may trigger a rate limit risk and could even lead to account suspension.",
+                onDismiss = {showGetMyTwitterLikes = false}
+            ) {
+                scope.launch{
+                    viewModel.emitIntent(AdvancedPageUIIntent.GetMyTwitterLiked)
                 }
             }
         }
@@ -86,8 +98,9 @@ fun AdvancedPage(){
                         ) {
                             when(index){
                                 0 ->{showGetAllMyTwitterBookmarks = true}
-                                1 ->{navController.navigateSingle(item.route)}
+                                1 ->{showGetMyTwitterLikes = true}
                                 2 ->{navController.navigateSingle(item.route)}
+                                3 ->{navController.navigateSingle(item.route)}
                             }
                         }
                     }

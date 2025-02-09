@@ -48,7 +48,6 @@ data class MainPageUIState(
     val loginErrorPlatform: AvailablePlatforms = AvailablePlatforms.Twitter
 ) : UIState
 
-
 @HiltViewModel
 class MainPageViewmodel @Inject constructor(
     private val twitterDownloadAPI: TwitterDownloadAPI,
@@ -70,7 +69,6 @@ class MainPageViewmodel @Inject constructor(
         }
 
     }
-
     private fun observeDownloadCompleted() {
         viewModelScope.launch {
             downloadEventManager.downloadCompletedFlow.collect{
@@ -78,6 +76,7 @@ class MainPageViewmodel @Inject constructor(
             }
         }
     }
+
     suspend fun presentFavouriteCardDetails() {
         val mostDownloaded = downloadRepository.getMostDownloadedUser()
         if (mostDownloaded != null) {
@@ -119,7 +118,6 @@ class MainPageViewmodel @Inject constructor(
                             }
                         }
                     }
-
                 }
             }
             is MainPageUIIntent.NavigateToFavouriteUser -> {
@@ -127,7 +125,6 @@ class MainPageViewmodel @Inject constructor(
                     intent.context.NavigateTwitterProfile(intent.userID,intent.screenName)
                 }
             }
-
             MainPageUIIntent.DismissLoginDialog -> {
                 emitState(uiState.value.copy(
                     showNotLoggedInDialog = false
@@ -143,91 +140,129 @@ class MainPageViewmodel @Inject constructor(
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    private fun handleNewDownload(url: String, platforms: AvailablePlatforms) {
+    private suspend fun handleNewDownload(url: String, platforms: AvailablePlatforms) {
         downloadPreChecks.canStartDownload().onSuccess {
-            when(platforms){
-                AvailablePlatforms.Twitter -> {
-                    val tweetId = url.split("?")[0].split("/").last()
-                    try {
-                        when (val result = twitterDownloadAPI.getTwitterSingleMediaDetailAsync(tweetId)) {
-                            is NetworkResult.Success -> {
-                                val user = result.data.user
-                                result.data.videoUrls.forEach {
-                                    createAndStartDownloadTwitterSingleMedia(it, user, tweetId, MediaType.VIDEO)
-                                }
-                                if(result.data.photoUrls.isNotEmpty()){
-                                    downloadPreChecks.checkPhotosDownload().onSuccess {
-                                        result.data.photoUrls.forEach {
-                                            createAndStartDownloadTwitterSingleMedia(it, user, tweetId, MediaType.PHOTO)
-                                        }
-                                    }.onFailure { error ->
-                                        viewModelScope.launch{
-                                            emitEffect(ShowSnackbar(error.message.toString(), "OKAY", true))
-                                        }
-                                    }
-                                }
-                            }
-                            is NetworkResult.Error -> {
-                                viewModelScope.launch{
-                                    emitEffect(ShowSnackbar("Twitter request error", withDismissAction = true, actionLabel = "OKAY"))
-                                }
-                            }
-                        }
-                    } catch (e: Exception) {
-                        viewModelScope.launch{
-                            emitEffect(ShowSnackbar(e.message ?: "Internal Error"))
-                        }
-                    }
-                }
-                AvailablePlatforms.Lofter -> {
-                    try {
-                        when (val result = lofterService.getBlogImages(url)) {
-                            is NetworkResult.Success -> {
-                                val data = result.data
-                                data.images.forEach {
-                                    createAndStartDownloadLofterSingleMedia(url, it.url, data.authorId, data.authorDomain, data.authorName, MediaType.PHOTO)
-                                }
-                            }
-                            is NetworkResult.Error -> {
-                                viewModelScope.launch{
-                                    emitEffect(ShowSnackbar(result.message.toString(), withDismissAction = true, actionLabel = "OKAY"))
-                                }
-                            }
-                        }
-                    } catch (e: Exception) {
-                        viewModelScope.launch{
-                            emitEffect(ShowSnackbar(e.message ?: "Internal Error"))
-                        }
-                    }
-                }
+            when(platforms) {
+                AvailablePlatforms.Twitter -> handleTwitterDownload(url)
+                AvailablePlatforms.Lofter -> handleLofterDownload(url)
             }
         }.onFailure { error ->
-            viewModelScope.launch{
+            viewModelScope.launch {
                 emitEffect(ShowSnackbar(error.message.toString(), withDismissAction = true, actionLabel = "OKAY"))
             }
         }
     }
 
-    private fun createAndStartDownloadTwitterSingleMedia(
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private suspend fun handleTwitterDownload(url: String) {
+        val tweetId = url.split("?")[0].split("/").last()
+        try {
+            when (val result = twitterDownloadAPI.getTwitterSingleMediaDetailAsync(tweetId)) {
+                is NetworkResult.Success -> {
+                    val user = result.data.user
+                    // 处理视频
+                    result.data.videoUrls.forEach { videoUrl ->
+                        createAndStartDownload(
+                            url = videoUrl,
+                            userId = user?.id,
+                            screenName = user?.screenName ?: "",
+                            platform = AvailablePlatforms.Twitter,
+                            name = user?.name ?: "",
+                            tweetID = tweetId,
+                            mainLink = videoUrl,
+                            mediaType = MediaType.VIDEO
+                        )
+                    }
+                    // 处理图片
+                    if(result.data.photoUrls.isNotEmpty()) {
+                        downloadPreChecks.checkPhotosDownload().onSuccess {
+                            result.data.photoUrls.forEach { photoUrl ->
+                                createAndStartDownload(
+                                    url = photoUrl,
+                                    userId = user?.id,
+                                    screenName = user?.screenName ?: "",
+                                    platform = AvailablePlatforms.Twitter,
+                                    name = user?.name ?: "",
+                                    tweetID = tweetId,
+                                    mainLink = photoUrl,
+                                    mediaType = MediaType.PHOTO
+                                )
+                            }
+                        }.onFailure { error ->
+                            viewModelScope.launch {
+                                emitEffect(ShowSnackbar(error.message.toString(), "OKAY", true))
+                            }
+                        }
+                    }
+                }
+                is NetworkResult.Error -> {
+                    viewModelScope.launch {
+                        emitEffect(ShowSnackbar("Twitter request error", withDismissAction = true, actionLabel = "OKAY"))
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            viewModelScope.launch {
+                emitEffect(ShowSnackbar(e.message ?: "Internal Error"))
+            }
+        }
+    }
+
+    private fun handleLofterDownload(url: String) {
+        try {
+            when (val result = lofterService.getBlogImages(url)) {
+                is NetworkResult.Success -> {
+                    val data = result.data
+                    data.images.forEach { image ->
+                        createAndStartDownload(
+                            url = image.url,
+                            userId = data.authorId,
+                            screenName = data.authorDomain,
+                            platform = AvailablePlatforms.Lofter,
+                            name = data.authorName,
+                            tweetID = image.url,
+                            mainLink = url,
+                            mediaType = MediaType.PHOTO
+                        )
+                    }
+                }
+                is NetworkResult.Error -> {
+                    viewModelScope.launch {
+                        emitEffect(ShowSnackbar(result.message.toString(), withDismissAction = true, actionLabel = "OKAY"))
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            viewModelScope.launch {
+                emitEffect(ShowSnackbar(e.message ?: "Internal Error"))
+            }
+        }
+    }
+
+    private fun createAndStartDownload(
         url: String,
-        user: TwitterUser?,
+        uuid: String = UUID.randomUUID().toString(),
+        userId: String?,
+        screenName: String,
+        platform: AvailablePlatforms,
+        name: String,
         tweetID: String,
+        mainLink: String,
         mediaType: MediaType
     ) {
-        val uuid = UUID.randomUUID().toString()
         val fileNameStrategy = MediaFileNameStrategy(mediaType)
-        val fileName = fileNameStrategy.generate(user?.screenName)
+        val fileName = fileNameStrategy.generate(screenName)
 
         try {
             val download = Download(
                 uuid = uuid,
-                userId = user?.id,
-                screenName = user?.screenName,
-                type = AvailablePlatforms.Twitter,
-                name = user?.name,
+                userId = userId,
+                screenName = screenName,
+                type = platform,
+                name = name,
                 tweetID = tweetID,
                 fileUri = null,
-                link = url,
+                link = mainLink,
                 fileName = fileName,
                 fileType = mediaType.name.lowercase(),
                 fileSize = 0L,
@@ -242,52 +277,7 @@ class MainPageViewmodel @Inject constructor(
                         id = uuid,
                         url = url,
                         fileName = fileName,
-                        screenName = user?.screenName ?: "",
-                        type = mediaType
-                    )
-                )
-            }
-        } catch (e: Exception) {
-            handleError("Failed", e)
-        }
-    }
-
-    private fun createAndStartDownloadLofterSingleMedia(
-        mainURL: String,
-        imageURL: String,
-        authorID: String,
-        authorDomain: String,
-        authorName: String,
-        mediaType: MediaType
-    ) {
-        val uuid = UUID.randomUUID().toString()
-        val fileNameStrategy = MediaFileNameStrategy(mediaType)
-        val fileName = fileNameStrategy.generate(authorDomain)
-
-        try {
-            val download = Download(
-                uuid = uuid,
-                userId = authorID,
-                screenName = authorDomain,
-                type = AvailablePlatforms.Lofter,
-                name = authorName,
-                tweetID = imageURL,
-                fileUri = null,
-                link = mainURL,
-                fileName = fileName,
-                fileType = mediaType.name.lowercase(),
-                fileSize = 0L,
-                status = DownloadStatus.PENDING,
-                mimeType = mediaType.mimeType
-            )
-            viewModelScope.launch {
-                downloadRepository.insert(download)
-                downloadQueueManager.enqueue(
-                    DownloadTask(
-                        id = uuid,
-                        url = imageURL,
-                        fileName = fileName,
-                        screenName = authorDomain,
+                        screenName = screenName,
                         type = mediaType
                     )
                 )

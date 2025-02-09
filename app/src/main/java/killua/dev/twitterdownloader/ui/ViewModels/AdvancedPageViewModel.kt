@@ -36,12 +36,13 @@ import javax.inject.Inject
 data class AdvancedPageUIState(
     val isLofterLoggedIn: Boolean = false,
     val isEligibleToUseLofterGetByTags: Boolean = false,
-    val isGettingMyTwitterBookmark: Boolean = false
+    val isGettingMyTwitterBookmark: Boolean = false,
 ): UIState
 
 sealed class AdvancedPageUIIntent : UIIntent {
     data class OnEntry(val context: Context): AdvancedPageUIIntent()
     data object GetMyTwitterBookmark: AdvancedPageUIIntent()
+    data object GetMyTwitterLiked : AdvancedPageUIIntent()
 }
 @HiltViewModel
 class AdvancedPageViewModel @Inject constructor(
@@ -73,12 +74,48 @@ class AdvancedPageViewModel @Inject constructor(
 
             AdvancedPageUIIntent.GetMyTwitterBookmark -> {
                 viewModelScope.launch{
-                    twitterDownloadAPI.getBookmarksAllTweets { user, newPhotoUrls, newVideoUrls ->
-                        newVideoUrls.forEach { url ->
-                            createAndStartDownloadTwitterSingleMedia(url, user, MediaType.VIDEO)
+                    twitterDownloadAPI.getBookmarksAllTweets { bookmarks ->
+                        bookmarks.forEach { bookmark ->
+                            bookmark.videoUrls.forEach { url ->
+                                createAndStartDownloadTwitterSingleMedia(
+                                    url = url,
+                                    user = bookmark.user,
+                                    tweetID = bookmark.tweetId,
+                                    mediaType = MediaType.VIDEO
+                                )
+                            }
+                            bookmark.photoUrls.forEach { url ->
+                                createAndStartDownloadTwitterSingleMedia(
+                                    url = url,
+                                    user = bookmark.user,
+                                    tweetID = bookmark.tweetId,
+                                    mediaType = MediaType.PHOTO
+                                )
+                            }
                         }
-                        newPhotoUrls.forEach { url ->
-                            createAndStartDownloadTwitterSingleMedia(url, user, MediaType.PHOTO)
+                    }
+                }
+            }
+            AdvancedPageUIIntent.GetMyTwitterLiked -> {
+                viewModelScope.launch {
+                    twitterDownloadAPI.getLikesAllTweets { likes ->
+                        likes.forEach { like ->
+                            like.videoUrls.forEach { url ->
+                                createAndStartDownloadTwitterSingleMedia(
+                                    url = url,
+                                    user = like.user,
+                                    tweetID = like.tweetId,
+                                    mediaType = MediaType.VIDEO
+                                )
+                            }
+                            like.photoUrls.forEach { url ->
+                                createAndStartDownloadTwitterSingleMedia(
+                                    url = url,
+                                    user = like.user,
+                                    tweetID = like.tweetId,
+                                    mediaType = MediaType.PHOTO
+                                )
+                            }
                         }
                     }
                 }
@@ -89,6 +126,7 @@ class AdvancedPageViewModel @Inject constructor(
     private fun createAndStartDownloadTwitterSingleMedia(
         url: String,
         user: TwitterUser?,
+        tweetID: String,
         mediaType: MediaType
     ) {
         val uuid = UUID.randomUUID().toString()
@@ -102,7 +140,7 @@ class AdvancedPageViewModel @Inject constructor(
                 screenName = user?.screenName,
                 type = AvailablePlatforms.Twitter,
                 name = user?.name,
-                tweetID = null,
+                tweetID = tweetID,
                 fileUri = null,
                 link = url,
                 fileName = fileName,
