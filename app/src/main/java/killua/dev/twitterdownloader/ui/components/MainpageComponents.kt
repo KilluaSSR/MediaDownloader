@@ -1,6 +1,7 @@
 package killua.dev.twitterdownloader.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -41,6 +42,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import killua.dev.base.Model.ReportOption
@@ -54,6 +56,7 @@ import killua.dev.base.ui.components.TitleLargeText
 import killua.dev.base.ui.components.TopBar
 import killua.dev.base.utils.navigateSingle
 import killua.dev.base.ui.MainPageMenuButtons
+import killua.dev.base.ui.animations.AnimatedTextContainer
 import killua.dev.base.ui.components.CommonInputDialog
 import killua.dev.base.ui.components.InputDialogConfig
 import killua.dev.base.ui.tokens.SizeTokens
@@ -93,7 +96,7 @@ fun MainTopBar(navController: NavHostController, showMoreOnClick : ()-> Unit ) {
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun FavouriteCard(
     favouriteUser: String,
@@ -108,36 +111,32 @@ fun FavouriteCard(
         colorContainer = MaterialTheme.colorScheme.primaryContainer,
         onColorContainer = MaterialTheme.colorScheme.onPrimaryContainer,
         content = {
+            val titleText = if (downloaded) {
+                "$favouriteUser @$favouriteUserScreenName"
+            } else {
+                "Nothing here"
+            }
+
+            val subtitleText = if (downloaded) {
+                "You've downloaded his/her media $downloadCount times"
+            } else {
+                ""
+            }
+
             Column {
-                AnimatedVisibility(
-                    visible = downloaded,
-                    enter = fadeIn(),
-                    exit = fadeOut()
-                ) {
+                AnimatedTextContainer(targetState = titleText) { text ->
                     TitleLargeText(
-                        text = "$favouriteUser @$favouriteUserScreenName",
+                        text = text,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
-                AnimatedVisibility(
-                    visible = downloaded,
-                    enter = fadeIn(),
-                    exit = fadeOut()
-                ) {
-                    BodyMediumText(
-                        text = "You've downloaded his/her media $downloadCount times",
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                }
-                AnimatedVisibility(
-                    visible = !downloaded,
-                    enter = fadeIn(),
-                    exit = fadeOut()
-                ) {
-                    TitleLargeText(
-                        text = "Nothing here",
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
+                AnimatedTextContainer(targetState = subtitleText) { text ->
+                    if (text.isNotEmpty()) {
+                        BodyMediumText(
+                            text = text,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
                 }
             }
         },

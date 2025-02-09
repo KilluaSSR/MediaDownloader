@@ -29,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.base.datastore.NOTIFICATION_ENABLED
 import killua.dev.base.datastore.PHOTOS_KEY
 import killua.dev.base.datastore.WIFI
+import killua.dev.base.datastore.readDelay
 import killua.dev.base.datastore.readDownloadPhotos
 import killua.dev.base.datastore.readMaxConcurrentDownloads
 import killua.dev.base.datastore.readMaxRetries
@@ -36,6 +37,9 @@ import killua.dev.base.datastore.readOnlyWifi
 import killua.dev.base.datastore.writeApplicationUserAuth
 import killua.dev.base.datastore.writeApplicationUserCt0
 import killua.dev.base.datastore.writeApplicationUserID
+import killua.dev.base.datastore.writeDelay
+import killua.dev.base.datastore.writeLofterLoginAuth
+import killua.dev.base.datastore.writeLofterLoginKey
 import killua.dev.base.datastore.writeMaxConcurrentDownloads
 import killua.dev.base.datastore.writeMaxRetries
 import killua.dev.base.ui.LocalNavController
@@ -81,6 +85,8 @@ fun SettingsPage(){
                     context.writeApplicationUserCt0("")
                     context.writeApplicationUserAuth("")
                     context.writeApplicationUserID("")
+                    context.writeLofterLoginAuth("")
+                    context.writeLofterLoginKey("")
                     context.startActivity(Intent(context, ActivityUtil.SetupActivity))
                     context.getActivity().finish()
                 }
@@ -97,6 +103,7 @@ fun SettingsPage(){
             val retry by context.readMaxRetries().collectAsStateWithLifecycle(initialValue = 3)
             val wifi by context.readOnlyWifi().collectAsStateWithLifecycle(initialValue = true)
             val photos by context.readDownloadPhotos().collectAsStateWithLifecycle(initialValue = true)
+            val delay by context.readDelay().collectAsStateWithLifecycle(initialValue = 2)
             Title(title = "Download") {
                 Switchable(
                     key = NOTIFICATION_ENABLED,
@@ -111,7 +118,7 @@ fun SettingsPage(){
                 Switchable(
                     key = PHOTOS_KEY,
                     title = "Download images",
-                    checkedText = if(photos){"Download images too"} else{"Download videos only"}
+                    checkedText = if(photos){"Download images too. This setting is only effective when you download using the link."} else{"Download videos only. This setting is only effective when you download using the link."}
                 )
                 Slideable(
                     title = "Max concurrent downloads",
@@ -134,6 +141,18 @@ fun SettingsPage(){
                 ) {
                     scope.launch{
                         context.writeMaxRetries(it.roundToInt())
+                    }
+                }
+
+                Slideable(
+                    title = "Delay",
+                    value = delay.toFloat(),
+                    valueRange = 2F..10F,
+                    steps = 7,
+                    desc = remember(delay) {"Current: $delay seconds. This means that when retrieving images in bulk, there should be a $delay-second interval between each page request."}
+                ) {
+                    scope.launch{
+                        context.writeDelay(it.roundToInt())
                     }
                 }
             }

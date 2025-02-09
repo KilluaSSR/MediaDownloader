@@ -57,10 +57,12 @@ class TwitterDownloadAPI @Inject constructor(
     }
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     suspend fun getBookmarksAllTweets(
-        onNewItems: suspend (List<Bookmark>) -> Unit
+        onNewItems: suspend (List<Bookmark>) -> Unit,
+        onError: (String) -> Unit
     ): NetworkResult<TweetData> = fetchAllMediaTweets(
         getPageData = { cursor -> getTwitterBookmarkAsync(cursor) },
-        onNewItems = onNewItems
+        onNewItems = onNewItems,
+        onError = onError
     )
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -74,14 +76,16 @@ class TwitterDownloadAPI @Inject constructor(
         extractData = { rootDto, cur -> rootDto.extractMediaPageData(cur, true) }
     )
 
-
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     suspend fun getLikesAllTweets(
-        onNewItems: suspend (List<Bookmark>) -> Unit
+        onNewItems: suspend (List<Bookmark>) -> Unit,
+        onError: (String) -> Unit
     ): NetworkResult<TweetData> = fetchAllMediaTweets(
         getPageData = { cursor -> getTwitterLikesAsync(cursor) },
-        onNewItems = onNewItems
+        onNewItems = onNewItems,
+        onError = onError
     )
+
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private suspend fun getTwitterLikesAsync(
         cursor: String,
@@ -143,9 +147,11 @@ class TwitterDownloadAPI @Inject constructor(
             NetworkResult.Error(message = "网络请求失败: ${e.message}")
         }
     }
+
     private suspend fun fetchAllMediaTweets(
         getPageData: suspend (String) -> NetworkResult<MediaPageData>,
-        onNewItems: suspend (List<Bookmark>) -> Unit
+        onNewItems: suspend (List<Bookmark>) -> Unit,
+        onError: (String) -> Unit
     ): NetworkResult<TweetData> {
         var currentPage = ""
         val allItems = mutableListOf<Bookmark>()
@@ -178,7 +184,7 @@ class TwitterDownloadAPI @Inject constructor(
                             lastUser = newItems.firstOrNull()?.user
                         }
 
-                        notification.updateBookmarkProgress(
+                        notification.updateGettingProgress(
                             photoCount = allItems.sumOf { it.photoUrls.size },
                             videoCount = allItems.sumOf { it.videoUrls.size }
                         )
@@ -194,14 +200,17 @@ class TwitterDownloadAPI @Inject constructor(
                         Log.d("TwitterAPI", "Moving to next page: $currentPage")
                         delay(1000)
                     }
-                    is NetworkResult.Error -> break
+                    is NetworkResult.Error -> {
+                        onError(result.message)
+                        break
+                    }
                 }
             }
         } catch (e: Exception) {
-            Log.e("TwitterAPI", "Error fetching media: ${e.message}")
+            onError("${e.message}")
         }
 
-        notification.completeBookmarkProgress(
+        notification.completeGettingProgress(
             totalPhotoCount = allItems.sumOf { it.photoUrls.size },
             totalVideoCount = allItems.sumOf { it.videoUrls.size }
         )

@@ -31,6 +31,8 @@ val NOTIFICATION_ENABLED =
 val DOWNLOAD_PATH = stringPreferencesKey("download_path")
 val MAX_CONCURRENT_DOWNLOADS =
     intPreferencesKey("max_concurrent_downloads")
+val DELAY =
+    intPreferencesKey("delay")
 val MAX_RETRIES = intPreferencesKey("max_retries")
 val WIFI = booleanPreferencesKey("wifi")
 val PHOTOS_KEY = booleanPreferencesKey("photos")
@@ -43,6 +45,7 @@ fun Context.readLofterLoginKey() = readStoreString(key = LOFTER_LOGIN_KEY, defVa
 fun Context.readLofterLoginAuth() = readStoreString(key = LOFTER_LOGIN_AUTH, defValue = "")
 fun Context.readLofterStartTime() = readStoreLong(key = LOFTER_START_TIME, defValue = 0L)
 fun Context.readLofterEndTime() = readStoreLong(key = LOFTER_END_TIME, defValue = 0L)
+fun Context.readDelay() = readStoreInt(DELAY, 2)
 fun Context.readLanguage() = readStoreString(key = LANGUAGE_KEY, defValue = "en")
 fun Context.readNotificationEnabled() = readStoreBoolean(key = NOTIFICATION_ENABLED, defValue = true)
 fun Context.readDownloadPath() = readStoreString(key = DOWNLOAD_PATH, defValue = "")
@@ -70,3 +73,4 @@ suspend fun Context.writeLofterCookieExpiration(expiration: String) = saveStoreS
 suspend fun Context.writeLofterStartTime(time: Long) = saveStoreLong(LOFTER_START_TIME, time)
 suspend fun Context.writeLofterEndTime(time: Long) = saveStoreLong(LOFTER_END_TIME, time)
 suspend fun Context.writeApplicationUserID(id: String) = saveStoreString(APPLICATION_USER_ID, id)
+suspend fun Context.writeDelay(delay: Int) = saveStoreInt(DELAY, delay)

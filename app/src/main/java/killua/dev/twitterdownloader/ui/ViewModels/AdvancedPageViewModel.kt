@@ -73,51 +73,65 @@ class AdvancedPageViewModel @Inject constructor(
             }
 
             AdvancedPageUIIntent.GetMyTwitterBookmark -> {
-                viewModelScope.launch{
-                    twitterDownloadAPI.getBookmarksAllTweets { bookmarks ->
-                        bookmarks.forEach { bookmark ->
-                            bookmark.videoUrls.forEach { url ->
-                                createAndStartDownloadTwitterSingleMedia(
-                                    url = url,
-                                    user = bookmark.user,
-                                    tweetID = bookmark.tweetId,
-                                    mediaType = MediaType.VIDEO
-                                )
+                viewModelScope.launch {
+                    twitterDownloadAPI.getBookmarksAllTweets(
+                        onNewItems = { bookmarks ->
+                            bookmarks.forEach { bookmark ->
+                                bookmark.videoUrls.forEach { url ->
+                                    createAndStartDownloadTwitterSingleMedia(
+                                        url = url,
+                                        user = bookmark.user,
+                                        tweetID = bookmark.tweetId,
+                                        mediaType = MediaType.VIDEO
+                                    )
+                                }
+                                bookmark.photoUrls.forEach { url ->
+                                    createAndStartDownloadTwitterSingleMedia(
+                                        url = url,
+                                        user = bookmark.user,
+                                        tweetID = bookmark.tweetId,
+                                        mediaType = MediaType.PHOTO
+                                    )
+                                }
                             }
-                            bookmark.photoUrls.forEach { url ->
-                                createAndStartDownloadTwitterSingleMedia(
-                                    url = url,
-                                    user = bookmark.user,
-                                    tweetID = bookmark.tweetId,
-                                    mediaType = MediaType.PHOTO
-                                )
+                        },
+                        onError = { errorMessage ->
+                            viewModelScope.launch{
+                                handleError(errorMessage)
                             }
                         }
-                    }
+                    )
                 }
             }
             AdvancedPageUIIntent.GetMyTwitterLiked -> {
                 viewModelScope.launch {
-                    twitterDownloadAPI.getLikesAllTweets { bookmarks ->
-                        bookmarks.forEach { bookmark ->
-                            bookmark.videoUrls.forEach { url ->
-                                createAndStartDownloadTwitterSingleMedia(
-                                    url = url,
-                                    user = bookmark.user,
-                                    tweetID = bookmark.tweetId,
-                                    mediaType = MediaType.VIDEO
-                                )
+                    twitterDownloadAPI.getLikesAllTweets(
+                        onNewItems = { bookmarks ->
+                            bookmarks.forEach { bookmark ->
+                                bookmark.videoUrls.forEach { url ->
+                                    createAndStartDownloadTwitterSingleMedia(
+                                        url = url,
+                                        user = bookmark.user,
+                                        tweetID = bookmark.tweetId,
+                                        mediaType = MediaType.VIDEO
+                                    )
+                                }
+                                bookmark.photoUrls.forEach { url ->
+                                    createAndStartDownloadTwitterSingleMedia(
+                                        url = url,
+                                        user = bookmark.user,
+                                        tweetID = bookmark.tweetId,
+                                        mediaType = MediaType.PHOTO
+                                    )
+                                }
                             }
-                            bookmark.photoUrls.forEach { url ->
-                                createAndStartDownloadTwitterSingleMedia(
-                                    url = url,
-                                    user = bookmark.user,
-                                    tweetID = bookmark.tweetId,
-                                    mediaType = MediaType.PHOTO
-                                )
+                        },
+                        onError = { errorMessage ->
+                            viewModelScope.launch{
+                                handleError(errorMessage)
                             }
                         }
-                    }
+                    )
                 }
             }
         }
@@ -163,13 +177,13 @@ class AdvancedPageViewModel @Inject constructor(
                 )
             }
         } catch (e: Exception) {
-            handleError("Failed", e)
+            handleError(e.message.toString())
         }
     }
 
-    private fun handleError(message: String, error: Exception) {
+    private fun handleError(error: String) {
         viewModelScope.launch{
-            emitEffect(ShowSnackbar("$message: ${error.message ?: "Internal Error"}", actionLabel =  "OKAY" , withDismissAction = true))
+            emitEffect(ShowSnackbar(error, actionLabel =  "OKAY" , withDismissAction = true))
         }
     }
 }

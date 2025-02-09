@@ -126,9 +126,9 @@ class ShowNotification @Inject constructor(
         notificationManager.notify(downloadId.hashCode(), notification)
     }
 
-    fun updateBookmarkProgress(photoCount: Int, videoCount: Int) {
+    fun updateGettingProgress(photoCount: Int, videoCount: Int) {
         val notification = NotificationCompat.Builder(context, channelId)
-            .setContentTitle("Getting your bookmarks")
+            .setContentTitle("Getting tweets")
             .setContentText("$photoCount photos, $videoCount videos detected")
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(true)
@@ -139,7 +139,7 @@ class ShowNotification @Inject constructor(
         notificationManager.notify(BOOKMARK_NOTIFICATION_ID, notification)
     }
 
-    fun completeBookmarkProgress(totalPhotoCount: Int, totalVideoCount: Int) {
+    fun completeGettingProgress(totalPhotoCount: Int, totalVideoCount: Int) {
         val notification = NotificationCompat.Builder(context, channelId)
             .setContentTitle("Completed!")
             .setContentText("Total: $totalPhotoCount photos, $totalVideoCount videos")
