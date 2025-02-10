@@ -43,6 +43,7 @@ import killua.dev.base.datastore.writeLofterLoginKey
 import killua.dev.base.datastore.writeMaxConcurrentDownloads
 import killua.dev.base.datastore.writeMaxRetries
 import killua.dev.base.ui.LocalNavController
+import killua.dev.base.ui.PrepareRoutes
 import killua.dev.base.ui.components.CancellableAlert
 import killua.dev.base.ui.components.SettingsScaffold
 import killua.dev.base.ui.tokens.SizeTokens
@@ -52,6 +53,7 @@ import killua.dev.base.ui.components.Switchable
 import killua.dev.base.ui.components.Title
 import killua.dev.base.utils.ActivityUtil
 import killua.dev.base.utils.getActivity
+import killua.dev.base.utils.navigateSingle
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -59,7 +61,7 @@ import kotlin.math.roundToInt
 @Composable
 fun SettingsPage(){
     val context = LocalContext.current
-    LocalNavController.current!!
+    val navController =  LocalNavController.current!!
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val scope = rememberCoroutineScope()
     SettingsScaffold(
@@ -153,6 +155,18 @@ fun SettingsPage(){
                 ) {
                     scope.launch{
                         context.writeDelay(it.roundToInt())
+                    }
+                }
+            }
+
+            Title(title = "Platform configurations", color = MaterialTheme.colorScheme.error) {
+
+                Clickable(
+                    title = "Lofter",
+                    value = "Date range, Tags and Log out."
+                ){
+                    scope.launch{
+                        navController.navigateSingle(PrepareRoutes.LofterPreparePage.route)
                     }
                 }
             }

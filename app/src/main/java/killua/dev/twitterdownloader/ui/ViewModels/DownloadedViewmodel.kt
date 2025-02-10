@@ -193,7 +193,7 @@ class DownloadedViewModel @Inject constructor(
         val statusFiltered = when (destination) {
             DownloadPageDestinations.All -> unfiltered
             DownloadPageDestinations.Downloading -> unfiltered.filter {
-                it.downloadState.toDownloadStatus() == DownloadStatus.DOWNLOADING
+                it.downloadState.toDownloadStatus() == DownloadStatus.DOWNLOADING || it.downloadState.toDownloadStatus() == DownloadStatus.PENDING
             }
             DownloadPageDestinations.Completed -> unfiltered.filter {
                 it.downloadState.toDownloadStatus() == DownloadStatus.COMPLETED

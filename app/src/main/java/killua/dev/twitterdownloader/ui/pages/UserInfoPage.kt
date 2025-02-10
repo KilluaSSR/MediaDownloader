@@ -21,6 +21,7 @@ import killua.dev.base.ui.getRandomColors
 import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.twitterdownloader.ui.ViewModels.UserInfoPageViewModel
 import killua.dev.twitterdownloader.ui.components.FavouriteCard
+import killua.dev.twitterdownloader.ui.components.UserInfoPageTopAppBar
 
 @Composable
 @ExperimentalFoundationApi
@@ -34,7 +35,7 @@ fun UserInfoPage() {
     rememberCoroutineScope()
     MainScaffold(
         topBar = {
-            MainTopBar(navController, {})
+            UserInfoPageTopAppBar(navController)
         },
         snackbarHostState = viewmodel.snackbarHostState
     ) {

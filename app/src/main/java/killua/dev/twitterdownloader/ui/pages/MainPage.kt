@@ -114,7 +114,7 @@ fun MainPage(
                 viewmodel.launchOnIO{
                     if(url.isBlank()){
                         viewmodel.emitEffect(SnackbarUIEffect.ShowSnackbar("You need to paste a url here."))
-                    }else if(!url.contains("x.com/") && !url.contains("twitter.com/") && !url.contains("lofter")) {
+                    }else if(!url.contains("x.com/") && !url.contains("twitter.com/") && !url.contains("lofter.com/")) {
                         viewmodel.emitEffect(SnackbarUIEffect.ShowSnackbar("Unsupported url"))
                     }else {
                         viewmodel.emitIntent(MainPageUIIntent.ExecuteDownload(url))

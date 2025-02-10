@@ -49,7 +49,7 @@ sealed class AdvancedPageUIIntent : UIIntent {
     data object GetMyTwitterBookmark: AdvancedPageUIIntent()
     data object GetMyTwitterLiked : AdvancedPageUIIntent()
     data class GetSomeonesTwitterAccountInfo(val screenName: String): AdvancedPageUIIntent()
-    data object OnConfirmTwitterDownloadMedia: AdvancedPageUIIntent()
+    data class OnConfirmTwitterDownloadMedia(val screenName: String, val id: String): AdvancedPageUIIntent()
 }
 @HiltViewModel
 class AdvancedPageViewModel @Inject constructor(
@@ -164,8 +164,8 @@ class AdvancedPageViewModel @Inject constructor(
 
             is AdvancedPageUIIntent.OnConfirmTwitterDownloadMedia -> {
                 viewModelScope.launch {
-                    val userId = uiState.value.TwitterUserAccountInfo.first
-                    val userScreenName = uiState.value.TwitterUserAccountInfo.third
+                    val userId = intent.id
+                    val userScreenName = intent.screenName
                     if (userId.isEmpty()) {
                         return@launch
                     }

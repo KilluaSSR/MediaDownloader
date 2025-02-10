@@ -34,6 +34,7 @@ import killua.dev.twitterdownloader.ui.ViewModels.AdvancedPageUIIntent
 import killua.dev.twitterdownloader.ui.ViewModels.AdvancedPageViewModel
 import killua.dev.twitterdownloader.ui.components.AdvancedPageTopAppBar
 import killua.dev.twitterdownloader.ui.components.MainScaffold
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -98,9 +99,11 @@ fun AdvancedPage(){
                 uiState.value.TwitterUserAccountInfo else null,
             onDismiss = {
                 showDialog = false
+                scope.launch{
+                    viewModel.emitState(uiState.value.copy(isFetchingTwitterUserInfo = false,TwitterUserAccountInfo = Triple("", "", "")))
+                }
             },
             onCancel = {
-                // 用户主动取消时清除状态
                 scope.launch {
                     viewModel.emitState(uiState.value.copy(
                         TwitterUserAccountInfo = Triple("", "", "")
@@ -115,9 +118,9 @@ fun AdvancedPage(){
                         viewModel.emitIntent(AdvancedPageUIIntent.GetSomeonesTwitterAccountInfo(input))
                     }
                 } else {
-                    // 开始下载并清除状态
                     scope.launch {
-                        viewModel.emitIntent(AdvancedPageUIIntent.OnConfirmTwitterDownloadMedia)
+                        viewModel.emitIntent(AdvancedPageUIIntent.OnConfirmTwitterDownloadMedia(uiState.value.TwitterUserAccountInfo.third, uiState.value.TwitterUserAccountInfo.first))
+                        delay(200)
                         viewModel.emitState(uiState.value.copy(
                             TwitterUserAccountInfo = Triple("", "", "")
                         ))
@@ -192,19 +195,21 @@ fun AdvancedPage(){
                             when (index) {
                                 0 -> {showDevelopingAlert = true}
                                 1 -> {
-                                    if (eligibleToUseLofterGetByTags.value) {
-                                        dialogTitle = "Enter Lofter author's Homepage"
-                                        dialogPlaceholder = "https://example.lofter.com/"
-                                        dialogAction = { input ->
-                                            scope.launch {
-                                                viewModel.emitIntent(AdvancedPageUIIntent.GetSomeonesTwitterAccountInfo(input))
-                                            }
-                                        }
-                                        showDialog = true
-                                    } else {
-                                        navController.navigateSingle(PrepareRoutes.LofterPreparePage.route)
-                                    }
+//                                    if (eligibleToUseLofterGetByTags.value) {
+//                                        dialogTitle = "Enter Lofter author's Homepage"
+//                                        dialogPlaceholder = "https://example.lofter.com/"
+//                                        dialogAction = { input ->
+//                                            scope.launch {
+//                                                viewModel.emitIntent(AdvancedPageUIIntent.GetSomeonesTwitterAccountInfo(input))
+//                                            }
+//                                        }
+//                                        showDialog = true
+//                                    } else {
+//                                        navController.navigateSingle(PrepareRoutes.LofterPreparePage.route)
+//                                    }
+                                    navController.navigateSingle(PrepareRoutes.LofterPreparePage.route)
                                 }
+
                             }
                         }
                     }
