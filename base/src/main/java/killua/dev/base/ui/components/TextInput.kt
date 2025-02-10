@@ -18,6 +18,54 @@ import androidx.compose.ui.text.input.VisualTransformation
 import killua.dev.base.ui.tokens.TextFieldTokens
 
 @Composable
+fun MainInputDialog(
+    title: String,
+    placeholder: String,
+    showDialog: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    val config = InputDialogConfig(
+        title = title,
+        placeholder = placeholder,
+        singleLine = true
+    )
+
+    CommonInputDialog(
+        showDialog = showDialog,
+        config = config,
+        onDismiss = onDismiss,
+        onConfirm = onConfirm
+    )
+}
+
+@Composable
+fun AdvancedInputDialog(
+    title: String,
+    placeholder: String,
+    showDialog: Boolean,
+    loading: Boolean,
+    userInfo: Triple<String, String, String>?,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    val config = AdvancedDialogConfig(
+        title = title,
+        placeholder = placeholder,
+        singleLine = true,
+        loading = loading,
+        userInfo = userInfo
+    )
+
+    AdvancedInputDialog(
+        showDialog = showDialog,
+        config = config,
+        onDismiss = onDismiss,
+        onConfirm = onConfirm
+    )
+}
+
+@Composable
 fun SetupTextField(
     modifier: Modifier,
     enabled: Boolean = true,

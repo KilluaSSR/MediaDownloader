@@ -22,7 +22,10 @@ import killua.dev.base.ui.AdvancedPageTwitterButtons
 import killua.dev.base.ui.LocalNavController
 import killua.dev.base.ui.PrepareRoutes
 import killua.dev.base.ui.components.ActionsBotton
+import killua.dev.base.ui.components.AdvancedInputDialog
 import killua.dev.base.ui.components.CancellableAlert
+import killua.dev.base.ui.components.DevelopingAlert
+import killua.dev.base.ui.components.MainInputDialog
 import killua.dev.base.ui.components.Section
 import killua.dev.base.ui.components.paddingTop
 import killua.dev.base.ui.tokens.SizeTokens
@@ -39,9 +42,14 @@ fun AdvancedPage(){
     val navController = LocalNavController.current!!
     val context = LocalContext.current
     val viewModel: AdvancedPageViewModel = hiltViewModel()
-    viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+    var showDialog by remember { mutableStateOf(false) }
+    var showDevelopingAlert by remember { mutableStateOf(false) }
     val eligibleToUseLofterGetByTags = viewModel.lofterGetByTagsEligibility.collectAsStateWithLifecycle()
+    var dialogTitle by remember { mutableStateOf("") }
+    var dialogPlaceholder by remember { mutableStateOf("") }
+    var dialogAction by remember { mutableStateOf<(String) -> Unit>({}) }
     LaunchedEffect(Unit) {
         viewModel.emitIntentOnIO(AdvancedPageUIIntent.OnEntry(context))
     }
@@ -51,10 +59,15 @@ fun AdvancedPage(){
         },
 
     ){
+        if (showDevelopingAlert) {
+            DevelopingAlert(
+                onDismiss = { showDevelopingAlert = false }
+            )
+        }
         var showGetAllMyTwitterBookmarks by remember { mutableStateOf(false) }
         if(showGetAllMyTwitterBookmarks){
             CancellableAlert(
-                title = "Get Bookmarks",
+                title = "Get my Bookmarks",
                 mainText = "Get the content I bookmarked on Twitter.",
                 onDismiss = {showGetAllMyTwitterBookmarks = false}
             ) {
@@ -66,7 +79,7 @@ fun AdvancedPage(){
         var showGetMyTwitterLikes by remember { mutableStateOf(false) }
         if(showGetMyTwitterLikes){
             CancellableAlert(
-                title = "Get Likes",
+                title = "Get my Likes",
                 mainText = "Get the content I liked on Twitter.\nNote that if you have a lot of liked content, it may trigger a rate limit risk and could even lead to account suspension.",
                 onDismiss = {showGetMyTwitterLikes = false}
             ) {
@@ -75,6 +88,37 @@ fun AdvancedPage(){
                 }
             }
         }
+
+        AdvancedInputDialog(
+            title = dialogTitle,
+            placeholder = dialogPlaceholder,
+            showDialog = showDialog,
+            loading = uiState.value.isFetchingTwitterUserInfo,
+            userInfo = if (uiState.value.TwitterUserAccountInfo.first.isNotEmpty())
+                uiState.value.TwitterUserAccountInfo else null,
+            onDismiss = {
+                scope.launch{
+                    viewModel.emitState(uiState.value.copy(
+                        TwitterUserAccountInfo = Triple("","","")
+                    ))
+                }
+                showDialog = false
+                        },
+            onConfirm = { input ->
+                if (uiState.value.TwitterUserAccountInfo.first.isEmpty()) {
+                    // 获取用户信息
+                    scope.launch {
+                        viewModel.emitIntent(AdvancedPageUIIntent.GetSomeonesTwitterAccountInfo(input))
+                    }
+                } else {
+                    // 开始下载
+                    scope.launch {
+                        viewModel.emitIntent(AdvancedPageUIIntent.OnConfirmTwitterDownloadMedia)
+                    }
+                    showDialog = false
+                }
+            }
+        )
         Column(
             modifier = Modifier
                 .paddingTop(SizeTokens.Level8)
@@ -99,8 +143,17 @@ fun AdvancedPage(){
                             when(index){
                                 0 ->{showGetAllMyTwitterBookmarks = true}
                                 1 ->{showGetMyTwitterLikes = true}
-                                2 ->{navController.navigateSingle(item.route)}
-                                3 ->{navController.navigateSingle(item.route)}
+                                2 ->{showDevelopingAlert = true}
+                                3 ->{
+                                    dialogTitle = "Enter Twitter Username"
+                                    dialogPlaceholder = "@ExampleUser"
+                                    dialogAction = { input ->
+                                        scope.launch {
+                                            viewModel.emitIntent(AdvancedPageUIIntent.GetSomeonesTwitterAccountInfo(input))
+                                        }
+                                    }
+                                    showDialog = true
+                                }
                             }
                         }
                     }
@@ -130,14 +183,20 @@ fun AdvancedPage(){
                             }
                         ) {
                             when (index) {
-                                0 -> navController.navigateSingle(item.route)
+                                0 -> {showDevelopingAlert = true}
                                 1 -> {
-//                                    if (eligibleToUseLofterGetByTags.value) {
-//                                        navController.navigateSingle(item.route)
-//                                    } else {
-//                                        navController.navigateSingle(PrepareRoutes.LofterPreparePage.route)
-//                                    }
-                                    navController.navigateSingle(PrepareRoutes.LofterPreparePage.route)
+                                    if (eligibleToUseLofterGetByTags.value) {
+                                        dialogTitle = "Enter Lofter author's Homepage"
+                                        dialogPlaceholder = "https://example.lofter.com/"
+                                        dialogAction = { input ->
+                                            scope.launch {
+                                                viewModel.emitIntent(AdvancedPageUIIntent.GetSomeonesTwitterAccountInfo(input))
+                                            }
+                                        }
+                                        showDialog = true
+                                    } else {
+                                        navController.navigateSingle(PrepareRoutes.LofterPreparePage.route)
+                                    }
                                 }
                             }
                         }

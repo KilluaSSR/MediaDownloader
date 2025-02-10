@@ -19,6 +19,7 @@ import killua.dev.base.ui.SnackbarUIEffect.ShowSnackbar
 import killua.dev.base.ui.UIIntent
 import killua.dev.base.ui.UIState
 import killua.dev.base.utils.MediaFileNameStrategy
+import killua.dev.twitterdownloader.Model.NetworkResult
 import killua.dev.twitterdownloader.api.Twitter.Model.TwitterUser
 import killua.dev.twitterdownloader.api.Twitter.TwitterDownloadAPI
 import killua.dev.twitterdownloader.download.DownloadQueueManager
@@ -27,6 +28,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -37,12 +39,16 @@ data class AdvancedPageUIState(
     val isLofterLoggedIn: Boolean = false,
     val isEligibleToUseLofterGetByTags: Boolean = false,
     val isGettingMyTwitterBookmark: Boolean = false,
+    val isFetchingTwitterUserInfo: Boolean = false,
+    val TwitterUserAccountInfo: Triple<String, String, String> = Triple("","","")
 ): UIState
 
 sealed class AdvancedPageUIIntent : UIIntent {
     data class OnEntry(val context: Context): AdvancedPageUIIntent()
     data object GetMyTwitterBookmark: AdvancedPageUIIntent()
     data object GetMyTwitterLiked : AdvancedPageUIIntent()
+    data class GetSomeonesTwitterAccountInfo(val screenName: String): AdvancedPageUIIntent()
+    data object OnConfirmTwitterDownloadMedia: AdvancedPageUIIntent()
 }
 @HiltViewModel
 class AdvancedPageViewModel @Inject constructor(
@@ -96,9 +102,7 @@ class AdvancedPageViewModel @Inject constructor(
                             }
                         },
                         onError = { errorMessage ->
-                            viewModelScope.launch{
-                                handleError(errorMessage)
-                            }
+                            handleError(errorMessage)
                         }
                     )
                 }
@@ -106,30 +110,89 @@ class AdvancedPageViewModel @Inject constructor(
             AdvancedPageUIIntent.GetMyTwitterLiked -> {
                 viewModelScope.launch {
                     twitterDownloadAPI.getLikesAllTweets(
-                        onNewItems = { bookmarks ->
-                            bookmarks.forEach { bookmark ->
-                                bookmark.videoUrls.forEach { url ->
+                        onNewItems = { tweets ->
+                            tweets.forEach { tweet ->
+                                tweet.videoUrls.forEach { url ->
                                     createAndStartDownloadTwitterSingleMedia(
                                         url = url,
-                                        user = bookmark.user,
-                                        tweetID = bookmark.tweetId,
+                                        user = tweet.user,
+                                        tweetID = tweet.tweetId,
                                         mediaType = MediaType.VIDEO
                                     )
                                 }
-                                bookmark.photoUrls.forEach { url ->
+                                tweet.photoUrls.forEach { url ->
                                     createAndStartDownloadTwitterSingleMedia(
                                         url = url,
-                                        user = bookmark.user,
-                                        tweetID = bookmark.tweetId,
+                                        user = tweet.user,
+                                        tweetID = tweet.tweetId,
                                         mediaType = MediaType.PHOTO
                                     )
                                 }
                             }
                         },
                         onError = { errorMessage ->
-                            viewModelScope.launch{
-                                handleError(errorMessage)
+                            handleError(errorMessage)
+                        }
+                    )
+                }
+            }
+
+            is AdvancedPageUIIntent.GetSomeonesTwitterAccountInfo -> {
+                viewModelScope.launch {
+                    emitState(uiState.value.copy(isFetchingTwitterUserInfo = true))
+                    when (val result = twitterDownloadAPI.getUserBasicInfo(intent.screenName)) {
+                        is NetworkResult.Success -> {
+                            result.data.let { userInfo ->
+                                emitState(uiState.value.copy(
+                                    isFetchingTwitterUserInfo = false,
+                                    TwitterUserAccountInfo = Triple(
+                                        userInfo.id ?: "",
+                                        userInfo.name ?: "",
+                                        userInfo.screenName ?: ""
+                                    )
+                                ))
                             }
+                        }
+                        is NetworkResult.Error -> {
+                            emitState(uiState.value.copy(isFetchingTwitterUserInfo = false))
+                            handleError(result.message)
+                        }
+                    }
+                }
+            }
+
+            is AdvancedPageUIIntent.OnConfirmTwitterDownloadMedia -> {
+                viewModelScope.launch {
+                    val userId = uiState.value.TwitterUserAccountInfo.first
+                    if (userId.isEmpty()) {
+                        emitEffect(ShowSnackbar("请先获取用户信息"))
+                        return@launch
+                    }
+                    emitState(uiState.value.copy(TwitterUserAccountInfo = Triple("","","")))
+                    twitterDownloadAPI.getUserMediaByUserId(
+                        userId = userId,
+                        onNewItems = { tweets ->
+                            tweets.forEach { tweet ->
+                                tweet.videoUrls.forEach { url ->
+                                    createAndStartDownloadTwitterSingleMedia(
+                                        url = url,
+                                        user = tweet.user,
+                                        tweetID = tweet.tweetId,
+                                        mediaType = MediaType.VIDEO
+                                    )
+                                }
+                                tweet.photoUrls.forEach { url ->
+                                    createAndStartDownloadTwitterSingleMedia(
+                                        url = url,
+                                        user = tweet.user,
+                                        tweetID = tweet.tweetId,
+                                        mediaType = MediaType.PHOTO
+                                    )
+                                }
+                            }
+                        },
+                        onError = { errorMessage ->
+                            handleError(errorMessage)
                         }
                     )
                 }

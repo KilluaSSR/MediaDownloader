@@ -2,12 +2,8 @@ package killua.dev.twitterdownloader.utils
 
 import android.util.Log
 import killua.dev.twitterdownloader.api.Twitter.Model.Bookmark
-import killua.dev.twitterdownloader.api.Twitter.Model.BookmarksPageData
-import killua.dev.twitterdownloader.api.Twitter.Model.LikesPageData
-import killua.dev.twitterdownloader.api.Twitter.Model.Media
 import killua.dev.twitterdownloader.api.Twitter.Model.MediaPageData
 import killua.dev.twitterdownloader.api.Twitter.Model.RootDto
-import killua.dev.twitterdownloader.api.Twitter.Model.Tweet
 import killua.dev.twitterdownloader.api.Twitter.Model.TwitterUser
 
 

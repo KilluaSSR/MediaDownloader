@@ -346,16 +346,6 @@ data class Media(
     @SerialName("bitrate")
     val bitrate: Long? = null
 )
-@Serializable
-data class LikesPageData(
-    val bookmark: List<Bookmark>,  // 使用相同的 Bookmark 数据结构
-    val nextPage: String
-)
-@Serializable
-data class BookmarksPageData(
-    val bookmark: List<Bookmark>,
-    val nextPage: String
-)
 
 @Serializable
 data class Bookmark(
@@ -369,4 +359,11 @@ data class Bookmark(
 data class MediaPageData(
     val items: List<Bookmark>,
     val nextPage: String
+)
+
+@Serializable
+data class UserBasicInfo(
+    val id: String?,
+    val name: String?,
+    val screenName: String?
 )

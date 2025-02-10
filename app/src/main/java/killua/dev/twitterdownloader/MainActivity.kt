@@ -25,6 +25,7 @@ import killua.dev.twitterdownloader.ui.pages.SettingsPage
 import killua.dev.twitterdownloader.ui.pages.AdvancedPage
 import killua.dev.twitterdownloader.ui.pages.OtherSetupPages.Lofter.LofterPreparePage
 import killua.dev.twitterdownloader.ui.pages.OtherSetupPages.Lofter.LofterPrepareTagsPage
+import killua.dev.twitterdownloader.ui.pages.UserInfoPage
 import killua.dev.twitterdownloader.ui.theme.TwitterDownloaderTheme
 
 @AndroidEntryPoint
@@ -54,13 +55,15 @@ class MainActivity : ComponentActivity() {
                         composable(MainRoutes.AdvancedPage.route){
                             AdvancedPage()
                         }
+                        composable(MainRoutes.UserinfoPage.route){
+                            UserInfoPage()
+                        }
                         composable(MainRoutes.SettingPage.route){
                             SettingsPage()
                         }
                         composable(MainRoutes.AboutPage.route){
                             AboutPage()
                         }
-
 
 
                         //Prepare Page

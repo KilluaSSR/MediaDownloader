@@ -57,3 +57,36 @@ fun GetLikeParams(count: Int, cursor: String, userId: String, gson: Gson): Map<S
         "fieldToggles" to "{\"withArticlePlainText\":false}"
     )
 }
+
+fun GetUserMediaParams(
+    count: Int,
+    cursor: String,
+    userId: String,
+    gson: Gson
+) : Map<String, String> {
+    val variables = mapOf(
+        "userId" to userId,
+        "count" to count,
+        "includePromotedContent" to false,
+        "withClientEventToken" to false,
+        "withBirdwatchNotes" to false,
+        "withVoice" to true,
+        "withV2Timeline" to true,
+        "cursor" to cursor
+    )
+    return mapOf(
+        "variables" to gson.toJson(variables),
+        "features" to GetUserMediaFeatures,
+        "fieldToggles" to "{\"withArticlePlainText\":false}"
+    )
+
+}
+
+fun GetUserProfileParams(
+    screenName: String,
+    gson: Gson
+): Map<String, String> = mapOf(
+    "variables" to gson.toJson(
+        mapOf("screen_name" to screenName)
+    )
+)

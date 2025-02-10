@@ -6,7 +6,5 @@ import killua.dev.base.ui.components.TopBar
 
 @Composable
 fun AdvancedPageTopAppBar(navController: NavHostController){
-    TopBar(navController,"Advanced"){
-
-    }
+    TopBar(navController,"Advanced"){}
 }

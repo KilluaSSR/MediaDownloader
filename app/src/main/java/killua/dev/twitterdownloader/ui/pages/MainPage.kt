@@ -29,7 +29,7 @@ import killua.dev.base.ui.PrepareRoutes
 import killua.dev.base.ui.SnackbarUIEffect
 import killua.dev.base.ui.components.ActionsBotton
 import killua.dev.base.ui.components.CancellableAlert
-import killua.dev.base.ui.components.DevelopingAlert
+import killua.dev.base.ui.components.MainInputDialog
 import killua.dev.base.ui.components.MainScaffold
 import killua.dev.base.ui.components.MainTopBar
 import killua.dev.base.ui.components.Section
@@ -43,7 +43,6 @@ import killua.dev.twitterdownloader.ui.ViewModels.MainPageViewmodel
 import killua.dev.twitterdownloader.ui.components.FavouriteCard
 import killua.dev.twitterdownloader.ui.components.MainPageBottomSheet
 import killua.dev.twitterdownloader.ui.components.ReportDialog
-import killua.dev.twitterdownloader.ui.components.URLInputDialog
 import kotlinx.coroutines.launch
 
 @ExperimentalFoundationApi
@@ -76,11 +75,7 @@ fun MainPage(
                 onShowReport = {showReportDialog = true}
             )
         }
-        if (showDevelopingAlert) {
-            DevelopingAlert(
-                onDismiss = { showDevelopingAlert = false }
-            )
-        }
+
         if (showReportDialog){
             ReportDialog("Report",icon = null, onDismiss = {showReportDialog = false})
         }
@@ -110,7 +105,9 @@ fun MainPage(
                 }
             }
         }
-        URLInputDialog(
+        MainInputDialog(
+            title = "URL here",
+            placeholder = "https://...",
             showDialog = showDialog,
             onDismiss = { showDialog = false },
             onConfirm = { url ->
@@ -161,13 +158,7 @@ fun MainPage(
                             if (item.route == MainRoutes.Download.route) {
                                 showDialog = true
                             } else {
-                                if (item.route == MainRoutes.DownloadPage.route){
-                                    navController.navigateSingle(item.route)
-                                }else if(item.route == MainRoutes.AdvancedPage.route){
-                                    navController.navigateSingle(item.route)
-                                }else{
-                                    showDevelopingAlert = true
-                                }
+                                navController.navigateSingle(item.route)
                             }
                         }
                     }

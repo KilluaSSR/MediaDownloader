@@ -11,12 +11,15 @@ import killua.dev.twitterdownloader.api.NetworkHelper
 import killua.dev.twitterdownloader.api.Twitter.BuildRequest.GetLikeParams
 import killua.dev.twitterdownloader.api.Twitter.BuildRequest.GetTwitterBookmarkMediaParams
 import killua.dev.twitterdownloader.api.Twitter.BuildRequest.GetTwitterDownloadSpecificMediaParams
+import killua.dev.twitterdownloader.api.Twitter.BuildRequest.GetUserMediaParams
+import killua.dev.twitterdownloader.api.Twitter.BuildRequest.GetUserProfileParams
 import killua.dev.twitterdownloader.api.Twitter.BuildRequest.TwitterAPIURL
 import killua.dev.twitterdownloader.api.Twitter.Model.Bookmark
 import killua.dev.twitterdownloader.api.Twitter.Model.MediaPageData
 import killua.dev.twitterdownloader.api.Twitter.Model.RootDto
 import killua.dev.twitterdownloader.api.Twitter.Model.TweetData
 import killua.dev.twitterdownloader.api.Twitter.Model.TwitterUser
+import killua.dev.twitterdownloader.api.Twitter.Model.UserBasicInfo
 import killua.dev.twitterdownloader.di.UserDataManager
 import killua.dev.twitterdownloader.utils.addTwitterBookmarkHeaders
 import killua.dev.twitterdownloader.utils.addTwitterNormalHeaders
@@ -95,6 +98,65 @@ class TwitterDownloadAPI @Inject constructor(
         params = GetLikeParams(count, cursor, userdata.userTwitterData.value.twid, gson),
         addHeaders = { it.addTwitterNormalHeaders(userdata.userTwitterData.value.ct0) },
         extractData = { rootDto, cur -> rootDto.extractMediaPageData(cur, false) }
+    )
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    suspend fun getUserMediaAllTweets(
+        userId: String,
+        onNewItems: suspend (List<Bookmark>) -> Unit,
+        onError: (String) -> Unit
+    ): NetworkResult<TweetData> = fetchAllMediaTweets(
+        getPageData = { cursor -> getUserMediaAsync(userId, cursor) },
+        onNewItems = onNewItems,
+        onError = onError
+    )
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private suspend fun getUserMediaAsync(
+        userId: String,
+        cursor: String,
+        count: Int = 20
+    ): NetworkResult<MediaPageData> = fetchTwitterPage(
+        apiUrl = TwitterAPIURL.UserMediaUrl,
+        params = GetUserMediaParams(
+            userId = userId,
+            count = count,
+            cursor = cursor,
+            gson = gson
+        ),
+        addHeaders = { it.addTwitterNormalHeaders(userdata.userTwitterData.value.ct0) },
+        extractData = { rootDto, cur -> rootDto.extractMediaPageData(cur, false) }
+    )
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    suspend fun getUserBasicInfo(screenName: String): NetworkResult<UserBasicInfo> =
+        getUserIdByScreenNameAsync(screenName.removePrefix("@"))
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private suspend fun getUserIdByScreenNameAsync(
+        screenName: String
+    ): NetworkResult<UserBasicInfo> = fetchTwitterPage(
+        apiUrl = TwitterAPIURL.ProfileSpotlightsUrl,
+        params = GetUserProfileParams(screenName, gson),
+        addHeaders = { it.addTwitterNormalHeaders(userdata.userTwitterData.value.ct0) },
+        extractData = { rootDto, _ ->
+            UserBasicInfo(
+                id = rootDto.data?.user_result_by_screen_name?.result?.rest_id,
+                name = rootDto.data?.user_result_by_screen_name?.result?.legacy?.name,
+                screenName = rootDto.data?.user_result_by_screen_name?.result?.legacy?.screen_name
+            )
+        }
+    )
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    suspend fun getUserMediaByUserId(
+        userId: String,
+        onNewItems: suspend (List<Bookmark>) -> Unit,
+        onError: (String) -> Unit
+    ): NetworkResult<TweetData> = fetchAllMediaTweets(
+        getPageData = { cursor -> getUserMediaAsync(userId, cursor) },
+        onNewItems = onNewItems,
+        onError = onError
     )
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)

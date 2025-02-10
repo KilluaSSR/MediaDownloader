@@ -1,11 +1,8 @@
 package killua.dev.twitterdownloader.ui.components
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,7 +39,6 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import killua.dev.base.Model.ReportOption
@@ -144,25 +140,8 @@ fun FavouriteCard(
     )
 }
 
-@Composable
-fun URLInputDialog(
-    showDialog: Boolean,
-    onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
-) {
-    val config = InputDialogConfig(
-        title = "URL here",
-        placeholder = "https://...",
-        singleLine = true
-    )
 
-    CommonInputDialog(
-        showDialog = showDialog,
-        config = config,
-        onDismiss = onDismiss,
-        onConfirm = onConfirm
-    )
-}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
