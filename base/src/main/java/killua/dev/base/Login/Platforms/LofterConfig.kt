@@ -18,7 +18,6 @@ class LofterConfig : PlatformConfig {
                     name = "LOFTER-PHONE-LOGIN-AUTH",
                     pattern = "LOFTER-PHONE-LOGIN-AUTH=([^;]+)",
                     saveFunction = { context, cookieInfo ->
-                        println("匹配到 LOFTER-PHONE-LOGIN-AUTH, value: ${cookieInfo.value}")
                         context.writeLofterLoginKey("LOFTER-PHONE-LOGIN-AUTH")
                         context.writeLofterLoginAuth(cookieInfo.value)
                         val tenDaysLater = System.currentTimeMillis() + (10L * 24 * 60 * 60 * 1000)
@@ -29,7 +28,6 @@ class LofterConfig : PlatformConfig {
                     name = "LOFTER_SESS",
                     pattern = "LOFTER_SESS=([^;]+)",
                     saveFunction = { context, cookieInfo ->
-                        println("匹配到 LOFTER_SESS, value: ${cookieInfo.value}")
                         context.writeLofterLoginKey("LOFTER_SESS")
                         context.writeLofterLoginAuth(cookieInfo.value)
                         val tenDaysLater = System.currentTimeMillis() + (10L * 24 * 60 * 60 * 1000)
@@ -40,7 +38,6 @@ class LofterConfig : PlatformConfig {
                     name = "NTES_SESS",
                     pattern = "NTES_SESS=([^;]+)",
                     saveFunction = { context, cookieInfo ->
-                        println("匹配到 NTES_SESS, value: ${cookieInfo.value}")
                         context.writeLofterLoginKey("NTES_SESS")
                         context.writeLofterLoginAuth(cookieInfo.value)
                         val tenDaysLater = System.currentTimeMillis() + (10L * 24 * 60 * 60 * 1000)
@@ -51,7 +48,6 @@ class LofterConfig : PlatformConfig {
                     name = "Authorization",
                     pattern = "Authorization=([^;]+)",
                     saveFunction = { context, cookieInfo ->
-                        println("匹配到 Authorization, value: ${cookieInfo.value}")
                         context.writeLofterLoginKey("Authorization")
                         context.writeLofterLoginAuth(cookieInfo.value)
                         val tenDaysLater = System.currentTimeMillis() + (10L * 24 * 60 * 60 * 1000)

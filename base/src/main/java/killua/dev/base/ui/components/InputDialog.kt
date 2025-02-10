@@ -151,12 +151,17 @@ fun AdvancedInputDialog(
     showDialog: Boolean,
     config: AdvancedDialogConfig,
     onDismiss: () -> Unit,
+    onCancel: () -> Unit,
     onConfirm: (String) -> Unit
 ) {
     var inputText by remember { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
     var shouldRequestFocus by remember { mutableStateOf(false) }
-
+    LaunchedEffect(showDialog) {
+        if (!showDialog) {
+            inputText = ""
+        }
+    }
     if (showDialog) {
         Dialog(
             onDismissRequest = onDismiss,
@@ -217,6 +222,11 @@ fun AdvancedInputDialog(
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
+                                    Text(
+                                        text = "ID: ${state.info.first}",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 }
                                 shouldRequestFocus = false
                             }
@@ -244,7 +254,7 @@ fun AdvancedInputDialog(
                         TextButton(
                             onClick = {
                                 inputText = ""
-                                onDismiss()
+                                onCancel()
                             }
                         ) {
                             Text(config.cancelText)
@@ -256,9 +266,11 @@ fun AdvancedInputDialog(
                             onClick = {
                                 if (config.userInfo != null) {
                                     onConfirm(inputText)
+                                    inputText = ""
                                     onDismiss()
                                 } else {
                                     onConfirm(inputText)
+                                    inputText = ""
                                 }
                             },
                             enabled = when {

@@ -97,13 +97,17 @@ fun AdvancedPage(){
             userInfo = if (uiState.value.TwitterUserAccountInfo.first.isNotEmpty())
                 uiState.value.TwitterUserAccountInfo else null,
             onDismiss = {
-                scope.launch{
+                showDialog = false
+            },
+            onCancel = {
+                // 用户主动取消时清除状态
+                scope.launch {
                     viewModel.emitState(uiState.value.copy(
-                        TwitterUserAccountInfo = Triple("","","")
+                        TwitterUserAccountInfo = Triple("", "", "")
                     ))
                 }
                 showDialog = false
-                        },
+            },
             onConfirm = { input ->
                 if (uiState.value.TwitterUserAccountInfo.first.isEmpty()) {
                     // 获取用户信息
@@ -111,9 +115,12 @@ fun AdvancedPage(){
                         viewModel.emitIntent(AdvancedPageUIIntent.GetSomeonesTwitterAccountInfo(input))
                     }
                 } else {
-                    // 开始下载
+                    // 开始下载并清除状态
                     scope.launch {
                         viewModel.emitIntent(AdvancedPageUIIntent.OnConfirmTwitterDownloadMedia)
+                        viewModel.emitState(uiState.value.copy(
+                            TwitterUserAccountInfo = Triple("", "", "")
+                        ))
                     }
                     showDialog = false
                 }

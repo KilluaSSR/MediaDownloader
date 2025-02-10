@@ -335,7 +335,6 @@ class DownloadedViewModel @Inject constructor(
 
     private suspend fun cancelDownload(downloadId: String) {
         val download = downloadRepository.getById(downloadId) ?: return
-        println("DOWNLOAD GOT ${download.uuid}, ${downloadId}")
         download.fileUri?.let { uri ->
             fileDelete.deleteFile(uri)
         }

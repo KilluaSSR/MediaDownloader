@@ -23,8 +23,10 @@ import killua.dev.twitterdownloader.api.Twitter.Model.UserBasicInfo
 import killua.dev.twitterdownloader.di.UserDataManager
 import killua.dev.twitterdownloader.utils.addTwitterBookmarkHeaders
 import killua.dev.twitterdownloader.utils.addTwitterNormalHeaders
+import killua.dev.twitterdownloader.utils.addTwitterUserMediaHeaders
 import killua.dev.twitterdownloader.utils.extractMediaPageData
 import killua.dev.twitterdownloader.utils.extractTwitterUser
+import killua.dev.twitterdownloader.utils.extractUserMediaPageData
 import killua.dev.twitterdownloader.utils.getAllHighestBitrateUrls
 import killua.dev.twitterdownloader.utils.getAllImageUrls
 import kotlinx.coroutines.Dispatchers
@@ -101,19 +103,9 @@ class TwitterDownloadAPI @Inject constructor(
     )
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    suspend fun getUserMediaAllTweets(
-        userId: String,
-        onNewItems: suspend (List<Bookmark>) -> Unit,
-        onError: (String) -> Unit
-    ): NetworkResult<TweetData> = fetchAllMediaTweets(
-        getPageData = { cursor -> getUserMediaAsync(userId, cursor) },
-        onNewItems = onNewItems,
-        onError = onError
-    )
-
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private suspend fun getUserMediaAsync(
         userId: String,
+        screenName: String,
         cursor: String,
         count: Int = 20
     ): NetworkResult<MediaPageData> = fetchTwitterPage(
@@ -124,8 +116,8 @@ class TwitterDownloadAPI @Inject constructor(
             cursor = cursor,
             gson = gson
         ),
-        addHeaders = { it.addTwitterNormalHeaders(userdata.userTwitterData.value.ct0) },
-        extractData = { rootDto, cur -> rootDto.extractMediaPageData(cur, false) }
+        addHeaders = { it.addTwitterUserMediaHeaders(userdata.userTwitterData.value.ct0, screenName) },
+        extractData = { rootDto, cur -> rootDto.extractUserMediaPageData(cur) }
     )
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -151,10 +143,11 @@ class TwitterDownloadAPI @Inject constructor(
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     suspend fun getUserMediaByUserId(
         userId: String,
+        screenName: String,
         onNewItems: suspend (List<Bookmark>) -> Unit,
         onError: (String) -> Unit
     ): NetworkResult<TweetData> = fetchAllMediaTweets(
-        getPageData = { cursor -> getUserMediaAsync(userId, cursor) },
+        getPageData = { cursor -> getUserMediaAsync(userId, screenName, cursor) },
         onNewItems = onNewItems,
         onError = onError
     )
@@ -178,14 +171,10 @@ class TwitterDownloadAPI @Inject constructor(
                         "auth_token" to userdata.userTwitterData.value.auth
                     ))
                 }
-            println(request)
-            println("cto="+userdata.userTwitterData.value.ct0)
-            println("authtoken="+userdata.userTwitterData.value.auth)
             NetworkHelper.doRequest(request).use { response ->
                 when {
                     response.isSuccessful -> {
                         val content = response.body?.string().orEmpty()
-                        println(content +"Content")
                         val rootDto = try {
                             gson.fromJson(content, RootDto::class.java)
                         } catch (e: Exception) {
@@ -195,8 +184,6 @@ class TwitterDownloadAPI @Inject constructor(
                         NetworkResult.Success(extractData(rootDto, params["cursor"] ?: ""))
                     }
                     else -> {
-                        println(response.code)
-                        println("BODY" +response.body?.string())
                         NetworkResult.Error(
                             code = response.code,
                             message = "请求失败: ${response.code} ${response.message}\n${response.body?.string()}"
@@ -205,7 +192,6 @@ class TwitterDownloadAPI @Inject constructor(
                 }
             }
         } catch (e: Exception) {
-            println("网络请求失败: ${e.message}")
             NetworkResult.Error(message = "网络请求失败: ${e.message}")
         }
     }
@@ -225,7 +211,6 @@ class TwitterDownloadAPI @Inject constructor(
                 when (val result = getPageData(currentPage)) {
                     is NetworkResult.Success -> {
                         val pageData = result.data
-
                         if (currentPage in processedPages) {
                             Log.d("TwitterAPI", "Page already processed: $currentPage")
                             break
@@ -260,7 +245,7 @@ class TwitterDownloadAPI @Inject constructor(
 
                         currentPage = pageData.nextPage
                         Log.d("TwitterAPI", "Moving to next page: $currentPage")
-                        delay(1000)
+                        delay(userdata.delay.value * 1000L)
                     }
                     is NetworkResult.Error -> {
                         onError(result.message)

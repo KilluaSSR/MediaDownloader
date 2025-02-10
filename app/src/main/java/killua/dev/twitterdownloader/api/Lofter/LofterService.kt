@@ -84,7 +84,6 @@ class LofterService @Inject constructor(
                 )
                 deferred.complete(NetworkResult.Success(blogInfo))
             }catch (e: Exception) {
-                println(e.message)
                 deferred.complete(NetworkResult.Error(message = e.message ?: "Failed"))
             }
         }

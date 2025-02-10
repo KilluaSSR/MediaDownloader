@@ -280,7 +280,8 @@ data class VideoInfo(
 data class VideoVariant(
     @SerialName("bitrate")
     val bitrate: Long? = null,
-
+    @SerialName("content_type")
+    val content_type: String? = null,
     @SerialName("url")
     val url: String? = null
 )

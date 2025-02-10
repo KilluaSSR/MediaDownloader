@@ -44,6 +44,7 @@ fun AdvancedInputDialog(
     title: String,
     placeholder: String,
     showDialog: Boolean,
+    onCancel: () -> Unit,
     loading: Boolean,
     userInfo: Triple<String, String, String>?,
     onDismiss: () -> Unit,
@@ -60,6 +61,7 @@ fun AdvancedInputDialog(
     AdvancedInputDialog(
         showDialog = showDialog,
         config = config,
+        onCancel = onCancel,
         onDismiss = onDismiss,
         onConfirm = onConfirm
     )

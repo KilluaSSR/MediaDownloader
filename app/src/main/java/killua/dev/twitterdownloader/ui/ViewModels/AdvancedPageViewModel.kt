@@ -2,6 +2,7 @@ package killua.dev.twitterdownloader.ui.ViewModels
 
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -164,13 +165,14 @@ class AdvancedPageViewModel @Inject constructor(
             is AdvancedPageUIIntent.OnConfirmTwitterDownloadMedia -> {
                 viewModelScope.launch {
                     val userId = uiState.value.TwitterUserAccountInfo.first
+                    val userScreenName = uiState.value.TwitterUserAccountInfo.third
                     if (userId.isEmpty()) {
-                        emitEffect(ShowSnackbar("请先获取用户信息"))
                         return@launch
                     }
-                    emitState(uiState.value.copy(TwitterUserAccountInfo = Triple("","","")))
+
                     twitterDownloadAPI.getUserMediaByUserId(
                         userId = userId,
+                        screenName = userScreenName,
                         onNewItems = { tweets ->
                             tweets.forEach { tweet ->
                                 tweet.videoUrls.forEach { url ->

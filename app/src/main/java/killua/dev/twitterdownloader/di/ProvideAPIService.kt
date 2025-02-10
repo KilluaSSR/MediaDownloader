@@ -11,6 +11,7 @@ import killua.dev.base.datastore.ApplicationUserDataTwitter
 import killua.dev.base.datastore.readApplicationUserAuth
 import killua.dev.base.datastore.readApplicationUserCt0
 import killua.dev.base.datastore.readApplicationUserID
+import killua.dev.base.datastore.readDelay
 import killua.dev.base.datastore.readLofterLoginAuth
 import killua.dev.base.datastore.readLofterLoginKey
 import killua.dev.base.di.ApplicationScope
@@ -49,6 +50,9 @@ class UserDataManager @Inject constructor(
     private val _userLofterData = MutableStateFlow(ApplicationUserDataLofter("", ""))
     val userLofterData: StateFlow<ApplicationUserDataLofter> = _userLofterData.asStateFlow()
 
+    private val _delay = MutableStateFlow(2)
+    val delay : StateFlow<Int> = _delay.asStateFlow()
+
     init {
         scope.launch {
             // Twitter 数据流
@@ -75,6 +79,12 @@ class UserDataManager @Inject constructor(
                 )
             }.collect {
                 _userLofterData.value = it
+            }
+        }
+
+        scope.launch{
+            context.readDelay().collect{
+                _delay.value = it
             }
         }
     }

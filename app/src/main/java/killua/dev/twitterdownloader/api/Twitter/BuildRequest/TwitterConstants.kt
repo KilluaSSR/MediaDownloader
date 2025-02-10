@@ -5,7 +5,7 @@ object TwitterAPIURL {
     const val TweetDetailUrl = Host + "/i/api/graphql/tivxwX7ezCWlYBkrhxoR0A/TweetDetail"
     const val LikeUrl = Host + "/i/api/graphql/oLLzvV4gwmdq_nhPM4cLwg/Likes"
     const val BookmarkUrl = Host + "/i/api/graphql/Ds7FCVYEIivOKHsGcE84xQ/Bookmarks"
-    const val UserMediaUrl = Host + "/i/api/graphql/BGmkmGDG0kZPM-aoQtNTTw/UserMedia"
+    const val UserMediaUrl = Host + "/i/api/graphql/ophTtKkfXcUKnXlxh9fU5w/UserMedia"
     const val ProfileSpotlightsUrl = Host + "/i/api/graphql/-0XdHI-mrHWBQd8-oLo1aA/ProfileSpotlightsQuery"
 
     const val Bearer =
@@ -74,7 +74,7 @@ const val GetBookmarkFeatures =
 
 const val GetUserMediaFeatures =
 "{" +
-"\"profile_label_improvements_pcf_label_in_post_enabled\":false," +
+"\"profile_label_improvements_pcf_label_in_post_enabled\":true," +
 "\"rweb_tipjar_consumption_enabled\":true," +
 "\"responsive_web_graphql_exclude_directive_enabled\":true," +
 "\"verified_phone_label_enabled\":false," +
@@ -86,6 +86,7 @@ const val GetUserMediaFeatures =
 "\"c9s_tweet_anatomy_moderator_badge_enabled\":true," +
 "\"responsive_web_grok_analyze_button_fetch_trends_enabled\":false," +
 "\"responsive_web_grok_analyze_post_followups_enabled\":true," +
+"\"responsive_web_jetfuel_frame\":false," +
 "\"responsive_web_grok_share_attachment_enabled\":true," +
 "\"articles_preview_enabled\":true," +
 "\"responsive_web_edit_tweet_api_enabled\":true," +
@@ -94,6 +95,7 @@ const val GetUserMediaFeatures =
 "\"longform_notetweets_consumption_enabled\":true," +
 "\"responsive_web_twitter_article_tweet_consumption_enabled\":true," +
 "\"tweet_awards_web_tipping_enabled\":false," +
+"\"responsive_web_grok_analysis_button_from_backend\":true," +
 "\"creator_subscriptions_quote_tweet_preview_enabled\":false," +
 "\"freedom_of_speech_not_reach_fetch_enabled\":true," +
 "\"standardized_nudges_misinfo\":true," +
@@ -101,6 +103,7 @@ const val GetUserMediaFeatures =
 "\"rweb_video_timestamps_enabled\":true," +
 "\"longform_notetweets_rich_text_read_enabled\":true," +
 "\"longform_notetweets_inline_media_enabled\":true," +
+"\"responsive_web_grok_image_annotation_enabled\":true," +
 "\"responsive_web_enhance_cards_enabled\":false}"
 
 const val GetLikeFeatures =
