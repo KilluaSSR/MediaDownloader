@@ -25,6 +25,7 @@ import killua.dev.twitterdownloader.api.Twitter.TwitterDownloadAPI
 import killua.dev.twitterdownloader.download.DownloadQueueManager
 import killua.dev.twitterdownloader.repository.DownloadRepository
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -34,6 +35,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.UUID
 import javax.inject.Inject
+import kotlin.random.Random
 
 data class AdvancedPageUIState(
     val isLofterLoggedIn: Boolean = false,
@@ -85,6 +87,7 @@ class AdvancedPageViewModel @Inject constructor(
                         onNewItems = { bookmarks ->
                             bookmarks.forEach { bookmark ->
                                 bookmark.videoUrls.forEach { url ->
+                                    randomDelay()
                                     createAndStartDownloadTwitterSingleMedia(
                                         url = url,
                                         user = bookmark.user,
@@ -93,6 +96,7 @@ class AdvancedPageViewModel @Inject constructor(
                                     )
                                 }
                                 bookmark.photoUrls.forEach { url ->
+                                    randomDelay()
                                     createAndStartDownloadTwitterSingleMedia(
                                         url = url,
                                         user = bookmark.user,
@@ -114,6 +118,7 @@ class AdvancedPageViewModel @Inject constructor(
                         onNewItems = { tweets ->
                             tweets.forEach { tweet ->
                                 tweet.videoUrls.forEach { url ->
+                                    randomDelay()
                                     createAndStartDownloadTwitterSingleMedia(
                                         url = url,
                                         user = tweet.user,
@@ -122,6 +127,7 @@ class AdvancedPageViewModel @Inject constructor(
                                     )
                                 }
                                 tweet.photoUrls.forEach { url ->
+                                    randomDelay()
                                     createAndStartDownloadTwitterSingleMedia(
                                         url = url,
                                         user = tweet.user,
@@ -176,6 +182,7 @@ class AdvancedPageViewModel @Inject constructor(
                         onNewItems = { tweets ->
                             tweets.forEach { tweet ->
                                 tweet.videoUrls.forEach { url ->
+                                    randomDelay()
                                     createAndStartDownloadTwitterSingleMedia(
                                         url = url,
                                         user = tweet.user,
@@ -184,6 +191,7 @@ class AdvancedPageViewModel @Inject constructor(
                                     )
                                 }
                                 tweet.photoUrls.forEach { url ->
+                                    randomDelay()
                                     createAndStartDownloadTwitterSingleMedia(
                                         url = url,
                                         user = tweet.user,
@@ -250,5 +258,9 @@ class AdvancedPageViewModel @Inject constructor(
         applicationScope.launch{
             emitEffect(ShowSnackbar(error, actionLabel =  "OKAY" , withDismissAction = true))
         }
+    }
+
+    private suspend fun randomDelay() {
+        delay(Random.nextLong(50, 150))
     }
 }
