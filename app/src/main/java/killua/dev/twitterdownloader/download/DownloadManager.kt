@@ -7,25 +7,16 @@ import db.DownloadStatus
 import killua.dev.base.Model.DownloadTask
 import killua.dev.base.datastore.readMaxRetries
 import killua.dev.base.datastore.readNotificationEnabled
+import killua.dev.base.di.DownloadScope
 import killua.dev.base.ui.SnackbarUIEffect
-import killua.dev.base.utils.MediaStoreHelper
 import killua.dev.base.utils.ShowNotification
 import killua.dev.twitterdownloader.repository.DownloadRepository
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import java.io.BufferedInputStream
-import java.io.OutputStream
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -35,12 +26,12 @@ class DownloadManager @Inject constructor(
     private val queueManager: DownloadQueueManager,
     private val downloadRepository: DownloadRepository,
     private val showNotification: ShowNotification,
-    private val downloaderFactory: MediaDownloaderFactory
+    private val downloaderFactory: MediaDownloaderFactory,
+    @DownloadScope private val managerScope: CoroutineScope
 ) {
     private val _downloadProgress = MutableStateFlow<Map<String, Int>>(emptyMap())
     val downloadProgress = _downloadProgress.asStateFlow()
 
-    private val managerScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val isNotificationEnabled = MutableStateFlow(false)
     private val maxRetries = MutableStateFlow(3)
 

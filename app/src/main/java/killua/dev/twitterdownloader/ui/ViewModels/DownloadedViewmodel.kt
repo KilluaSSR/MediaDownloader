@@ -36,9 +36,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -88,72 +91,90 @@ class DownloadedViewModel @Inject constructor(
     private val _thumbnailCache = MutableStateFlow<Map<Uri, Bitmap?>>(emptyMap())
     private val _authors = MutableStateFlow<Set<String>>(emptySet())
     private val filteredResultsCache = mutableMapOf<DownloadPageDestinations, List<DownloadedItem>>()
+    private val mutex = Mutex()
+
     init {
         viewModelScope.launch {
-            downloadManager.downloadProgress.collect { progressList ->
-                for ((downloadId, progress) in progressList) {
-                    val currentProgress = uiState.value.downloadProgress[downloadId]
-                    emitState(
-                        uiState.value.copy(
-                            downloadProgress = uiState.value.downloadProgress + (downloadId to
-                                    DownloadProgress(
-                                        progress = progress,
-                                        isCompleted = currentProgress?.isCompleted == true,
-                                        isFailed = currentProgress?.isFailed == true,
-                                        errorMessage = currentProgress?.errorMessage
-                                    )
-                                    )
-                        )
-                    )
+            // 合并数据流
+            combine(
+                downloadManager.downloadProgress,
+                downloadRepository.observeAllDownloads()
+            ) { progress, downloads ->
+                Pair(progress, downloads)
+            }.collect { (progressList, downloads) ->
+                mutex.withLock {
+                    updateState(progressList, downloads)
                 }
             }
         }
+    }
 
-        viewModelScope.launch {
-            downloadRepository.observeAllDownloads().collect { downloads ->
-                // 1. 处理作者列表
-                val authors = downloads
-                    .mapNotNull { it.name }
-                    .filter { it.isNotBlank() }
-                    .sortedBy { it.length }
-                    .toSet()
+    private suspend fun updateState(
+        progressList: Map<String, Int>,
+        downloads: List<Download>
+    ) {
+        // 1. 处理作者列表
+        val authors = downloads
+            .mapNotNull { it.name }
+            .filter { it.isNotBlank() }
+            .sortedBy { it.length }
+            .toSet()
 
-                // 2. 处理基础数据
-                val unfilteredItems = downloads.map { DownloadedItem.fromDownload(it) }
-                    .sortedByDescending { it.createdAt }
+        // 2. 处理下载进度
+        val currentState = uiState.value
+        val updatedProgress = currentState.downloadProgress.toMutableMap()
+        progressList.forEach { (downloadId, progress) ->
+            val currentProgress = currentState.downloadProgress[downloadId]
+            updatedProgress[downloadId] = DownloadProgress(
+                progress = progress,
+                isCompleted = currentProgress?.isCompleted == true,
+                isFailed = currentProgress?.isFailed == true,
+                errorMessage = currentProgress?.errorMessage
+            )
+        }
 
-                // 3. 更新当前页面数据
-                val currentDestination = uiState.value.optionsType
-                val currentFiltered = applyFilters(
+        // 3. 处理下载列表
+        val unfilteredItems = downloads.map { DownloadedItem.fromDownload(it) }
+            .sortedByDescending { it.createdAt }
+
+        // 4. 应用过滤器
+        val currentDestination = currentState.optionsType
+        val filteredItems = applyFilters(
+            unfilteredItems,
+            currentDestination,
+            currentState.filterOptions
+        )
+
+        // 5. 更新状态
+        emitState(
+            currentState.copy(
+                unfilteredDownloads = unfilteredItems,
+                downloads = filteredItems,
+                availableAuthors = authors,
+                downloadProgress = updatedProgress,
+                isLoading = false
+            )
+        )
+
+        // 6. 后台更新缓存
+        launchOnIO {
+            updateFilterCache(unfilteredItems, currentState.filterOptions)
+        }
+    }
+
+    private suspend fun updateFilterCache(
+        unfilteredItems: List<DownloadedItem>,
+        filterOptions: FilterOptions
+    ) {
+        DownloadPageDestinations.values()
+            .filter { it != uiState.value.optionsType }
+            .forEach { destination ->
+                filteredResultsCache[destination] = applyFilters(
                     unfilteredItems,
-                    currentDestination,
-                    uiState.value.filterOptions
+                    destination,
+                    filterOptions
                 )
-
-                // 4. 更新状态，包括作者列表
-                emitState(
-                    uiState.value.copy(
-                        unfilteredDownloads = unfilteredItems,
-                        downloads = currentFiltered,
-                        availableAuthors = authors,  // 确保更新作者列表
-                        isLoading = false
-                    )
-                )
-
-                // 5. 后台预加载其他标签页数据
-                launchOnIO {
-                    DownloadPageDestinations.values()
-                        .filter { it != currentDestination }
-                        .forEach { destination ->
-                            filteredResultsCache[destination] = applyFilters(
-                                unfilteredItems,
-                                destination,
-                                uiState.value.filterOptions
-                            )
-                        }
-                }
             }
-        }
     }
 
     private fun observeDownloadsFromDB() {

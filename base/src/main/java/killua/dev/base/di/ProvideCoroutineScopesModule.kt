@@ -22,6 +22,13 @@ internal object CoroutineScopesModule {
     fun providesCoroutineScope(
         @Dispatcher(DbDispatchers.Default) dispatcher: CoroutineDispatcher,
     ): CoroutineScope = CoroutineScope(SupervisorJob() + dispatcher)
+
+    @Provides
+    @Singleton
+    @DownloadScope
+    fun providesDownloadScope(
+        @Dispatcher(DbDispatchers.IO) dispatcher: CoroutineDispatcher,
+    ): CoroutineScope = CoroutineScope(SupervisorJob() + dispatcher)
 }
 
 enum class DbDispatchers {

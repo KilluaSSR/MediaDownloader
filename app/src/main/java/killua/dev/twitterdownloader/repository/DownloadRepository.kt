@@ -87,4 +87,6 @@ class DownloadRepository @Inject constructor(
     suspend fun updateError(uuid: String, errorMessage: String?) {
         downloadDao.updateError(uuid, status = DownloadStatus.FAILED, errorMessage = errorMessage)
     }
+
+
 }

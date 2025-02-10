@@ -6,6 +6,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import db.Download
 import killua.dev.base.Model.DownloadTask
 import killua.dev.base.datastore.readMaxConcurrentDownloads
+import killua.dev.base.di.ApplicationScope
 import killua.dev.base.repository.SettingsRepository
 import killua.dev.twitterdownloader.repository.DownloadRepository
 import kotlinx.coroutines.CoroutineScope
@@ -27,13 +28,14 @@ import kotlin.math.max
 @Singleton
 class DownloadQueueManager @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val repository: DownloadRepository
+    private val repository: DownloadRepository,
+    @ApplicationScope private val scope: CoroutineScope
 ) {
 
     private val maxConcurrentDownloads = MutableStateFlow(3)
     private val activeDownloads = ConcurrentHashMap<String, Boolean>()
     private val pendingDownloads = LinkedList<DownloadTask>()
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
 
     init {
         scope.launch{

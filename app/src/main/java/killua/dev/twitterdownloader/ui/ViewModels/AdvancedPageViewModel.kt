@@ -2,9 +2,7 @@ package killua.dev.twitterdownloader.ui.ViewModels
 
 import android.content.Context
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import db.Download
 import db.DownloadStatus
@@ -13,6 +11,7 @@ import killua.dev.base.Model.DownloadTask
 import killua.dev.base.Model.MediaType
 import killua.dev.base.datastore.readLofterLoginAuth
 import killua.dev.base.datastore.readLofterLoginKey
+import killua.dev.base.di.ApplicationScope
 import killua.dev.base.states.CurrentState
 import killua.dev.base.ui.BaseViewModel
 import killua.dev.base.ui.SnackbarUIEffect
@@ -25,11 +24,11 @@ import killua.dev.twitterdownloader.api.Twitter.Model.TwitterUser
 import killua.dev.twitterdownloader.api.Twitter.TwitterDownloadAPI
 import killua.dev.twitterdownloader.download.DownloadQueueManager
 import killua.dev.twitterdownloader.repository.DownloadRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -56,6 +55,7 @@ class AdvancedPageViewModel @Inject constructor(
     private val twitterDownloadAPI: TwitterDownloadAPI,
     private val downloadQueueManager: DownloadQueueManager,
     private val downloadRepository: DownloadRepository,
+    @ApplicationScope private val applicationScope: CoroutineScope
 ): BaseViewModel<AdvancedPageUIIntent, AdvancedPageUIState, SnackbarUIEffect>(AdvancedPageUIState()) {
     private val mutex = Mutex()
     private val _lofterLoginState: MutableStateFlow<CurrentState> =
@@ -80,7 +80,7 @@ class AdvancedPageViewModel @Inject constructor(
             }
 
             AdvancedPageUIIntent.GetMyTwitterBookmark -> {
-                viewModelScope.launch {
+                applicationScope.launch {
                     twitterDownloadAPI.getBookmarksAllTweets(
                         onNewItems = { bookmarks ->
                             bookmarks.forEach { bookmark ->
@@ -109,7 +109,7 @@ class AdvancedPageViewModel @Inject constructor(
                 }
             }
             AdvancedPageUIIntent.GetMyTwitterLiked -> {
-                viewModelScope.launch {
+                applicationScope.launch {
                     twitterDownloadAPI.getLikesAllTweets(
                         onNewItems = { tweets ->
                             tweets.forEach { tweet ->
@@ -139,7 +139,7 @@ class AdvancedPageViewModel @Inject constructor(
             }
 
             is AdvancedPageUIIntent.GetSomeonesTwitterAccountInfo -> {
-                viewModelScope.launch {
+                applicationScope.launch {
                     emitState(uiState.value.copy(isFetchingTwitterUserInfo = true))
                     when (val result = twitterDownloadAPI.getUserBasicInfo(intent.screenName)) {
                         is NetworkResult.Success -> {
@@ -163,7 +163,7 @@ class AdvancedPageViewModel @Inject constructor(
             }
 
             is AdvancedPageUIIntent.OnConfirmTwitterDownloadMedia -> {
-                viewModelScope.launch {
+                applicationScope.launch {
                     val userId = intent.id
                     val userScreenName = intent.screenName
                     if (userId.isEmpty()) {
@@ -229,7 +229,7 @@ class AdvancedPageViewModel @Inject constructor(
                 mimeType = mediaType.mimeType
             )
 
-            viewModelScope.launch {
+            applicationScope.launch {
                 downloadRepository.insert(download)
                 downloadQueueManager.enqueue(
                     DownloadTask(
@@ -247,7 +247,7 @@ class AdvancedPageViewModel @Inject constructor(
     }
 
     private fun handleError(error: String) {
-        viewModelScope.launch{
+        applicationScope.launch{
             emitEffect(ShowSnackbar(error, actionLabel =  "OKAY" , withDismissAction = true))
         }
     }
