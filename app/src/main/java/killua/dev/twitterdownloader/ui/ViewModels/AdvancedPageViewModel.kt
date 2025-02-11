@@ -1,8 +1,6 @@
 package killua.dev.twitterdownloader.ui.ViewModels
 
 import android.content.Context
-import android.os.Build
-import androidx.annotation.RequiresApi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import db.Download
 import db.DownloadStatus

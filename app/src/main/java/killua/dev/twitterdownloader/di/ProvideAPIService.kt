@@ -44,7 +44,7 @@ object UserDataModule {
 @Singleton
 class UserDataManager @Inject constructor(
     private val context: Context,
-    private val scope: CoroutineScope
+    scope: CoroutineScope
 ) {
     private val _userData = MutableStateFlow(ApplicationUserDataTwitter("", "", ""))
     val userTwitterData: StateFlow<ApplicationUserDataTwitter> = _userData.asStateFlow()

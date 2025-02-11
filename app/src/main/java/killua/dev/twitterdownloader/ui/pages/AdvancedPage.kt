@@ -17,15 +17,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import killua.dev.base.ui.AdvancedPageLofterButtons
-import killua.dev.base.ui.AdvancedPageTwitterButtons
+import killua.dev.twitterdownloader.ui.components.AdvancedPageLofterButtons
+import killua.dev.twitterdownloader.ui.components.AdvancedPageTwitterButtons
 import killua.dev.base.ui.LocalNavController
 import killua.dev.base.ui.PrepareRoutes
 import killua.dev.base.ui.components.ActionsBotton
 import killua.dev.base.ui.components.AdvancedInputDialog
 import killua.dev.base.ui.components.CancellableAlert
 import killua.dev.base.ui.components.DevelopingAlert
-import killua.dev.base.ui.components.MainInputDialog
 import killua.dev.base.ui.components.Section
 import killua.dev.base.ui.components.paddingTop
 import killua.dev.base.ui.tokens.SizeTokens

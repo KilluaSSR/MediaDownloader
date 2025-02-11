@@ -27,17 +27,17 @@ sealed class CurrentState {
     val backgroundColor: Color
         @Composable
         get() = when (this) {
-            Idle -> MaterialTheme.colorScheme.tertiaryContainer
-            Processing -> MaterialTheme.colorScheme.tertiaryContainer
-            Success -> MaterialTheme.colorScheme.tertiaryContainer
+            Idle -> MaterialTheme.colorScheme.errorContainer
+            Processing -> MaterialTheme.colorScheme.errorContainer
+            Success -> MaterialTheme.colorScheme.primaryContainer
             Error -> MaterialTheme.colorScheme.errorContainer
         }
     val textColor: Color
         @Composable
         get() = when (this) {
-            Idle -> MaterialTheme.colorScheme.onTertiaryContainer
-            Processing -> MaterialTheme.colorScheme.onTertiaryContainer
-            Success -> MaterialTheme.colorScheme.onTertiaryContainer
+            Idle -> MaterialTheme.colorScheme.onErrorContainer
+            Processing -> MaterialTheme.colorScheme.onErrorContainer
+            Success -> MaterialTheme.colorScheme.onPrimaryContainer
             Error -> MaterialTheme.colorScheme.onErrorContainer
         }
 }

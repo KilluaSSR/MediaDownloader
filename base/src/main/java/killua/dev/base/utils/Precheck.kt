@@ -10,17 +10,11 @@ import killua.dev.base.datastore.readLofterLoginKey
 import killua.dev.base.datastore.readOnlyWifi
 import killua.dev.base.datastore.readPixivPHPSSID
 import killua.dev.base.di.ApplicationScope
-import killua.dev.base.repository.SettingsRepository
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 sealed class DownloadCheckError(message: String) : Exception(message) {

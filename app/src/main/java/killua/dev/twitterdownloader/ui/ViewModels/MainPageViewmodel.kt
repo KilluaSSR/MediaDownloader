@@ -23,9 +23,9 @@ import killua.dev.twitterdownloader.api.Pixiv.PixivService
 import killua.dev.twitterdownloader.api.Twitter.TwitterDownloadAPI
 import killua.dev.twitterdownloader.download.DownloadQueueManager
 import killua.dev.twitterdownloader.repository.DownloadRepository
-import killua.dev.twitterdownloader.utils.NavigateLofterProfile
-import killua.dev.twitterdownloader.utils.NavigatePixivProfile
-import killua.dev.twitterdownloader.utils.NavigateTwitterProfile
+import killua.dev.twitterdownloader.utils.navigateLofterProfile
+import killua.dev.twitterdownloader.utils.navigatePixivProfile
+import killua.dev.twitterdownloader.utils.navigateTwitterProfile
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -160,9 +160,9 @@ class MainPageViewmodel @Inject constructor(
             is MainPageUIIntent.NavigateToFavouriteUser -> {
                 withMainContext {
                     when(intent.platforms){
-                        AvailablePlatforms.Twitter -> intent.context.NavigateTwitterProfile(intent.userID,intent.screenName)
-                        AvailablePlatforms.Lofter -> intent.context.NavigateLofterProfile(intent.screenName)
-                        AvailablePlatforms.Pixiv -> intent.context.NavigatePixivProfile(intent.userID)
+                        AvailablePlatforms.Twitter -> intent.context.navigateTwitterProfile(intent.userID,intent.screenName)
+                        AvailablePlatforms.Lofter -> intent.context.navigateLofterProfile(intent.screenName)
+                        AvailablePlatforms.Pixiv -> intent.context.navigatePixivProfile(intent.userID)
                     }
                 }
             }

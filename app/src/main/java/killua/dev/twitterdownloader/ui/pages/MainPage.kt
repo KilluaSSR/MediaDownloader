@@ -24,7 +24,7 @@ import killua.dev.base.Model.AvailablePlatforms
 import killua.dev.base.Model.SupportedUrlType
 import killua.dev.base.Model.platformsDrawable
 import killua.dev.base.ui.LocalNavController
-import killua.dev.base.ui.MainPageButtons
+import killua.dev.twitterdownloader.ui.components.MainPageButtons
 import killua.dev.base.ui.MainRoutes
 import killua.dev.base.ui.PrepareRoutes
 import killua.dev.base.ui.SnackbarUIEffect

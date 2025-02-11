@@ -7,7 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.ui.Modifier
 import db.DownloadStatus
 
-fun Modifier.videoClickable(
+fun Modifier.mediaClickable(
     context: Context,
     status: DownloadStatus,
     fileUri: Uri?,

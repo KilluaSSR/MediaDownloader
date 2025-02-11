@@ -84,7 +84,6 @@ fun BrowserPage(
                             webViewClient = object : WebViewClient() {
                                 override fun onPageFinished(view: WebView?, url: String?) {
                                     super.onPageFinished(view, url)
-                                    // 仅为Pixiv添加特殊处理
                                     if (platformConfig is PixivConfig && url == "https://www.pixiv.net/") {
                                         val cookieManager = CookieManager.getInstance()
                                         val cookies = cookieManager.getCookie(platformConfig.cookieDomain)

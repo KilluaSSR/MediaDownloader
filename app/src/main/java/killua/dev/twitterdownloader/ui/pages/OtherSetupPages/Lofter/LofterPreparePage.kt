@@ -162,7 +162,7 @@ fun LofterPreparePage() {
                             navController.navigateSingle(CookiesRoutes.LofterCookiesBrowser.route)
                         }
                     },
-                    color = if (loginState.value == CurrentState.Idle || loginState.value == CurrentState.Error) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
+                    color = loginState.value.backgroundColor
                 )
             }
 
@@ -174,7 +174,7 @@ fun LofterPreparePage() {
                     onClick = {
                         showDatePicker = true
                     },
-                    color = if (dateSelectedState.value == CurrentState.Idle || dateSelectedState.value == CurrentState.Error) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
+                    color = dateSelectedState.value.backgroundColor
                 )
             }
 
@@ -186,7 +186,7 @@ fun LofterPreparePage() {
                     onClick = {
                         navController.navigateSingle(PrepareRoutes.LofterPrepareTagsPage.route)
                     },
-                    color = if (tagsAddedState.value == CurrentState.Idle || tagsAddedState.value == CurrentState.Error) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
+                    color = tagsAddedState.value.backgroundColor
                 )
 
             }

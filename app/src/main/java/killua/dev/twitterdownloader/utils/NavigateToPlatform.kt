@@ -6,7 +6,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 
-fun Context.NavigateTwitterProfile(userID: String? = null, screenName: String){
+fun Context.navigateTwitterProfile(userID: String? = null, screenName: String){
     val intent = try {
         if(isTwitterInstalled()){
             if(!userID.isNullOrEmpty()){
@@ -24,19 +24,19 @@ fun Context.NavigateTwitterProfile(userID: String? = null, screenName: String){
     startActivity(intent)
 }
 
-fun Context.NavigateLofterProfile(screenName: String){
+fun Context.navigateLofterProfile(screenName: String){
     val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://$screenName.lofter.com/"))
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     startActivity(intent)
 }
 
-fun Context.NavigatePixivProfile(userID: String? = null){
+fun Context.navigatePixivProfile(userID: String? = null){
     val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.pixiv.net/users/$userID"))
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     startActivity(intent)
 }
 
-fun Context.NavigateTwitterTweet(userScreenName:String? , tweetID: String? = null, url: String?){
+fun Context.navigateTwitterTweet(userScreenName:String?, tweetID: String? = null, url: String?){
     val intent = if(userScreenName?.isNotBlank() == true && tweetID?.isNotBlank() == true){
         Intent(Intent.ACTION_VIEW, Uri.parse("https://x.com/$userScreenName/status/$tweetID"))
     }else{
@@ -46,18 +46,14 @@ fun Context.NavigateTwitterTweet(userScreenName:String? , tweetID: String? = nul
     startActivity(intent)
 }
 
-fun Context.NavigateToLofter(link: String? = null){
+fun Context.navigateToLofter(link: String? = null){
     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     startActivity(intent)
 }
 
 fun Context.isTwitterInstalled(): Boolean = try {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        packageManager.getPackageInfo("com.twitter.android", PackageManager.PackageInfoFlags.of(0))
-    } else {
-        packageManager.getPackageInfo("com.twitter.android", 0)
-    }
+    packageManager.getPackageInfo("com.twitter.android", PackageManager.PackageInfoFlags.of(0))
     true
 } catch (e: Exception) {
     false

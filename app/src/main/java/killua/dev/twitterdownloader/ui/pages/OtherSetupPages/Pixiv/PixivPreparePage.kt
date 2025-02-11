@@ -115,7 +115,7 @@ fun PixivPreparePage() {
                             navController.navigateSingle(CookiesRoutes.PixivCookiesBrowser.route)
                         }
                     },
-                    color = if (loginState.value == CurrentState.Idle || loginState.value == CurrentState.Error) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
+                    color = loginState.value.backgroundColor
                 )
             }
 
@@ -127,7 +127,7 @@ fun PixivPreparePage() {
                     onClick = {
                         isShowReset = true
                     },
-                    color = MaterialTheme.colorScheme.errorContainer
+                    color = CurrentState.Error.backgroundColor
                 )
             }
         }

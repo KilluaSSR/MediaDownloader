@@ -3,26 +3,18 @@ package killua.dev.twitterdownloader.download
 import android.content.Context
 import android.net.Uri
 import dagger.hilt.android.qualifiers.ApplicationContext
-import db.Download
 import killua.dev.base.Model.DownloadTask
 import killua.dev.base.datastore.readMaxConcurrentDownloads
 import killua.dev.base.di.ApplicationScope
-import killua.dev.base.repository.SettingsRepository
 import killua.dev.twitterdownloader.repository.DownloadRepository
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import java.util.LinkedList
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.math.max
 
 
 @Singleton

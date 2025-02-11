@@ -193,11 +193,11 @@ fun ClickableConfigurationButton(
         ) {
             LabelLargeText(
                 text = title,
-                color = getColorRelationship(color)
+                color = state.textColor
             )
             BodySmallText(
                 text = description,
-                color = getColorRelationship(color)
+                color = state.textColor
             )
         }
     }

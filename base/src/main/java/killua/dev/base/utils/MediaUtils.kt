@@ -17,7 +17,7 @@ class VideoDurationRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : VideoDurationRepository {
     private val durationCache = LruCache<String, Long>(100)
-    private val retrieverPool = Semaphore(4) // 限制同时进行的元数据提取数量
+    private val retrieverPool = Semaphore(4)
 
     override suspend fun getVideoDuration(uri: Uri): Long = withContext(Dispatchers.IO) {
         val key = uri.toString()

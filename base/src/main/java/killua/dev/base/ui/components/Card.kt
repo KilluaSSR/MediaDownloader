@@ -24,7 +24,6 @@ import killua.dev.base.ui.tokens.SizeTokens
 @ExperimentalMaterial3Api
 @Composable
 fun OverviewCard(
-    modifier: Modifier = Modifier.Companion,
     title: String,
     icon: ImageVector,
     colorContainer: Color,

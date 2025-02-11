@@ -1,4 +1,4 @@
-package killua.dev.base.ui
+package killua.dev.twitterdownloader.ui.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountCircle
@@ -6,6 +6,7 @@ import androidx.compose.material.icons.rounded.Bookmarks
 import androidx.compose.material.icons.rounded.Subscriptions
 import androidx.compose.material.icons.rounded.ThumbUp
 import androidx.compose.material.icons.rounded.VideoLibrary
+import killua.dev.base.ui.AdvancedpageRoutes
 
 val AdvancedPageTwitterButtons = listOf(
     ButtonsEssentials(

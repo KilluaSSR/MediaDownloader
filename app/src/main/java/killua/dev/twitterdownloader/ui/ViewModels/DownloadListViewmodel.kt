@@ -30,8 +30,8 @@ import killua.dev.twitterdownloader.Model.DownloadedItem
 import killua.dev.twitterdownloader.download.DownloadManager
 import killua.dev.twitterdownloader.download.DownloadQueueManager
 import killua.dev.twitterdownloader.repository.DownloadRepository
-import killua.dev.twitterdownloader.utils.NavigateToLofter
-import killua.dev.twitterdownloader.utils.NavigateTwitterTweet
+import killua.dev.twitterdownloader.utils.navigateToLofter
+import killua.dev.twitterdownloader.utils.navigateTwitterTweet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.combine
@@ -429,14 +429,14 @@ class DownloadListViewModel @Inject constructor(
             withMainContext {
                 when(download.type) {
                     AvailablePlatforms.Twitter -> {
-                        intent.context.NavigateTwitterTweet(
+                        intent.context.navigateTwitterTweet(
                             download.screenName,
                             download.tweetID,
                             download.link
                         )
                     }
                     AvailablePlatforms.Lofter -> {
-                        intent.context.NavigateToLofter(download.tweetID!!)
+                        intent.context.navigateToLofter(download.tweetID!!)
                     }
 
                     AvailablePlatforms.Pixiv -> {}

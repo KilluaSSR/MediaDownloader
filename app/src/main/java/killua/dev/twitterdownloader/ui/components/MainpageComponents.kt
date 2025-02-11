@@ -44,7 +44,6 @@ import androidx.navigation.NavHostController
 import killua.dev.base.Model.AvailablePlatforms
 import killua.dev.base.Model.ReportOption
 import killua.dev.base.ui.LocalNavController
-import killua.dev.base.ui.MainPageButtonsAction
 import killua.dev.base.ui.components.BodyMediumText
 import killua.dev.base.ui.components.BottomSheet
 import killua.dev.base.ui.components.BottomSheetItem
@@ -52,10 +51,7 @@ import killua.dev.base.ui.components.OverviewCard
 import killua.dev.base.ui.components.TitleLargeText
 import killua.dev.base.ui.components.TopBar
 import killua.dev.base.utils.navigateSingle
-import killua.dev.base.ui.MainPageMenuButtons
 import killua.dev.base.ui.animations.AnimatedTextContainer
-import killua.dev.base.ui.components.CommonInputDialog
-import killua.dev.base.ui.components.InputDialogConfig
 import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.twitterdownloader.utils.openGithubIssues
 import killua.dev.twitterdownloader.utils.openMail
@@ -184,37 +180,30 @@ fun ReportDialog(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    // 进出动画时长
     val inAnimDuration = 600
     val outAnimDuration = 450
 
-    // 控制对话框是否可见
     var isDialogVisible by remember { mutableStateOf(false) }
 
-    // 根据当前可见状态切换不同动画时长
     val animationSpec = tween<Float>(
         durationMillis = if (isDialogVisible) inAnimDuration else outAnimDuration
     )
 
-    // 透明度动画
     val dialogAlpha by animateFloatAsState(
         targetValue = if (isDialogVisible) 1f else 0f,
         animationSpec = animationSpec
     )
 
-    // 旋转动画
     val dialogRotationX by animateFloatAsState(
         targetValue = if (isDialogVisible) 0f else -90f,
         animationSpec = animationSpec
     )
 
-    // 缩放动画
     val dialogScale by animateFloatAsState(
         targetValue = if (isDialogVisible) 1f else 0f,
         animationSpec = animationSpec
     )
 
-    // 带动画的关闭逻辑
     val dismissWithAnimation: () -> Unit = {
         scope.launch {
             isDialogVisible = false
@@ -223,7 +212,6 @@ fun ReportDialog(
         }
     }
 
-    // 进入时启动显示动画
     LaunchedEffect(Unit) {
         isDialogVisible = true
     }
@@ -231,7 +219,6 @@ fun ReportDialog(
     AlertDialog(
         onDismissRequest = { dismissWithAnimation() },
         containerColor = MaterialTheme.colorScheme.surface,
-        // 在这里应用动画效果
         modifier = Modifier
             .padding(SizeTokens.Level6)
             .alpha(dialogAlpha)
@@ -251,7 +238,6 @@ fun ReportDialog(
             )
         },
         text = {
-            // 原对话框内容，保持原有排版、间距
             Column(
                 modifier = Modifier.padding(horizontal = SizeTokens.Level2)
             ) {
@@ -311,7 +297,6 @@ fun ReportDialog(
             }
         },
         confirmButton = {
-            // 按钮布局，同样保持原有排版与间距
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

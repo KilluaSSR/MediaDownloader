@@ -9,7 +9,7 @@ class FileDelete @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
 
-    suspend fun deleteFile(uri: Uri): Boolean {
+    fun deleteFile(uri: Uri): Boolean {
         return try {
             val deletedRows = context.contentResolver.delete(uri, null, null)
             deletedRows > 0

@@ -34,7 +34,7 @@ import killua.dev.base.ui.components.DownloadActions
 import killua.dev.base.ui.components.DownloadThumbnail
 import killua.dev.base.ui.components.ShowStatus
 import killua.dev.base.ui.tokens.SizeTokens
-import killua.dev.base.utils.videoClickable
+import killua.dev.base.utils.mediaClickable
 import killua.dev.twitterdownloader.Model.DownloadedItem
 
 @Composable
@@ -52,7 +52,7 @@ fun DownloadItemCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = SizeTokens.Level16, vertical = SizeTokens.Level1)
-            .videoClickable(
+            .mediaClickable(
                 context = context,
                 status = status,
                 fileUri = item.fileUri,

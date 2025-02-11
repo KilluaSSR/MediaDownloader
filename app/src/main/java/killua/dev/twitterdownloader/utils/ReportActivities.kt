@@ -34,7 +34,7 @@ fun openMail(context: Context) {
         
             Additional Information:
             
-        """.trimIndent()) // 邮件正文模板
+        """.trimIndent())
     }
     try {
         context.startActivity(intent)

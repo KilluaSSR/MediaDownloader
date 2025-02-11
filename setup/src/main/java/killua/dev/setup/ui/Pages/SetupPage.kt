@@ -99,7 +99,7 @@ fun SetupPage() {
                         )
                     }
                 },
-                color = if (notificationState.value == CurrentState.Idle || notificationState.value == CurrentState.Error) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
+                color = notificationState.value.backgroundColor
             )
         }
         Spacer(modifier = Modifier.size(SizeTokens.Level24))
@@ -113,7 +113,7 @@ fun SetupPage() {
                        navController.navigateSingle(SetupRoutes.BrowserPage.route)
                    }
                 },
-                color = if (loginState.value == CurrentState.Idle || loginState.value == CurrentState.Error) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
+                color = loginState.value.backgroundColor
             )
 
         }
