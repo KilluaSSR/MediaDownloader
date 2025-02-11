@@ -14,9 +14,11 @@ import killua.dev.base.datastore.readApplicationUserID
 import killua.dev.base.datastore.readDelay
 import killua.dev.base.datastore.readLofterLoginAuth
 import killua.dev.base.datastore.readLofterLoginKey
+import killua.dev.base.datastore.readPixivPHPSSID
 import killua.dev.base.di.ApplicationScope
 import killua.dev.base.utils.ShowNotification
 import killua.dev.twitterdownloader.api.Lofter.LofterService
+import killua.dev.twitterdownloader.api.Pixiv.PixivService
 import killua.dev.twitterdownloader.api.Twitter.TwitterDownloadAPI
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -49,6 +51,9 @@ class UserDataManager @Inject constructor(
 
     private val _userLofterData = MutableStateFlow(ApplicationUserDataLofter("", ""))
     val userLofterData: StateFlow<ApplicationUserDataLofter> = _userLofterData.asStateFlow()
+
+    private val _userPixivPHPSSID = MutableStateFlow("")
+    val userPixivPHPSSID: StateFlow<String> = _userPixivPHPSSID.asStateFlow()
 
     private val _delay = MutableStateFlow(2)
     val delay : StateFlow<Int> = _delay.asStateFlow()
@@ -87,6 +92,12 @@ class UserDataManager @Inject constructor(
                 _delay.value = it
             }
         }
+
+        scope.launch{
+            context.readPixivPHPSSID().collect{
+                _userPixivPHPSSID.value = it
+            }
+        }
     }
 }
 
@@ -110,6 +121,15 @@ object ProvideAPI {
         @ApplicationScope scope: CoroutineScope
     ): LofterService {
         return LofterService(userDataManager,scope)
+    }
+
+    @Provides
+    @Singleton
+    fun providePixivService(
+        userDataManager: UserDataManager,
+        @ApplicationScope scope: CoroutineScope
+    ): PixivService {
+        return PixivService(userDataManager,scope)
     }
 }
 

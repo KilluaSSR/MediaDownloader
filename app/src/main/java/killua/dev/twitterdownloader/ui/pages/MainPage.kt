@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.base.Model.AvailablePlatforms
+import killua.dev.base.Model.SupportedUrlType
 import killua.dev.base.Model.platformsDrawable
 import killua.dev.base.ui.LocalNavController
 import killua.dev.base.ui.MainPageButtons
@@ -98,9 +99,13 @@ fun MainPage(
                 },
             ) {
                 when(uiState.value.loginErrorPlatform){
-                    AvailablePlatforms.Twitter -> TODO()
+                    AvailablePlatforms.Twitter -> {}
                     AvailablePlatforms.Lofter -> {
                         navController.navigateSingle(PrepareRoutes.LofterPreparePage.route)
+                    }
+
+                    AvailablePlatforms.Pixiv -> {
+                        navController.navigateSingle(PrepareRoutes.PixivPreparePage.route)
                     }
                 }
             }
@@ -111,13 +116,21 @@ fun MainPage(
             showDialog = showDialog,
             onDismiss = { showDialog = false },
             onConfirm = { url ->
-                viewmodel.launchOnIO{
-                    if(url.isBlank()){
-                        viewmodel.emitEffect(SnackbarUIEffect.ShowSnackbar("You need to paste a url here."))
-                    }else if(!url.contains("x.com/") && !url.contains("twitter.com/") && !url.contains("lofter.com/")) {
-                        viewmodel.emitEffect(SnackbarUIEffect.ShowSnackbar("Unsupported url"))
-                    }else {
-                        viewmodel.emitIntent(MainPageUIIntent.ExecuteDownload(url))
+                viewmodel.launchOnIO {
+                    when {
+                        url.isBlank() -> {
+                            viewmodel.emitEffect(SnackbarUIEffect.ShowSnackbar("You need to paste a url here."))
+                        }
+                        else -> {
+                            when (SupportedUrlType.fromUrl(url)) {
+                                SupportedUrlType.UNKNOWN -> {
+                                    viewmodel.emitEffect(SnackbarUIEffect.ShowSnackbar("Unsupported url"))
+                                }
+                                else -> {
+                                    viewmodel.emitIntent(MainPageUIIntent.ExecuteDownload(url))
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -130,13 +143,13 @@ fun MainPage(
         ) {
             Section(title = "Overview") {
                 if(uiState.value.youHaveDownloadedSth){
-                    FavouriteCard(uiState.value.favouriteUserName, uiState.value.favouriteUserScreenName, uiState.value.downloadedTimes,true){
+                    FavouriteCard(uiState.value.favouriteUserName, uiState.value.favouriteUserScreenName, uiState.value.downloadedTimes, uiState.value.favouriteUserFromPlatform, true){
                         viewmodel.launchOnIO {
-                            viewmodel.emitIntent(MainPageUIIntent.NavigateToFavouriteUser(context,uiState.value.favouriteUserID,uiState.value.favouriteUserScreenName))
+                            viewmodel.emitIntent(MainPageUIIntent.NavigateToFavouriteUser(context, uiState.value.favouriteUserID,uiState.value.favouriteUserFromPlatform, uiState.value.favouriteUserScreenName))
                         }
                     }
                 }else{
-                    FavouriteCard("", "", 0,false) {}
+                    FavouriteCard("", "", 0,uiState.value.favouriteUserFromPlatform, false) {}
                 }
             }
 

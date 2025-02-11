@@ -41,6 +41,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import killua.dev.base.Model.AvailablePlatforms
 import killua.dev.base.Model.ReportOption
 import killua.dev.base.ui.LocalNavController
 import killua.dev.base.ui.MainPageButtonsAction
@@ -98,6 +99,7 @@ fun FavouriteCard(
     favouriteUser: String,
     favouriteUserScreenName: String,
     downloadCount: Int,
+    downloadPlatforms: AvailablePlatforms,
     downloaded: Boolean,
     onClick: () -> Unit
 ) {
@@ -108,7 +110,11 @@ fun FavouriteCard(
         onColorContainer = MaterialTheme.colorScheme.onPrimaryContainer,
         content = {
             val titleText = if (downloaded) {
-                "$favouriteUser @$favouriteUserScreenName"
+                when(downloadPlatforms){
+                    AvailablePlatforms.Twitter -> "$favouriteUser @$favouriteUserScreenName"
+                    AvailablePlatforms.Lofter -> "$favouriteUser @$favouriteUserScreenName"
+                    AvailablePlatforms.Pixiv -> "@$favouriteUserScreenName"
+                }
             } else {
                 "Nothing here"
             }

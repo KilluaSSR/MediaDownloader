@@ -68,7 +68,6 @@ class AdvancedPageViewModel @Inject constructor(
         login == CurrentState.Success
     }.flowOnIO().stateInScope(false)
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override suspend fun onEvent(state: AdvancedPageUIState, intent: AdvancedPageUIIntent) {
         when(intent){
             is AdvancedPageUIIntent.OnEntry -> {

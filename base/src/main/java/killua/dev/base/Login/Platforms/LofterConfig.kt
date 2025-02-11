@@ -19,6 +19,7 @@ class LofterConfig : PlatformConfig {
                     pattern = "LOFTER-PHONE-LOGIN-AUTH=([^;]+)",
                     saveFunction = { context, cookieInfo ->
                         context.writeLofterLoginKey("LOFTER-PHONE-LOGIN-AUTH")
+                        println("LOFTER = "+cookieInfo.value)
                         context.writeLofterLoginAuth(cookieInfo.value)
                         val tenDaysLater = System.currentTimeMillis() + (10L * 24 * 60 * 60 * 1000)
                         context.writeLofterCookieExpiration(tenDaysLater.toString())

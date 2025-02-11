@@ -7,7 +7,7 @@ sealed class MainRoutes(val route: String) {
     data object MainPage : MainRoutes(route = "main_page")
     data object UserinfoPage : MainRoutes(route = "userinfo_page")
     data object Download : MainRoutes(route = "downloading")
-    data object DownloadPage : MainRoutes(route = "downloaded_page")
+    data object DownloadListPage : MainRoutes(route = "downloaded_page")
     data object AdvancedPage : MainRoutes(route = "advanced_page")
     data object SpecificTwitterUserPage :
         MainRoutes(route = "specific_twitter_user_page/{$ARG_USER_ID}") {
@@ -30,8 +30,10 @@ sealed class AdvancedpageRoutes(val route: String){
 
 sealed class PrepareRoutes(val route: String){
     data object LofterPreparePage: PrepareRoutes(route = "lofter_prepare_page")
+    data object PixivPreparePage: PrepareRoutes(route = "pixiv_prepare_page")
     data object LofterPrepareTagsPage: PrepareRoutes(route = "lofter_prepare_tags_page")
 }
 sealed class CookiesRoutes(val route: String){
     data object LofterCookiesBrowser: CookiesRoutes(route = "lofter_cookies_browser")
+    data object PixivCookiesBrowser: CookiesRoutes(route = "pixiv_cookies_browser")
 }

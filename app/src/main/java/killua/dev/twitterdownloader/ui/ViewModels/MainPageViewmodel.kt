@@ -1,8 +1,6 @@
 package killua.dev.twitterdownloader.ui.ViewModels
 
 import android.content.Context
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import db.Download
@@ -21,10 +19,12 @@ import killua.dev.base.utils.DownloadPreChecks
 import killua.dev.base.utils.MediaFileNameStrategy
 import killua.dev.twitterdownloader.Model.NetworkResult
 import killua.dev.twitterdownloader.api.Lofter.LofterService
-import killua.dev.twitterdownloader.api.Twitter.Model.TwitterUser
+import killua.dev.twitterdownloader.api.Pixiv.PixivService
 import killua.dev.twitterdownloader.api.Twitter.TwitterDownloadAPI
 import killua.dev.twitterdownloader.download.DownloadQueueManager
 import killua.dev.twitterdownloader.repository.DownloadRepository
+import killua.dev.twitterdownloader.utils.NavigateLofterProfile
+import killua.dev.twitterdownloader.utils.NavigatePixivProfile
 import killua.dev.twitterdownloader.utils.NavigateTwitterProfile
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -34,7 +34,7 @@ import javax.inject.Inject
 
 sealed class MainPageUIIntent : UIIntent {
     data class ExecuteDownload(val url: String) : MainPageUIIntent()
-    data class NavigateToFavouriteUser(val context: Context, val userID: String, val screenName: String) : MainPageUIIntent()
+    data class NavigateToFavouriteUser(val context: Context, val userID: String,val platforms: AvailablePlatforms, val screenName: String) : MainPageUIIntent()
     object DismissLoginDialog : MainPageUIIntent()
 }
 
@@ -43,6 +43,7 @@ data class MainPageUIState(
     val favouriteUserName: String = "",
     val favouriteUserScreenName: String = "",
     val favouriteUserID: String = "",
+    val favouriteUserFromPlatform: AvailablePlatforms = AvailablePlatforms.Twitter,
     val downloadedTimes: Int = 0,
     val showNotLoggedInDialog: Boolean = false,
     val loginErrorPlatform: AvailablePlatforms = AvailablePlatforms.Twitter
@@ -52,6 +53,7 @@ data class MainPageUIState(
 class MainPageViewmodel @Inject constructor(
     private val twitterDownloadAPI: TwitterDownloadAPI,
     private val lofterService: LofterService,
+    private val pixivService: PixivService,
     private val downloadRepository: DownloadRepository,
     private val downloadQueueManager: DownloadQueueManager,
     private val downloadEventManager: DownloadEventManager,
@@ -80,17 +82,41 @@ class MainPageViewmodel @Inject constructor(
     suspend fun presentFavouriteCardDetails() {
         val mostDownloaded = downloadRepository.getMostDownloadedUser()
         if (mostDownloaded != null) {
-            emitState(uiState.value.copy(
-                youHaveDownloadedSth = true,
-                favouriteUserID = mostDownloaded.twitterUserId!!,
-                favouriteUserName = mostDownloaded.twitterName!!,
-                favouriteUserScreenName = mostDownloaded.twitterScreenName!!,
-                downloadedTimes = mostDownloaded.totalDownloads
-            ))
+            when(mostDownloaded.platforms){
+                AvailablePlatforms.Twitter -> {
+                    emitState(uiState.value.copy(
+                        youHaveDownloadedSth = true,
+                        favouriteUserID = mostDownloaded.userID!!,
+                        favouriteUserName = mostDownloaded.name!!,
+                        favouriteUserFromPlatform = mostDownloaded.platforms,
+                        favouriteUserScreenName = mostDownloaded.screenName!!,
+                        downloadedTimes = mostDownloaded.totalDownloads
+                    ))
+                }
+                AvailablePlatforms.Lofter -> {
+                    emitState(uiState.value.copy(
+                        youHaveDownloadedSth = true,
+                        favouriteUserID = mostDownloaded.userID!!,
+                        favouriteUserName = mostDownloaded.name!!,
+                        favouriteUserFromPlatform = mostDownloaded.platforms,
+                        favouriteUserScreenName = mostDownloaded.screenName!!,
+                        downloadedTimes = mostDownloaded.totalDownloads
+                    ))
+                }
+                AvailablePlatforms.Pixiv -> {
+                    emitState(uiState.value.copy(
+                        youHaveDownloadedSth = true,
+                        favouriteUserID = mostDownloaded.userID!!,
+                        favouriteUserName = "",
+                        favouriteUserFromPlatform = mostDownloaded.platforms,
+                        favouriteUserScreenName = mostDownloaded.screenName!!,
+                        downloadedTimes = mostDownloaded.totalDownloads
+                    ))
+                }
+            }
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override suspend fun onEvent(state: MainPageUIState, intent: MainPageUIIntent) {
         when (intent) {
             is MainPageUIIntent.ExecuteDownload -> {
@@ -117,12 +143,27 @@ class MainPageViewmodel @Inject constructor(
                                 ))
                             }
                         }
+
+                        AvailablePlatforms.Pixiv -> {
+                            downloadPreChecks.checkPixivLoggedIn().onSuccess {
+                                handleNewDownload(intent.url, AvailablePlatforms.Pixiv)
+                            }.onFailure { error ->
+                                emitState(uiState.value.copy(
+                                    showNotLoggedInDialog = true,
+                                    loginErrorPlatform = AvailablePlatforms.Pixiv
+                                ))
+                            }
+                        }
                     }
                 }
             }
             is MainPageUIIntent.NavigateToFavouriteUser -> {
                 withMainContext {
-                    intent.context.NavigateTwitterProfile(intent.userID,intent.screenName)
+                    when(intent.platforms){
+                        AvailablePlatforms.Twitter -> intent.context.NavigateTwitterProfile(intent.userID,intent.screenName)
+                        AvailablePlatforms.Lofter -> intent.context.NavigateLofterProfile(intent.screenName)
+                        AvailablePlatforms.Pixiv -> intent.context.NavigatePixivProfile(intent.userID)
+                    }
                 }
             }
             MainPageUIIntent.DismissLoginDialog -> {
@@ -139,12 +180,12 @@ class MainPageViewmodel @Inject constructor(
         }?.value!!
     }
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private suspend fun handleNewDownload(url: String, platforms: AvailablePlatforms) {
         downloadPreChecks.canStartDownload().onSuccess {
             when(platforms) {
                 AvailablePlatforms.Twitter -> handleTwitterDownload(url)
                 AvailablePlatforms.Lofter -> handleLofterDownload(url)
+                AvailablePlatforms.Pixiv -> handlePixivDownload(url)
             }
         }.onFailure { error ->
             viewModelScope.launch {
@@ -152,8 +193,36 @@ class MainPageViewmodel @Inject constructor(
             }
         }
     }
+    private suspend fun handlePixivDownload(url: String){
+        try {
+            when(val result = pixivService.getSingleBlogImage(url)){
+                is NetworkResult.Error -> {
+                    viewModelScope.launch {
+                        emitEffect(ShowSnackbar("Pixiv request error", withDismissAction = true, actionLabel = "OKAY"))
+                    }
+                }
+                is NetworkResult.Success -> {
+                    result.data.originalUrls.forEach { imageURL ->
+                        createAndStartDownload(
+                            url = imageURL,
+                            userId = result.data.userId,
+                            screenName = result.data.userName,
+                            platform = AvailablePlatforms.Pixiv,
+                            name = result.data.title,
+                            tweetID = imageURL,
+                            mainLink = url,
+                            mediaType = MediaType.PHOTO
+                        )
+                    }
+                }
+            }
+        }catch (e: Exception) {
+            viewModelScope.launch {
+                emitEffect(ShowSnackbar(e.message ?: "Internal Error"))
+            }
+        }
+    }
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private suspend fun handleTwitterDownload(url: String) {
         val tweetId = url.split("?")[0].split("/").last()
         try {
@@ -276,6 +345,7 @@ class MainPageViewmodel @Inject constructor(
                     DownloadTask(
                         id = uuid,
                         url = url,
+                        from = download.type,
                         fileName = fileName,
                         screenName = screenName,
                         type = mediaType

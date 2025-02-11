@@ -24,6 +24,18 @@ fun Context.NavigateTwitterProfile(userID: String? = null, screenName: String){
     startActivity(intent)
 }
 
+fun Context.NavigateLofterProfile(screenName: String){
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://$screenName.lofter.com/"))
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    startActivity(intent)
+}
+
+fun Context.NavigatePixivProfile(userID: String? = null){
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.pixiv.net/users/$userID"))
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    startActivity(intent)
+}
+
 fun Context.NavigateTwitterTweet(userScreenName:String? , tweetID: String? = null, url: String?){
     val intent = if(userScreenName?.isNotBlank() == true && tweetID?.isNotBlank() == true){
         Intent(Intent.ACTION_VIEW, Uri.parse("https://x.com/$userScreenName/status/$tweetID"))

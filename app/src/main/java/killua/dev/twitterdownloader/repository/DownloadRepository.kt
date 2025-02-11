@@ -37,7 +37,7 @@ class DownloadRepository @Inject constructor(
     // ✅ 获取状态为 "DOWNLOADING" 的任务
     suspend fun getDownloadingItems(): List<Download> = downloadDao.getDownloading()
 
-    // ✅ 获取下载次数最多的 Twitter 用户
+
     suspend fun getMostDownloadedUser(): MostDownloadedUser? = downloadDao.getMostDownloadedUser()
 
     // ✅ 获取所有 Pending 状态的下载项（等待下载）

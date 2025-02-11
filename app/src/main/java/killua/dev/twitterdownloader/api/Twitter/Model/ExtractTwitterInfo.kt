@@ -1,11 +1,6 @@
-package killua.dev.twitterdownloader.utils
+package killua.dev.twitterdownloader.api.Twitter.Model
 
 import android.util.Log
-import killua.dev.twitterdownloader.api.Twitter.Model.Bookmark
-import killua.dev.twitterdownloader.api.Twitter.Model.MediaPageData
-import killua.dev.twitterdownloader.api.Twitter.Model.RootDto
-import killua.dev.twitterdownloader.api.Twitter.Model.TweetResult
-import killua.dev.twitterdownloader.api.Twitter.Model.TwitterUser
 
 
 fun RootDto.extractTwitterUser(): TwitterUser {

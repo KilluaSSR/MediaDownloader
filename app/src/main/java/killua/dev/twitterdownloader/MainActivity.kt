@@ -19,12 +19,13 @@ import killua.dev.base.ui.MainRoutes
 import killua.dev.base.ui.PrepareRoutes
 import killua.dev.base.ui.animations.AnimatedNavHost
 import killua.dev.twitterdownloader.ui.pages.AboutPage
-import killua.dev.twitterdownloader.ui.pages.DownloadPage
+import killua.dev.twitterdownloader.ui.pages.DownloadListPage
 import killua.dev.twitterdownloader.ui.pages.MainPage
 import killua.dev.twitterdownloader.ui.pages.SettingsPage
 import killua.dev.twitterdownloader.ui.pages.AdvancedPage
 import killua.dev.twitterdownloader.ui.pages.OtherSetupPages.Lofter.LofterPreparePage
 import killua.dev.twitterdownloader.ui.pages.OtherSetupPages.Lofter.LofterPrepareTagsPage
+import killua.dev.twitterdownloader.ui.pages.OtherSetupPages.Pixiv.PixivPreparePage
 import killua.dev.twitterdownloader.ui.pages.UserInfoPage
 import killua.dev.twitterdownloader.ui.theme.TwitterDownloaderTheme
 
@@ -49,8 +50,8 @@ class MainActivity : ComponentActivity() {
                         composable(MainRoutes.MainPage.route) {
                             MainPage()
                         }
-                        composable(MainRoutes.DownloadPage.route){
-                            DownloadPage()
+                        composable(MainRoutes.DownloadListPage.route){
+                            DownloadListPage()
                         }
                         composable(MainRoutes.AdvancedPage.route){
                             AdvancedPage()
@@ -73,10 +74,16 @@ class MainActivity : ComponentActivity() {
                         composable(PrepareRoutes.LofterPrepareTagsPage.route){
                             LofterPrepareTagsPage()
                         }
+                        composable(PrepareRoutes.PixivPreparePage.route){
+                            PixivPreparePage()
+                        }
 
                         //Prepare Cookies
                         composable(CookiesRoutes.LofterCookiesBrowser.route){
                             BrowserPage(AvailablePlatforms.Lofter)
+                        }
+                        composable(CookiesRoutes.PixivCookiesBrowser.route){
+                            BrowserPage(AvailablePlatforms.Pixiv)
                         }
                     }
                 }

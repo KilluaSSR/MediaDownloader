@@ -1,60 +1,56 @@
-package killua.dev.twitterdownloader.ui.pages.OtherSetupPages.Lofter
+package killua.dev.twitterdownloader.ui.pages.OtherSetupPages
 
 import android.content.Context
-import android.webkit.CookieManager
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import killua.dev.base.datastore.readApplicationUserAuth
-import killua.dev.base.datastore.readApplicationUserCt0
 import killua.dev.base.datastore.readLofterEndTime
 import killua.dev.base.datastore.readLofterLoginAuth
 import killua.dev.base.datastore.readLofterLoginKey
 import killua.dev.base.datastore.readLofterStartTime
-import killua.dev.base.datastore.writeApplicationUserAuth
-import killua.dev.base.datastore.writeApplicationUserCt0
+import killua.dev.base.datastore.readPixivPHPSSID
 import killua.dev.base.states.CurrentState
 import killua.dev.base.ui.BaseViewModel
 import killua.dev.base.ui.SnackbarUIEffect
 import killua.dev.base.ui.UIIntent
 import killua.dev.base.ui.UIState
-import killua.dev.base.utils.NotificationUtils
 import killua.dev.twitterdownloader.db.LofterTagsRepository
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
-import kotlin.text.split
 
-data class LofterPreparePageUIState(
+data class PreparePageUIState(
     val isLoggedIn: Boolean = false,
     val isTagsAdded: Boolean = false
 ): UIState
 
-sealed class LofterPreparePageUIIntent : UIIntent {
-    data object OnDateChanged : LofterPreparePageUIIntent()
-    data class OnEntry(val context: Context) : LofterPreparePageUIIntent()
-    data class OnTagsChanged(val context: Context) : LofterPreparePageUIIntent()
-    data object OnLoggedOut: LofterPreparePageUIIntent()
+sealed class PreparePageUIIntent : UIIntent {
+    data object OnDateChanged : PreparePageUIIntent()
+    data class OnEntryLofter(val context: Context) : PreparePageUIIntent()
+    data class OnEntryPixiv(val context: Context) : PreparePageUIIntent()
+    data class OnTagsChanged(val context: Context) : PreparePageUIIntent()
+    data object OnLofterLoggedOut: PreparePageUIIntent()
+    data object OnPixivLoggedOut: PreparePageUIIntent()
 }
 
 @HiltViewModel
-class LofterPreparePageViewModel @Inject constructor(
+class PreparePageViewModel @Inject constructor(
     private val tagsRepository: LofterTagsRepository
-): BaseViewModel<LofterPreparePageUIIntent, LofterPreparePageUIState,SnackbarUIEffect>(
-    LofterPreparePageUIState()
+): BaseViewModel<PreparePageUIIntent, PreparePageUIState,SnackbarUIEffect>(
+    PreparePageUIState()
 ){
     private val mutex = Mutex()
-    private val _loginState: MutableStateFlow<CurrentState> =
+    private val _lofterLoginState: MutableStateFlow<CurrentState> =
         MutableStateFlow(CurrentState.Idle)
-    val loginState: StateFlow<CurrentState> =
-        _loginState.stateInScope(CurrentState.Idle)
+    val lofterLoginState: StateFlow<CurrentState> =
+        _lofterLoginState.stateInScope(CurrentState.Idle)
+
+    private val _pixivLoginState: MutableStateFlow<CurrentState> =
+        MutableStateFlow(CurrentState.Idle)
+    val pixivLoginState: StateFlow<CurrentState> =
+        _pixivLoginState.stateInScope(CurrentState.Idle)
 
     private val _dateSelectedState: MutableStateFlow<CurrentState> =
         MutableStateFlow(CurrentState.Idle)
@@ -64,18 +60,21 @@ class LofterPreparePageViewModel @Inject constructor(
         MutableStateFlow(CurrentState.Idle)
     val tagsAddedState: StateFlow<CurrentState>  = _tagsAddedState.stateInScope(CurrentState.Idle)
 
-    val eligibility: StateFlow<Boolean> = _loginState.map { login ->
+    val lofterEligibility: StateFlow<Boolean> = _lofterLoginState.map { login ->
+        login == CurrentState.Success}.flowOnIO().stateInScope(false)
+    val pixivEligibility: StateFlow<Boolean> = _pixivLoginState.map { login ->
         login == CurrentState.Success}.flowOnIO().stateInScope(false)
 
     override suspend fun onEvent(
-        state: LofterPreparePageUIState,
-        intent: LofterPreparePageUIIntent
+        state: PreparePageUIState,
+        intent: PreparePageUIIntent
     ) {
         when(intent){
-            is LofterPreparePageUIIntent.OnDateChanged -> {
+            is PreparePageUIIntent.OnDateChanged -> {
                 _dateSelectedState.value = CurrentState.Success
             }
-            is LofterPreparePageUIIntent.OnEntry -> {
+
+            is PreparePageUIIntent.OnEntryLofter -> {
                 launchOnIO {
                     val tags = tagsRepository.observeAllDownloads().first()?.tags
                     if(!tags.isNullOrEmpty()){
@@ -88,16 +87,31 @@ class LofterPreparePageViewModel @Inject constructor(
                     val startDate = intent.context.readLofterStartTime().first()
                     val endDate = intent.context.readLofterEndTime().first()
                     if(loginKey.isNotBlank() && loginAuth.isNotBlank()){
-                        _loginState.value = CurrentState.Success
+                        _lofterLoginState.value = CurrentState.Success
                     }
                     if(startDate != 0L && endDate != 0L){
                         _dateSelectedState.value = CurrentState.Success
                     }
                 }
             }
-            is LofterPreparePageUIIntent.OnTagsChanged -> TODO()
-            LofterPreparePageUIIntent.OnLoggedOut -> {
-                _loginState.value = CurrentState.Idle
+
+            is PreparePageUIIntent.OnEntryPixiv -> {
+                mutex.withLock{
+                    val PHPSSID = intent.context.readPixivPHPSSID().first()
+                    if (PHPSSID.isNotBlank()){
+                        _pixivLoginState.value = CurrentState.Success
+                    }
+                }
+            }
+
+            is PreparePageUIIntent.OnTagsChanged -> TODO()
+            PreparePageUIIntent.OnLofterLoggedOut -> {
+                _lofterLoginState.value = CurrentState.Idle
+            }
+
+
+            PreparePageUIIntent.OnPixivLoggedOut -> {
+                _pixivLoginState.value = CurrentState.Idle
             }
         }
     }

@@ -1,4 +1,4 @@
-package killua.dev.twitterdownloader.utils
+package killua.dev.twitterdownloader.api.Lofter.Model
 
 fun String.extractLofterUserDomain(): String? {
     val pattern = "https://([^.]+)\\.lofter".toRegex()

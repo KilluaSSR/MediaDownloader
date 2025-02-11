@@ -48,8 +48,8 @@ import killua.dev.base.ui.components.paddingBottom
 import killua.dev.base.ui.components.paddingHorizontal
 import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.twitterdownloader.ui.FilterContent
-import killua.dev.twitterdownloader.ui.ViewModels.DownloadPageUIIntent.*
-import killua.dev.twitterdownloader.ui.ViewModels.DownloadedViewModel
+import killua.dev.twitterdownloader.ui.ViewModels.DownloadListPageUIIntent.*
+import killua.dev.twitterdownloader.ui.ViewModels.DownloadListViewModel
 import killua.dev.twitterdownloader.ui.components.DownloadItemCard
 import killua.dev.twitterdownloader.ui.components.Loading
 import killua.dev.twitterdownloader.ui.components.MainScaffold
@@ -59,10 +59,10 @@ import killua.dev.twitterdownloader.ui.components.MainScaffold
     ExperimentalMaterial3Api::class
 )
 @Composable
-fun DownloadPage() {
+fun DownloadListPage() {
     val navController = LocalNavController.current!!
     val context = LocalContext.current
-    val viewModel: DownloadedViewModel = hiltViewModel()
+    val viewModel: DownloadListViewModel = hiltViewModel()
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -217,14 +217,14 @@ fun DownloadPage() {
                                             DownloadPageCommands.Cancel -> {
                                                 viewModel.launchOnIO {
                                                     viewModel.emitIntent(
-                                                        CancelDownload(item.id)
+                                                        CancelDownloadList(item.id)
                                                     )
                                                 }
                                             }
                                             DownloadPageCommands.Delete -> {
                                                 viewModel.launchOnIO {
                                                     viewModel.emitIntent(
-                                                        CancelDownload(item.id)  //Same
+                                                        CancelDownloadList(item.id)  //Same
                                                     )
                                                 }
                                             }

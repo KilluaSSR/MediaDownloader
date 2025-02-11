@@ -1,6 +1,5 @@
 package killua.dev.base.datastore
 import android.content.Context
-import androidx.compose.runtime.key
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
@@ -24,6 +23,8 @@ val LOFTER_LOGIN_AUTH = stringPreferencesKey("lofter_login_auth")
 val LOFTER_EXPIRATION = stringPreferencesKey("lofter_expiration")
 val LOFTER_START_TIME = longPreferencesKey("lofter_start_time")
 val LOFTER_END_TIME = longPreferencesKey("lofter_end_time")
+
+val PIXIV_PHPSSID = stringPreferencesKey("pixiv_phpssid")
 // AppSettings keys
 val LANGUAGE_KEY = stringPreferencesKey("language")
 val NOTIFICATION_ENABLED =
@@ -45,6 +46,7 @@ fun Context.readLofterLoginKey() = readStoreString(key = LOFTER_LOGIN_KEY, defVa
 fun Context.readLofterLoginAuth() = readStoreString(key = LOFTER_LOGIN_AUTH, defValue = "")
 fun Context.readLofterStartTime() = readStoreLong(key = LOFTER_START_TIME, defValue = 0L)
 fun Context.readLofterEndTime() = readStoreLong(key = LOFTER_END_TIME, defValue = 0L)
+fun Context.readPixivPHPSSID() = readStoreString(PIXIV_PHPSSID, "")
 fun Context.readDelay() = readStoreInt(DELAY, 2)
 fun Context.readLanguage() = readStoreString(key = LANGUAGE_KEY, defValue = "en")
 fun Context.readNotificationEnabled() = readStoreBoolean(key = NOTIFICATION_ENABLED, defValue = true)
@@ -74,3 +76,4 @@ suspend fun Context.writeLofterStartTime(time: Long) = saveStoreLong(LOFTER_STAR
 suspend fun Context.writeLofterEndTime(time: Long) = saveStoreLong(LOFTER_END_TIME, time)
 suspend fun Context.writeApplicationUserID(id: String) = saveStoreString(APPLICATION_USER_ID, id)
 suspend fun Context.writeDelay(delay: Int) = saveStoreInt(DELAY, delay)
+suspend fun Context.writePixivPHPSSID(PixivSSID: String) = saveStoreString(PIXIV_PHPSSID, PixivSSID)

@@ -3,6 +3,7 @@ package killua.dev.base.Model
 import android.net.Uri
 import android.provider.MediaStore
 
+
 enum class MediaType(
     val extension: String,
     val mimeType: String,
@@ -32,6 +33,7 @@ enum class MediaType(
         val platformFolder = when (platform) {
             AvailablePlatforms.Twitter -> "TwitterDownloader"
             AvailablePlatforms.Lofter -> "LofterDownloader"
+            AvailablePlatforms.Pixiv -> "PixivDownloader"
         }
         return "$baseFolder/$platformFolder"
     }

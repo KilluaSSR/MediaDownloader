@@ -1,12 +1,8 @@
 package killua.dev.twitterdownloader.api.Lofter
 
-import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
-import dagger.hilt.android.qualifiers.ApplicationContext
 import killua.dev.base.Model.ImageType
-import killua.dev.base.datastore.readLofterLoginAuth
-import killua.dev.base.datastore.readLofterLoginKey
 import killua.dev.base.di.ApplicationScope
 import killua.dev.base.utils.UserAgentUtils
 import killua.dev.twitterdownloader.Model.LofterParseRequiredInformation
@@ -20,14 +16,11 @@ import killua.dev.twitterdownloader.api.Lofter.utils.LofterParser.parseAuthorInf
 import killua.dev.twitterdownloader.api.Lofter.utils.LofterParser.parseFromArchiveInfos
 import killua.dev.twitterdownloader.api.NetworkHelper
 import killua.dev.twitterdownloader.di.UserDataManager
-import killua.dev.twitterdownloader.utils.extractLofterUserDomain
+import killua.dev.twitterdownloader.api.Lofter.Model.extractLofterUserDomain
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
 import javax.inject.Inject
 

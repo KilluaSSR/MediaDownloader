@@ -7,7 +7,7 @@ import killua.dev.twitterdownloader.download.BaseMediaDownloader
 import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
 
-class LofterMediaDownloader(
+class PixivDownloader(
     context: Context,
     mediaHelper: MediaStoreHelper
 ) : BaseMediaDownloader(context, mediaHelper) {
@@ -17,6 +17,6 @@ class LofterMediaDownloader(
         .build()
 
     override fun getHeaders(task: DownloadTask) = mapOf(
-        "Referer" to task.url.split("post")[0]
+        "Referer" to "https://www.pixiv.net/"
     )
 }

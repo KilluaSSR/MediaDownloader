@@ -106,13 +106,14 @@ interface DownloadDao {
     @Query("DELETE FROM Download WHERE uuid = :uuid")
     suspend fun deleteById(uuid: String)
 
-    // ✅ 获取下载次数最多的 Twitter 用户
+
     @Query("""
     SELECT 
-        user_id AS twitterUserId,
-        screen_name AS twitterScreenName,
-        name AS twitterName,
-        COUNT(*) AS totalDownloads
+        user_id AS userID,
+        screen_name AS screenName,
+        name AS name,
+        COUNT(*) AS totalDownloads,
+        type AS platforms
     FROM Download
     WHERE status = :status 
         AND user_id IS NOT NULL 
@@ -121,11 +122,10 @@ interface DownloadDao {
         AND screen_name != ''
         AND name IS NOT NULL 
         AND name != ''
-    GROUP BY user_id
+    GROUP BY user_id, type
     ORDER BY totalDownloads DESC
     LIMIT 1
-""")
-    suspend fun getMostDownloadedUser(status: DownloadStatus = DownloadStatus.COMPLETED): MostDownloadedUser?
+""") suspend fun getMostDownloadedUser(status: DownloadStatus = DownloadStatus.COMPLETED): MostDownloadedUser?
 
     // ✅ 记录下载失败信息
     @Query("""

@@ -45,18 +45,7 @@ fun UserInfoPage() {
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(SizeTokens.Level24)
         ) {
-            Section(title = "Your favourite user") {
-                FavouriteCard("KilluaSSR", "KilluaSSR", 520, true){}
-            }
-            Section(title = "Total downloads") {
-                FavouriteCard("KilluaSSR", "KilluaSSR", 520, true){}
-            }
-            Section(title = "Download Time") {
-                FavouriteCard("KilluaSSR", "KilluaSSR", 520, true){}
-            }
-            Section(title = "Overview") {
-                FavouriteCard("KilluaSSR", "KilluaSSR", 520, true){}
-            }
+
         }
     }
 }

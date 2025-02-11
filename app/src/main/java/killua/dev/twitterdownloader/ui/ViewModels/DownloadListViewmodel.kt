@@ -34,11 +34,7 @@ import killua.dev.twitterdownloader.utils.NavigateToLofter
 import killua.dev.twitterdownloader.utils.NavigateTwitterTweet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -46,20 +42,20 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
-sealed interface DownloadPageUIIntent : UIIntent {
-    object LoadDownloads : DownloadPageUIIntent
-    data class FilterDownloads(val filter: DownloadPageDestinations) : DownloadPageUIIntent
-    data class ResumeDownload(val downloadId: String) : DownloadPageUIIntent
-    data class RetryDownload(val downloadId: String) : DownloadPageUIIntent
-    data class PauseDownload(val downloadId: String) : DownloadPageUIIntent
-    data class CancelDownload(val downloadId: String) : DownloadPageUIIntent
-    data object CancelAll : DownloadPageUIIntent
-    data object RetryAll : DownloadPageUIIntent
-    data class UpdateFilterOptions(val filterOptions: FilterOptions) : DownloadPageUIIntent
-    data class GoTo(val downloadId: String, val context: Context) : DownloadPageUIIntent
+sealed interface DownloadListPageUIIntent : UIIntent {
+    object LoadDownloads : DownloadListPageUIIntent
+    data class FilterDownloads(val filter: DownloadPageDestinations) : DownloadListPageUIIntent
+    data class ResumeDownload(val downloadId: String) : DownloadListPageUIIntent
+    data class RetryDownload(val downloadId: String) : DownloadListPageUIIntent
+    data class PauseDownload(val downloadId: String) : DownloadListPageUIIntent
+    data class CancelDownloadList(val downloadId: String) : DownloadListPageUIIntent
+    data object CancelAll : DownloadListPageUIIntent
+    data object RetryAll : DownloadListPageUIIntent
+    data class UpdateFilterOptions(val filterOptions: FilterOptions) : DownloadListPageUIIntent
+    data class GoTo(val downloadId: String, val context: Context) : DownloadListPageUIIntent
 }
 
-data class DownloadPageUIState(
+data class DownloadListPageUIState(
     val optionIndex: Int,
     val optionsType: DownloadPageDestinations,
     val isLoading: Boolean,
@@ -73,23 +69,21 @@ data class DownloadPageUIState(
 
 @OptIn(FlowPreview::class)
 @HiltViewModel
-class DownloadedViewModel @Inject constructor(
+class DownloadListViewModel @Inject constructor(
     private val downloadRepository: DownloadRepository,
     private val downloadManager: DownloadManager,
     private val thumbnailRepository: ThumbnailRepository,
     private val videoDurationRepository: VideoDurationRepository,
     private val downloadQueueManager: DownloadQueueManager,
     private val fileDelete: FileDelete
-) : BaseViewModel<DownloadPageUIIntent, DownloadPageUIState, SnackbarUIEffect>(
-    DownloadPageUIState(
+) : BaseViewModel<DownloadListPageUIIntent, DownloadListPageUIState, SnackbarUIEffect>(
+    DownloadListPageUIState(
         optionIndex = 0,
         isLoading = true,
         optionsType = DownloadPageDestinations.All,
         thumbnailCache = emptyMap()
     )
 ) {
-    private val _thumbnailCache = MutableStateFlow<Map<Uri, Bitmap?>>(emptyMap())
-    private val _authors = MutableStateFlow<Set<String>>(emptySet())
     private val filteredResultsCache = mutableMapOf<DownloadPageDestinations, List<DownloadedItem>>()
     private val mutex = Mutex()
 
@@ -115,7 +109,13 @@ class DownloadedViewModel @Inject constructor(
     ) {
         // 1. 处理作者列表
         val authors = downloads
-            .mapNotNull { it.name }
+            .mapNotNull { download ->
+                when (download.type) {
+                    AvailablePlatforms.Twitter,
+                    AvailablePlatforms.Lofter -> download.name
+                    AvailablePlatforms.Pixiv -> download.screenName
+                }
+            }
             .filter { it.isNotBlank() }
             .sortedBy { it.length }
             .toSet()
@@ -273,7 +273,11 @@ class DownloadedViewModel @Inject constructor(
         statusFiltered.filter { item ->
             // 作者过滤
             val authorMatch = filterOptions.selectedAuthors.isEmpty() ||
-                    (item.name.isNotBlank() && item.name in filterOptions.selectedAuthors)
+                    when (item.type) {
+                        AvailablePlatforms.Twitter,
+                        AvailablePlatforms.Lofter -> item.name in filterOptions.selectedAuthors
+                        AvailablePlatforms.Pixiv -> item.screenName in filterOptions.selectedAuthors
+                    }
 
             // 判断是否选择了具体时长（非 All）
             val durationFilterSelected = filterOptions.durationFilter != DurationFilter.All
@@ -314,43 +318,44 @@ class DownloadedViewModel @Inject constructor(
                 PlatformFilter.All -> true
                 PlatformFilter.Twitter -> item.type == AvailablePlatforms.Twitter
                 PlatformFilter.Lofter -> item.type == AvailablePlatforms.Lofter
+                PlatformFilter.Pixiv -> item.type == AvailablePlatforms.Pixiv
             }
 
             authorMatch && durationMatch && typeMatch && platformMatch
         }
     }
 
-    override suspend fun onEvent(state: DownloadPageUIState, intent: DownloadPageUIIntent) {
+    override suspend fun onEvent(state: DownloadListPageUIState, intent: DownloadListPageUIIntent) {
         when (intent) {
-            is DownloadPageUIIntent.LoadDownloads -> observeDownloadsFromDB()
+            is DownloadListPageUIIntent.LoadDownloads -> observeDownloadsFromDB()
 
-            is DownloadPageUIIntent.FilterDownloads -> handleFilterDownloads(state, intent)
+            is DownloadListPageUIIntent.FilterDownloads -> handleFilterDownloads(state, intent)
 
-            is DownloadPageUIIntent.UpdateFilterOptions -> handleUpdateFilterOptions(state, intent)
+            is DownloadListPageUIIntent.UpdateFilterOptions -> handleUpdateFilterOptions(state, intent)
 
-            is DownloadPageUIIntent.ResumeDownload ->
+            is DownloadListPageUIIntent.ResumeDownload ->
                 updateDownloadStatus(intent.downloadId, DownloadStatus.DOWNLOADING)
 
-            is DownloadPageUIIntent.PauseDownload ->
+            is DownloadListPageUIIntent.PauseDownload ->
                 updateDownloadStatus(intent.downloadId, DownloadStatus.PENDING)
 
-            is DownloadPageUIIntent.CancelDownload ->
+            is DownloadListPageUIIntent.CancelDownloadList ->
                 launchOnIO { cancelDownload(intent.downloadId) }
 
-            DownloadPageUIIntent.CancelAll -> handleBulkOperation(
+            DownloadListPageUIIntent.CancelAll -> handleBulkOperation(
                 operation = { cancelDownload(it.uuid) },
                 emptyMessage = "No active downloads"
             )
 
-            DownloadPageUIIntent.RetryAll -> handleBulkOperation(
+            DownloadListPageUIIntent.RetryAll -> handleBulkOperation(
                 operation = { retryDownload(it.uuid) },
                 emptyMessage = "No failed downloads"
             )
 
-            is DownloadPageUIIntent.RetryDownload ->
+            is DownloadListPageUIIntent.RetryDownload ->
                 launchOnIO { retryDownload(intent.downloadId) }
 
-            is DownloadPageUIIntent.GoTo -> handleNavigation(intent)
+            is DownloadListPageUIIntent.GoTo -> handleNavigation(intent)
         }
     }
 
@@ -414,7 +419,7 @@ class DownloadedViewModel @Inject constructor(
         downloads.forEach { operation(it) }
     }
 
-    private fun handleNavigation(intent: DownloadPageUIIntent.GoTo) {
+    private fun handleNavigation(intent: DownloadListPageUIIntent.GoTo) {
         launchOnIO {
             val download = downloadRepository.getById(intent.downloadId) ?: run {
                 showMessage("Not Found")
@@ -433,13 +438,15 @@ class DownloadedViewModel @Inject constructor(
                     AvailablePlatforms.Lofter -> {
                         intent.context.NavigateToLofter(download.tweetID!!)
                     }
+
+                    AvailablePlatforms.Pixiv -> {}
                 }
             }
         }
     }
     private suspend fun handleFilterDownloads(
-        state: DownloadPageUIState,
-        intent: DownloadPageUIIntent.FilterDownloads
+        state: DownloadListPageUIState,
+        intent: DownloadListPageUIIntent.FilterDownloads
     ) {
         filteredResultsCache[intent.filter]?.let { cached ->
             emitState(state.copy(
@@ -462,8 +469,8 @@ class DownloadedViewModel @Inject constructor(
         }
     }
     private suspend fun handleUpdateFilterOptions(
-        state: DownloadPageUIState,
-        intent: DownloadPageUIIntent.UpdateFilterOptions
+        state: DownloadListPageUIState,
+        intent: DownloadListPageUIIntent.UpdateFilterOptions
     ) {
         val filtered = applyFilters(
             state.unfilteredDownloads,

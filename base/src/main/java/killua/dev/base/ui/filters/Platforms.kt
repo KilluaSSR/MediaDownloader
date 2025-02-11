@@ -40,18 +40,25 @@ fun FilterByPlatforms(
             label = { Text("All") }
         )
         FilterChip(
-            selected = currentFilter.platformFilter== PlatformFilter.Twitter,
+            selected = currentFilter.platformFilter == PlatformFilter.Twitter,
             onClick = {
                 onFilterChange(currentFilter.copy(platformFilter = PlatformFilter.Twitter))
             },
             label = { Text("Twitter") }
         )
         FilterChip(
-            selected = currentFilter.platformFilter== PlatformFilter.Lofter,
+            selected = currentFilter.platformFilter == PlatformFilter.Lofter,
             onClick = {
                 onFilterChange(currentFilter.copy(platformFilter = PlatformFilter.Lofter))
             },
             label = { Text("Lofter") }
+        )
+        FilterChip(
+            selected = currentFilter.platformFilter == PlatformFilter.Pixiv,
+            onClick = {
+                onFilterChange(currentFilter.copy(platformFilter = PlatformFilter.Pixiv))
+            },
+            label = { Text("Pixiv") }
         )
     }
 }

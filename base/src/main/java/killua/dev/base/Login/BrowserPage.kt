@@ -26,6 +26,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import killua.dev.base.Login.Platforms.LofterConfig
+import killua.dev.base.Login.Platforms.PixivConfig
 import killua.dev.base.Login.Platforms.TwitterConfig
 import killua.dev.base.Model.AvailablePlatforms
 import killua.dev.base.ui.LocalNavController
@@ -49,6 +50,7 @@ fun BrowserPage(
         when(platform) {
             AvailablePlatforms.Twitter -> TwitterConfig()
             AvailablePlatforms.Lofter -> LofterConfig()
+            AvailablePlatforms.Pixiv -> PixivConfig()
         }
     }
 
@@ -79,7 +81,32 @@ fun BrowserPage(
                                 domStorageEnabled = true
                                 javaScriptCanOpenWindowsAutomatically = true
                             }
-                            webViewClient = WebViewClient()
+                            webViewClient = object : WebViewClient() {
+                                override fun onPageFinished(view: WebView?, url: String?) {
+                                    super.onPageFinished(view, url)
+                                    // 仅为Pixiv添加特殊处理
+                                    if (platformConfig is PixivConfig && url == "https://www.pixiv.net/") {
+                                        val cookieManager = CookieManager.getInstance()
+                                        val cookies = cookieManager.getCookie(platformConfig.cookieDomain)
+                                        cookies?.let { cookieStr ->
+                                            platformConfig.cookieRuleGroups.forEach { group ->
+                                                group.rules.forEach { rule ->
+                                                    val matchResult = rule.pattern.toRegex().find(cookieStr)
+                                                    if (matchResult != null) {
+                                                        val value = matchResult.groupValues[1]
+                                                        if (value.contains("_")) {
+                                                            coroutineScope.launch(Dispatchers.Main) {
+                                                                rule.saveFunction(context, CookieInfo(rule.name, value))
+                                                                loginSuccess.value = true
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                             loadUrl(platformConfig.loginUrl)
 
                             val cookieManager = CookieManager.getInstance().apply {
@@ -90,6 +117,7 @@ fun BrowserPage(
                                 try {
                                     while (isActive && !loginSuccess.value) {
                                         delay(1000)
+                                        if (platformConfig is PixivConfig) continue
                                         val cookies = cookieManager.getCookie(platformConfig.cookieDomain)
                                             ?: continue
 

@@ -95,7 +95,7 @@ fun DownloadPageTopAppBar(
     cancelOnClick: () -> Unit,
     showMoreOnClick: () -> Unit
 ) {
-    TopBar(navController, "Downloaded", extraIcons = {
+    TopBar(navController, "Download List", extraIcons = {
         IconButton(
             onClick = retryAllOnClick
         ) {

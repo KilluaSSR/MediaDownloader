@@ -18,6 +18,7 @@ sealed class PlatformFilter{
     object All: PlatformFilter()
     object Twitter: PlatformFilter()
     object Lofter: PlatformFilter()
+    object Pixiv: PlatformFilter()
 }
 
 data class FilterOptions(

@@ -36,9 +36,9 @@ val MainPageButtons = listOf(
         MainRoutes.Download.route
     ),
     ButtonsEssentials(
-        "Downloaded",
+        "Download List",
         Icons.Rounded.DownloadDone,
-        MainRoutes.DownloadPage.route
+        MainRoutes.DownloadListPage.route
     ),
     ButtonsEssentials(
         "Advanced",

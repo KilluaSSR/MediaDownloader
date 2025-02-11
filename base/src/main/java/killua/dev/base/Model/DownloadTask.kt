@@ -7,5 +7,7 @@ data class DownloadTask(
     val type: MediaType = MediaType.VIDEO,
     val fileName: String,
     val screenName: String,
-    val destinationFolder: String = type.buildPath(from)
+    val destinationFolder: String = type.buildPath(from),
+    val headers: Map<String, String> = mapOf(),
+    val cookies: Map<String, String> = mapOf()
 )

@@ -4,7 +4,8 @@ import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import killua.dev.base.Model.AvailablePlatforms
 import killua.dev.base.utils.MediaStoreHelper
-import killua.dev.twitterdownloader.download.Platforms.LofterMediaDownloader
+import killua.dev.twitterdownloader.download.Platforms.LofterDownloader
+import killua.dev.twitterdownloader.download.Platforms.PixivDownloader
 import killua.dev.twitterdownloader.download.Platforms.TwitterMediaDownloader
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -17,6 +18,7 @@ class MediaDownloaderFactory @Inject constructor(
 
     fun create(platform: AvailablePlatforms): MediaDownloader = when (platform) {
         AvailablePlatforms.Twitter -> TwitterMediaDownloader(context, mediaHelper)
-        AvailablePlatforms.Lofter -> LofterMediaDownloader(context, mediaHelper)
+        AvailablePlatforms.Lofter -> LofterDownloader(context, mediaHelper)
+        AvailablePlatforms.Pixiv -> PixivDownloader(context,mediaHelper)
     }
 }

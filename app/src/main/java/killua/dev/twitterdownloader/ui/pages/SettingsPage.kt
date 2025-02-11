@@ -119,8 +119,8 @@ fun SettingsPage(){
                 )
                 Switchable(
                     key = PHOTOS_KEY,
-                    title = "Download images",
-                    checkedText = if(photos){"Download images too. This setting is only effective when you download using the link."} else{"Download videos only. This setting is only effective when you download using the link."}
+                    title = "Download Twitter images",
+                    checkedText = if(photos){"Download twitter images too. This setting is only effective when you download using the link."} else{"Download twitter videos only. This setting is only effective when you download using the link."}
                 )
                 Slideable(
                     title = "Max concurrent downloads",
@@ -163,10 +163,19 @@ fun SettingsPage(){
 
                 Clickable(
                     title = "Lofter",
-                    value = "Date range, Tags and Log out."
+                    value = "Date range, Tags and Log in / out."
                 ){
                     scope.launch{
                         navController.navigateSingle(PrepareRoutes.LofterPreparePage.route)
+                    }
+                }
+
+                Clickable(
+                    title = "Pixiv",
+                    value = "Log in / out."
+                ){
+                    scope.launch{
+                        navController.navigateSingle(PrepareRoutes.PixivPreparePage.route)
                     }
                 }
             }
