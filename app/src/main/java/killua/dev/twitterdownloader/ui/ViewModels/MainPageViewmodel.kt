@@ -365,7 +365,10 @@ class MainPageViewmodel @Inject constructor(
         mediaType: MediaType
     ) {
         val fileNameStrategy = MediaFileNameStrategy(mediaType)
-        val fileName = fileNameStrategy.generateMedia(screenName)
+        val fileName = when(platform){
+            AvailablePlatforms.Kuaikan -> fileNameStrategy.generateManga(title = screenName, chapter = name)
+            else -> fileNameStrategy.generateMedia(screenName)
+        }
 
         try {
             val download = Download(

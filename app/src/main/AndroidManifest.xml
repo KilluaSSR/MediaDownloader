@@ -4,6 +4,20 @@
 
     <queries>
         <package android:name="com.twitter.android" />
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:mimeType="application/pdf" />
+        </intent>
+        <!-- 用于打开图片 -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:mimeType="image/*" />
+        </intent>
+        <!-- 用于打开视频 -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:mimeType="video/*" />
+        </intent>
     </queries>
 
     <uses-permission android:name="android.permission.INTERNET" />

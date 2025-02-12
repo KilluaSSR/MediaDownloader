@@ -55,6 +55,7 @@ fun DownloadItemCard(
             .mediaClickable(
                 context = context,
                 status = status,
+                fileType = item.fileType,
                 fileUri = item.fileUri,
                 fileNotFoundClick = fileNotFoundClick
             ),
