@@ -42,7 +42,7 @@ fun SetupPage() {
     val context = LocalContext.current
     val notificationState = viewModel.notificationState.collectAsStateWithLifecycle()
     val loginState = viewModel.loginState.collectAsStateWithLifecycle()
-    val eligibility = viewModel.eligibility.collectAsStateWithLifecycle()
+    viewModel.eligibility.collectAsStateWithLifecycle()
     SetOnResume {
         viewModel.emitIntentOnIO(SetupUIIntent.OnResume(context))
     }
@@ -64,7 +64,7 @@ fun SetupPage() {
                 }
             }
             Button(
-                enabled = eligibility.value,
+                enabled = true, //eligibility.value,
                 onClick = {
                     viewModel.launchOnIO {
                         viewModel.emitIntent(SetupUIIntent.StartApplication(context))

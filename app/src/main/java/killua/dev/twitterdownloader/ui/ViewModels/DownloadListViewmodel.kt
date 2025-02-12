@@ -114,6 +114,7 @@ class DownloadListViewModel @Inject constructor(
                     AvailablePlatforms.Twitter,
                     AvailablePlatforms.Lofter -> download.name
                     AvailablePlatforms.Pixiv -> download.screenName
+                    AvailablePlatforms.Kuaikan -> download.name
                 }
             }
             .filter { it.isNotBlank() }
@@ -277,6 +278,7 @@ class DownloadListViewModel @Inject constructor(
                         AvailablePlatforms.Twitter,
                         AvailablePlatforms.Lofter -> item.name in filterOptions.selectedAuthors
                         AvailablePlatforms.Pixiv -> item.screenName in filterOptions.selectedAuthors
+                        AvailablePlatforms.Kuaikan -> item.name in filterOptions.selectedAuthors
                     }
 
             // 判断是否选择了具体时长（非 All）
@@ -371,11 +373,12 @@ class DownloadListViewModel @Inject constructor(
         val mediaType = when(old.fileType) {
             "video" -> MediaType.VIDEO
             "photo" -> MediaType.PHOTO
+            "pdf" -> MediaType.PDF
             else -> MediaType.VIDEO
         }
 
         val fileNameStrategy = MediaFileNameStrategy(mediaType)
-        val fileName = fileNameStrategy.generate(old.screenName)
+        val fileName = fileNameStrategy.generateMedia(old.screenName)
 
         cancelDownload(downloadId)
 
@@ -440,6 +443,7 @@ class DownloadListViewModel @Inject constructor(
                     }
 
                     AvailablePlatforms.Pixiv -> {}
+                    AvailablePlatforms.Kuaikan -> {}
                 }
             }
         }

@@ -122,6 +122,7 @@ interface DownloadDao {
         AND screen_name != ''
         AND name IS NOT NULL 
         AND name != ''
+        AND type IN ('Twitter', 'Lofter', 'PIXIV')
     GROUP BY user_id, type
     ORDER BY totalDownloads DESC
     LIMIT 1

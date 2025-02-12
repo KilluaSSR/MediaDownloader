@@ -110,6 +110,7 @@ fun FavouriteCard(
                     AvailablePlatforms.Twitter -> "$favouriteUser @$favouriteUserScreenName"
                     AvailablePlatforms.Lofter -> "$favouriteUser @$favouriteUserScreenName"
                     AvailablePlatforms.Pixiv -> "@$favouriteUserScreenName"
+                    AvailablePlatforms.Kuaikan -> favouriteUserScreenName
                 }
             } else {
                 "Nothing here"

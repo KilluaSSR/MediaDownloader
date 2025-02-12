@@ -3,7 +3,6 @@ package killua.dev.twitterdownloader.download.Platforms
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Canvas
 import android.graphics.pdf.PdfDocument
 import android.net.Uri
 import killua.dev.base.Model.DownloadTask
@@ -11,6 +10,7 @@ import killua.dev.base.Model.MediaType
 import killua.dev.base.utils.MediaStoreHelper
 import killua.dev.twitterdownloader.download.BaseMediaDownloader
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -20,7 +20,20 @@ class CommonMangaDownloader(
     context: Context,
     mediaHelper: MediaStoreHelper
 ) : BaseMediaDownloader(context, mediaHelper) {
+    companion object {
+        private const val TAG = "CommonMangaDownloader"
+        private fun log(message: String) {
+            println("$TAG: $message")
+        }
 
+        private fun logError(message: String, error: Throwable? = null) {
+            println("$TAG ERROR: $message")
+            error?.let {
+                println("$TAG ERROR: ${it.javaClass.simpleName}: ${it.message}")
+                it.printStackTrace()
+            }
+        }
+    }
     override fun buildClient(headers: Map<String, String>): OkHttpClient {
         return OkHttpClient.Builder()
             .followRedirects(true)
@@ -39,69 +52,204 @@ class CommonMangaDownloader(
         onProgress: (Int) -> Unit
     ): Result<Uri> = withContext(Dispatchers.IO) {
         try {
-            // 假设task.url是包含所有图片URL的列表
+            log("文件名: ${task.fileName}")
+            log("目标路径: ${task.destinationFolder}")
+            println("开始下载任务: ${task.id}")
             val imageUrls = task.url.split(",")
-            val totalImages = imageUrls.size
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+                .filter { !it.startsWith("url:") }
+                .distinct()
+                .also { urls ->
+                    log("解析得到 ${urls.size} 个URL")
+                    urls.forEachIndexed { index, url ->
+                        log("URL[$index]: $url")
+                    }
+                }
+
+            if (imageUrls.isEmpty()) {
+                logError("没有有效的图片URL")
+                return@withContext Result.failure(IOException("没有有效的图片URL"))
+            }
+
+            log("开始下载漫画章节，共 ${imageUrls.size} 页")
             val bitmaps = mutableListOf<Bitmap>()
 
-            // 下载所有图片
+            // 顺序下载每张图片
             imageUrls.forEachIndexed { index, url ->
-                val response = buildClient(headers).newCall(
-                    Request.Builder().url(url).build()
-                ).execute()
+                try {
+                    log("开始下载第 ${index + 1}/${imageUrls.size} 张图片")
+                    log("下载地址: $url")
 
-                if (!response.isSuccessful) throw IOException("Failed to download: $url")
+                    val startTime = System.currentTimeMillis()
+                    val imageBytes = downloadSingleFile(url, headers + getHeaders(task))
+                    val downloadTime = System.currentTimeMillis() - startTime
+                    log("图片下载完成，大小: ${imageBytes.size / 1024}KB，耗时: ${downloadTime}ms")
 
-                val bitmap = BitmapFactory.decodeStream(response.body?.byteStream())
-                bitmaps.add(bitmap)
+                    val decodeStartTime = System.currentTimeMillis()
+                    val options = BitmapFactory.Options().apply {
+                        inPreferredConfig = Bitmap.Config.RGB_565
+                    }
 
-                // 更新总体下载进度
-                onProgress((index + 1) * 100 / totalImages)
+                    val bitmap = BitmapFactory.decodeByteArray(
+                        imageBytes,
+                        0,
+                        imageBytes.size,
+                        options
+                    ) ?: throw IOException("图片解码失败")
+
+                    val decodeTime = System.currentTimeMillis() - decodeStartTime
+                    log("图片解码完成，尺寸: ${bitmap.width}x${bitmap.height}，耗时: ${decodeTime}ms")
+
+                    bitmaps.add(bitmap)
+                    onProgress((index + 1) * 80 / imageUrls.size)
+
+                } catch (e: Exception) {
+                    logError("第 ${index + 1} 张图片处理失败", e)
+                    throw IOException("下载失败: $url", e)
+                }
             }
 
-            // 计算总高度和最大宽度
-            val totalHeight = bitmaps.sumOf { it.height }
-            val maxWidth = bitmaps.maxOf { it.width }
-
-            // 创建合并的Bitmap
-            val mergedBitmap = Bitmap.createBitmap(maxWidth, totalHeight, Bitmap.Config.ARGB_8888)
-            val canvas = Canvas(mergedBitmap)
-
-            // 拼接图片
-            var currentHeight = 0
-            bitmaps.forEach { bitmap ->
-                canvas.drawBitmap(bitmap, 0f, currentHeight.toFloat(), null)
-                currentHeight += bitmap.height
-                bitmap.recycle()
-            }
+            log("所有图片下载完成，开始生成PDF")
 
             // 创建PDF文件
-            val pdfDocument = PdfDocument()
-            val pageInfo = PdfDocument.PageInfo.Builder(maxWidth, totalHeight, 1).create()
-            val page = pdfDocument.startPage(pageInfo)
-
-            page.canvas.drawBitmap(mergedBitmap, 0f, 0f, null)
-            pdfDocument.finishPage(page)
-
-            // 保存PDF文件
             val uri = mediaHelper.insertMedia(
                 fileName = task.fileName,
                 filePath = task.destinationFolder,
                 type = MediaType.PDF
-            )
+            ).also { log("创建PDF文件: $it") }
 
-            context.contentResolver.openOutputStream(uri)?.use { outputStream ->
-                pdfDocument.writeTo(outputStream)
+            try {
+                log("开始合并图片到PDF")
+                createPdfFromBitmaps(bitmaps, uri) { mergeProgress ->
+                    onProgress(80 + (mergeProgress * 20 / 100))
+                }
+                log("PDF生成完成")
+
+                mediaHelper.markMediaAsComplete(uri)
+                log("文件标记为完成")
+                Result.success(uri)
+            } catch (e: Exception) {
+                logError("PDF处理失败", e)
+                context.contentResolver.delete(uri, null, null)
+                throw e
+            } finally {
+                log("开始清理位图资源")
+                bitmaps.forEachIndexed { index, bitmap ->
+                    try {
+                        if (!bitmap.isRecycled) {
+                            bitmap.recycle()
+                            log("清理第 ${index + 1} 张图片资源成功")
+                        }
+                    } catch (e: Exception) {
+                        logError("清理第 ${index + 1} 张图片资源失败", e)
+                    }
+                }
             }
-
-            pdfDocument.close()
-            mergedBitmap.recycle()
-
-            mediaHelper.markMediaAsComplete(uri)
-            Result.success(uri)
-
         } catch (e: Exception) {
+            logError("下载过程发生致命错误", e)
             Result.failure(e)
         }
     }
+
+    private suspend fun downloadSingleFile(
+        url: String,
+        headers: Map<String, String>
+    ): ByteArray = withContext(Dispatchers.IO) {
+        val client = buildClient(headers)
+        var retryCount = 0
+        val maxRetries = 3
+
+        while (retryCount < maxRetries) {
+            try {
+                log("开始下载文件: $url (尝试 ${retryCount + 1}/$maxRetries)")
+                val startTime = System.currentTimeMillis()
+
+                val response = client.newCall(
+                    Request.Builder()
+                        .url(url)
+                        .apply {
+                            headers.forEach { (k, v) ->
+                                addHeader(k, v)
+                                log("添加请求头: $k: $v")
+                            }
+                        }
+                        .build()
+                ).execute()
+
+                if (!response.isSuccessful) {
+                    logError("请求失败: HTTP ${response.code}")
+                    throw IOException("下载失败 (${response.code})")
+                }
+
+                val bytes = response.body?.bytes()
+                    ?: throw IOException("响应内容为空")
+
+                val time = System.currentTimeMillis() - startTime
+                log("文件下载成功，大小: ${bytes.size / 1024}KB，耗时: ${time}ms")
+
+                return@withContext bytes
+
+            } catch (e: Exception) {
+                retryCount++
+                logError("下载失败 (尝试 $retryCount/$maxRetries)", e)
+
+                if (retryCount >= maxRetries) {
+                    throw e
+                }
+
+                log("等待1秒后重试...")
+                delay(1000)
+            }
+        }
+        throw IOException("超过最大重试次数")
+    }
+
+    private suspend fun createPdfFromBitmaps(
+        bitmaps: List<Bitmap>,
+        uri: Uri,
+        onProgress: (Int) -> Unit
+    ) = withContext(Dispatchers.IO) {
+        println("开始创建PDF，图片数量: ${bitmaps.size}")
+        if (bitmaps.isEmpty()) {
+            println("错误: 没有可用的图片")
+            throw IllegalArgumentException("没有可用的图片")
+        }
+
+        val totalHeight = bitmaps.sumOf { it.height }
+        val maxWidth = bitmaps.maxOf { it.width }
+        println("PDF页面尺寸: ${maxWidth}x${totalHeight}")
+
+        val document = PdfDocument()
+        try {
+            println("创建PDF页面...")
+            val pageInfo = PdfDocument.PageInfo.Builder(maxWidth, totalHeight, 1).create()
+            val page = document.startPage(pageInfo)
+
+            var currentHeight = 0
+            bitmaps.forEachIndexed { index, bitmap ->
+                println("处理第 ${index + 1} 张图片...")
+                page.canvas.drawBitmap(bitmap, 0f, currentHeight.toFloat(), null)
+                currentHeight += bitmap.height
+                onProgress((index + 1) * 100 / bitmaps.size)
+            }
+
+            document.finishPage(page)
+            println("PDF页面创建完成")
+
+            println("写入PDF文件...")
+            context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                document.writeTo(outputStream)
+                println("PDF文件写入完成")
+            }
+        } catch (e: Exception) {
+            println("PDF创建过程发生错误:")
+            e.printStackTrace()
+            throw e
+        } finally {
+            document.close()
+            println("PDF文档已关闭")
+        }
+    }
+
 }

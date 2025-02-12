@@ -205,7 +205,7 @@ class MainPageViewmodel @Inject constructor(
     }
     private suspend fun handleKuaikanDownload(url: String){
         try {
-            when(kuaiaknService.getSingleChapter(url)){
+            when(val result = kuaiaknService.getSingleChapter(url)){
                 is NetworkResult.Error -> {
                     viewModelScope.launch {
                         emitState(uiState.value.copy(
@@ -215,6 +215,19 @@ class MainPageViewmodel @Inject constructor(
                     }
                 }
                 is NetworkResult.Success -> {
+
+                    viewModelScope.launch{
+                        createAndStartDownload(
+                            url = result.data.urlList.joinToString(separator = ","),
+                            userId = result.data.title,
+                            screenName = result.data.title,
+                            platform = AvailablePlatforms.Kuaikan,
+                            name = result.data.chapter,
+                            tweetID = result.data.title,
+                            mainLink = url,
+                            mediaType = MediaType.PDF
+                        )
+                    }
 
                 }
             }
@@ -352,7 +365,7 @@ class MainPageViewmodel @Inject constructor(
         mediaType: MediaType
     ) {
         val fileNameStrategy = MediaFileNameStrategy(mediaType)
-        val fileName = fileNameStrategy.generate(screenName)
+        val fileName = fileNameStrategy.generateMedia(screenName)
 
         try {
             val download = Download(

@@ -215,7 +215,7 @@ class AdvancedPageViewModel @Inject constructor(
     ) {
         val uuid = UUID.randomUUID().toString()
         val fileNameStrategy = MediaFileNameStrategy(mediaType)
-        val fileName = fileNameStrategy.generate(user?.screenName)
+        val fileName = fileNameStrategy.generateMedia(user?.screenName)
 
         try {
             val download = Download(

@@ -1,5 +1,6 @@
 package killua.dev.twitterdownloader.ui.pages
 
+import android.content.Intent
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import killua.dev.base.Model.AppIcon
 import killua.dev.base.Model.AvailablePlatforms
 import killua.dev.base.Model.SupportedUrlType
 import killua.dev.base.Model.platformsDrawable
@@ -37,8 +39,11 @@ import killua.dev.base.ui.components.Section
 import killua.dev.base.ui.components.paddingTop
 import killua.dev.base.ui.getRandomColors
 import killua.dev.base.ui.tokens.SizeTokens
+import killua.dev.base.utils.ActivityUtil
 import killua.dev.base.utils.drawableToImageVector
+import killua.dev.base.utils.getActivity
 import killua.dev.base.utils.navigateSingle
+import killua.dev.setup.SetupRoutes
 import killua.dev.twitterdownloader.ui.ViewModels.MainPageUIIntent
 import killua.dev.twitterdownloader.ui.ViewModels.MainPageViewmodel
 import killua.dev.twitterdownloader.ui.components.FavouriteCard
@@ -86,11 +91,7 @@ fun MainPage(
                 "${uiState.value.loginErrorPlatform.name} NOT logged in",
                 "Your cookie is necessary when downloading this content from ${uiState.value.loginErrorPlatform.name}",
                 icon = {
-                    Icon(
-                        imageVector = drawableToImageVector(platformsDrawable.getValue(uiState.value.loginErrorPlatform)),
-                        contentDescription = null,
-                        tint = Color.Unspecified
-                    )
+                    AppIcon(uiState.value.loginErrorPlatform)
                 },
                 onDismiss = {
                     scope.launch{
@@ -99,7 +100,9 @@ fun MainPage(
                 },
             ) {
                 when(uiState.value.loginErrorPlatform){
-                    AvailablePlatforms.Twitter -> {}
+                    AvailablePlatforms.Twitter -> {
+                        context.startActivity(Intent(context, ActivityUtil.SetupActivity))
+                    }
                     AvailablePlatforms.Lofter -> {
                         navController.navigateSingle(PrepareRoutes.LofterPreparePage.route)
                     }

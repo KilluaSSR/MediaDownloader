@@ -5,10 +5,12 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import killua.dev.base.R
@@ -26,7 +28,7 @@ val patterns: Map<String, AvailablePlatforms> = mapOf(
     "twitter.com" to AvailablePlatforms.Twitter,
     ".lofter.com/post/" to AvailablePlatforms.Lofter,
     "pixiv.net/artworks/" to AvailablePlatforms.Pixiv,
-    "kuaikanmanhua.com/web/comic/" to AvailablePlatforms.Kuaikan
+    "kuaikanmanhua.com/webs/comic" to AvailablePlatforms.Kuaikan
 )
 
 val platformsDrawable: Map<AvailablePlatforms,Int> = mapOf(
@@ -40,6 +42,7 @@ enum class SupportedUrlType(val pattern: Regex) {
     TWITTER("""(?:twitter\.com|x\.com)/.*""".toRegex()),
     LOFTER("""lofter\.com/post/.*""".toRegex()),
     PIXIV("""pixiv\.net/artworks/.*""".toRegex()),
+    KUAIKAN("""www\.kuaikanmanhua\.com.*comic-next.*""".toRegex()),
     UNKNOWN("".toRegex());
 
     companion object {
@@ -58,20 +61,20 @@ fun AppIcon(platforms: AvailablePlatforms, modifier: Modifier = Modifier) {
         AvailablePlatforms.Kuaikan -> R.drawable.kuaikanmanhua
     }
     val sizeTokens = when(platforms){
-        AvailablePlatforms.Twitter -> SizeTokens.Level100
+        AvailablePlatforms.Twitter -> SizeTokens.Level64
         AvailablePlatforms.Lofter -> SizeTokens.Level152
         AvailablePlatforms.Pixiv -> SizeTokens.Level152
         AvailablePlatforms.Kuaikan -> SizeTokens.Level152
     }
     Box(
         modifier = modifier
-            .size(SizeTokens.Level152),
+            .size(sizeTokens),
         contentAlignment = Alignment.Center
     ) {
         Image(
             modifier = Modifier.size(sizeTokens),
             imageVector = ImageVector.vectorResource(id = icon),
-            contentDescription = null
+            contentDescription = null,
         )
     }
 }

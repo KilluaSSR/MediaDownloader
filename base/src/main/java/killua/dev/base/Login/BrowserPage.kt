@@ -51,6 +51,7 @@ fun BrowserPage(
             AvailablePlatforms.Twitter -> TwitterConfig()
             AvailablePlatforms.Lofter -> LofterConfig()
             AvailablePlatforms.Pixiv -> PixivConfig()
+            AvailablePlatforms.Kuaikan -> TODO()
         }
     }
 
