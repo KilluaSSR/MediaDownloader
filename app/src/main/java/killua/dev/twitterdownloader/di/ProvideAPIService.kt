@@ -12,6 +12,7 @@ import killua.dev.base.datastore.readApplicationUserAuth
 import killua.dev.base.datastore.readApplicationUserCt0
 import killua.dev.base.datastore.readApplicationUserID
 import killua.dev.base.datastore.readDelay
+import killua.dev.base.datastore.readKuaikanPassToken
 import killua.dev.base.datastore.readLofterLoginAuth
 import killua.dev.base.datastore.readLofterLoginKey
 import killua.dev.base.datastore.readPixivPHPSSID
@@ -56,6 +57,9 @@ class UserDataManager @Inject constructor(
     private val _userPixivPHPSSID = MutableStateFlow("")
     val userPixivPHPSSID: StateFlow<String> = _userPixivPHPSSID.asStateFlow()
 
+    private val _userKuaikanData = MutableStateFlow("")
+    val userKuaikanData: StateFlow<String> = _userKuaikanData.asStateFlow()
+
     private val _delay = MutableStateFlow(2)
     val delay : StateFlow<Int> = _delay.asStateFlow()
 
@@ -85,6 +89,12 @@ class UserDataManager @Inject constructor(
                 )
             }.collect {
                 _userLofterData.value = it
+            }
+        }
+
+        scope.launch{
+            context.readKuaikanPassToken().collect{
+                _userKuaikanData.value = it
             }
         }
 

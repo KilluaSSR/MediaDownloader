@@ -25,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
+import killua.dev.base.Login.Platforms.KuaikanConfig
 import killua.dev.base.Login.Platforms.LofterConfig
 import killua.dev.base.Login.Platforms.PixivConfig
 import killua.dev.base.Login.Platforms.TwitterConfig
@@ -51,7 +52,7 @@ fun BrowserPage(
             AvailablePlatforms.Twitter -> TwitterConfig()
             AvailablePlatforms.Lofter -> LofterConfig()
             AvailablePlatforms.Pixiv -> PixivConfig()
-            AvailablePlatforms.Kuaikan -> TODO()
+            AvailablePlatforms.Kuaikan -> KuaikanConfig()
         }
     }
 

@@ -23,6 +23,7 @@ import killua.dev.twitterdownloader.ui.pages.DownloadListPage
 import killua.dev.twitterdownloader.ui.pages.MainPage
 import killua.dev.twitterdownloader.ui.pages.SettingsPage
 import killua.dev.twitterdownloader.ui.pages.AdvancedPage
+import killua.dev.twitterdownloader.ui.pages.OtherSetupPages.Kuaikan.KuaikanPreparePage
 import killua.dev.twitterdownloader.ui.pages.OtherSetupPages.Lofter.LofterPreparePage
 import killua.dev.twitterdownloader.ui.pages.OtherSetupPages.Lofter.LofterPrepareTagsPage
 import killua.dev.twitterdownloader.ui.pages.OtherSetupPages.Pixiv.PixivPreparePage
@@ -77,6 +78,9 @@ class MainActivity : ComponentActivity() {
                         composable(PrepareRoutes.PixivPreparePage.route){
                             PixivPreparePage()
                         }
+                        composable(PrepareRoutes.KuaikanPreparePage.route){
+                            KuaikanPreparePage()
+                        }
 
                         //Prepare Cookies
                         composable(CookiesRoutes.LofterCookiesBrowser.route){
@@ -84,6 +88,9 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(CookiesRoutes.PixivCookiesBrowser.route){
                             BrowserPage(AvailablePlatforms.Pixiv)
+                        }
+                        composable(CookiesRoutes.KuaikanCookiesBrowser.route){
+                            BrowserPage(AvailablePlatforms.Kuaikan)
                         }
                     }
                 }

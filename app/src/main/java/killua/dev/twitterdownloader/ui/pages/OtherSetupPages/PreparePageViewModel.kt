@@ -2,6 +2,7 @@ package killua.dev.twitterdownloader.ui.pages.OtherSetupPages
 
 import android.content.Context
 import dagger.hilt.android.lifecycle.HiltViewModel
+import killua.dev.base.datastore.readKuaikanPassToken
 import killua.dev.base.datastore.readLofterEndTime
 import killua.dev.base.datastore.readLofterLoginAuth
 import killua.dev.base.datastore.readLofterLoginKey
@@ -30,9 +31,11 @@ sealed class PreparePageUIIntent : UIIntent {
     data object OnDateChanged : PreparePageUIIntent()
     data class OnEntryLofter(val context: Context) : PreparePageUIIntent()
     data class OnEntryPixiv(val context: Context) : PreparePageUIIntent()
+    data class OnEntryKuaikan(val context: Context) : PreparePageUIIntent()
     data class OnTagsChanged(val context: Context) : PreparePageUIIntent()
     data object OnLofterLoggedOut: PreparePageUIIntent()
     data object OnPixivLoggedOut: PreparePageUIIntent()
+    data object OnKuaikanLoggedOut: PreparePageUIIntent()
 }
 
 @HiltViewModel
@@ -52,6 +55,11 @@ class PreparePageViewModel @Inject constructor(
     val pixivLoginState: StateFlow<CurrentState> =
         _pixivLoginState.stateInScope(CurrentState.Idle)
 
+    private val _kuaikanLoginState: MutableStateFlow<CurrentState> =
+        MutableStateFlow(CurrentState.Idle)
+    val kuaikanLoginState: StateFlow<CurrentState> =
+        _kuaikanLoginState.stateInScope(CurrentState.Idle)
+
     private val _dateSelectedState: MutableStateFlow<CurrentState> =
         MutableStateFlow(CurrentState.Idle)
     val dateSelectedState: StateFlow<CurrentState>  = _dateSelectedState.stateInScope(CurrentState.Idle)
@@ -63,6 +71,8 @@ class PreparePageViewModel @Inject constructor(
     val lofterEligibility: StateFlow<Boolean> = _lofterLoginState.map { login ->
         login == CurrentState.Success}.flowOnIO().stateInScope(false)
     val pixivEligibility: StateFlow<Boolean> = _pixivLoginState.map { login ->
+        login == CurrentState.Success}.flowOnIO().stateInScope(false)
+    val kuaikanEligibility: StateFlow<Boolean> = _kuaikanLoginState.map { login ->
         login == CurrentState.Success}.flowOnIO().stateInScope(false)
 
     override suspend fun onEvent(
@@ -104,14 +114,26 @@ class PreparePageViewModel @Inject constructor(
                 }
             }
 
-            is PreparePageUIIntent.OnTagsChanged -> TODO()
+            is PreparePageUIIntent.OnTagsChanged -> {}
             PreparePageUIIntent.OnLofterLoggedOut -> {
                 _lofterLoginState.value = CurrentState.Idle
             }
 
 
-            PreparePageUIIntent.OnPixivLoggedOut -> {
+            PreparePageUIIntent.OnPixivLoggedOut, -> {
                 _pixivLoginState.value = CurrentState.Idle
+            }
+
+            is PreparePageUIIntent.OnEntryKuaikan -> {
+                mutex.withLock{
+                    val PassToken = intent.context.readKuaikanPassToken().first()
+                    if (PassToken.isNotBlank()){
+                        _kuaikanLoginState.value = CurrentState.Success
+                    }
+                }
+            }
+            PreparePageUIIntent.OnKuaikanLoggedOut -> {
+                _kuaikanLoginState.value = CurrentState.Idle
             }
         }
     }

@@ -25,6 +25,8 @@ val LOFTER_START_TIME = longPreferencesKey("lofter_start_time")
 val LOFTER_END_TIME = longPreferencesKey("lofter_end_time")
 
 val PIXIV_PHPSSID = stringPreferencesKey("pixiv_phpssid")
+
+val KUAIKAN_PASSTOKEN = stringPreferencesKey("kuaikan_passtoken")
 // AppSettings keys
 val LANGUAGE_KEY = stringPreferencesKey("language")
 val NOTIFICATION_ENABLED =
@@ -47,6 +49,7 @@ fun Context.readLofterLoginAuth() = readStoreString(key = LOFTER_LOGIN_AUTH, def
 fun Context.readLofterStartTime() = readStoreLong(key = LOFTER_START_TIME, defValue = 0L)
 fun Context.readLofterEndTime() = readStoreLong(key = LOFTER_END_TIME, defValue = 0L)
 fun Context.readPixivPHPSSID() = readStoreString(PIXIV_PHPSSID, "")
+fun Context.readKuaikanPassToken() = readStoreString(KUAIKAN_PASSTOKEN, "")
 fun Context.readDelay() = readStoreInt(DELAY, 2)
 fun Context.readLanguage() = readStoreString(key = LANGUAGE_KEY, defValue = "en")
 fun Context.readNotificationEnabled() = readStoreBoolean(key = NOTIFICATION_ENABLED, defValue = true)
@@ -77,3 +80,4 @@ suspend fun Context.writeLofterEndTime(time: Long) = saveStoreLong(LOFTER_END_TI
 suspend fun Context.writeApplicationUserID(id: String) = saveStoreString(APPLICATION_USER_ID, id)
 suspend fun Context.writeDelay(delay: Int) = saveStoreInt(DELAY, delay)
 suspend fun Context.writePixivPHPSSID(PixivSSID: String) = saveStoreString(PIXIV_PHPSSID, PixivSSID)
+suspend fun Context.writeKuaikanPassToken(PassToken: String) = saveStoreString(KUAIKAN_PASSTOKEN, PassToken)

@@ -210,7 +210,7 @@ class MainPageViewmodel @Inject constructor(
                     viewModelScope.launch {
                         emitState(uiState.value.copy(
                             showNotLoggedInDialog = true,
-                            loginErrorPlatform = AvailablePlatforms.Lofter
+                            loginErrorPlatform = AvailablePlatforms.Kuaikan
                         ))
                     }
                 }

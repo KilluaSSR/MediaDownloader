@@ -29,6 +29,11 @@ class KuaikanService @Inject constructor(
                     .get()
                     .url(KuaikanSingleChapterRequest(id))
                     .build()
+                    .also {
+                        NetworkHelper.setCookies("kuaikanmanhua.com", mapOf(
+                            "passToken" to userdata.userKuaikanData.value
+                        ))
+                    }
             ).use { response ->
                 if (!response.isSuccessful) {
                     return@withContext NetworkResult.Error(

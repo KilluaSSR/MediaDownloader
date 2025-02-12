@@ -111,7 +111,9 @@ fun MainPage(
                         navController.navigateSingle(PrepareRoutes.PixivPreparePage.route)
                     }
 
-                    AvailablePlatforms.Kuaikan -> TODO()
+                    AvailablePlatforms.Kuaikan -> {
+                        navController.navigateSingle(PrepareRoutes.KuaikanPreparePage.route)
+                    }
                 }
             }
         }

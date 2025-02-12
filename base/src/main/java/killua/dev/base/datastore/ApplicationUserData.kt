@@ -10,3 +10,4 @@ data class ApplicationUserDataLofter(
     val login_key: String,
     val login_auth: String
 )
+
