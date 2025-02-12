@@ -29,7 +29,7 @@ val patterns: Map<String, AvailablePlatforms> = mapOf(
     "twitter.com" to AvailablePlatforms.Twitter,
     ".lofter.com/post/" to AvailablePlatforms.Lofter,
     "pixiv.net/artworks/" to AvailablePlatforms.Pixiv,
-    "kuaikanmanhua.com/webs/comic" to AvailablePlatforms.Kuaikan
+    "kuaikanmanhua.com" to AvailablePlatforms.Kuaikan
 )
 
 val platformsDrawable: Map<AvailablePlatforms,Int> = mapOf(
@@ -43,7 +43,7 @@ enum class SupportedUrlType(val pattern: Regex) {
     TWITTER("""(?:twitter\.com|x\.com)/.*""".toRegex()),
     LOFTER("""lofter\.com/post/.*""".toRegex()),
     PIXIV("""pixiv\.net/artworks/.*""".toRegex()),
-    KUAIKAN("""www\.kuaikanmanhua\.com.*comic-next.*""".toRegex()),
+    KUAIKAN("""kuaikanmanhua\.com/.*""".toRegex()),
     UNKNOWN("".toRegex());
 
     companion object {

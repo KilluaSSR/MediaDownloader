@@ -1,10 +1,12 @@
 package killua.dev.twitterdownloader.api.Kuaikan
 
 import killua.dev.base.di.ApplicationScope
+import killua.dev.base.utils.USER_AGENT
 import killua.dev.twitterdownloader.Model.NetworkResult
 import killua.dev.twitterdownloader.api.Kuaikan.BuildRequest.KuaikanSingleChapterRequest
 import killua.dev.twitterdownloader.api.Kuaikan.Model.MangaInfo
 import killua.dev.twitterdownloader.api.NetworkHelper
+import killua.dev.twitterdownloader.api.Pixiv.BuildRequest.addPixivPictureDownloadHeaders
 import killua.dev.twitterdownloader.di.UserDataManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,46 +19,55 @@ class KuaikanService @Inject constructor(
     @ApplicationScope private val scope: CoroutineScope
 ) {
     suspend fun getSingleChapter(url: String): NetworkResult<MangaInfo> = withContext(Dispatchers.IO) {
+        val pattern = """(?:comics/|comic-next/|comic/)(\d+)""".toRegex()
+
         val id = try {
-            url.split("comic-next/")[1]
+            pattern.find(url)?.groupValues?.get(1)
+                ?: throw IllegalArgumentException("URL中未找到数字ID: $url")
         } catch (e: Exception) {
-            println("URL解析失败: ${e.message}")
-            return@withContext NetworkResult.Error(message = "URL格式错误: ${e.message}")
+            val errorMessage = "URL解析失败: ${e.message}"
+            println(errorMessage)
+            e.printStackTrace()
+            return@withContext NetworkResult.Error(message = errorMessage)
         }
         try {
             NetworkHelper.doRequest(
                 Request.Builder()
                     .get()
                     .url(KuaikanSingleChapterRequest(id))
-                    .build()
+                    .header("User-Agent", USER_AGENT)
                     .also {
-                        NetworkHelper.setCookies("kuaikanmanhua.com", mapOf(
+                        NetworkHelper.setCookies("www.kuaikanmanhua.com", mapOf(
                             "passToken" to userdata.userKuaikanData.value
                         ))
-                    }
+                    }.build()
             ).use { response ->
                 if (!response.isSuccessful) {
+                    val errorMessage = "详情请求失败: ${response.code} ${response.message}"
                     return@withContext NetworkResult.Error(
                         code = response.code,
-                        message = "详情请求失败: ${response.code} ${response.message}"
+                        message = errorMessage
                     )
                 }
                 val htmlContent = response.body?.string()
                     ?: return@withContext NetworkResult.Error(message = "响应内容为空")
-
                 val (title, chapter) = extractMangaInfo(htmlContent)
                     ?: return@withContext NetworkResult.Error(message = "无法提取标题和章节信息")
-
                 val imageUrls = extractImageUrls(htmlContent)
+                imageUrls.forEach{
+                    println(it)
+                }
                 if (imageUrls.isEmpty()) {
                     return@withContext NetworkResult.Error(message = "未找到图片URL")
                 }
 
-                NetworkResult.Success(MangaInfo(title,url, chapter, imageUrls))
-
+                NetworkResult.Success(MangaInfo(title, url, chapter, imageUrls))
             }
         } catch (e: Exception) {
-            NetworkResult.Error(message = "Error: ${e.message}")
+            val errorMessage = "请求处理失败: ${e.message}"
+            println(errorMessage)
+            e.printStackTrace()
+            NetworkResult.Error(message = errorMessage)
         }
     }
 
@@ -67,6 +78,7 @@ class KuaikanService @Inject constructor(
         if (scriptContent == null) {
             return emptyList()
         }
+        println(scriptContent)
 
         val urls = scriptContent
             .split(',')
@@ -82,7 +94,8 @@ class KuaikanService @Inject constructor(
 
         val title = titlePattern.find(htmlContent)?.groupValues?.get(1)?.trim()
         val chapter = chapterPattern.find(htmlContent)?.groupValues?.get(1)?.trim()
-
+        println(title)
+        println(chapter)
         return if (title != null && chapter != null) {
             Pair(title, chapter)
         } else null

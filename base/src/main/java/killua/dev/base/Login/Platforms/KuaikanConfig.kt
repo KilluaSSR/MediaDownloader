@@ -6,7 +6,7 @@ import killua.dev.base.Login.PlatformConfig
 import killua.dev.base.datastore.writeKuaikanPassToken
 
 class KuaikanConfig : PlatformConfig {
-    override val loginUrl = "https://www.kuaikanmanhua.com/webs/loginh"
+    override val loginUrl = "https://m.kuaikanmanhua.com/mob/login?"
     override val cookieDomain = "https://kuaikanmanhua.com"
     override val titleText = "Login your Kuaikan account"
     override val cookieRuleGroups = listOf(

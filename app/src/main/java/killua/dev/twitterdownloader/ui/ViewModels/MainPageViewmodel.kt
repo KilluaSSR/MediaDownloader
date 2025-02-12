@@ -208,6 +208,7 @@ class MainPageViewmodel @Inject constructor(
             when(val result = kuaiaknService.getSingleChapter(url)){
                 is NetworkResult.Error -> {
                     viewModelScope.launch {
+                        println(result.message.toString())
                         emitState(uiState.value.copy(
                             showNotLoggedInDialog = true,
                             loginErrorPlatform = AvailablePlatforms.Kuaikan
@@ -215,7 +216,6 @@ class MainPageViewmodel @Inject constructor(
                     }
                 }
                 is NetworkResult.Success -> {
-
                     viewModelScope.launch{
                         createAndStartDownload(
                             url = result.data.urlList.joinToString(separator = ","),

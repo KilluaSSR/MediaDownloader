@@ -149,4 +149,5 @@ object NetworkHelper {
     }
 
     private fun HttpUrl.toURI(): URI = URI(this.toString())
+    fun doRequest(builder: Request.Builder) {}
 }

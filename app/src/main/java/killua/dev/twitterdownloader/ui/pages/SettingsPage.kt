@@ -178,6 +178,14 @@ fun SettingsPage(){
                         navController.navigateSingle(PrepareRoutes.PixivPreparePage.route)
                     }
                 }
+                Clickable(
+                    title = "Kuaikan",
+                    value = "Log in / out."
+                ){
+                    scope.launch{
+                        navController.navigateSingle(PrepareRoutes.KuaikanPreparePage.route)
+                    }
+                }
             }
 
             Title(title = "Dangerous", color = MaterialTheme.colorScheme.error) {
