@@ -12,6 +12,7 @@ sealed class TypeFilter{
     object All: TypeFilter()
     object Videos: TypeFilter()
     object Images: TypeFilter()
+    object PDF: TypeFilter()
 }
 
 sealed class PlatformFilter{
@@ -19,6 +20,7 @@ sealed class PlatformFilter{
     object Twitter: PlatformFilter()
     object Lofter: PlatformFilter()
     object Pixiv: PlatformFilter()
+    object Kuaikan: PlatformFilter()
 }
 
 data class FilterOptions(

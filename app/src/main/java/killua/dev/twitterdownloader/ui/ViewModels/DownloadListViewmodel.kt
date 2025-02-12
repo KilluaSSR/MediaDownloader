@@ -114,7 +114,7 @@ class DownloadListViewModel @Inject constructor(
                     AvailablePlatforms.Twitter,
                     AvailablePlatforms.Lofter -> download.name
                     AvailablePlatforms.Pixiv -> download.screenName
-                    AvailablePlatforms.Kuaikan -> download.name
+                    AvailablePlatforms.Kuaikan -> download.screenName
                 }
             }
             .filter { it.isNotBlank() }
@@ -312,6 +312,7 @@ class DownloadListViewModel @Inject constructor(
                     TypeFilter.All -> true
                     TypeFilter.Videos -> item.fileType == MediaType.VIDEO
                     TypeFilter.Images -> item.fileType == MediaType.PHOTO
+                    TypeFilter.PDF -> item.fileType == MediaType.PDF
                 }
             }
 
@@ -321,6 +322,7 @@ class DownloadListViewModel @Inject constructor(
                 PlatformFilter.Twitter -> item.type == AvailablePlatforms.Twitter
                 PlatformFilter.Lofter -> item.type == AvailablePlatforms.Lofter
                 PlatformFilter.Pixiv -> item.type == AvailablePlatforms.Pixiv
+                PlatformFilter.Kuaikan -> item.type == AvailablePlatforms.Kuaikan
             }
 
             authorMatch && durationMatch && typeMatch && platformMatch

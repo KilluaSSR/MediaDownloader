@@ -60,5 +60,12 @@ fun FilterByPlatforms(
             },
             label = { Text("Pixiv") }
         )
+        FilterChip(
+            selected = currentFilter.platformFilter == PlatformFilter.Kuaikan,
+            onClick = {
+                onFilterChange(currentFilter.copy(platformFilter = PlatformFilter.Kuaikan))
+            },
+            label = { Text("Kuaikan") }
+        )
     }
 }

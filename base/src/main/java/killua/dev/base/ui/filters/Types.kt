@@ -54,5 +54,12 @@ fun FilterByType(
             },
             label = { Text("Images") }
         )
+        FilterChip(
+            selected = currentFilter.typeFilter== TypeFilter.PDF,
+            onClick = {
+                onFilterChange(currentFilter.copy(typeFilter = TypeFilter.PDF))
+            },
+            label = { Text("PDF") }
+        )
     }
 }

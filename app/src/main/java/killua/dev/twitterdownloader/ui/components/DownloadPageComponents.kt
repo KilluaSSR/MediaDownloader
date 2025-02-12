@@ -69,6 +69,7 @@ fun DownloadItemCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             DownloadThumbnail(
+                fileType = item.fileType,
                 fileUri = if (status == DownloadStatus.COMPLETED) item.fileUri else null,
                 thumbnailCache = thumbnailCache
             )

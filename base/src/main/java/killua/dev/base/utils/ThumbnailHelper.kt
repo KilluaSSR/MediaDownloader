@@ -3,6 +3,7 @@ package killua.dev.base.utils
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.pdf.PdfRenderer
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import kotlinx.coroutines.Dispatchers
@@ -33,6 +34,7 @@ object ThumbnailHelper{
             when {
                 mimeType?.startsWith("video/") == true -> createVideoThumbnail(context, uri, cacheFile)
                 mimeType?.startsWith("image/") == true -> createImageThumbnail(context, uri, cacheFile)
+
                 else -> null
             }
         }
