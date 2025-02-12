@@ -84,7 +84,7 @@ fun MainPage(
         if(uiState.value.showNotLoggedInDialog){
             CancellableAlert(
                 "${uiState.value.loginErrorPlatform.name} NOT logged in",
-                "Your cookie is necessary when downloading anything from ${uiState.value.loginErrorPlatform.name}",
+                "Your cookie is necessary when downloading this content from ${uiState.value.loginErrorPlatform.name}",
                 icon = {
                     Icon(
                         imageVector = drawableToImageVector(platformsDrawable.getValue(uiState.value.loginErrorPlatform)),
@@ -107,6 +107,8 @@ fun MainPage(
                     AvailablePlatforms.Pixiv -> {
                         navController.navigateSingle(PrepareRoutes.PixivPreparePage.route)
                     }
+
+                    AvailablePlatforms.Kuaikan -> TODO()
                 }
             }
         }

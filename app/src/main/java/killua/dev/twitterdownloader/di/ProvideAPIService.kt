@@ -17,6 +17,7 @@ import killua.dev.base.datastore.readLofterLoginKey
 import killua.dev.base.datastore.readPixivPHPSSID
 import killua.dev.base.di.ApplicationScope
 import killua.dev.base.utils.ShowNotification
+import killua.dev.twitterdownloader.api.Kuaikan.KuaikanService
 import killua.dev.twitterdownloader.api.Lofter.LofterService
 import killua.dev.twitterdownloader.api.Pixiv.PixivService
 import killua.dev.twitterdownloader.api.Twitter.TwitterDownloadAPI
@@ -130,6 +131,15 @@ object ProvideAPI {
         @ApplicationScope scope: CoroutineScope
     ): PixivService {
         return PixivService(userDataManager,scope)
+    }
+
+    @Provides
+    @Singleton
+    fun provideKuaikanService(
+        userDataManager: UserDataManager,
+        @ApplicationScope scope: CoroutineScope
+    ): KuaikanService {
+        return KuaikanService(userDataManager,scope)
     }
 }
 

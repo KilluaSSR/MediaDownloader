@@ -27,6 +27,12 @@ enum class MediaType(
         mimeType = "image/gif",
         collection = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
         baseFolder = "Pictures"
+    ),
+    PDF(
+        extension = "pdf",
+        mimeType = "application/pdf",
+        collection = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
+        baseFolder = "Download"
     );
 
     fun buildPath(platform: AvailablePlatforms): String {
@@ -34,6 +40,7 @@ enum class MediaType(
             AvailablePlatforms.Twitter -> "TwitterDownloader"
             AvailablePlatforms.Lofter -> "LofterDownloader"
             AvailablePlatforms.Pixiv -> "PixivDownloader"
+            AvailablePlatforms.Kuaikan -> "Manga/KuaikanManga"
         }
         return "$baseFolder/$platformFolder"
     }
@@ -43,6 +50,7 @@ enum class MediaType(
             "video" -> VIDEO
             "photo" -> PHOTO
             "gif" -> GIF
+            "pdf" -> PDF
             else -> throw IllegalArgumentException("Unknown media type: $value")
         }
     }

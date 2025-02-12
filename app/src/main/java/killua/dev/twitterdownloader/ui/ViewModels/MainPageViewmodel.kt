@@ -18,6 +18,7 @@ import killua.dev.base.utils.DownloadEventManager
 import killua.dev.base.utils.DownloadPreChecks
 import killua.dev.base.utils.MediaFileNameStrategy
 import killua.dev.twitterdownloader.Model.NetworkResult
+import killua.dev.twitterdownloader.api.Kuaikan.KuaikanService
 import killua.dev.twitterdownloader.api.Lofter.LofterService
 import killua.dev.twitterdownloader.api.Pixiv.PixivService
 import killua.dev.twitterdownloader.api.Twitter.TwitterDownloadAPI
@@ -54,6 +55,7 @@ class MainPageViewmodel @Inject constructor(
     private val twitterDownloadAPI: TwitterDownloadAPI,
     private val lofterService: LofterService,
     private val pixivService: PixivService,
+    private val kuaiaknService: KuaikanService,
     private val downloadRepository: DownloadRepository,
     private val downloadQueueManager: DownloadQueueManager,
     private val downloadEventManager: DownloadEventManager,
@@ -113,6 +115,8 @@ class MainPageViewmodel @Inject constructor(
                         downloadedTimes = mostDownloaded.totalDownloads
                     ))
                 }
+
+                AvailablePlatforms.Kuaikan -> TODO()
             }
         }
     }
@@ -154,6 +158,10 @@ class MainPageViewmodel @Inject constructor(
                                 ))
                             }
                         }
+
+                        AvailablePlatforms.Kuaikan -> {
+                            handleNewDownload(intent.url, AvailablePlatforms.Kuaikan)
+                        }
                     }
                 }
             }
@@ -163,6 +171,7 @@ class MainPageViewmodel @Inject constructor(
                         AvailablePlatforms.Twitter -> intent.context.navigateTwitterProfile(intent.userID,intent.screenName)
                         AvailablePlatforms.Lofter -> intent.context.navigateLofterProfile(intent.screenName)
                         AvailablePlatforms.Pixiv -> intent.context.navigatePixivProfile(intent.userID)
+                        AvailablePlatforms.Kuaikan -> {}
                     }
                 }
             }
@@ -186,6 +195,7 @@ class MainPageViewmodel @Inject constructor(
                 AvailablePlatforms.Twitter -> handleTwitterDownload(url)
                 AvailablePlatforms.Lofter -> handleLofterDownload(url)
                 AvailablePlatforms.Pixiv -> handlePixivDownload(url)
+                AvailablePlatforms.Kuaikan -> handleKuaikanDownload(url)
             }
         }.onFailure { error ->
             viewModelScope.launch {
@@ -193,6 +203,28 @@ class MainPageViewmodel @Inject constructor(
             }
         }
     }
+    private suspend fun handleKuaikanDownload(url: String){
+        try {
+            when(kuaiaknService.getSingleChapter(url)){
+                is NetworkResult.Error -> {
+                    viewModelScope.launch {
+                        emitState(uiState.value.copy(
+                            showNotLoggedInDialog = true,
+                            loginErrorPlatform = AvailablePlatforms.Lofter
+                        ))
+                    }
+                }
+                is NetworkResult.Success -> {
+
+                }
+            }
+        }catch (e: Exception) {
+            viewModelScope.launch {
+                emitEffect(ShowSnackbar(e.message ?: "Internal Error"))
+            }
+        }
+    }
+
     private suspend fun handlePixivDownload(url: String){
         try {
             when(val result = pixivService.getSingleBlogImage(url)){

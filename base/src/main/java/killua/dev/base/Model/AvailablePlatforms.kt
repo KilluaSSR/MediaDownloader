@@ -18,6 +18,7 @@ enum class AvailablePlatforms {
     Twitter,
     Lofter,
     Pixiv,
+    Kuaikan
 }
 
 val patterns: Map<String, AvailablePlatforms> = mapOf(
@@ -25,12 +26,14 @@ val patterns: Map<String, AvailablePlatforms> = mapOf(
     "twitter.com" to AvailablePlatforms.Twitter,
     ".lofter.com/post/" to AvailablePlatforms.Lofter,
     "pixiv.net/artworks/" to AvailablePlatforms.Pixiv,
+    "kuaikanmanhua.com/web/comic/" to AvailablePlatforms.Kuaikan
 )
 
 val platformsDrawable: Map<AvailablePlatforms,Int> = mapOf(
     AvailablePlatforms.Twitter to R.drawable.logo_of_twitter,
     AvailablePlatforms.Lofter to R.drawable.lofter_logo,
-    AvailablePlatforms.Pixiv to R.drawable.pixiv_logo__2025_
+    AvailablePlatforms.Pixiv to R.drawable.pixiv_logo__2025_,
+    AvailablePlatforms.Kuaikan to R.drawable.kuaikanmanhua
 )
 
 enum class SupportedUrlType(val pattern: Regex) {
@@ -52,11 +55,13 @@ fun AppIcon(platforms: AvailablePlatforms, modifier: Modifier = Modifier) {
         AvailablePlatforms.Twitter -> R.drawable.logo_of_twitter
         AvailablePlatforms.Lofter -> R.drawable.lofter_logo
         AvailablePlatforms.Pixiv -> R.drawable.pixiv_logo__2025_
+        AvailablePlatforms.Kuaikan -> R.drawable.kuaikanmanhua
     }
     val sizeTokens = when(platforms){
         AvailablePlatforms.Twitter -> SizeTokens.Level100
         AvailablePlatforms.Lofter -> SizeTokens.Level152
         AvailablePlatforms.Pixiv -> SizeTokens.Level152
+        AvailablePlatforms.Kuaikan -> SizeTokens.Level152
     }
     Box(
         modifier = modifier
