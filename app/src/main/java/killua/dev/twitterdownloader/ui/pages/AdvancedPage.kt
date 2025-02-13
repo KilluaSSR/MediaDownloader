@@ -31,6 +31,7 @@ import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.base.utils.navigateSingle
 import killua.dev.twitterdownloader.ui.ViewModels.AdvancedPageUIIntent
 import killua.dev.twitterdownloader.ui.ViewModels.AdvancedPageViewModel
+import killua.dev.twitterdownloader.ui.ViewModels.DialogType
 import killua.dev.twitterdownloader.ui.components.AdvancedPageKuaikanButtons
 import killua.dev.twitterdownloader.ui.components.AdvancedPageTopAppBar
 import killua.dev.twitterdownloader.ui.components.MainScaffold
@@ -50,7 +51,6 @@ fun AdvancedPage(){
     val eligibleToUseLofterGetByTags = viewModel.lofterGetByTagsEligibility.collectAsStateWithLifecycle()
     var dialogTitle by remember { mutableStateOf("") }
     var dialogPlaceholder by remember { mutableStateOf("") }
-    var dialogAction by remember { mutableStateOf<(String) -> Unit>({}) }
     LaunchedEffect(Unit) {
         viewModel.emitIntentOnIO(AdvancedPageUIIntent.OnEntry(context))
     }
@@ -94,38 +94,57 @@ fun AdvancedPage(){
             title = dialogTitle,
             placeholder = dialogPlaceholder,
             showDialog = showDialog,
-            loading = uiState.value.isFetchingTwitterUserInfo,
-            userInfo = if (uiState.value.TwitterUserAccountInfo.first.isNotEmpty())
-                uiState.value.TwitterUserAccountInfo else null,
+            loading = uiState.value.isFetching,
+            userInfo = if (uiState.value.info.first.isNotEmpty())
+                uiState.value.info else null,
             onDismiss = {
                 showDialog = false
                 scope.launch{
-                    viewModel.emitState(uiState.value.copy(isFetchingTwitterUserInfo = false,TwitterUserAccountInfo = Triple("", "", "")))
+                    viewModel.emitState(uiState.value.copy(isFetching = false,info = Triple("", "", "")))
                 }
             },
             onCancel = {
                 scope.launch {
                     viewModel.emitState(uiState.value.copy(
-                        TwitterUserAccountInfo = Triple("", "", "")
+                        info = Triple("", "", ""),
+                        isFetching = false,
                     ))
                 }
                 showDialog = false
             },
             onConfirm = { input ->
-                if (uiState.value.TwitterUserAccountInfo.first.isEmpty()) {
-                    // 获取用户信息
-                    scope.launch {
-                        viewModel.emitIntent(AdvancedPageUIIntent.GetSomeonesTwitterAccountInfo(input))
+                when(uiState.value.currentDialogType){
+                    DialogType.TWITTER_USER_INFO_DOWNLOAD ->{
+                        if (uiState.value.info.first.isEmpty()) {
+                            scope.launch {
+                                viewModel.emitIntent(AdvancedPageUIIntent.GetSomeonesTwitterAccountInfo(input))
+                            }
+                        } else {
+                            scope.launch {
+                                viewModel.emitIntent(AdvancedPageUIIntent.OnConfirmTwitterDownloadMedia(uiState.value.info.third, uiState.value.info.first))
+                                delay(200)
+                                viewModel.emitState(uiState.value.copy(
+                                    info = Triple("", "", "")
+                                ))
+                            }
+                            showDialog = false
+                        }
                     }
-                } else {
-                    scope.launch {
-                        viewModel.emitIntent(AdvancedPageUIIntent.OnConfirmTwitterDownloadMedia(uiState.value.TwitterUserAccountInfo.third, uiState.value.TwitterUserAccountInfo.first))
-                        delay(200)
-                        viewModel.emitState(uiState.value.copy(
-                            TwitterUserAccountInfo = Triple("", "", "")
-                        ))
+                    DialogType.LOFTER_AUTHOR_TAGS -> {
+
                     }
-                    showDialog = false
+                    DialogType.KUAIKAN_ENTIRE -> {
+                        scope.launch {
+                            viewModel.emitIntent(AdvancedPageUIIntent.GetKuaikanEntireManga(input))
+                            delay(200)
+                            viewModel.emitState(uiState.value.copy(
+                                info = Triple("", "", "")
+                            ))
+                            showDialog = false
+                        }
+
+                    }
+                    DialogType.NONE -> TODO()
                 }
             }
         )
@@ -155,13 +174,11 @@ fun AdvancedPage(){
                                 1 ->{showGetMyTwitterLikes = true}
                                 2 ->{showDevelopingAlert = true}
                                 3 ->{
+                                    scope.launch{
+                                        viewModel.emitState(uiState.value.copy(currentDialogType = DialogType.TWITTER_USER_INFO_DOWNLOAD))
+                                    }
                                     dialogTitle = "Enter Twitter Username"
                                     dialogPlaceholder = "@ExampleUser"
-                                    dialogAction = { input ->
-                                        scope.launch {
-                                            viewModel.emitIntent(AdvancedPageUIIntent.GetSomeonesTwitterAccountInfo(input))
-                                        }
-                                    }
                                     showDialog = true
                                 }
                             }
@@ -195,21 +212,17 @@ fun AdvancedPage(){
                             when (index) {
                                 0 -> {showDevelopingAlert = true}
                                 1 -> {
-//                                    if (eligibleToUseLofterGetByTags.value) {
-//                                        dialogTitle = "Enter Lofter author's Homepage"
-//                                        dialogPlaceholder = "https://example.lofter.com/"
-//                                        dialogAction = { input ->
-//                                            scope.launch {
-//                                                viewModel.emitIntent(AdvancedPageUIIntent.GetSomeonesTwitterAccountInfo(input))
-//                                            }
-//                                        }
-//                                        showDialog = true
-//                                    } else {
-//                                        navController.navigateSingle(PrepareRoutes.LofterPreparePage.route)
-//                                    }
-                                    navController.navigateSingle(PrepareRoutes.LofterPreparePage.route)
+                                    if (eligibleToUseLofterGetByTags.value) {
+                                        scope.launch{
+                                            viewModel.emitState(uiState.value.copy(currentDialogType = DialogType.LOFTER_AUTHOR_TAGS))
+                                        }
+                                        dialogTitle = "Enter Lofter author's Homepage"
+                                        dialogPlaceholder = "https://username.lofter.com/"
+                                        showDialog = true
+                                    } else {
+                                        navController.navigateSingle(PrepareRoutes.LofterPreparePage.route)
+                                    }
                                 }
-
                             }
                         }
                     }
@@ -232,7 +245,14 @@ fun AdvancedPage(){
                             color = MaterialTheme.colorScheme.primaryContainer
                         ) {
                             when (index) {
-                                0 -> {showDevelopingAlert = true}
+                                0 -> {
+                                    scope.launch{
+                                        viewModel.emitState(uiState.value.copy(currentDialogType = DialogType.KUAIKAN_ENTIRE))
+                                    }
+                                    dialogTitle = "Enter Kuaikan Comic's URL"
+                                    dialogPlaceholder = "kuaikanmanhua.com/web/topic/..."
+                                    showDialog = true
+                                }
                             }
                         }
                     }

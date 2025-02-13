@@ -26,11 +26,12 @@ import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
 data class AdvancedPageUIState(
+    val currentDialogType: DialogType = DialogType.NONE,
     val isLofterLoggedIn: Boolean = false,
     val isEligibleToUseLofterGetByTags: Boolean = false,
     val isGettingMyTwitterBookmark: Boolean = false,
-    val isFetchingTwitterUserInfo: Boolean = false,
-    val TwitterUserAccountInfo: Triple<String, String, String> = Triple("","","")
+    val isFetching: Boolean = false,
+    val info: Triple<String, String, String> = Triple("","","")
 ): UIState
 
 sealed class AdvancedPageUIIntent : UIIntent {
@@ -39,7 +40,15 @@ sealed class AdvancedPageUIIntent : UIIntent {
     data object GetMyTwitterLiked : AdvancedPageUIIntent()
     data class GetSomeonesTwitterAccountInfo(val screenName: String): AdvancedPageUIIntent()
     data class OnConfirmTwitterDownloadMedia(val screenName: String, val id: String): AdvancedPageUIIntent()
+    data class GetKuaikanEntireManga(val url: String): AdvancedPageUIIntent()
 }
+enum class DialogType {
+    TWITTER_USER_INFO_DOWNLOAD,
+    LOFTER_AUTHOR_TAGS,
+    KUAIKAN_ENTIRE,
+    NONE
+}
+
 @HiltViewModel
 class AdvancedPageViewModel @Inject constructor(
     private val twitterDownloadAPI: TwitterDownloadAPI,
@@ -60,10 +69,9 @@ class AdvancedPageViewModel @Inject constructor(
             is AdvancedPageUIIntent.OnEntry -> handleEntry(intent.context)
             AdvancedPageUIIntent.GetMyTwitterBookmark -> handleTwitterBookmarks()
             AdvancedPageUIIntent.GetMyTwitterLiked -> handleTwitterLikes()
-            is AdvancedPageUIIntent.GetSomeonesTwitterAccountInfo ->
-                handleTwitterUserInfo(intent.screenName)
-            is AdvancedPageUIIntent.OnConfirmTwitterDownloadMedia ->
-                handleUserMediaDownload(intent.screenName, intent.id)
+            is AdvancedPageUIIntent.GetSomeonesTwitterAccountInfo -> handleTwitterUserInfo(intent.screenName)
+            is AdvancedPageUIIntent.OnConfirmTwitterDownloadMedia -> handleUserMediaDownload(intent.screenName, intent.id)
+            is AdvancedPageUIIntent.GetKuaikanEntireManga -> handleKuaikanEntireManga(intent.url)
         }
     }
     private suspend fun handleEntry(context: Context) {
@@ -89,14 +97,16 @@ class AdvancedPageViewModel @Inject constructor(
                 .onFailure { handleError(it.message ?: "Download failed") }
         }
     }
+
+
     private fun handleTwitterUserInfo(screenName: String) {
         applicationScope.launch {
-            emitState(uiState.value.copy(isFetchingTwitterUserInfo = true))
+            emitState(uiState.value.copy(isFetching = true))
             when (val result = twitterDownloadAPI.getUserBasicInfo(screenName)) {
                 is NetworkResult.Success -> {
                     emitState(uiState.value.copy(
-                        isFetchingTwitterUserInfo = false,
-                        TwitterUserAccountInfo = Triple(
+                        isFetching = false,
+                        info = Triple(
                             result.data.id ?: "",
                             result.data.name ?: "",
                             result.data.screenName ?: ""
@@ -104,8 +114,25 @@ class AdvancedPageViewModel @Inject constructor(
                     ))
                 }
                 is NetworkResult.Error -> {
-                    emitState(uiState.value.copy(isFetchingTwitterUserInfo = false))
+                    emitState(uiState.value.copy(isFetching = false))
                     handleError(result.message)
+                }
+            }
+        }
+    }
+
+
+    private fun handleKuaikanEntireManga(url: String){
+        applicationScope.launch {
+            emitState(uiState.value.copy(isFetching = true))
+            when(val mangaList = advancedFeaturesManager.getWholeManga(url)){
+                is NetworkResult.Error -> {
+                    emitState(uiState.value.copy(isFetching = false))
+                    emitEffect(ShowSnackbar("Error"))
+                }
+                is NetworkResult.Success -> {
+                    emitState(uiState.value.copy(isFetching = false))
+                    advancedFeaturesManager.downloadEntireManga(mangaList.data)
                 }
             }
         }

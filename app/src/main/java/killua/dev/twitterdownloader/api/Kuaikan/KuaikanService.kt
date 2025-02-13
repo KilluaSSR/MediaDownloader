@@ -4,7 +4,7 @@ import killua.dev.base.di.ApplicationScope
 import killua.dev.base.utils.USER_AGENT
 import killua.dev.twitterdownloader.Model.NetworkResult
 import killua.dev.twitterdownloader.api.Kuaikan.BuildRequest.KuaikanSingleChapterRequest
-import killua.dev.twitterdownloader.api.Kuaikan.BuildRequest.KuaikanWholeMangeRequest
+import killua.dev.twitterdownloader.api.Kuaikan.BuildRequest.KuaikanWholeComicRequest
 import killua.dev.twitterdownloader.api.Kuaikan.Model.MangaInfo
 import killua.dev.twitterdownloader.api.NetworkHelper
 import killua.dev.twitterdownloader.di.UserDataManager
@@ -28,7 +28,6 @@ class KuaikanService @Inject constructor(
                 ?: throw IllegalArgumentException("URL中未找到数字ID: $url")
         } catch (e: Exception) {
             val errorMessage = "URL解析失败: ${e.message}"
-            println(errorMessage)
             e.printStackTrace()
             return@withContext NetworkResult.Error(message = errorMessage)
         }
@@ -56,9 +55,6 @@ class KuaikanService @Inject constructor(
                 val (title, chapter) = extractSingleMangaInfo(htmlContent)
                     ?: return@withContext NetworkResult.Error(message = "无法提取标题和章节信息")
                 val imageUrls = extractSingleImageUrls(htmlContent)
-                imageUrls.forEach{
-                    println(it)
-                }
                 if (imageUrls.isEmpty()) {
                     return@withContext NetworkResult.Error(message = "未找到图片URL")
                 }
@@ -67,13 +63,12 @@ class KuaikanService @Inject constructor(
             }
         } catch (e: Exception) {
             val errorMessage = "请求处理失败: ${e.message}"
-            println(errorMessage)
             e.printStackTrace()
             NetworkResult.Error(message = errorMessage)
         }
     }
 
-    suspend fun getWholeMange(url: String): NetworkResult<List<Chapter>> = withContext(Dispatchers.IO) {
+    suspend fun getWholeComic(url: String): NetworkResult<List<Chapter>> = withContext(Dispatchers.IO) {
         val pattern = """(?:topic|mobile)/(\d+)(?:/list)?(?:[/?].*)?$""".toRegex()
 
         val id = try {
@@ -81,23 +76,16 @@ class KuaikanService @Inject constructor(
                 ?: throw IllegalArgumentException("URL中未找到漫画ID: $url")
         } catch (e: Exception) {
             val errorMessage = "URL解析失败: ${e.message}"
-            println("原始URL: $url")
-            println(errorMessage)
             e.printStackTrace()
             return@withContext NetworkResult.Error(message = errorMessage)
         }
-
         try {
             NetworkHelper.doRequest(
                 Request.Builder()
                     .get()
-                    .url(KuaikanWholeMangeRequest(id))
+                    .url(KuaikanWholeComicRequest(id))
                     .header("User-Agent", USER_AGENT)
-                    .also {
-                        NetworkHelper.setCookies("www.kuaikanmanhua.com", mapOf(
-                            "passToken" to userdata.userKuaikanData.value
-                        ))
-                    }.build()
+                    .build()
             ).use { response ->
                 if (!response.isSuccessful) {
                     return@withContext NetworkResult.Error(
@@ -108,6 +96,7 @@ class KuaikanService @Inject constructor(
 
                 val htmlContent = response.body?.string()
                     ?: return@withContext NetworkResult.Error(message = "响应内容为空")
+
 
                 val result = extractNuxtParams(htmlContent)
                 if (result == null) {
@@ -123,7 +112,6 @@ class KuaikanService @Inject constructor(
             }
         } catch (e: Exception) {
             val errorMessage = "请求处理失败: ${e.message}"
-            println(errorMessage)
             e.printStackTrace()
             return@withContext NetworkResult.Error(message = errorMessage)
         }
@@ -152,29 +140,50 @@ class KuaikanService @Inject constructor(
         return chapters.sortedBy { chapter ->
             Regex("""第(\d+)话""").find(chapter.name)
                 ?.groupValues?.get(1)?.toIntOrNull() ?: 999
-        }.also { sortedChapters ->
-            if (sortedChapters.isNotEmpty()) {
-                sortedChapters.forEach { (name, id) ->
-                    println("$name: $id")
-                }
-            }
         }
     }
 
     fun extractNuxtParams(htmlContent: String): NuxtParams? {
 
-        """window\.__NUXT__=\(function\([^)]*\)\{"""
-        """return\s*(\{.*?\})\s*\}\("""
-        """\((.*?)\);"""
         try {
-            val nuxtContent = htmlContent.substringAfter("window.__NUXT__=")
-                .substringBefore(";</script>")
-            val returnObject = Regex("""\{.*?\}(?=\s*\}\()""", RegexOption.DOT_MATCHES_ALL)
-                .find(nuxtContent)?.value ?: throw Exception("无法找到return对象")
-            val parameters = Regex("""}\((.*?)\)$""", RegexOption.DOT_MATCHES_ALL)
-                .find(nuxtContent)?.groupValues?.get(1) ?: throw Exception("无法找到参数")
+            // 1. 提取NUXT内容
+            val nuxtStartIndex = htmlContent.indexOf("window.__NUXT__=")
+            if (nuxtStartIndex == -1) {
+                return null
+            }
+
+            val nuxtEndIndex = htmlContent.indexOf(";</script>", nuxtStartIndex)
+            if (nuxtEndIndex == -1) {
+                return null
+            }
+
+            val nuxtContent = htmlContent.substring(
+                nuxtStartIndex + "window.__NUXT__=".length,
+                nuxtEndIndex
+            ).trim()
+
+            // 2. 提取return对象
+            val returnStartIndex = nuxtContent.indexOf("return") + "return".length
+            val returnEndIndex = nuxtContent.lastIndexOf("}")
+            if (returnStartIndex == -1 || returnEndIndex == -1) {
+                return null
+            }
+
+            val returnObject = nuxtContent.substring(returnStartIndex, returnEndIndex + 1).trim()
+
+            // 3. 提取函数参数
+            val paramsStartIndex = nuxtContent.lastIndexOf("(") + 1
+            val paramsEndIndex = nuxtContent.lastIndexOf(")")
+            if (paramsStartIndex <= 0 || paramsEndIndex <= paramsStartIndex) {
+                return null
+            }
+
+            val parameters = nuxtContent.substring(paramsStartIndex, paramsEndIndex)
+
+
             return NuxtParams(returnObject, parameters)
         } catch (e: Exception) {
+            e.printStackTrace()
             return null
         }
     }
@@ -187,7 +196,6 @@ class KuaikanService @Inject constructor(
         if (scriptContent == null) {
             return emptyList()
         }
-        println(scriptContent)
 
         val urls = scriptContent
             .split(',')
@@ -203,8 +211,6 @@ class KuaikanService @Inject constructor(
 
         val title = titlePattern.find(htmlContent)?.groupValues?.get(1)?.trim()
         val chapter = chapterPattern.find(htmlContent)?.groupValues?.get(1)?.trim()
-        println(title)
-        println(chapter)
         return if (title != null && chapter != null) {
             Pair(title, chapter)
         } else null

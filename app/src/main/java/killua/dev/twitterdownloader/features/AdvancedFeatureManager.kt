@@ -7,6 +7,7 @@ import killua.dev.base.Model.DownloadTask
 import killua.dev.base.Model.MediaType
 import killua.dev.base.utils.MediaFileNameStrategy
 import killua.dev.twitterdownloader.Model.NetworkResult
+import killua.dev.twitterdownloader.api.Kuaikan.Chapter
 import killua.dev.twitterdownloader.api.Kuaikan.KuaikanService
 import killua.dev.twitterdownloader.api.Lofter.LofterService
 import killua.dev.twitterdownloader.api.Twitter.Model.TwitterUser
@@ -63,27 +64,44 @@ class AdvancedFeaturesManager @Inject constructor(
         )
     }
 
-    suspend fun getWholeManga(url: String): Result<Unit> = runCatching {
-        when(val result = kuaikanService.getWholeMange(url)){
-            is NetworkResult.Error -> {}
+    suspend fun getWholeManga(url: String): NetworkResult<List<Chapter>> = runCatching {
+        when(val result = kuaikanService.getWholeComic(url)) {
+            is NetworkResult.Error -> {
+                println(result.code)
+                println(result.message)
+                NetworkResult.Error(
+                    code = result.code,
+                    message = result.message
+                )
+            }
             is NetworkResult.Success -> {
                 val manga = result.data
-                manga.forEach{
-                    when(val mangaResult = kuaikanService.getSingleChapter("https://www.kuaikanmanhua.com/webs/comic-next/${it.id}")){
-                        is NetworkResult.Error -> return@forEach
-                        is NetworkResult.Success -> {
-                            createDownloadTask(
-                                url = mangaResult.data.urlList.joinToString(separator = ","),
-                                userId = mangaResult.data.title,
-                                screenName = mangaResult.data.title,
-                                platform = AvailablePlatforms.Kuaikan,
-                                name = mangaResult.data.chapter,
-                                tweetID = mangaResult.data.title,
-                                mainLink = url,
-                                mediaType = MediaType.PDF
-                            )
-                        }
-                    }
+
+                NetworkResult.Success(manga)
+            }
+        }
+    }.getOrElse { e ->
+        NetworkResult.Error(
+            message = e.message ?: "Unknown error"
+        )
+    }
+
+    suspend fun downloadEntireManga(mangaList: List<Chapter>) = runCatching {
+        mangaList.forEach{
+            delay(3000)
+            when(val mangaResult = kuaikanService.getSingleChapter("https://www.kuaikanmanhua.com/webs/comic-next/${it.id}")){
+                is NetworkResult.Error -> return@forEach
+                is NetworkResult.Success -> {
+                    createDownloadTask(
+                        url = mangaResult.data.urlList.joinToString(separator = ","),
+                        userId = mangaResult.data.title,
+                        screenName = mangaResult.data.title,
+                        platform = AvailablePlatforms.Kuaikan,
+                        name = mangaResult.data.chapter,
+                        tweetID = mangaResult.data.title,
+                        mainLink = "https://www.kuaikanmanhua.com/webs/comic-next/${it.id}",
+                        mediaType = MediaType.PDF
+                    )
                 }
             }
         }

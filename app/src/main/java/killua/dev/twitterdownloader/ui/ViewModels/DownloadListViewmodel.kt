@@ -23,6 +23,7 @@ import killua.dev.base.ui.filters.TypeFilter
 import killua.dev.base.utils.MediaFileNameStrategy
 import killua.dev.twitterdownloader.Model.DownloadedItem
 import killua.dev.twitterdownloader.download.DownloadListManager
+import killua.dev.twitterdownloader.download.DownloadbyLink
 import killua.dev.twitterdownloader.utils.navigateToLofter
 import killua.dev.twitterdownloader.utils.navigateTwitterTweet
 import kotlinx.coroutines.Dispatchers
@@ -66,6 +67,7 @@ data class DownloadListPageUIState(
 @HiltViewModel
 class DownloadListViewModel @Inject constructor(
     private val downloadListManager: DownloadListManager,
+    private val downloadbyLink: DownloadbyLink,
 ) : BaseViewModel<DownloadListPageUIIntent, DownloadListPageUIState, SnackbarUIEffect>(
     DownloadListPageUIState(
         optionIndex = 0,
@@ -371,35 +373,39 @@ class DownloadListViewModel @Inject constructor(
 
         val fileNameStrategy = MediaFileNameStrategy(mediaType)
         val fileName = fileNameStrategy.generateMedia(old.screenName)
-
         cancelDownload(downloadId)
-
-        val newDownload = Download(
-            uuid = old.uuid,
-            userId  = old.userId,
-            screenName = old.screenName,
-            name = old.name,
-            type = old.type,
-            tweetID = old.tweetID,
-            fileUri = null,
-            link = old.link,
-            fileName = fileName,
-            fileType = mediaType.name.lowercase(),
-            fileSize = 0L,
-            status = DownloadStatus.PENDING,
-            mimeType = mediaType.mimeType
-        )
-
-        downloadListManager.insert(newDownload)
-        downloadListManager.enqueueDownload(
-            DownloadTask(
-                id = old.uuid,
-                url = old.link!!,
-                fileName = fileName,
-                screenName = old.screenName ?: "",
-                type = mediaType
-            )
-        )
+        when(old.type){
+            AvailablePlatforms.Kuaikan -> {
+                downloadbyLink.handlePlatformDownload(old.link!!, AvailablePlatforms.Kuaikan)
+            }
+            else -> {
+                val newDownload = Download(
+                    uuid = old.uuid,
+                    userId  = old.userId,
+                    screenName = old.screenName,
+                    name = old.name,
+                    type = old.type,
+                    tweetID = old.tweetID,
+                    fileUri = null,
+                    link = old.link,
+                    fileName = fileName,
+                    fileType = mediaType.name.lowercase(),
+                    fileSize = 0L,
+                    status = DownloadStatus.PENDING,
+                    mimeType = mediaType.mimeType
+                )
+                downloadListManager.insert(newDownload)
+                downloadListManager.enqueueDownload(
+                    DownloadTask(
+                        id = old.uuid,
+                        url = old.link!!,
+                        fileName = fileName,
+                        screenName = old.screenName ?: "",
+                        type = mediaType
+                    )
+                )
+            }
+        }
     }
 
     private suspend fun handleBulkOperation(

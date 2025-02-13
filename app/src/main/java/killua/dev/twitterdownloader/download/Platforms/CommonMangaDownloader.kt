@@ -210,45 +210,35 @@ class CommonMangaDownloader(
         uri: Uri,
         onProgress: (Int) -> Unit
     ) = withContext(Dispatchers.IO) {
-        println("开始创建PDF，图片数量: ${bitmaps.size}")
         if (bitmaps.isEmpty()) {
-            println("错误: 没有可用的图片")
             throw IllegalArgumentException("没有可用的图片")
         }
 
         val totalHeight = bitmaps.sumOf { it.height }
         val maxWidth = bitmaps.maxOf { it.width }
-        println("PDF页面尺寸: ${maxWidth}x${totalHeight}")
 
         val document = PdfDocument()
         try {
-            println("创建PDF页面...")
             val pageInfo = PdfDocument.PageInfo.Builder(maxWidth, totalHeight, 1).create()
             val page = document.startPage(pageInfo)
 
             var currentHeight = 0
             bitmaps.forEachIndexed { index, bitmap ->
-                println("处理第 ${index + 1} 张图片...")
                 page.canvas.drawBitmap(bitmap, 0f, currentHeight.toFloat(), null)
                 currentHeight += bitmap.height
                 onProgress((index + 1) * 100 / bitmaps.size)
             }
 
             document.finishPage(page)
-            println("PDF页面创建完成")
 
-            println("写入PDF文件...")
             context.contentResolver.openOutputStream(uri)?.use { outputStream ->
                 document.writeTo(outputStream)
-                println("PDF文件写入完成")
             }
         } catch (e: Exception) {
-            println("PDF创建过程发生错误:")
             e.printStackTrace()
             throw e
         } finally {
             document.close()
-            println("PDF文档已关闭")
         }
     }
 
