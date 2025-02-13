@@ -17,11 +17,17 @@ import killua.dev.base.datastore.readLofterLoginAuth
 import killua.dev.base.datastore.readLofterLoginKey
 import killua.dev.base.datastore.readPixivPHPSSID
 import killua.dev.base.di.ApplicationScope
+import killua.dev.base.utils.DownloadEventManager
+import killua.dev.base.utils.DownloadPreChecks
 import killua.dev.base.utils.ShowNotification
 import killua.dev.twitterdownloader.api.Kuaikan.KuaikanService
 import killua.dev.twitterdownloader.api.Lofter.LofterService
 import killua.dev.twitterdownloader.api.Pixiv.PixivService
 import killua.dev.twitterdownloader.api.Twitter.TwitterDownloadAPI
+import killua.dev.twitterdownloader.download.DownloadQueueManager
+import killua.dev.twitterdownloader.download.DownloadbyLink
+import killua.dev.twitterdownloader.repository.DownloadRepository
+import killua.dev.twitterdownloader.repository.DownloadServicesRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -116,6 +122,29 @@ class UserDataManager @Inject constructor(
 @Module
 @InstallIn(SingletonComponent::class)
 object ProvideAPI {
+    @Provides
+    @Singleton
+    fun provideDownloadByLink(
+        downloadRepository: DownloadServicesRepository,
+        downloadQueueManager: DownloadQueueManager,
+        downloadEventManager: DownloadEventManager,
+        downloadPreChecks: DownloadPreChecks,
+    ): DownloadbyLink {
+        return DownloadbyLink(downloadRepository, downloadQueueManager, downloadEventManager, downloadPreChecks)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDownloadServicesRepository(
+        twitterDownloadAPI: TwitterDownloadAPI,
+        lofterService: LofterService,
+        pixivService: PixivService,
+        kuaikanService: KuaikanService,
+        downloadRepository: DownloadRepository
+    ): DownloadServicesRepository {
+        return DownloadServicesRepository(twitterDownloadAPI, lofterService, pixivService, kuaikanService, downloadRepository)
+    }
+
     @Provides
     @Singleton
     fun provideTwitterSingleMedia(

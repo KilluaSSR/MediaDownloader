@@ -31,6 +31,7 @@ import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.base.utils.navigateSingle
 import killua.dev.twitterdownloader.ui.ViewModels.AdvancedPageUIIntent
 import killua.dev.twitterdownloader.ui.ViewModels.AdvancedPageViewModel
+import killua.dev.twitterdownloader.ui.components.AdvancedPageKuaikanButtons
 import killua.dev.twitterdownloader.ui.components.AdvancedPageTopAppBar
 import killua.dev.twitterdownloader.ui.components.MainScaffold
 import kotlinx.coroutines.delay
@@ -168,7 +169,7 @@ fun AdvancedPage(){
                     }
                 }
             }
-            Section(title = "Lofter (Disable your VPN before continuing)") {
+            Section(title = "Lofter") {
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(SizeTokens.Level8),
@@ -209,6 +210,29 @@ fun AdvancedPage(){
                                     navController.navigateSingle(PrepareRoutes.LofterPreparePage.route)
                                 }
 
+                            }
+                        }
+                    }
+                }
+            }
+
+            Section(title = "Kuaikan") {
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(SizeTokens.Level8),
+                    verticalArrangement = Arrangement.spacedBy(SizeTokens.Level8),
+                    maxItemsInEachRow = 2,
+                ) {
+                    AdvancedPageKuaikanButtons.forEachIndexed { index, item ->
+                        ActionsBotton(
+                            modifier = Modifier.weight(1f),
+                            enabled = true,
+                            title = item.title,
+                            icon = item.icon,
+                            color = MaterialTheme.colorScheme.primaryContainer
+                        ) {
+                            when (index) {
+                                0 -> {showDevelopingAlert = true}
                             }
                         }
                     }

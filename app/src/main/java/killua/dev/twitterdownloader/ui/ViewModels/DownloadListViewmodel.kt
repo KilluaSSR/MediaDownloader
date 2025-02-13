@@ -12,28 +12,23 @@ import killua.dev.base.Model.DownloadPageDestinations
 import killua.dev.base.Model.DownloadProgress
 import killua.dev.base.Model.DownloadTask
 import killua.dev.base.Model.MediaType
-import killua.dev.base.repository.ThumbnailRepository
 import killua.dev.base.ui.BaseViewModel
 import killua.dev.base.ui.SnackbarUIEffect
 import killua.dev.base.ui.UIIntent
 import killua.dev.base.ui.UIState
 import killua.dev.base.ui.filters.DurationFilter
 import killua.dev.base.ui.filters.FilterOptions
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import killua.dev.base.ui.filters.PlatformFilter
 import killua.dev.base.ui.filters.TypeFilter
-import killua.dev.base.utils.FileDelete
 import killua.dev.base.utils.MediaFileNameStrategy
-import killua.dev.base.utils.VideoDurationRepository
 import killua.dev.twitterdownloader.Model.DownloadedItem
-import killua.dev.twitterdownloader.download.DownloadManager
-import killua.dev.twitterdownloader.download.DownloadQueueManager
-import killua.dev.twitterdownloader.repository.DownloadRepository
+import killua.dev.twitterdownloader.download.DownloadListManager
 import killua.dev.twitterdownloader.utils.navigateToLofter
 import killua.dev.twitterdownloader.utils.navigateTwitterTweet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -70,12 +65,7 @@ data class DownloadListPageUIState(
 @OptIn(FlowPreview::class)
 @HiltViewModel
 class DownloadListViewModel @Inject constructor(
-    private val downloadRepository: DownloadRepository,
-    private val downloadManager: DownloadManager,
-    private val thumbnailRepository: ThumbnailRepository,
-    private val videoDurationRepository: VideoDurationRepository,
-    private val downloadQueueManager: DownloadQueueManager,
-    private val fileDelete: FileDelete
+    private val downloadListManager: DownloadListManager,
 ) : BaseViewModel<DownloadListPageUIIntent, DownloadListPageUIState, SnackbarUIEffect>(
     DownloadListPageUIState(
         optionIndex = 0,
@@ -91,8 +81,8 @@ class DownloadListViewModel @Inject constructor(
         viewModelScope.launch {
             // 合并数据流
             combine(
-                downloadManager.downloadProgress,
-                downloadRepository.observeAllDownloads()
+                downloadListManager.downloadProgress,
+                downloadListManager.observeAllDownloads()
             ) { progress, downloads ->
                 Pair(progress, downloads)
             }.collect { (progressList, downloads) ->
@@ -167,7 +157,7 @@ class DownloadListViewModel @Inject constructor(
         unfilteredItems: List<DownloadedItem>,
         filterOptions: FilterOptions
     ) {
-        DownloadPageDestinations.values()
+        DownloadPageDestinations.entries
             .filter { it != uiState.value.optionsType }
             .forEach { destination ->
                 filteredResultsCache[destination] = applyFilters(
@@ -180,7 +170,7 @@ class DownloadListViewModel @Inject constructor(
 
     private fun observeDownloadsFromDB() {
         launchOnIO {
-            downloadRepository.observeAllDownloads().collect { downloads ->
+            downloadListManager.observeAllDownloads().collect { downloads ->
                 val authors = downloads.mapNotNull { it.name }
                     .sortedBy { it.length }
                     .toSet()
@@ -240,7 +230,7 @@ class DownloadListViewModel @Inject constructor(
                 .toList()
                 .map { uri ->
                     async {
-                        uri to videoDurationRepository.getVideoDuration(uri)
+                        uri to downloadListManager.getVideoDuration(uri)
                     }
                 }
                 .awaitAll()
@@ -255,7 +245,7 @@ class DownloadListViewModel @Inject constructor(
             .filter { uri -> !uiState.value.thumbnailCache.containsKey(uri) }
             .map { uri ->
                 async {
-                    uri to thumbnailRepository.getThumbnail(uri)
+                    uri to downloadListManager.getThumbnail(uri)
                 }
             }
             .awaitAll()
@@ -364,14 +354,14 @@ class DownloadListViewModel @Inject constructor(
     }
 
     private suspend fun cancelDownload(downloadId: String) {
-        val download = downloadRepository.getById(downloadId) ?: return
+        val download = downloadListManager.getById(downloadId) ?: return
         download.fileUri?.let { uri ->
-            fileDelete.deleteFile(uri)
+            downloadListManager.deleteFile(uri)
         }
-        downloadRepository.deleteById(downloadId)
+        downloadListManager.deleteById(downloadId)
     }
     private suspend fun retryDownload(downloadId: String) {
-        val old = downloadRepository.getById(downloadId) ?: return
+        val old = downloadListManager.getById(downloadId) ?: return
         val mediaType = when(old.fileType) {
             "video" -> MediaType.VIDEO
             "photo" -> MediaType.PHOTO
@@ -400,8 +390,8 @@ class DownloadListViewModel @Inject constructor(
             mimeType = mediaType.mimeType
         )
 
-        downloadRepository.insert(newDownload)
-        downloadQueueManager.enqueue(
+        downloadListManager.insert(newDownload)
+        downloadListManager.enqueueDownload(
             DownloadTask(
                 id = old.uuid,
                 url = old.link!!,
@@ -416,7 +406,7 @@ class DownloadListViewModel @Inject constructor(
         operation: suspend (Download) -> Unit,
         emptyMessage: String
     ) {
-        val downloads = downloadRepository.getActiveDownloads()
+        val downloads = downloadListManager.getActiveDownloads()
         if (downloads.isEmpty()) {
             showMessage(emptyMessage)
             return
@@ -426,7 +416,7 @@ class DownloadListViewModel @Inject constructor(
 
     private fun handleNavigation(intent: DownloadListPageUIIntent.GoTo) {
         launchOnIO {
-            val download = downloadRepository.getById(intent.downloadId) ?: run {
+            val download = downloadListManager.getById(intent.downloadId) ?: run {
                 showMessage("Not Found")
                 return@launchOnIO
             }
@@ -489,30 +479,15 @@ class DownloadListViewModel @Inject constructor(
         ))
     }
 
-    private fun Download.toDownloadTask(): DownloadTask {
-        val mediaType = when(fileType) {
-            "video" -> MediaType.VIDEO
-            "photo" -> MediaType.PHOTO
-            else -> MediaType.VIDEO
-        }
-        return DownloadTask(
-            id = uuid,
-            url = link!!,
-            fileName = fileName,
-            screenName = screenName ?: "",
-            type = mediaType
-        )
-    }
-
     private fun showMessage(message: String) {
         viewModelScope.launch {
             emitEffect(SnackbarUIEffect.ShowSnackbar(message))
         }
     }
 
-    private suspend fun updateDownloadStatus(downloadId: String, status: DownloadStatus) {
+    private fun updateDownloadStatus(downloadId: String, status: DownloadStatus) {
         launchOnIO {
-            downloadRepository.updateStatus(downloadId, status)
+            downloadListManager.updateStatus(downloadId, status)
         }
     }
 }

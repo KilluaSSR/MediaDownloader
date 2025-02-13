@@ -44,6 +44,7 @@ import killua.dev.base.utils.drawableToImageVector
 import killua.dev.base.utils.getActivity
 import killua.dev.base.utils.navigateSingle
 import killua.dev.setup.SetupRoutes
+import killua.dev.twitterdownloader.Model.FavouriteUserInfo
 import killua.dev.twitterdownloader.ui.ViewModels.MainPageUIIntent
 import killua.dev.twitterdownloader.ui.ViewModels.MainPageViewmodel
 import killua.dev.twitterdownloader.ui.components.FavouriteCard
@@ -149,14 +150,36 @@ fun MainPage(
             verticalArrangement = Arrangement.spacedBy(SizeTokens.Level24)
         ) {
             Section(title = "Overview") {
-                if(uiState.value.youHaveDownloadedSth){
-                    FavouriteCard(uiState.value.favouriteUserName, uiState.value.favouriteUserScreenName, uiState.value.downloadedTimes, uiState.value.favouriteUserFromPlatform, true){
-                        viewmodel.launchOnIO {
-                            viewmodel.emitIntent(MainPageUIIntent.NavigateToFavouriteUser(context, uiState.value.favouriteUserID,uiState.value.favouriteUserFromPlatform, uiState.value.favouriteUserScreenName))
+                if(uiState.value.youHaveDownloadedSth) {
+                    val userInfo = FavouriteUserInfo(
+                        name = uiState.value.favouriteUserName,
+                        screenName = uiState.value.favouriteUserScreenName,
+                        downloadCount = uiState.value.downloadedTimes,
+                        platform = uiState.value.favouriteUserFromPlatform,
+                        hasDownloaded = true
+                    )
+
+                    FavouriteCard(
+                        userInfo = userInfo,
+                        onClick = {
+                            viewmodel.launchOnIO {
+                                viewmodel.emitIntent(
+                                    MainPageUIIntent.NavigateToFavouriteUser(
+                                        context,
+                                        uiState.value.favouriteUserID,
+                                        uiState.value.favouriteUserFromPlatform,
+                                        uiState.value.favouriteUserScreenName
+                                    )
+                                )
+                            }
                         }
-                    }
-                }else{
-                    FavouriteCard("", "", 0,uiState.value.favouriteUserFromPlatform, false) {}
+                    )
+                } else {
+                    FavouriteCard(
+                        userInfo = FavouriteUserInfo(
+                            platform = uiState.value.favouriteUserFromPlatform
+                        )
+                    )
                 }
             }
 

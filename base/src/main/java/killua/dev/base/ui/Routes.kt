@@ -26,6 +26,7 @@ sealed class AdvancedpageRoutes(val route: String){
     data object TwitterGetAll: AdvancedpageRoutes(route = "twitter_get_all")
     data object LofterAuthors: AdvancedpageRoutes(route = "lofter_authors")
     data object LofterGetAuthorImagesByTags: AdvancedpageRoutes(route = "lofter_get_author_images_by_tags")
+    data object KuaikanEntireComic: AdvancedpageRoutes(route = "kuaikan_entire_comic")
 }
 
 sealed class PrepareRoutes(val route: String){

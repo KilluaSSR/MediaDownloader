@@ -53,6 +53,7 @@ import killua.dev.base.ui.components.TopBar
 import killua.dev.base.utils.navigateSingle
 import killua.dev.base.ui.animations.AnimatedTextContainer
 import killua.dev.base.ui.tokens.SizeTokens
+import killua.dev.twitterdownloader.Model.FavouriteUserInfo
 import killua.dev.twitterdownloader.utils.openGithubIssues
 import killua.dev.twitterdownloader.utils.openMail
 import kotlinx.coroutines.delay
@@ -92,12 +93,8 @@ fun MainTopBar(navController: NavHostController, showMoreOnClick : ()-> Unit ) {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun FavouriteCard(
-    favouriteUser: String,
-    favouriteUserScreenName: String,
-    downloadCount: Int,
-    downloadPlatforms: AvailablePlatforms,
-    downloaded: Boolean,
-    onClick: () -> Unit
+    userInfo: FavouriteUserInfo,
+    onClick: () -> Unit = {}
 ) {
     OverviewCard(
         title = "Your Favourite",
@@ -105,31 +102,14 @@ fun FavouriteCard(
         colorContainer = MaterialTheme.colorScheme.primaryContainer,
         onColorContainer = MaterialTheme.colorScheme.onPrimaryContainer,
         content = {
-            val titleText = if (downloaded) {
-                when(downloadPlatforms){
-                    AvailablePlatforms.Twitter -> "$favouriteUser @$favouriteUserScreenName"
-                    AvailablePlatforms.Lofter -> "$favouriteUser @$favouriteUserScreenName"
-                    AvailablePlatforms.Pixiv -> "@$favouriteUserScreenName"
-                    AvailablePlatforms.Kuaikan -> favouriteUserScreenName
-                }
-            } else {
-                "Nothing here"
-            }
-
-            val subtitleText = if (downloaded) {
-                "You've downloaded his/her media $downloadCount times"
-            } else {
-                ""
-            }
-
             Column {
-                AnimatedTextContainer(targetState = titleText) { text ->
+                AnimatedTextContainer(targetState = userInfo.displayName) { text ->
                     TitleLargeText(
                         text = text,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
-                AnimatedTextContainer(targetState = subtitleText) { text ->
+                AnimatedTextContainer(targetState = userInfo.description) { text ->
                     if (text.isNotEmpty()) {
                         BodyMediumText(
                             text = text,

@@ -2,11 +2,6 @@ package killua.dev.twitterdownloader.ui.ViewModels
 
 import android.content.Context
 import dagger.hilt.android.lifecycle.HiltViewModel
-import db.Download
-import db.DownloadStatus
-import killua.dev.base.Model.AvailablePlatforms
-import killua.dev.base.Model.DownloadTask
-import killua.dev.base.Model.MediaType
 import killua.dev.base.datastore.readLofterLoginAuth
 import killua.dev.base.datastore.readLofterLoginKey
 import killua.dev.base.di.ApplicationScope
@@ -16,24 +11,19 @@ import killua.dev.base.ui.SnackbarUIEffect
 import killua.dev.base.ui.SnackbarUIEffect.ShowSnackbar
 import killua.dev.base.ui.UIIntent
 import killua.dev.base.ui.UIState
-import killua.dev.base.utils.MediaFileNameStrategy
 import killua.dev.twitterdownloader.Model.NetworkResult
-import killua.dev.twitterdownloader.api.Twitter.Model.TwitterUser
 import killua.dev.twitterdownloader.api.Twitter.TwitterDownloadAPI
-import killua.dev.twitterdownloader.download.DownloadQueueManager
-import killua.dev.twitterdownloader.repository.DownloadRepository
+import killua.dev.twitterdownloader.features.AdvancedFeaturesManager
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.util.UUID
 import javax.inject.Inject
-import kotlin.random.Random
 
 data class AdvancedPageUIState(
     val isLofterLoggedIn: Boolean = false,
@@ -53,211 +43,85 @@ sealed class AdvancedPageUIIntent : UIIntent {
 @HiltViewModel
 class AdvancedPageViewModel @Inject constructor(
     private val twitterDownloadAPI: TwitterDownloadAPI,
-    private val downloadQueueManager: DownloadQueueManager,
-    private val downloadRepository: DownloadRepository,
+    private val advancedFeaturesManager: AdvancedFeaturesManager,
     @ApplicationScope private val applicationScope: CoroutineScope
 ): BaseViewModel<AdvancedPageUIIntent, AdvancedPageUIState, SnackbarUIEffect>(AdvancedPageUIState()) {
     private val mutex = Mutex()
-    private val _lofterLoginState: MutableStateFlow<CurrentState> =
-        MutableStateFlow(CurrentState.Idle)
-    val lofterLoginState: StateFlow<CurrentState> =
-        _lofterLoginState.stateInScope(CurrentState.Idle)
-    val lofterGetByTagsEligibility: StateFlow<Boolean> = _lofterLoginState.map { login ->
-        login == CurrentState.Success
-    }.flowOnIO().stateInScope(false)
+    private val _lofterLoginState = MutableStateFlow<CurrentState>(CurrentState.Idle)
+    val lofterLoginState: StateFlow<CurrentState> = _lofterLoginState.asStateFlow()
+
+    val lofterGetByTagsEligibility: StateFlow<Boolean> = _lofterLoginState
+        .map { it == CurrentState.Success }
+        .flowOnIO()
+        .stateInScope(false)
 
     override suspend fun onEvent(state: AdvancedPageUIState, intent: AdvancedPageUIIntent) {
-        when(intent){
-            is AdvancedPageUIIntent.OnEntry -> {
-                mutex.withLock {
-                    val loginKey = intent.context.readLofterLoginKey().first()
-                    val loginAuth = intent.context.readLofterLoginAuth().first()
-                    if(loginKey.isNotBlank() && loginAuth.isNotBlank()){
-                        _lofterLoginState.value = CurrentState.Success
-                    }
-                }
+        when(intent) {
+            is AdvancedPageUIIntent.OnEntry -> handleEntry(intent.context)
+            AdvancedPageUIIntent.GetMyTwitterBookmark -> handleTwitterBookmarks()
+            AdvancedPageUIIntent.GetMyTwitterLiked -> handleTwitterLikes()
+            is AdvancedPageUIIntent.GetSomeonesTwitterAccountInfo ->
+                handleTwitterUserInfo(intent.screenName)
+            is AdvancedPageUIIntent.OnConfirmTwitterDownloadMedia ->
+                handleUserMediaDownload(intent.screenName, intent.id)
+        }
+    }
+    private suspend fun handleEntry(context: Context) {
+        mutex.withLock {
+            val loginKey = context.readLofterLoginKey().first()
+            val loginAuth = context.readLofterLoginAuth().first()
+            if(loginKey.isNotBlank() && loginAuth.isNotBlank()) {
+                _lofterLoginState.value = CurrentState.Success
             }
+        }
+    }
 
-            AdvancedPageUIIntent.GetMyTwitterBookmark -> {
-                applicationScope.launch {
-                    twitterDownloadAPI.getBookmarksAllTweets(
-                        onNewItems = { bookmarks ->
-                            bookmarks.forEach { bookmark ->
-                                bookmark.videoUrls.forEach { url ->
-                                    randomDelay()
-                                    createAndStartDownloadTwitterSingleMedia(
-                                        url = url,
-                                        user = bookmark.user,
-                                        tweetID = bookmark.tweetId,
-                                        mediaType = MediaType.VIDEO
-                                    )
-                                }
-                                bookmark.photoUrls.forEach { url ->
-                                    randomDelay()
-                                    createAndStartDownloadTwitterSingleMedia(
-                                        url = url,
-                                        user = bookmark.user,
-                                        tweetID = bookmark.tweetId,
-                                        mediaType = MediaType.PHOTO
-                                    )
-                                }
-                            }
-                        },
-                        onError = { errorMessage ->
-                            handleError(errorMessage)
-                        }
-                    )
+    private fun handleTwitterBookmarks() {
+        applicationScope.launch {
+            advancedFeaturesManager.handleTwitterBookmarks()
+                .onFailure { handleError(it.message ?: "Download failed") }
+        }
+    }
+
+    private fun handleTwitterLikes() {
+        applicationScope.launch {
+            advancedFeaturesManager.handleTwitterLikes()
+                .onFailure { handleError(it.message ?: "Download failed") }
+        }
+    }
+    private fun handleTwitterUserInfo(screenName: String) {
+        applicationScope.launch {
+            emitState(uiState.value.copy(isFetchingTwitterUserInfo = true))
+            when (val result = twitterDownloadAPI.getUserBasicInfo(screenName)) {
+                is NetworkResult.Success -> {
+                    emitState(uiState.value.copy(
+                        isFetchingTwitterUserInfo = false,
+                        TwitterUserAccountInfo = Triple(
+                            result.data.id ?: "",
+                            result.data.name ?: "",
+                            result.data.screenName ?: ""
+                        )
+                    ))
                 }
-            }
-            AdvancedPageUIIntent.GetMyTwitterLiked -> {
-                applicationScope.launch {
-                    twitterDownloadAPI.getLikesAllTweets(
-                        onNewItems = { tweets ->
-                            tweets.forEach { tweet ->
-                                tweet.videoUrls.forEach { url ->
-                                    randomDelay()
-                                    createAndStartDownloadTwitterSingleMedia(
-                                        url = url,
-                                        user = tweet.user,
-                                        tweetID = tweet.tweetId,
-                                        mediaType = MediaType.VIDEO
-                                    )
-                                }
-                                tweet.photoUrls.forEach { url ->
-                                    randomDelay()
-                                    createAndStartDownloadTwitterSingleMedia(
-                                        url = url,
-                                        user = tweet.user,
-                                        tweetID = tweet.tweetId,
-                                        mediaType = MediaType.PHOTO
-                                    )
-                                }
-                            }
-                        },
-                        onError = { errorMessage ->
-                            handleError(errorMessage)
-                        }
-                    )
-                }
-            }
-
-            is AdvancedPageUIIntent.GetSomeonesTwitterAccountInfo -> {
-                applicationScope.launch {
-                    emitState(uiState.value.copy(isFetchingTwitterUserInfo = true))
-                    when (val result = twitterDownloadAPI.getUserBasicInfo(intent.screenName)) {
-                        is NetworkResult.Success -> {
-                            result.data.let { userInfo ->
-                                emitState(uiState.value.copy(
-                                    isFetchingTwitterUserInfo = false,
-                                    TwitterUserAccountInfo = Triple(
-                                        userInfo.id ?: "",
-                                        userInfo.name ?: "",
-                                        userInfo.screenName ?: ""
-                                    )
-                                ))
-                            }
-                        }
-                        is NetworkResult.Error -> {
-                            emitState(uiState.value.copy(isFetchingTwitterUserInfo = false))
-                            handleError(result.message)
-                        }
-                    }
-                }
-            }
-
-            is AdvancedPageUIIntent.OnConfirmTwitterDownloadMedia -> {
-                applicationScope.launch {
-                    val userId = intent.id
-                    val userScreenName = intent.screenName
-                    if (userId.isEmpty()) {
-                        return@launch
-                    }
-
-                    twitterDownloadAPI.getUserMediaByUserId(
-                        userId = userId,
-                        screenName = userScreenName,
-                        onNewItems = { tweets ->
-                            tweets.forEach { tweet ->
-                                tweet.videoUrls.forEach { url ->
-                                    randomDelay()
-                                    createAndStartDownloadTwitterSingleMedia(
-                                        url = url,
-                                        user = tweet.user,
-                                        tweetID = tweet.tweetId,
-                                        mediaType = MediaType.VIDEO
-                                    )
-                                }
-                                tweet.photoUrls.forEach { url ->
-                                    randomDelay()
-                                    createAndStartDownloadTwitterSingleMedia(
-                                        url = url,
-                                        user = tweet.user,
-                                        tweetID = tweet.tweetId,
-                                        mediaType = MediaType.PHOTO
-                                    )
-                                }
-                            }
-                        },
-                        onError = { errorMessage ->
-                            handleError(errorMessage)
-                        }
-                    )
+                is NetworkResult.Error -> {
+                    emitState(uiState.value.copy(isFetchingTwitterUserInfo = false))
+                    handleError(result.message)
                 }
             }
         }
     }
 
-    private fun createAndStartDownloadTwitterSingleMedia(
-        url: String,
-        user: TwitterUser?,
-        tweetID: String,
-        mediaType: MediaType
-    ) {
-        val uuid = UUID.randomUUID().toString()
-        val fileNameStrategy = MediaFileNameStrategy(mediaType)
-        val fileName = fileNameStrategy.generateMedia(user?.screenName)
-
-        try {
-            val download = Download(
-                uuid = uuid,
-                userId = user?.id,
-                screenName = user?.screenName,
-                type = AvailablePlatforms.Twitter,
-                name = user?.name,
-                tweetID = tweetID,
-                fileUri = null,
-                link = url,
-                fileName = fileName,
-                fileType = mediaType.name.lowercase(),
-                fileSize = 0L,
-                status = DownloadStatus.PENDING,
-                mimeType = mediaType.mimeType
-            )
-
-            applicationScope.launch {
-                downloadRepository.insert(download)
-                downloadQueueManager.enqueue(
-                    DownloadTask(
-                        id = uuid,
-                        url = url,
-                        fileName = fileName,
-                        screenName = user?.screenName ?: "",
-                        type = mediaType
-                    )
-                )
-            }
-        } catch (e: Exception) {
-            handleError(e.message.toString())
+    private fun handleUserMediaDownload(screenName: String, id: String) {
+        if (id.isEmpty()) return
+        applicationScope.launch {
+            advancedFeaturesManager.getUserMediaByUserId(id, screenName)
+                .onFailure { handleError(it.message ?: "Download failed") }
         }
     }
 
     private fun handleError(error: String) {
-        applicationScope.launch{
-            emitEffect(ShowSnackbar(error, actionLabel =  "OKAY" , withDismissAction = true))
+        applicationScope.launch {
+            emitEffect(ShowSnackbar(error, "OKAY", true))
         }
-    }
-
-    private suspend fun randomDelay() {
-        delay(Random.nextLong(50, 150))
     }
 }
