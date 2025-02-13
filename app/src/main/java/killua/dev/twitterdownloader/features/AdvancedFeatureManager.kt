@@ -1,17 +1,21 @@
 package killua.dev.twitterdownloader.features
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import db.Download
 import db.DownloadStatus
 import killua.dev.base.Model.AvailablePlatforms
 import killua.dev.base.Model.DownloadTask
 import killua.dev.base.Model.MediaType
 import killua.dev.base.utils.MediaFileNameStrategy
+import killua.dev.base.utils.ShowNotification
 import killua.dev.twitterdownloader.Model.NetworkResult
 import killua.dev.twitterdownloader.api.Kuaikan.Chapter
 import killua.dev.twitterdownloader.api.Kuaikan.KuaikanService
 import killua.dev.twitterdownloader.api.Lofter.LofterService
 import killua.dev.twitterdownloader.api.Twitter.Model.TwitterUser
 import killua.dev.twitterdownloader.api.Twitter.TwitterDownloadAPI
+import killua.dev.twitterdownloader.db.LofterTagsRepository
 import killua.dev.twitterdownloader.download.DownloadQueueManager
 import killua.dev.twitterdownloader.repository.DownloadRepository
 import kotlinx.coroutines.delay
@@ -23,8 +27,10 @@ class AdvancedFeaturesManager @Inject constructor(
     private val twitterDownloadAPI: TwitterDownloadAPI,
     private val kuaikanService: KuaikanService,
     private val lofterService: LofterService,
+    private val notification: ShowNotification,
     private val downloadQueueManager: DownloadQueueManager,
     private val downloadRepository: DownloadRepository,
+    private val tagsRepository: LofterTagsRepository
 ) {
     suspend fun handleTwitterBookmarks(): Result<Unit> = runCatching {
         twitterDownloadAPI.getBookmarksAllTweets(
@@ -64,6 +70,32 @@ class AdvancedFeaturesManager @Inject constructor(
         )
     }
 
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    suspend fun getLofterPicsByAuthorTags(url: String){
+        var link = url
+        if(url.last() != '/'){
+            link += "/"
+        }
+        val tags = tagsRepository.getAllTags()
+        val blogInfo = lofterService.getByAuthorTags(link, tags)
+        val authorID = blogInfo.authorId
+        val authorName = blogInfo.authorName
+        val authorDomain = blogInfo.authorDomain
+        blogInfo.images.forEach {
+            delay(100)
+            createDownloadTask(
+                url = it.url,
+                userId = authorID,
+                screenName = authorDomain,
+                platform = AvailablePlatforms.Lofter,
+                name = authorName,
+                tweetID = it.url,
+                mainLink = url,
+                mediaType = MediaType.PHOTO
+            )
+        }
+    }
+
     suspend fun getWholeManga(url: String): NetworkResult<List<Chapter>> = runCatching {
         when(val result = kuaikanService.getWholeComic(url)) {
             is NetworkResult.Error -> {
@@ -89,6 +121,7 @@ class AdvancedFeaturesManager @Inject constructor(
     suspend fun downloadEntireManga(mangaList: List<Chapter>) = runCatching {
         mangaList.forEach{
             delay(3000)
+            notification.updateGettingComicProgress(it.name)
             when(val mangaResult = kuaikanService.getSingleChapter("https://www.kuaikanmanhua.com/webs/comic-next/${it.id}")){
                 is NetworkResult.Error -> return@forEach
                 is NetworkResult.Success -> {

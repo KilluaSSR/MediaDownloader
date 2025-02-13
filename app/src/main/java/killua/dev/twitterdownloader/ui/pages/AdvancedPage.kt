@@ -131,7 +131,14 @@ fun AdvancedPage(){
                         }
                     }
                     DialogType.LOFTER_AUTHOR_TAGS -> {
-
+                        scope.launch {
+                            viewModel.emitIntent(AdvancedPageUIIntent.GetLofterPicsByTags(input))
+                            delay(200)
+                            viewModel.emitState(uiState.value.copy(
+                                info = Triple("", "", "")
+                            ))
+                            showDialog = false
+                        }
                     }
                     DialogType.KUAIKAN_ENTIRE -> {
                         scope.launch {

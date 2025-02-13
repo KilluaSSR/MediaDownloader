@@ -127,7 +127,19 @@ class ShowNotification @Inject constructor(
         notificationManager.notify(downloadId.hashCode(), notification)
     }
 
-    fun updateGettingProgress(photoCount: Int, videoCount: Int) {
+    fun showStartGettingImages(downloadId: String, error: String?) {
+        val notification = NotificationCompat.Builder(context, channelId)
+            .setSmallIcon(R.drawable.icon)
+            .setContentTitle("Getting images.")
+            .setContentText(error ?: "ERROR")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true)
+            .build()
+
+        notificationManager.notify(downloadId.hashCode(), notification)
+    }
+
+    fun updateGettingTweetsProgress(photoCount: Int, videoCount: Int) {
         val notification = NotificationCompat.Builder(context, channelId)
             .setContentTitle("Getting tweets")
             .setContentText("$photoCount photos, $videoCount videos detected")
@@ -138,6 +150,19 @@ class ShowNotification @Inject constructor(
             .build()
 
         notificationManager.notify(BOOKMARK_NOTIFICATION_ID, notification)
+    }
+
+    fun updateGettingComicProgress(chapter: String) {
+        val notification = NotificationCompat.Builder(context, channelId)
+            .setContentTitle("Getting comics")
+            .setContentText("Current: Trying $chapter")
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .setSmallIcon(R.drawable.icon)
+            .build()
+
+        notificationManager.notify(KUAIKAN_ENTIRE_NOTIFICATION_ID, notification)
     }
 
     fun completeGettingProgress(totalPhotoCount: Int, totalVideoCount: Int) {
@@ -154,6 +179,7 @@ class ShowNotification @Inject constructor(
 
     companion object {
         private const val BOOKMARK_NOTIFICATION_ID = 10086
+        private const val KUAIKAN_ENTIRE_NOTIFICATION_ID = 10087
     }
 
     fun cancelNotification(downloadId: String) {

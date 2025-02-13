@@ -74,8 +74,7 @@ class PixivService @Inject constructor(
                     }
             ).use { response ->
                 if (!response.isSuccessful) {
-                    println("图片URL请求失败: ${response.code} ${response.message}")
-                    println("响应体: ${response.body?.string()}")
+
                     return@withContext NetworkResult.Error(
                         code = response.code,
                         message = "图片URL请求失败: ${response.code} ${response.message}"
@@ -87,8 +86,7 @@ class PixivService @Inject constructor(
                         .body
                         .map { it.urls.original }
                 } catch (e: Exception) {
-                    println("URL列表JSON解析失败: ${e.message}")
-                    println("原始JSON: ${response.body?.string()}")
+
                     return@withContext NetworkResult.Error(message = "URL列表JSON解析失败: ${e.message}")
                 }
             }

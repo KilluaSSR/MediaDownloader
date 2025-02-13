@@ -8,6 +8,8 @@ data class ApplicationUserDataTwitter(
 
 data class ApplicationUserDataLofter(
     val login_key: String,
-    val login_auth: String
+    val login_auth: String,
+    val start_time: Long,
+    val end_time: Long
 )
 

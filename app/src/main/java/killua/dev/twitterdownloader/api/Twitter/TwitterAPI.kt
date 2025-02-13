@@ -231,7 +231,7 @@ class TwitterDownloadAPI @Inject constructor(
                             lastUser = newItems.firstOrNull()?.user
                         }
 
-                        notification.updateGettingProgress(
+                        notification.updateGettingTweetsProgress(
                             photoCount = allItems.sumOf { it.photoUrls.size },
                             videoCount = allItems.sumOf { it.videoUrls.size }
                         )

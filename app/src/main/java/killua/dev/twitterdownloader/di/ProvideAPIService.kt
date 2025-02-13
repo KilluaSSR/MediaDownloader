@@ -13,8 +13,10 @@ import killua.dev.base.datastore.readApplicationUserCt0
 import killua.dev.base.datastore.readApplicationUserID
 import killua.dev.base.datastore.readDelay
 import killua.dev.base.datastore.readKuaikanPassToken
+import killua.dev.base.datastore.readLofterEndTime
 import killua.dev.base.datastore.readLofterLoginAuth
 import killua.dev.base.datastore.readLofterLoginKey
+import killua.dev.base.datastore.readLofterStartTime
 import killua.dev.base.datastore.readPixivPHPSSID
 import killua.dev.base.di.ApplicationScope
 import killua.dev.base.utils.DownloadEventManager
@@ -57,7 +59,7 @@ class UserDataManager @Inject constructor(
     private val _userData = MutableStateFlow(ApplicationUserDataTwitter("", "", ""))
     val userTwitterData: StateFlow<ApplicationUserDataTwitter> = _userData.asStateFlow()
 
-    private val _userLofterData = MutableStateFlow(ApplicationUserDataLofter("", ""))
+    private val _userLofterData = MutableStateFlow(ApplicationUserDataLofter("", "", 0, 0))
     val userLofterData: StateFlow<ApplicationUserDataLofter> = _userLofterData.asStateFlow()
 
     private val _userPixivPHPSSID = MutableStateFlow("")
@@ -87,11 +89,15 @@ class UserDataManager @Inject constructor(
             // Lofter 数据流
             combine(
                 context.readLofterLoginKey(),
-                context.readLofterLoginAuth()
-            ) { key, auth ->
+                context.readLofterLoginAuth(),
+                context.readLofterStartTime(),
+                context.readLofterEndTime()
+            ) { key, auth, startTime, endTime ->
                 ApplicationUserDataLofter(
                     login_key = key,
-                    login_auth = auth
+                    login_auth = auth,
+                    start_time = startTime,
+                    end_time = endTime
                 )
             }.collect {
                 _userLofterData.value = it

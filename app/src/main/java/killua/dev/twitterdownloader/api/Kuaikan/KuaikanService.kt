@@ -97,6 +97,8 @@ class KuaikanService @Inject constructor(
                 val htmlContent = response.body?.string()
                     ?: return@withContext NetworkResult.Error(message = "响应内容为空")
 
+                println("HTML内容长度: ${htmlContent.length}")
+                println("HTML内容前500字符: ${htmlContent.take(500)}")
 
                 val result = extractNuxtParams(htmlContent)
                 if (result == null) {

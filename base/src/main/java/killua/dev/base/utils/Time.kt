@@ -6,15 +6,15 @@ import java.util.Date
 
 @SuppressLint("SimpleDateFormat")
 fun isTimeEarlierThan(timestamp: String, targetTime: String): Boolean {
-    val timestampSeconds = timestamp.toLong() / 1000
-    val targetTimestamp = SimpleDateFormat("yyyy-MM-dd").parse(targetTime)?.time?.div(1000) ?: return false
+    val timestampSeconds = timestamp.toLong()
+    val targetTimestamp = targetTime.toLong()
     return timestampSeconds < targetTimestamp
 }
 
 @SuppressLint("SimpleDateFormat")
 fun isTimeLaterThan(timestamp: String, targetTime: String): Boolean {
-    val timestampSeconds = timestamp.toLong() / 1000
-    val targetTimestamp = SimpleDateFormat("yyyy-MM-dd").parse(targetTime)?.time?.div(1000) ?: return false
+    val timestampSeconds = timestamp.toLong()
+    val targetTimestamp = targetTime.toLong()
     return timestampSeconds > targetTimestamp
 }
 

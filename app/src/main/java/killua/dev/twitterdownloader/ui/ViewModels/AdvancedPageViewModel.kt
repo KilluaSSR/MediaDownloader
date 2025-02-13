@@ -1,6 +1,10 @@
 package killua.dev.twitterdownloader.ui.ViewModels
 
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import killua.dev.base.datastore.readLofterLoginAuth
 import killua.dev.base.datastore.readLofterLoginKey
@@ -41,6 +45,7 @@ sealed class AdvancedPageUIIntent : UIIntent {
     data class GetSomeonesTwitterAccountInfo(val screenName: String): AdvancedPageUIIntent()
     data class OnConfirmTwitterDownloadMedia(val screenName: String, val id: String): AdvancedPageUIIntent()
     data class GetKuaikanEntireManga(val url: String): AdvancedPageUIIntent()
+    data class GetLofterPicsByTags(val url: String): AdvancedPageUIIntent()
 }
 enum class DialogType {
     TWITTER_USER_INFO_DOWNLOAD,
@@ -64,6 +69,7 @@ class AdvancedPageViewModel @Inject constructor(
         .flowOnIO()
         .stateInScope(false)
 
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override suspend fun onEvent(state: AdvancedPageUIState, intent: AdvancedPageUIIntent) {
         when(intent) {
             is AdvancedPageUIIntent.OnEntry -> handleEntry(intent.context)
@@ -72,8 +78,10 @@ class AdvancedPageViewModel @Inject constructor(
             is AdvancedPageUIIntent.GetSomeonesTwitterAccountInfo -> handleTwitterUserInfo(intent.screenName)
             is AdvancedPageUIIntent.OnConfirmTwitterDownloadMedia -> handleUserMediaDownload(intent.screenName, intent.id)
             is AdvancedPageUIIntent.GetKuaikanEntireManga -> handleKuaikanEntireManga(intent.url)
+            is AdvancedPageUIIntent.GetLofterPicsByTags -> handleLofterPicsByAuthorTags(intent.url)
         }
     }
+    
     private suspend fun handleEntry(context: Context) {
         mutex.withLock {
             val loginKey = context.readLofterLoginKey().first()
@@ -87,14 +95,21 @@ class AdvancedPageViewModel @Inject constructor(
     private fun handleTwitterBookmarks() {
         applicationScope.launch {
             advancedFeaturesManager.handleTwitterBookmarks()
-                .onFailure { handleError(it.message ?: "Download failed") }
+                .onFailure { showMessage(it.message ?: "Download failed") }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    private fun handleLofterPicsByAuthorTags(url: String) {
+        applicationScope.launch {
+            advancedFeaturesManager.getLofterPicsByAuthorTags(url = url)
         }
     }
 
     private fun handleTwitterLikes() {
         applicationScope.launch {
             advancedFeaturesManager.handleTwitterLikes()
-                .onFailure { handleError(it.message ?: "Download failed") }
+                .onFailure { showMessage(it.message ?: "Download failed") }
         }
     }
 
@@ -115,7 +130,7 @@ class AdvancedPageViewModel @Inject constructor(
                 }
                 is NetworkResult.Error -> {
                     emitState(uiState.value.copy(isFetching = false))
-                    handleError(result.message)
+                    showMessage(result.message)
                 }
             }
         }
@@ -128,7 +143,7 @@ class AdvancedPageViewModel @Inject constructor(
             when(val mangaList = advancedFeaturesManager.getWholeManga(url)){
                 is NetworkResult.Error -> {
                     emitState(uiState.value.copy(isFetching = false))
-                    emitEffect(ShowSnackbar("Error"))
+                    showMessage("Error")
                 }
                 is NetworkResult.Success -> {
                     emitState(uiState.value.copy(isFetching = false))
@@ -142,13 +157,13 @@ class AdvancedPageViewModel @Inject constructor(
         if (id.isEmpty()) return
         applicationScope.launch {
             advancedFeaturesManager.getUserMediaByUserId(id, screenName)
-                .onFailure { handleError(it.message ?: "Download failed") }
+                .onFailure { showMessage(it.message ?: "Download failed") }
         }
     }
 
-    private fun handleError(error: String) {
-        applicationScope.launch {
-            emitEffect(ShowSnackbar(error, "OKAY", true))
+    private fun showMessage(message: String) {
+        viewModelScope.launch {
+            emitEffect(ShowSnackbar(message))
         }
     }
 }

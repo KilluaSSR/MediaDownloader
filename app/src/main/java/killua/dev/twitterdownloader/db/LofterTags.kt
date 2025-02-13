@@ -9,7 +9,10 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.TypeConverter
 import killua.dev.base.Model.AvailablePlatforms
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @Entity(tableName = "tags")
@@ -53,7 +56,9 @@ class LofterTagsRepository @Inject constructor(
     // ✅ 插入下载项
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(tag: TagEntry) = tagDao.saveTags(tag)
-
+    suspend fun getAllTags(): Set<String> = withContext(Dispatchers.IO) {
+        tagDao.observeTags().first()?.tags ?: emptySet()
+    }
     suspend fun clearAllTags() {
         val emptyEntry = TagEntry(
             id = 1,
