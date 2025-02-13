@@ -6,6 +6,9 @@ import killua.dev.base.Model.AvailablePlatforms
 import killua.dev.base.Model.DownloadTask
 import killua.dev.base.Model.MediaType
 import killua.dev.base.utils.MediaFileNameStrategy
+import killua.dev.twitterdownloader.Model.NetworkResult
+import killua.dev.twitterdownloader.api.Kuaikan.KuaikanService
+import killua.dev.twitterdownloader.api.Lofter.LofterService
 import killua.dev.twitterdownloader.api.Twitter.Model.TwitterUser
 import killua.dev.twitterdownloader.api.Twitter.TwitterDownloadAPI
 import killua.dev.twitterdownloader.download.DownloadQueueManager
@@ -17,6 +20,8 @@ import kotlin.random.Random
 
 class AdvancedFeaturesManager @Inject constructor(
     private val twitterDownloadAPI: TwitterDownloadAPI,
+    private val kuaikanService: KuaikanService,
+    private val lofterService: LofterService,
     private val downloadQueueManager: DownloadQueueManager,
     private val downloadRepository: DownloadRepository,
 ) {
@@ -58,6 +63,32 @@ class AdvancedFeaturesManager @Inject constructor(
         )
     }
 
+    suspend fun getWholeManga(url: String): Result<Unit> = runCatching {
+        when(val result = kuaikanService.getWholeMange(url)){
+            is NetworkResult.Error -> {}
+            is NetworkResult.Success -> {
+                val manga = result.data
+                manga.forEach{
+                    when(val mangaResult = kuaikanService.getSingleChapter("https://www.kuaikanmanhua.com/webs/comic-next/${it.id}")){
+                        is NetworkResult.Error -> return@forEach
+                        is NetworkResult.Success -> {
+                            createDownloadTask(
+                                url = mangaResult.data.urlList.joinToString(separator = ","),
+                                userId = mangaResult.data.title,
+                                screenName = mangaResult.data.title,
+                                platform = AvailablePlatforms.Kuaikan,
+                                name = mangaResult.data.chapter,
+                                tweetID = mangaResult.data.title,
+                                mainLink = url,
+                                mediaType = MediaType.PDF
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private suspend fun processTwitterMedia(
         urls: List<String>,
         user: TwitterUser?,
@@ -65,30 +96,36 @@ class AdvancedFeaturesManager @Inject constructor(
         mediaType: MediaType
     ) {
         urls.forEach { url ->
-            createAndStartDownload(url, user, tweetId, mediaType)
+            createDownloadTask(url, user!!.id, user.screenName!!, AvailablePlatforms.Twitter, user.name!!, tweetId, "x.com/${user.screenName}/status/$tweetId", mediaType)
             delay(Random.nextLong(50, 150))
         }
     }
 
-    private suspend fun createAndStartDownload(
+    private suspend fun createDownloadTask(
         url: String,
-        user: TwitterUser?,
-        tweetId: String,
+        userId: String?,
+        screenName: String,
+        platform: AvailablePlatforms,
+        name: String,
+        tweetID: String,
+        mainLink: String,
         mediaType: MediaType
     ) {
-        val uuid = UUID.randomUUID().toString()
         val fileNameStrategy = MediaFileNameStrategy(mediaType)
-        val fileName = fileNameStrategy.generateMedia(user?.screenName)
+        val fileName = when(platform) {
+            AvailablePlatforms.Kuaikan -> fileNameStrategy.generateManga(title = screenName, chapter = name)
+            else -> fileNameStrategy.generateMedia(screenName)
+        }
 
         val download = Download(
-            uuid = uuid,
-            userId = user?.id,
-            screenName = user?.screenName,
-            type = AvailablePlatforms.Twitter,
-            name = user?.name,
-            tweetID = tweetId,
+            uuid = UUID.randomUUID().toString(),
+            userId = userId,
+            screenName = screenName,
+            type = platform,
+            name = name,
+            tweetID = tweetID,
             fileUri = null,
-            link = url,
+            link = mainLink,
             fileName = fileName,
             fileType = mediaType.name.lowercase(),
             fileSize = 0L,
@@ -99,10 +136,11 @@ class AdvancedFeaturesManager @Inject constructor(
         downloadRepository.insert(download)
         downloadQueueManager.enqueue(
             DownloadTask(
-                id = uuid,
+                id = download.uuid,
                 url = url,
+                from = download.type,
                 fileName = fileName,
-                screenName = user?.screenName ?: "",
+                screenName = screenName,
                 type = mediaType
             )
         )

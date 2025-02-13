@@ -4,9 +4,9 @@ import killua.dev.base.di.ApplicationScope
 import killua.dev.base.utils.USER_AGENT
 import killua.dev.twitterdownloader.Model.NetworkResult
 import killua.dev.twitterdownloader.api.Kuaikan.BuildRequest.KuaikanSingleChapterRequest
+import killua.dev.twitterdownloader.api.Kuaikan.BuildRequest.KuaikanWholeMangeRequest
 import killua.dev.twitterdownloader.api.Kuaikan.Model.MangaInfo
 import killua.dev.twitterdownloader.api.NetworkHelper
-import killua.dev.twitterdownloader.api.Pixiv.BuildRequest.addPixivPictureDownloadHeaders
 import killua.dev.twitterdownloader.di.UserDataManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -14,6 +14,8 @@ import kotlinx.coroutines.withContext
 import okhttp3.Request
 import javax.inject.Inject
 
+data class Chapter(val name: String, val id: String)
+data class NuxtParams(val returnObject: String, val parameters: String)
 class KuaikanService @Inject constructor(
     val userdata: UserDataManager,
     @ApplicationScope private val scope: CoroutineScope
@@ -51,9 +53,9 @@ class KuaikanService @Inject constructor(
                 }
                 val htmlContent = response.body?.string()
                     ?: return@withContext NetworkResult.Error(message = "响应内容为空")
-                val (title, chapter) = extractMangaInfo(htmlContent)
+                val (title, chapter) = extractSingleMangaInfo(htmlContent)
                     ?: return@withContext NetworkResult.Error(message = "无法提取标题和章节信息")
-                val imageUrls = extractImageUrls(htmlContent)
+                val imageUrls = extractSingleImageUrls(htmlContent)
                 imageUrls.forEach{
                     println(it)
                 }
@@ -71,7 +73,114 @@ class KuaikanService @Inject constructor(
         }
     }
 
-    private fun extractImageUrls(htmlContent: String): List<String> {
+    suspend fun getWholeMange(url: String): NetworkResult<List<Chapter>> = withContext(Dispatchers.IO) {
+        val pattern = """(?:topic|mobile)/(\d+)(?:/list)?(?:[/?].*)?$""".toRegex()
+
+        val id = try {
+            pattern.find(url)?.groupValues?.get(1)
+                ?: throw IllegalArgumentException("URL中未找到漫画ID: $url")
+        } catch (e: Exception) {
+            val errorMessage = "URL解析失败: ${e.message}"
+            println("原始URL: $url")
+            println(errorMessage)
+            e.printStackTrace()
+            return@withContext NetworkResult.Error(message = errorMessage)
+        }
+
+        try {
+            NetworkHelper.doRequest(
+                Request.Builder()
+                    .get()
+                    .url(KuaikanWholeMangeRequest(id))
+                    .header("User-Agent", USER_AGENT)
+                    .also {
+                        NetworkHelper.setCookies("www.kuaikanmanhua.com", mapOf(
+                            "passToken" to userdata.userKuaikanData.value
+                        ))
+                    }.build()
+            ).use { response ->
+                if (!response.isSuccessful) {
+                    return@withContext NetworkResult.Error(
+                        code = response.code,
+                        message = "详情请求失败: ${response.code} ${response.message}"
+                    )
+                }
+
+                val htmlContent = response.body?.string()
+                    ?: return@withContext NetworkResult.Error(message = "响应内容为空")
+
+                val result = extractNuxtParams(htmlContent)
+                if (result == null) {
+                    return@withContext NetworkResult.Error(message = "无法提取NUXT参数")
+                }
+
+                val chapters = extractChapterInfo(result.parameters)
+                if (chapters.isEmpty()) {
+                    return@withContext NetworkResult.Error(message = "未找到任何章节信息")
+                }
+
+                return@withContext NetworkResult.Success(chapters)
+            }
+        } catch (e: Exception) {
+            val errorMessage = "请求处理失败: ${e.message}"
+            println(errorMessage)
+            e.printStackTrace()
+            return@withContext NetworkResult.Error(message = errorMessage)
+        }
+    }
+
+    fun extractChapterInfo(paramsStr: String): List<Chapter> {
+        val pattern = """"id":(\d{6}),"title":"([^"]+)""""
+        val regex = Regex(pattern)
+
+        val chapters = mutableListOf<Chapter>()
+        regex.findAll(paramsStr).forEach { matchResult ->
+            val chapterId = matchResult.groupValues[1]
+            val chapterName = matchResult.groupValues[2]
+            chapters.add(Chapter(chapterName, chapterId))
+        }
+
+        if (chapters.isEmpty()) {
+            val backupPattern = """\.jpg","[^"]+","[^"]+",(\d{6}),"([^"]+)""""
+            Regex(backupPattern).findAll(paramsStr).forEach { matchResult ->
+                val chapterId = matchResult.groupValues[1]
+                val chapterName = matchResult.groupValues[2]
+                chapters.add(Chapter(chapterName, chapterId))
+            }
+        }
+
+        return chapters.sortedBy { chapter ->
+            Regex("""第(\d+)话""").find(chapter.name)
+                ?.groupValues?.get(1)?.toIntOrNull() ?: 999
+        }.also { sortedChapters ->
+            if (sortedChapters.isNotEmpty()) {
+                sortedChapters.forEach { (name, id) ->
+                    println("$name: $id")
+                }
+            }
+        }
+    }
+
+    fun extractNuxtParams(htmlContent: String): NuxtParams? {
+
+        """window\.__NUXT__=\(function\([^)]*\)\{"""
+        """return\s*(\{.*?\})\s*\}\("""
+        """\((.*?)\);"""
+        try {
+            val nuxtContent = htmlContent.substringAfter("window.__NUXT__=")
+                .substringBefore(";</script>")
+            val returnObject = Regex("""\{.*?\}(?=\s*\}\()""", RegexOption.DOT_MATCHES_ALL)
+                .find(nuxtContent)?.value ?: throw Exception("无法找到return对象")
+            val parameters = Regex("""}\((.*?)\)$""", RegexOption.DOT_MATCHES_ALL)
+                .find(nuxtContent)?.groupValues?.get(1) ?: throw Exception("无法找到参数")
+            return NuxtParams(returnObject, parameters)
+        } catch (e: Exception) {
+            return null
+        }
+    }
+
+
+    private fun extractSingleImageUrls(htmlContent: String): List<String> {
         val scriptPattern = """window\.__NUXT__=(.*?)</script>""".toRegex(RegexOption.DOT_MATCHES_ALL)
         val scriptContent = scriptPattern.find(htmlContent)?.groupValues?.get(1)
 
@@ -87,7 +196,7 @@ class KuaikanService @Inject constructor(
         return urls
     }
 
-    private fun extractMangaInfo(htmlContent: String): Pair<String, String>? {
+    private fun extractSingleMangaInfo(htmlContent: String): Pair<String, String>? {
         // 使用正则表达式匹配标题和章节
         val titlePattern = """class="step-topic"[^>]*>([^<]+)""".toRegex()
         val chapterPattern = """class="step-comic"[^>]*>([^<]+)""".toRegex()
