@@ -8,7 +8,6 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import killua.dev.twitterdownloader.Model.MostDownloadedUser
 import kotlinx.coroutines.flow.Flow
-import kotlin.uuid.ExperimentalUuidApi
 
 @Dao
 interface DownloadDao {

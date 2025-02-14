@@ -16,7 +16,6 @@ import killua.dev.base.di.ApplicationScope
 import killua.dev.base.utils.KUAIKAN_ENTIRE_NOTIFICATION_ID
 import killua.dev.base.utils.LOFTER_GET_BY_TAGS_ID
 import killua.dev.base.utils.MediaFileNameStrategy
-import killua.dev.base.utils.NotificationUtils
 import killua.dev.base.utils.ShowNotification
 import killua.dev.twitterdownloader.Model.NetworkResult
 import killua.dev.twitterdownloader.api.Kuaikan.Chapter

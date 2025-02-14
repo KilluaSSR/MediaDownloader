@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -17,16 +16,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.base.Model.AppIcon
 import killua.dev.base.Model.AvailablePlatforms
 import killua.dev.base.Model.SupportedUrlType
-import killua.dev.base.Model.platformsDrawable
 import killua.dev.base.ui.LocalNavController
-import killua.dev.twitterdownloader.ui.components.MainPageButtons
 import killua.dev.base.ui.MainRoutes
 import killua.dev.base.ui.PrepareRoutes
 import killua.dev.base.ui.SnackbarUIEffect
@@ -40,15 +36,13 @@ import killua.dev.base.ui.components.paddingTop
 import killua.dev.base.ui.getRandomColors
 import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.base.utils.ActivityUtil
-import killua.dev.base.utils.drawableToImageVector
-import killua.dev.base.utils.getActivity
 import killua.dev.base.utils.navigateSingle
-import killua.dev.setup.SetupRoutes
 import killua.dev.twitterdownloader.Model.FavouriteUserInfo
 import killua.dev.twitterdownloader.ui.ViewModels.MainPageUIIntent
 import killua.dev.twitterdownloader.ui.ViewModels.MainPageViewmodel
 import killua.dev.twitterdownloader.ui.components.FavouriteCard
 import killua.dev.twitterdownloader.ui.components.MainPageBottomSheet
+import killua.dev.twitterdownloader.ui.components.MainPageButtons
 import killua.dev.twitterdownloader.ui.components.ReportDialog
 import kotlinx.coroutines.launch
 

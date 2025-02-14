@@ -11,13 +11,13 @@ import killua.dev.twitterdownloader.Model.NetworkResult
 import killua.dev.twitterdownloader.api.Lofter.BuildRequest.makeArchiveData
 import killua.dev.twitterdownloader.api.Lofter.Model.BlogImage
 import killua.dev.twitterdownloader.api.Lofter.Model.BlogInfo
+import killua.dev.twitterdownloader.api.Lofter.Model.extractLofterUserDomain
 import killua.dev.twitterdownloader.api.Lofter.utils.LofterParser
 import killua.dev.twitterdownloader.api.Lofter.utils.LofterParser.parseArchivePage
 import killua.dev.twitterdownloader.api.Lofter.utils.LofterParser.parseAuthorInfo
 import killua.dev.twitterdownloader.api.Lofter.utils.LofterParser.parseFromArchiveInfos
 import killua.dev.twitterdownloader.api.NetworkHelper
 import killua.dev.twitterdownloader.di.UserDataManager
-import killua.dev.twitterdownloader.api.Lofter.Model.extractLofterUserDomain
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

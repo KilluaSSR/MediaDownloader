@@ -30,6 +30,7 @@ sealed class AdvancedpageRoutes(val route: String){
 }
 
 sealed class PrepareRoutes(val route: String){
+    data object TwitterPreparePage: PrepareRoutes(route = "twitter_prepare_page")
     data object LofterPreparePage: PrepareRoutes(route = "lofter_prepare_page")
     data object PixivPreparePage: PrepareRoutes(route = "pixiv_prepare_page")
     data object KuaikanPreparePage: PrepareRoutes(route = "kuaikan_prepare_page")
@@ -39,4 +40,5 @@ sealed class CookiesRoutes(val route: String){
     data object LofterCookiesBrowser: CookiesRoutes(route = "lofter_cookies_browser")
     data object PixivCookiesBrowser: CookiesRoutes(route = "pixiv_cookies_browser")
     data object KuaikanCookiesBrowser: CookiesRoutes(route = "kuaikan_cookies_browser")
+    data object TwitterCookiesBrowser: CookiesRoutes(route = "Twitter_cookies_browser")
 }

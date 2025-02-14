@@ -11,8 +11,6 @@ import killua.dev.base.ui.SnackbarUIEffect
 import killua.dev.base.ui.SnackbarUIEffect.*
 import killua.dev.base.ui.UIIntent
 import killua.dev.base.ui.UIState
-import killua.dev.base.utils.DownloadEventManager
-import killua.dev.base.utils.DownloadPreChecks
 import killua.dev.twitterdownloader.download.DownloadbyLink
 import killua.dev.twitterdownloader.repository.DownloadRepository
 import killua.dev.twitterdownloader.utils.navigateLofterProfile

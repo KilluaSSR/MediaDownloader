@@ -14,13 +14,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.base.ui.LocalNavController
 import killua.dev.base.ui.components.MainScaffold
-import killua.dev.base.ui.components.MainTopBar
-import killua.dev.base.ui.components.Section
 import killua.dev.base.ui.components.paddingTop
 import killua.dev.base.ui.getRandomColors
 import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.twitterdownloader.ui.ViewModels.UserInfoPageViewModel
-import killua.dev.twitterdownloader.ui.components.FavouriteCard
 import killua.dev.twitterdownloader.ui.components.UserInfoPageTopAppBar
 
 @Composable

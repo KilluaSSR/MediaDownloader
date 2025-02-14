@@ -2,6 +2,8 @@ package killua.dev.twitterdownloader.ui.pages.OtherSetupPages
 
 import android.content.Context
 import dagger.hilt.android.lifecycle.HiltViewModel
+import killua.dev.base.datastore.readApplicationUserAuth
+import killua.dev.base.datastore.readApplicationUserCt0
 import killua.dev.base.datastore.readKuaikanPassToken
 import killua.dev.base.datastore.readLofterEndTime
 import killua.dev.base.datastore.readLofterLoginAuth
@@ -32,10 +34,12 @@ sealed class PreparePageUIIntent : UIIntent {
     data class OnEntryLofter(val context: Context) : PreparePageUIIntent()
     data class OnEntryPixiv(val context: Context) : PreparePageUIIntent()
     data class OnEntryKuaikan(val context: Context) : PreparePageUIIntent()
+    data class OnEntryTwitter(val context: Context) : PreparePageUIIntent()
     data class OnTagsChanged(val context: Context) : PreparePageUIIntent()
     data object OnLofterLoggedOut: PreparePageUIIntent()
     data object OnPixivLoggedOut: PreparePageUIIntent()
     data object OnKuaikanLoggedOut: PreparePageUIIntent()
+    data object OnTwitterLoggedOut: PreparePageUIIntent()
 }
 
 @HiltViewModel
@@ -60,6 +64,11 @@ class PreparePageViewModel @Inject constructor(
     val kuaikanLoginState: StateFlow<CurrentState> =
         _kuaikanLoginState.stateInScope(CurrentState.Idle)
 
+    private val _twitterLoginState: MutableStateFlow<CurrentState> =
+        MutableStateFlow(CurrentState.Idle)
+    val twitterLoginState: StateFlow<CurrentState> =
+        _twitterLoginState.stateInScope(CurrentState.Idle)
+
     private val _dateSelectedState: MutableStateFlow<CurrentState> =
         MutableStateFlow(CurrentState.Idle)
     val dateSelectedState: StateFlow<CurrentState>  = _dateSelectedState.stateInScope(CurrentState.Idle)
@@ -74,7 +83,8 @@ class PreparePageViewModel @Inject constructor(
         login == CurrentState.Success}.flowOnIO().stateInScope(false)
     val kuaikanEligibility: StateFlow<Boolean> = _kuaikanLoginState.map { login ->
         login == CurrentState.Success}.flowOnIO().stateInScope(false)
-
+    val twitterEligibility: StateFlow<Boolean> = _twitterLoginState.map { login ->
+        login == CurrentState.Success}.flowOnIO().stateInScope(false)
     override suspend fun onEvent(
         state: PreparePageUIState,
         intent: PreparePageUIIntent
@@ -134,6 +144,18 @@ class PreparePageViewModel @Inject constructor(
             }
             PreparePageUIIntent.OnKuaikanLoggedOut -> {
                 _kuaikanLoginState.value = CurrentState.Idle
+            }
+
+            is PreparePageUIIntent.OnEntryTwitter -> {
+                mutex.withLock{
+                    val (ct0,auth) = Pair(intent.context.readApplicationUserCt0().first(), intent.context.readApplicationUserAuth().first())
+                    if (ct0.isNotBlank() && auth.isNotBlank()){
+                        _twitterLoginState.value = CurrentState.Success
+                    }
+                }
+            }
+            PreparePageUIIntent.OnTwitterLoggedOut -> {
+                _twitterLoginState.value = CurrentState.Idle
             }
         }
     }

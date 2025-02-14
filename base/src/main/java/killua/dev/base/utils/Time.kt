@@ -1,12 +1,10 @@
 package killua.dev.base.utils
 
 import android.annotation.SuppressLint
-import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Date
 
 @SuppressLint("SimpleDateFormat")
 fun isTimeEarlierThan(timestamp: String, targetTime: String): Boolean {

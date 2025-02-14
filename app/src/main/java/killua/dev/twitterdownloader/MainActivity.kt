@@ -19,14 +19,15 @@ import killua.dev.base.ui.MainRoutes
 import killua.dev.base.ui.PrepareRoutes
 import killua.dev.base.ui.animations.AnimatedNavHost
 import killua.dev.twitterdownloader.ui.pages.AboutPage
+import killua.dev.twitterdownloader.ui.pages.AdvancedPage
 import killua.dev.twitterdownloader.ui.pages.DownloadListPage
 import killua.dev.twitterdownloader.ui.pages.MainPage
-import killua.dev.twitterdownloader.ui.pages.SettingsPage
-import killua.dev.twitterdownloader.ui.pages.AdvancedPage
 import killua.dev.twitterdownloader.ui.pages.OtherSetupPages.Kuaikan.KuaikanPreparePage
 import killua.dev.twitterdownloader.ui.pages.OtherSetupPages.Lofter.LofterPreparePage
 import killua.dev.twitterdownloader.ui.pages.OtherSetupPages.Lofter.LofterPrepareTagsPage
 import killua.dev.twitterdownloader.ui.pages.OtherSetupPages.Pixiv.PixivPreparePage
+import killua.dev.twitterdownloader.ui.pages.OtherSetupPages.Twitter.TwitterPreparePage
+import killua.dev.twitterdownloader.ui.pages.SettingsPage
 import killua.dev.twitterdownloader.ui.pages.UserInfoPage
 import killua.dev.twitterdownloader.ui.theme.TwitterDownloaderTheme
 
@@ -82,6 +83,10 @@ class MainActivity : ComponentActivity() {
                             KuaikanPreparePage()
                         }
 
+                        composable(PrepareRoutes.TwitterPreparePage.route){
+                            TwitterPreparePage()
+                        }
+
                         //Prepare Cookies
                         composable(CookiesRoutes.LofterCookiesBrowser.route){
                             BrowserPage(AvailablePlatforms.Lofter)
@@ -91,6 +96,9 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(CookiesRoutes.KuaikanCookiesBrowser.route){
                             BrowserPage(AvailablePlatforms.Kuaikan)
+                        }
+                        composable(CookiesRoutes.TwitterCookiesBrowser.route){
+                            BrowserPage(AvailablePlatforms.Twitter)
                         }
                     }
                 }
