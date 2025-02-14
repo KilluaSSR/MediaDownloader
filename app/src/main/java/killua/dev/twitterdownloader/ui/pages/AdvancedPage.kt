@@ -35,6 +35,7 @@ import killua.dev.twitterdownloader.ui.components.AdvancedPageLofterButtons
 import killua.dev.twitterdownloader.ui.components.AdvancedPageTopAppBar
 import killua.dev.twitterdownloader.ui.components.AdvancedPageTwitterButtons
 import killua.dev.twitterdownloader.ui.components.MainScaffold
+import killua.dev.twitterdownloader.ui.pages.AdvancedPage.ChapterSelectionDialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -89,6 +90,26 @@ fun AdvancedPage(){
                     viewModel.emitIntent(AdvancedPageUIIntent.GetMyTwitterLiked)
                 }
             }
+        }
+        if (uiState.value.showChapterSelection) {
+            ChapterSelectionDialog(
+                chapters = uiState.value.chapters,
+                onToggle = { index ->
+                    scope.launch {
+                        viewModel.emitIntent(AdvancedPageUIIntent.ToggleChapter(index))
+                    }
+                },
+                onConfirm = {
+                    scope.launch {
+                        viewModel.emitIntent(AdvancedPageUIIntent.ConfirmChapterSelection)
+                    }
+                },
+                onDismiss = {
+                    scope.launch {
+                        viewModel.emitIntent(AdvancedPageUIIntent.DismissChapterSelection)
+                    }
+                }
+            )
         }
 
         AdvancedInputDialog(
@@ -180,8 +201,7 @@ fun AdvancedPage(){
                             when(index){
                                 0 ->{showGetAllMyTwitterBookmarks = true}
                                 1 ->{showGetMyTwitterLikes = true}
-                                2 ->{showDevelopingAlert = true}
-                                3 ->{
+                                2 ->{
                                     scope.launch{
                                         viewModel.emitState(uiState.value.copy(currentDialogType = DialogType.TWITTER_USER_INFO_DOWNLOAD))
                                     }
@@ -208,8 +228,7 @@ fun AdvancedPage(){
                             title = item.title,
                             icon = item.icon,
                             color = when (index) {
-                                0 -> MaterialTheme.colorScheme.primaryContainer
-                                1 -> if (eligibleToUseLofterGetByTags.value) {
+                                0 -> if (eligibleToUseLofterGetByTags.value) {
                                     MaterialTheme.colorScheme.primaryContainer
                                 } else {
                                     MaterialTheme.colorScheme.errorContainer
@@ -218,8 +237,7 @@ fun AdvancedPage(){
                             }
                         ) {
                             when (index) {
-                                0 -> {showDevelopingAlert = true}
-                                1 -> {
+                                0 -> {
                                     if (eligibleToUseLofterGetByTags.value) {
                                         scope.launch{
                                             viewModel.emitState(uiState.value.copy(currentDialogType = DialogType.LOFTER_AUTHOR_TAGS))
