@@ -108,6 +108,16 @@ fun AdvancedPage(){
                     scope.launch {
                         viewModel.emitIntent(AdvancedPageUIIntent.DismissChapterSelection)
                     }
+                },
+                onSelectAll = {
+                    scope.launch {
+                        viewModel.emitIntent(AdvancedPageUIIntent.SelectAllChapters)
+                    }
+                },
+                onClearAll = {
+                    scope.launch {
+                        viewModel.emitIntent(AdvancedPageUIIntent.ClearAllChapters)
+                    }
                 }
             )
         }

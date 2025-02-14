@@ -6,7 +6,6 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,9 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -109,7 +105,9 @@ fun ChapterSelectionDialog(
     chapters: List<Pair<Chapter, Boolean>>,
     onToggle: (Int) -> Unit,
     onConfirm: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onSelectAll: () -> Unit,
+    onClearAll: () -> Unit
 ) {
     ExpandableFullScreenDialog(
         visible = true,
@@ -131,7 +129,16 @@ fun ChapterSelectionDialog(
                         }
                     },
                     actions = {
-                        TextButton(onClick = onConfirm) {
+                        TextButton(onClick = onSelectAll) {
+                            Text("Select all",fontWeight = FontWeight.Bold)
+                        }
+                        TextButton(onClick = onClearAll) {
+                            Text("Clear all",fontWeight = FontWeight.Bold)
+                        }
+                        TextButton(onClick = {
+                            onConfirm()
+                            onDismiss()
+                        }) {
                             Text("Confirm",fontWeight = FontWeight.Bold)
                         }
                     }

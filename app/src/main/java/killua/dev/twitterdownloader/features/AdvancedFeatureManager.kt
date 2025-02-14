@@ -13,6 +13,7 @@ import killua.dev.base.datastore.readLofterLoginAuth
 import killua.dev.base.datastore.readLofterLoginKey
 import killua.dev.base.datastore.readLofterStartTime
 import killua.dev.base.di.ApplicationScope
+import killua.dev.base.utils.KUAIKAN_ENTIRE_NOTIFICATION_ID
 import killua.dev.base.utils.LOFTER_GET_BY_TAGS_ID
 import killua.dev.base.utils.MediaFileNameStrategy
 import killua.dev.base.utils.NotificationUtils
@@ -59,6 +60,8 @@ class AdvancedFeaturesManager @Inject constructor(
     suspend fun readStartDateAndEndDate() = Pair(context.readLofterStartTime().first(),context.readLofterEndTime().first())
 
     suspend fun readLofterCredits() = Pair(context.readLofterLoginKey().first(),context.readLofterLoginAuth().first())
+
+    fun cancelKuaikanProgressNotification() = notification.cancelSpecificNotification(KUAIKAN_ENTIRE_NOTIFICATION_ID)
 
     suspend fun handleTwitterLikes(): Result<Unit> = runCatching {
         twitterDownloadAPI.getLikesAllTweets(
@@ -140,7 +143,7 @@ class AdvancedFeaturesManager @Inject constructor(
 
     suspend fun downloadEntireManga(mangaList: List<Chapter>) = runCatching {
         mangaList.forEach{
-            delay(Random.nextLong(1000, 7000))
+            delay(Random.nextLong(500, 7000))
             notification.updateGettingComicProgress(it.name)
             when(val mangaResult = kuaikanService.getSingleChapter("https://www.kuaikanmanhua.com/webs/comic-next/${it.id}")){
                 is NetworkResult.Error -> return@forEach

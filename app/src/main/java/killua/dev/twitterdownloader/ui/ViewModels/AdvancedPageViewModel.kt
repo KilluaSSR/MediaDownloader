@@ -46,6 +46,8 @@ sealed class AdvancedPageUIIntent : UIIntent {
     data class ToggleChapter(val index: Int) : AdvancedPageUIIntent()
     data object ConfirmChapterSelection : AdvancedPageUIIntent()
     data object DismissChapterSelection : AdvancedPageUIIntent()
+    data object SelectAllChapters : AdvancedPageUIIntent()
+    data object ClearAllChapters : AdvancedPageUIIntent()
 }
 enum class DialogType {
     TWITTER_USER_INFO_DOWNLOAD,
@@ -80,6 +82,8 @@ class AdvancedPageViewModel @Inject constructor(
             is AdvancedPageUIIntent.ToggleChapter -> handleToggleChapter(intent.index)
             AdvancedPageUIIntent.ConfirmChapterSelection -> handleConfirmChapterSelection()
             AdvancedPageUIIntent.DismissChapterSelection -> handleDismissChapterSelection()
+            AdvancedPageUIIntent.SelectAllChapters -> handleSelectAllChapters()
+            AdvancedPageUIIntent.ClearAllChapters -> handleClearAllChapters()
         }
     }
     
@@ -189,17 +193,30 @@ class AdvancedPageViewModel @Inject constructor(
             emitState(uiState.value.copy(chapters = updatedChapters))
         }
     }
+    private fun handleSelectAllChapters() {
+        val updatedChapters = uiState.value.chapters.map { it.copy(second = true) }
+        viewModelScope.launch{
+            emitState(uiState.value.copy(chapters = updatedChapters))
+        }
+    }
 
+    private fun handleClearAllChapters() {
+        val updatedChapters = uiState.value.chapters.map { it.copy(second = false) }
+        viewModelScope.launch{
+            emitState(uiState.value.copy(chapters = updatedChapters))
+        }
+    }
     private fun handleConfirmChapterSelection() {
         applicationScope.launch {
             val selectedChapters = uiState.value.chapters
                 .filter { it.second }
                 .map { it.first }
-            advancedFeaturesManager.downloadEntireManga(selectedChapters)
             emitState(uiState.value.copy(
                 showChapterSelection = false,
                 chapters = emptyList()
             ))
+            advancedFeaturesManager.downloadEntireManga(selectedChapters)
+            advancedFeaturesManager.cancelKuaikanProgressNotification()
         }
     }
 
