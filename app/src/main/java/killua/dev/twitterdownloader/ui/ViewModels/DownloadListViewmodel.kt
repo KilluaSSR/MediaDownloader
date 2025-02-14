@@ -437,7 +437,7 @@ class DownloadListViewModel @Inject constructor(
                         )
                     }
                     AvailablePlatforms.Lofter -> {
-                        intent.context.navigateToLofter(download.tweetID!!)
+                        intent.context.navigateToLofter(download.link!!)
                     }
 
                     AvailablePlatforms.Pixiv -> {}

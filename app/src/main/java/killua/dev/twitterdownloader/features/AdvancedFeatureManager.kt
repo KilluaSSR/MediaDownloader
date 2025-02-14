@@ -7,7 +7,9 @@ import db.DownloadStatus
 import killua.dev.base.Model.AvailablePlatforms
 import killua.dev.base.Model.DownloadTask
 import killua.dev.base.Model.MediaType
+import killua.dev.base.utils.LOFTER_GET_BY_TAGS_ID
 import killua.dev.base.utils.MediaFileNameStrategy
+import killua.dev.base.utils.NotificationUtils
 import killua.dev.base.utils.ShowNotification
 import killua.dev.twitterdownloader.Model.NetworkResult
 import killua.dev.twitterdownloader.api.Kuaikan.Chapter
@@ -77,12 +79,14 @@ class AdvancedFeaturesManager @Inject constructor(
             link += "/"
         }
         val tags = tagsRepository.getAllTags()
+        notification.showStartGettingLofterImages()
         val blogInfo = lofterService.getByAuthorTags(link, tags)
+        notification.cancelSpecificNotification(LOFTER_GET_BY_TAGS_ID)
         val authorID = blogInfo.authorId
         val authorName = blogInfo.authorName
         val authorDomain = blogInfo.authorDomain
         blogInfo.images.forEach {
-            delay(100)
+            delay(Random.nextLong(10, 300))
             createDownloadTask(
                 url = it.url,
                 userId = authorID,
@@ -90,9 +94,11 @@ class AdvancedFeaturesManager @Inject constructor(
                 platform = AvailablePlatforms.Lofter,
                 name = authorName,
                 tweetID = it.url,
-                mainLink = url,
+                mainLink = it.blogUrl,
                 mediaType = MediaType.PHOTO
             )
+
+            println(it.url.substringBefore("?"))
         }
     }
 
@@ -120,7 +126,7 @@ class AdvancedFeaturesManager @Inject constructor(
 
     suspend fun downloadEntireManga(mangaList: List<Chapter>) = runCatching {
         mangaList.forEach{
-            delay(3000)
+            delay(Random.nextLong(1000, 7000))
             notification.updateGettingComicProgress(it.name)
             when(val mangaResult = kuaikanService.getSingleChapter("https://www.kuaikanmanhua.com/webs/comic-next/${it.id}")){
                 is NetworkResult.Error -> return@forEach

@@ -4,8 +4,6 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import killua.dev.base.Model.ImageType
-import killua.dev.base.utils.NotificationUtils
-import killua.dev.base.utils.ShowNotification
 import killua.dev.base.utils.StringUtils
 import killua.dev.base.utils.UserAgentUtils
 import killua.dev.base.utils.isTimeEarlierThan
@@ -143,22 +141,17 @@ object LofterParser {
     }
 
     suspend fun parseArchivePage(info: LofterParseRequiredInformation): MutableList<ArchiveInfo> {
-        println("开始解析归档页面 - 作者: ${info.authorName}")
         val allBlogInfo = mutableListOf<String>()
         val data = info.data.toMutableMap()
         val queryNum = 50
-        println("初始化查询参数 - 每页数量: $queryNum")
 
         var pageCount = 0
         while (true) {
             pageCount++
-            println("正在获取第 $pageCount 页数据...")
 
             when (val result = postFormContent(info.archiveURL, info.data, info.header, info.cookies)) {
                 is NetworkResult.Success -> {
                     val pageData = result.data
-                    println("页面数据获取成功，长度: ${pageData.length}")
-                    println("原始页面数据: $pageData")
 
                     val regex = Regex(
                         """s\d+\.blogId=\d+.*?values=s\d+.*?imgurl="([^"]+)".*?permalink="([^"]+)".*?noticeLinkTitle""",
@@ -185,9 +178,7 @@ object LofterParser {
                     val nextTimestamp = lastIndexRegex.find(pageData)
                         ?.groupValues
                         ?.getOrNull(1)
-                    println("下一页时间戳: $nextTimestamp")
                     if (nextTimestamp == null) {
-                        println("无法获取下一页时间戳，停止获取")
                         break
                     }
 
@@ -196,18 +187,15 @@ object LofterParser {
                 }
 
                 is NetworkResult.Error -> {
-                    println("获取页面数据失败: ${result.message}")
                     break
                 }
             }
         }
 
-        println("开始解析博客详细信息...")
         val parsedBlogInfo = mutableListOf<ArchiveInfo>()
         var blogNum = 0
 
         for (blogInfo in allBlogInfo) {
-            println("\n处理博客信息 #${blogNum + 1}:")
 
             val timestamp = Regex("""s[\d]*.time=(\d*);""")
                 .find(blogInfo)
@@ -218,12 +206,10 @@ object LofterParser {
             }
 
             if (info.startTime != null && isTimeEarlierThan(timestamp, info.startTime)) {
-                println("早于开始时间，停止处理")
                 break
             }
 
             if (info.endTime != null && isTimeLaterThan(timestamp, info.endTime)) {
-                println("晚于结束时间，跳过")
                 continue
             }
 
@@ -233,9 +219,7 @@ object LofterParser {
                 .find(blogInfo)
                 ?.groupValues
                 ?.getOrNull(1)
-            println("提取的图片URL: $imgUrl")
             if (imgUrl == null || imgUrl.isEmpty()) {
-                println("图片URL无效，跳过")
                 continue
             }
 
@@ -243,9 +227,7 @@ object LofterParser {
                 .find(blogInfo)
                 ?.groupValues
                 ?.getOrNull(1)
-            println("提取的博客索引: $blogIndex")
             if (blogIndex == null) {
-                println("博客索引提取失败，跳过")
                 continue
             }
 
@@ -254,11 +236,9 @@ object LofterParser {
                 blogUrl = "${info.authorURL}post/$blogIndex",
                 time = parseTimestamp(timestamp.toLong() / 1000)
             )
-            println("创建归档信息: $archiveInfo")
             parsedBlogInfo.add(archiveInfo)
         }
 
-        println("归档页面解析完成，共解析 ${parsedBlogInfo.size} 条有效博客信息")
         return parsedBlogInfo
     }
 
@@ -277,10 +257,6 @@ object LofterParser {
 
         for (archive in archiveInfos) {
             processedCount++
-            println("\n处理第 $processedCount/${archiveInfos.size} 个归档")
-            println("博客URL: ${archive.blogUrl}")
-            println("归档时间: ${archive.time}")
-
             when (val result = NetworkHelper.get(
                 url = archive.blogUrl,
                 headers = UserAgentUtils.getHeaders() + mapOf("Referer" to info.authorURL+"view"),
@@ -288,50 +264,32 @@ object LofterParser {
             ) { it.decodeToString() }) {
                 is NetworkResult.Success -> {
                     val content = result.data
-
-
                     if (!matchTags(content, targetTags.toList(), saveNoTags)) {
-                        println("标签不匹配，跳过当前博客")
                         continue
                     }
-                    println("标签匹配成功")
 
                     val imageUrls = findImageUrls(content)
-                    println("找到 ${imageUrls.size} 个图片URL")
-                    imageUrls.forEachIndexed { index, url ->
-                        println("图片 #${index + 1}: $url")
-                    }
 
                     val startIndex = if (archive.time == lastTime) lastIndex else 0
-                    println("图片起始索引: $startIndex")
 
                     val newImages = createBlogImages(
                         urls = imageUrls,
                         time = archive.time,
+                        blogURL = archive.blogUrl,
                         info = info,
                         startIndex = startIndex
                     )
-                    println("创建了 ${newImages.size} 个博客图片对象")
 
                     images.addAll(newImages)
-                    println("当前累计图片数: ${images.size}")
 
                     lastTime = archive.time
                     lastIndex = startIndex + imageUrls.size
-                    println("更新lastTime: $lastTime, lastIndex: $lastIndex")
                 }
                 is NetworkResult.Error -> {
-                    println("获取博客内容失败: ${result.message}")
                     continue
                 }
             }
         }
-
-        println("\n解析完成:")
-        println("- 作者: ${info.authorName}")
-        println("- 作者ID: ${info.authorID}")
-        println("- 作者域名: ${info.authorDomain}")
-        println("- 总图片数: ${images.size}")
 
         return BlogInfo(
             authorName = info.authorName,
@@ -364,30 +322,36 @@ object LofterParser {
     private fun findImageUrls(content: String): List<String> {
         var urls = IMG_URL_PATTERN.matcher(content)
             .results()
-            .map { it.group(1) }  // group(1) 现在直接包含干净的URL
-            .filter { it.contains("imglf", true) }
+            .map { it.group(1) }
             .toList()
 
         if (urls.isEmpty()) {
             urls = OLD_IMG_URL_PATTERN.matcher(content)
                 .results()
                 .map { it.group(1) }
-                .filter { it.contains("imglf", true) }
                 .toList()
         }
-        return urls
+        return return urls
+            .filter { it.contains("imglf", true) }  // 确保是Lofter图片服务器的URL
+            .filterNot { it.contains("&amp;") }     // 过滤掉包含 &amp; 的URL
+            .filterNot { url ->                     // 过滤掉头像图片
+                Regex("[1649]{2}[x,y][1649]{2}").find(url) != null
+            }
+            .map { it.split("imageView")[0] }       // 删除图片链接中的大小参数
+            .distinct()
     }
 
     private fun createBlogImages(
         urls: List<String>,
         time: String,
+        blogURL: String,
         info: LofterParseRequiredInformation,
         startIndex: Int
     ): List<BlogImage> {
         return urls.mapIndexed { index, url ->
             val type = ImageType.fromUrl(url)
             val filename = "${info.authorName}[${info.authorID}] $time(${startIndex + index + 1}).${type.extension}"
-            BlogImage(url = url, filename = filename, type = type)
+            BlogImage(url = url, filename = filename, type = type, blogUrl = blogURL)
         }
     }
 }

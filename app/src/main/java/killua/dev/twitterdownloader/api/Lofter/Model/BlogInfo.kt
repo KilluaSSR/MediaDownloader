@@ -5,7 +5,8 @@ import killua.dev.base.Model.ImageType
 data class BlogImage(
     val url: String,
     val filename: String,
-    val type: ImageType
+    val type: ImageType,
+    val blogUrl: String
 )
 
 data class BlogInfo(

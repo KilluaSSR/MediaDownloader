@@ -72,7 +72,8 @@ class LofterService @Inject constructor(
                                 index = index + 1,
                                 imageUrl = imageUrl
                             ),
-                            type = ImageType.fromUrl(imageUrl)
+                            type = ImageType.fromUrl(imageUrl),
+                            blogUrl = blogUrl
                         )
                     }
                 )

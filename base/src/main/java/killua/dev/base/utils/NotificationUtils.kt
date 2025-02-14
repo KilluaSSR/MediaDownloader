@@ -127,16 +127,16 @@ class ShowNotification @Inject constructor(
         notificationManager.notify(downloadId.hashCode(), notification)
     }
 
-    fun showStartGettingImages(downloadId: String, error: String?) {
+    fun showStartGettingLofterImages() {
         val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.icon)
-            .setContentTitle("Getting images.")
-            .setContentText(error ?: "ERROR")
+            .setContentTitle("Getting images from lofter...")
+            .setProgress(0,0,true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)
             .build()
 
-        notificationManager.notify(downloadId.hashCode(), notification)
+        notificationManager.notify(LOFTER_GET_BY_TAGS_ID, notification)
     }
 
     fun updateGettingTweetsProgress(photoCount: Int, videoCount: Int) {
@@ -156,6 +156,7 @@ class ShowNotification @Inject constructor(
         val notification = NotificationCompat.Builder(context, channelId)
             .setContentTitle("Getting comics")
             .setContentText("Current: Trying $chapter")
+            .setProgress(0,0,true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
@@ -177,12 +178,14 @@ class ShowNotification @Inject constructor(
         notificationManager.notify(BOOKMARK_NOTIFICATION_ID, notification)
     }
 
-    companion object {
-        private const val BOOKMARK_NOTIFICATION_ID = 10086
-        private const val KUAIKAN_ENTIRE_NOTIFICATION_ID = 10087
-    }
-
     fun cancelNotification(downloadId: String) {
         notificationManager.cancel(downloadId.hashCode())
     }
+    fun cancelSpecificNotification(Id: Int){
+        notificationManager.cancel(Id)
+    }
 }
+
+const val BOOKMARK_NOTIFICATION_ID = 10086
+const val KUAIKAN_ENTIRE_NOTIFICATION_ID = 10087
+const val LOFTER_GET_BY_TAGS_ID = 10088
