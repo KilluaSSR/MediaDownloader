@@ -96,7 +96,7 @@ fun MainPage(
             ) {
                 when(uiState.value.loginErrorPlatform){
                     AvailablePlatforms.Twitter -> {
-                        context.startActivity(Intent(context, ActivityUtil.SetupActivity))
+                        navController.navigateSingle(PrepareRoutes.TwitterPreparePage.route)
                     }
                     AvailablePlatforms.Lofter -> {
                         navController.navigateSingle(PrepareRoutes.LofterPreparePage.route)
