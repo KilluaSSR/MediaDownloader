@@ -38,10 +38,12 @@ import killua.dev.base.datastore.writeApplicationUserAuth
 import killua.dev.base.datastore.writeApplicationUserCt0
 import killua.dev.base.datastore.writeApplicationUserID
 import killua.dev.base.datastore.writeDelay
+import killua.dev.base.datastore.writeKuaikanPassToken
 import killua.dev.base.datastore.writeLofterLoginAuth
 import killua.dev.base.datastore.writeLofterLoginKey
 import killua.dev.base.datastore.writeMaxConcurrentDownloads
 import killua.dev.base.datastore.writeMaxRetries
+import killua.dev.base.datastore.writePixivPHPSSID
 import killua.dev.base.ui.LocalNavController
 import killua.dev.base.ui.PrepareRoutes
 import killua.dev.base.ui.components.CancellableAlert
@@ -89,6 +91,8 @@ fun SettingsPage(){
                     context.writeApplicationUserID("")
                     context.writeLofterLoginAuth("")
                     context.writeLofterLoginKey("")
+                    context.writePixivPHPSSID("")
+                    context.writeKuaikanPassToken("")
                     context.startActivity(Intent(context, ActivityUtil.SetupActivity))
                     context.getActivity().finish()
                 }

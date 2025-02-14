@@ -3,6 +3,7 @@ package killua.dev.twitterdownloader.ui.pages.OtherSetupPages.Lofter
 import android.annotation.SuppressLint
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -14,6 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.base.Model.AvailablePlatforms
+import killua.dev.base.datastore.readLofterCookieExpiration
 import killua.dev.base.datastore.readLofterEndTime
 import killua.dev.base.datastore.readLofterStartTime
 import killua.dev.base.datastore.writeLofterEndTime
@@ -23,10 +25,12 @@ import killua.dev.base.datastore.writeLofterStartTime
 import killua.dev.base.ui.CookiesRoutes
 import killua.dev.base.ui.LocalNavController
 import killua.dev.base.ui.PrepareRoutes
+import killua.dev.base.ui.SnackbarUIEffect
 import killua.dev.base.ui.components.ClickableConfigurationButton
 import killua.dev.base.ui.components.DateRangePickerModal
 import killua.dev.base.ui.components.Section
 import killua.dev.base.utils.navigateSingle
+import killua.dev.base.utils.parseTimestamp
 import killua.dev.twitterdownloader.ui.components.ConfigurationPage
 import killua.dev.twitterdownloader.ui.pages.OtherSetupPages.PreparePageUIIntent
 import killua.dev.twitterdownloader.ui.pages.OtherSetupPages.PreparePageViewModel
@@ -50,11 +54,17 @@ fun LofterPreparePage() {
     var showDatePicker by remember { mutableStateOf(false) }
     var startDate by remember { mutableStateOf<Long?>(null) }
     var endDate by remember { mutableStateOf<Long?>(null) }
-
+    val snackbarHostState = viewModel.snackbarHostState
     LaunchedEffect(Unit) {
         viewModel.emitIntentOnIO(PreparePageUIIntent.OnEntryLofter(context))
         startDate = context.readLofterStartTime().first()
         endDate = context.readLofterEndTime().first()
+    }
+
+    LaunchedEffect(viewModel.lofterLoginState) {
+        val unixTimeMS = context.readLofterCookieExpiration().first()
+        val time = parseTimestamp(unixTimeMS.toLong())
+        viewModel.emitEffect(SnackbarUIEffect.ShowSnackbar("Your cookie will expire at $time due to platform limitations. Please log out and log back in at that time.","OK",true, SnackbarDuration.Short))
     }
 
     val dateString by remember(startDate, endDate) {
@@ -63,7 +73,7 @@ fun LofterPreparePage() {
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                 "From ${dateFormat.format(Date(startDate!!))} to ${dateFormat.format(Date(endDate!!))}"
             } else {
-                "Please select a date range"
+                "Please select a date range, and only the images within this range will be downloaded"
             }
         )
     }
@@ -72,6 +82,7 @@ fun LofterPreparePage() {
         platform = AvailablePlatforms.Lofter,
         loginStateFlow = viewModel.lofterLoginState,
         eligibilityFlow = viewModel.lofterEligibility,
+        snackbarHostState = snackbarHostState,
         onLogin = {
             navController.navigateSingle(CookiesRoutes.LofterCookiesBrowser.route)
         },
@@ -86,9 +97,9 @@ fun LofterPreparePage() {
             navController.popBackStack()
         }
     ) {
-        Section(title = "Date picker") {
+        Section(title = "Date Range") {
             ClickableConfigurationButton(
-                title = "Range",
+                title = "Date Range for Image Download",
                 description = dateString,
                 state = viewModel.dateSelectedState.collectAsStateWithLifecycle().value,
                 onClick = { showDatePicker = true },

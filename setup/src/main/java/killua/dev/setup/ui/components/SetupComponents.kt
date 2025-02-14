@@ -12,6 +12,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,12 +24,17 @@ import killua.dev.base.ui.tokens.SizeTokens
 @Composable
 fun SetupScaffold(
     topBar: @Composable () -> Unit = {},
+    snackbarHostState: SnackbarHostState? = null,
     actions: @Composable RowScope.() -> Unit = {},
     content: @Composable LazyItemScope.() -> Unit
 ) {
     Scaffold(
         topBar = topBar,
-        containerColor = MaterialTheme.colorScheme.surface
+        containerColor = MaterialTheme.colorScheme.surface,
+        snackbarHost = {
+            if (snackbarHostState != null)
+                SnackbarHost(hostState = snackbarHostState)
+        }
     ) { innerPadding ->
         Column {
             Box(

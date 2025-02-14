@@ -24,7 +24,7 @@ import javax.inject.Inject
 
 data class PreparePageUIState(
     val isLoggedIn: Boolean = false,
-    val isTagsAdded: Boolean = false
+    val isTagsAdded: Boolean = false,
 ): UIState
 
 sealed class PreparePageUIIntent : UIIntent {

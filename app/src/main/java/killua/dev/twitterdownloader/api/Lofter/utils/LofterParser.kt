@@ -234,7 +234,7 @@ object LofterParser {
             val archiveInfo = ArchiveInfo(
                 imgUrl = imgUrl,
                 blogUrl = "${info.authorURL}post/$blogIndex",
-                time = parseTimestamp(timestamp.toLong() / 1000)
+                time = parseTimestamp(timestamp.toLong())
             )
             parsedBlogInfo.add(archiveInfo)
         }

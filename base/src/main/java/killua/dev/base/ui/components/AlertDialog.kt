@@ -37,7 +37,7 @@ fun BaseAnimatedDialog(
     onDismiss: () -> Unit,
     icon: @Composable (() -> Unit)? = null,
     buttons: @Composable (dismissWithAnimation: () -> Unit) -> Unit,
-    inAnimDuration: Int = 600,
+    inAnimDuration: Int = 500,
     outAnimDuration: Int = 450,
     properties: DialogProperties = DialogProperties()
 ) {
@@ -51,7 +51,7 @@ fun BaseAnimatedDialog(
     )
 
     val dialogRotationX by animateFloatAsState(
-        targetValue = if (isDialogVisible) 0f else -90f,
+        targetValue = if (isDialogVisible) 0f else -70f,
         animationSpec = animationSpec
     )
 

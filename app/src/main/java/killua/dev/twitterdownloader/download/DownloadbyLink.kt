@@ -31,7 +31,7 @@ private val downloadPreChecks: DownloadPreChecks
         }
     }
 
-    suspend fun checkPlatformLogin(platform: AvailablePlatforms): Result<Unit> {
+    fun checkPlatformLogin(platform: AvailablePlatforms): Result<Unit> {
         return when(platform) {
             AvailablePlatforms.Twitter -> downloadPreChecks.checkTwitterLoggedIn()
             AvailablePlatforms.Lofter -> downloadPreChecks.checkLofterLoggedIn()

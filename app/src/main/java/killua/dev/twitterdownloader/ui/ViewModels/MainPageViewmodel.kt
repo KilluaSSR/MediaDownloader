@@ -1,6 +1,7 @@
 package killua.dev.twitterdownloader.ui.ViewModels
 
 import android.content.Context
+import androidx.compose.material3.SnackbarDuration
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import killua.dev.base.Model.AvailablePlatforms
@@ -101,10 +102,8 @@ class MainPageViewmodel @Inject constructor(
                     val platform = classifyLinks(intent.url)
                     downloadbyLink.checkPlatformLogin(platform)
                         .onSuccess {
-                            try {
-                                downloadbyLink.handlePlatformDownload(intent.url, platform)
-                            } catch (e: Exception) {
-                                emitEffect(ShowSnackbar(e.message ?: "Download failed", "OKAY", true))
+                            downloadbyLink.handlePlatformDownload(intent.url, platform).onFailure { error ->
+                                emitEffect(ShowSnackbar(error.message ?: "Error", "OK", true, SnackbarDuration.Short))
                             }
                         }
                         .onFailure { error ->

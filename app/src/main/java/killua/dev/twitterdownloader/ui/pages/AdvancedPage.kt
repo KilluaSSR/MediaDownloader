@@ -17,8 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import killua.dev.twitterdownloader.ui.components.AdvancedPageLofterButtons
-import killua.dev.twitterdownloader.ui.components.AdvancedPageTwitterButtons
 import killua.dev.base.ui.LocalNavController
 import killua.dev.base.ui.PrepareRoutes
 import killua.dev.base.ui.components.ActionsBotton
@@ -33,7 +31,9 @@ import killua.dev.twitterdownloader.ui.ViewModels.AdvancedPageUIIntent
 import killua.dev.twitterdownloader.ui.ViewModels.AdvancedPageViewModel
 import killua.dev.twitterdownloader.ui.ViewModels.DialogType
 import killua.dev.twitterdownloader.ui.components.AdvancedPageKuaikanButtons
+import killua.dev.twitterdownloader.ui.components.AdvancedPageLofterButtons
 import killua.dev.twitterdownloader.ui.components.AdvancedPageTopAppBar
+import killua.dev.twitterdownloader.ui.components.AdvancedPageTwitterButtons
 import killua.dev.twitterdownloader.ui.components.MainScaffold
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -42,7 +42,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun AdvancedPage(){
     val navController = LocalNavController.current!!
-    val context = LocalContext.current
     val viewModel: AdvancedPageViewModel = hiltViewModel()
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
@@ -51,13 +50,15 @@ fun AdvancedPage(){
     val eligibleToUseLofterGetByTags = viewModel.lofterGetByTagsEligibility.collectAsStateWithLifecycle()
     var dialogTitle by remember { mutableStateOf("") }
     var dialogPlaceholder by remember { mutableStateOf("") }
+    LocalContext.current
     LaunchedEffect(Unit) {
-        viewModel.emitIntentOnIO(AdvancedPageUIIntent.OnEntry(context))
+        viewModel.emitIntentOnIO(AdvancedPageUIIntent.OnEntry)
     }
     MainScaffold (
         topBar = {
             AdvancedPageTopAppBar(navController)
         },
+        snackbarHostState = viewModel.snackbarHostState
 
     ){
         if (showDevelopingAlert) {

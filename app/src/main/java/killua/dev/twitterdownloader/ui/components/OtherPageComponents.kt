@@ -8,6 +8,10 @@ import killua.dev.base.ui.components.TopBar
 fun AdvancedPageTopAppBar(navController: NavHostController){
     TopBar(navController,"Advanced", showMoreIcon = false){}
 }
+@Composable
+fun DownloadListTopAppBar(title: String, navController: NavHostController){
+    TopBar(navController,title, showMoreIcon = false){}
+}
 
 @Composable
 fun UserInfoPageTopAppBar(navController: NavHostController){

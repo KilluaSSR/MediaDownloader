@@ -20,26 +20,26 @@ val AdvancedPageTwitterButtons = listOf(
         Icons.Rounded.ThumbUp,
         AdvancedpageRoutes.TwitterGetMyBookmarks.route
     ),
+//    ButtonsEssentials(
+//        "Subscribe",
+//        Icons.Rounded.Subscriptions,
+//        AdvancedpageRoutes.TwitterSubscribe.route
+//    ),
     ButtonsEssentials(
-        "Subscribe",
-        Icons.Rounded.Subscriptions,
-        AdvancedpageRoutes.TwitterSubscribe.route
-    ),
-    ButtonsEssentials(
-        "Get all media",
+        "Get someone's all media",
         Icons.Rounded.VideoLibrary,
         AdvancedpageRoutes.TwitterGetAll.route
     )
 )
 
 val AdvancedPageLofterButtons = listOf(
+//    ButtonsEssentials(
+//        "Authors",
+//        Icons.Rounded.AccountCircle,
+//        AdvancedpageRoutes.LofterAuthors.route
+//    ),
     ButtonsEssentials(
-        "Authors",
-        Icons.Rounded.AccountCircle,
-        AdvancedpageRoutes.LofterAuthors.route
-    ),
-    ButtonsEssentials(
-        "Get by Tags",
+        "Get pics by Tags",
         Icons.Rounded.Bookmarks,
         AdvancedpageRoutes.LofterGetAuthorImagesByTags.route,
     ),

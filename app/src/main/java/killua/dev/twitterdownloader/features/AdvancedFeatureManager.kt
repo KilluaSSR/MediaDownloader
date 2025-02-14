@@ -1,5 +1,6 @@
 package killua.dev.twitterdownloader.features
 
+import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import db.Download
@@ -7,6 +8,11 @@ import db.DownloadStatus
 import killua.dev.base.Model.AvailablePlatforms
 import killua.dev.base.Model.DownloadTask
 import killua.dev.base.Model.MediaType
+import killua.dev.base.datastore.readLofterEndTime
+import killua.dev.base.datastore.readLofterLoginAuth
+import killua.dev.base.datastore.readLofterLoginKey
+import killua.dev.base.datastore.readLofterStartTime
+import killua.dev.base.di.ApplicationScope
 import killua.dev.base.utils.LOFTER_GET_BY_TAGS_ID
 import killua.dev.base.utils.MediaFileNameStrategy
 import killua.dev.base.utils.NotificationUtils
@@ -21,6 +27,7 @@ import killua.dev.twitterdownloader.db.LofterTagsRepository
 import killua.dev.twitterdownloader.download.DownloadQueueManager
 import killua.dev.twitterdownloader.repository.DownloadRepository
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import java.util.UUID
 import javax.inject.Inject
 import kotlin.random.Random
@@ -32,7 +39,8 @@ class AdvancedFeaturesManager @Inject constructor(
     private val notification: ShowNotification,
     private val downloadQueueManager: DownloadQueueManager,
     private val downloadRepository: DownloadRepository,
-    private val tagsRepository: LofterTagsRepository
+    private val tagsRepository: LofterTagsRepository,
+    @ApplicationScope private val context: Context
 ) {
     suspend fun handleTwitterBookmarks(): Result<Unit> = runCatching {
         twitterDownloadAPI.getBookmarksAllTweets(
@@ -45,6 +53,12 @@ class AdvancedFeaturesManager @Inject constructor(
             onError = { throw Exception(it) }
         )
     }
+
+    suspend fun readLofterTags() = tagsRepository.observeAllDownloads().first()?.tags
+
+    suspend fun readStartDateAndEndDate() = Pair(context.readLofterStartTime().first(),context.readLofterEndTime().first())
+
+    suspend fun readLofterCredits() = Pair(context.readLofterLoginKey().first(),context.readLofterLoginAuth().first())
 
     suspend fun handleTwitterLikes(): Result<Unit> = runCatching {
         twitterDownloadAPI.getLikesAllTweets(
