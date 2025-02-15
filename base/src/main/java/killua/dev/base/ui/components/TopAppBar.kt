@@ -22,7 +22,7 @@ import killua.dev.base.utils.maybePopBackStack
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainTopBar(navController: NavHostController, showMoreOnClick : ()-> Unit ) {
-    TopBar(navController, "Twitter Downloader", enableNavIcon = false,
+    TopBar(navController, "Media Downloader", enableNavIcon = false,
         showMoreOnClick = showMoreOnClick
     )
 }

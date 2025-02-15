@@ -19,7 +19,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "TwitterDownloader"
+rootProject.name = "MediaDownloader"
 include(":app")
 include(":setup")
 include(":base")

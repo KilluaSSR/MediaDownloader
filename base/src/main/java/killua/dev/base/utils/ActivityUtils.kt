@@ -6,6 +6,6 @@ import android.content.Context
 fun Context.getActivity() = this as Activity
 
 object ActivityUtil {
-    val classMainActivity: Class<*> = Class.forName("killua.dev.twitterdownloader.MainActivity")
+    val classMainActivity: Class<*> = Class.forName("killua.dev.mediadownloader.MainActivity")
     val SetupActivity: Class<*> = Class.forName("killua.dev.setup.MainActivity")
 }

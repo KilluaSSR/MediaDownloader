@@ -11,11 +11,11 @@ plugins {
 }
 
 android {
-    namespace = "killua.dev.twitterdownloader"
+    namespace = "killua.dev.mediadownloader"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "killua.dev.twitterdownloader"
+        applicationId = rootProject.extra["defaultApplicationId"] as String
         minSdk = 33
         targetSdk = 35
         versionCode = 1
@@ -26,12 +26,11 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {

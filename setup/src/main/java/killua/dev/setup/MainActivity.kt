@@ -10,7 +10,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import killua.dev.base.ui.LocalNavController
-import killua.dev.setup.ui.theme.TwitterDownloaderTheme
+import killua.dev.setup.ui.theme.MediaDownloaderTheme
 
 @ExperimentalAnimationApi
 @AndroidEntryPoint
@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         this
         setContent {
-            TwitterDownloaderTheme {
+            MediaDownloaderTheme {
                 val navController = rememberNavController()
                 CompositionLocalProvider(
                     LocalNavController provides navController,
