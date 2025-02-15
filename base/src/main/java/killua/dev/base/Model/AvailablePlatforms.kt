@@ -63,7 +63,7 @@ fun AppIcon(platforms: AvailablePlatforms, modifier: Modifier = Modifier) {
     }
     Box(
         modifier = modifier
-            .size(sizeTokens),
+            .size(SizeTokens.Level152),
         contentAlignment = Alignment.Center
     ) {
         Image(

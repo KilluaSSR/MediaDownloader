@@ -63,8 +63,11 @@ fun LofterPreparePage() {
 
     LaunchedEffect(viewModel.lofterLoginState) {
         val unixTimeMS = context.readLofterCookieExpiration().first()
-        val time = parseTimestamp(unixTimeMS.toLong())
-        viewModel.emitEffect(SnackbarUIEffect.ShowSnackbar("Your cookie will expire at $time due to platform limitations. Please log out and log back in at that time.","OK",true, SnackbarDuration.Short))
+        if(unixTimeMS.isNotEmpty()){
+            val time = parseTimestamp(unixTimeMS.toLong())
+            viewModel.emitEffect(SnackbarUIEffect.ShowSnackbar("Your cookie will expire at $time due to platform limitations. Please log out and log back in at that time.","OK",true, SnackbarDuration.Short))
+        }
+
     }
 
     val dateString by remember(startDate, endDate) {
