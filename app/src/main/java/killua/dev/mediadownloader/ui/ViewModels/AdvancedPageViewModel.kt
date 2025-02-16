@@ -97,10 +97,9 @@ class AdvancedPageViewModel @Inject constructor(
             val tagsState = !tags.isNullOrEmpty()
             mutex.withLock {
                 val (startDate, endDate) = advancedFeaturesManager.readStartDateAndEndDate()
-                val (loginKey, loginAuth) = advancedFeaturesManager.readLofterCredits()
-                val (ct0, auth) = advancedFeaturesManager.readLofterCredits()
-                val allLofterConditionsMet = loginKey.isNotBlank() &&
-                        loginAuth.isNotBlank() &&
+                val isTwitterLoggedIn = advancedFeaturesManager.isTwitterLoggedIn().isSuccess
+                val isLofterLoggedIn = advancedFeaturesManager.isLofterLoggedIn().isSuccess
+                val allLofterConditionsMet = isLofterLoggedIn &&
                         startDate != 0L &&
                         endDate != 0L &&
                         tagsState
@@ -109,8 +108,7 @@ class AdvancedPageViewModel @Inject constructor(
                 } else {
                     CurrentState.Idle
                 }
-                val twitterConditionMet = ct0.isNotBlank() && auth.isNotBlank()
-                _twitterUsableState.value = if (twitterConditionMet) {
+                _twitterUsableState.value = if (isTwitterLoggedIn) {
                     CurrentState.Success
                 } else {
                     CurrentState.Idle
