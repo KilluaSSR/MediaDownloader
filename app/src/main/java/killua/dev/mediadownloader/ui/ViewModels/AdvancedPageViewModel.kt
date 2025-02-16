@@ -10,7 +10,6 @@ import killua.dev.mediadownloader.api.Twitter.TwitterDownloadAPI
 import killua.dev.mediadownloader.di.ApplicationScope
 import killua.dev.mediadownloader.features.AdvancedFeaturesManager
 import killua.dev.mediadownloader.states.CurrentState
-import killua.dev.mediadownloader.ui.BaseViewModel
 import killua.dev.mediadownloader.ui.SnackbarUIEffect
 import killua.dev.mediadownloader.ui.SnackbarUIEffect.ShowSnackbar
 import killua.dev.mediadownloader.ui.UIIntent

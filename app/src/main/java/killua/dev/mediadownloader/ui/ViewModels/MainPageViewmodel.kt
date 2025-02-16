@@ -6,17 +6,18 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import killua.dev.mediadownloader.Model.AvailablePlatforms
 import killua.dev.mediadownloader.Model.NotLoggedInPlatform
-import killua.dev.mediadownloader.Model.patterns
 import killua.dev.mediadownloader.download.DownloadbyLink
 import killua.dev.mediadownloader.repository.DownloadRepository
-import killua.dev.mediadownloader.ui.BaseViewModel
 import killua.dev.mediadownloader.ui.SnackbarUIEffect
 import killua.dev.mediadownloader.ui.SnackbarUIEffect.*
 import killua.dev.mediadownloader.ui.UIIntent
 import killua.dev.mediadownloader.ui.UIState
+import killua.dev.mediadownloader.utils.classifyLinks
 import killua.dev.mediadownloader.utils.navigateLofterProfile
 import killua.dev.mediadownloader.utils.navigatePixivProfile
 import killua.dev.mediadownloader.utils.navigateTwitterProfile
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -45,6 +46,10 @@ class MainPageViewmodel @Inject constructor(
     MainPageUIState()
 ) {
     private val mutex = Mutex()
+
+    private val _sharedDownloadResult = MutableStateFlow<Result<Unit>?>(null)
+    val sharedDownloadResult = _sharedDownloadResult.asStateFlow()
+
     init {
         launchOnIO {
             observeDownloadCompleted()
@@ -92,6 +97,18 @@ class MainPageViewmodel @Inject constructor(
         }
     }
 
+    fun handleSharedLink(platforms: AvailablePlatforms, url: String) {
+        viewModelScope.launch {
+            _sharedDownloadResult.value = try {
+                downloadbyLink.checkPlatformLogin(platforms).getOrThrow()
+                downloadbyLink.handlePlatformDownload(url, platforms).getOrThrow()
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
+
     override suspend fun onEvent(state: MainPageUIState, intent: MainPageUIIntent) {
         when (intent) {
             is MainPageUIIntent.ExecuteDownload -> {
@@ -119,10 +136,5 @@ class MainPageViewmodel @Inject constructor(
                 }
             }
         }
-    }
-    private fun classifyLinks(urlLink: String): AvailablePlatforms {
-        return patterns.entries.firstOrNull { (pattern, _) ->
-            urlLink.contains(pattern, ignoreCase = true)
-        }?.value ?: throw IllegalArgumentException("Unsupported URL")
     }
 }

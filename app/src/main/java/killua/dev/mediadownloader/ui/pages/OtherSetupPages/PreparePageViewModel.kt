@@ -4,7 +4,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import killua.dev.mediadownloader.db.LofterTagsRepository
 import killua.dev.mediadownloader.di.UserDataManager
 import killua.dev.mediadownloader.states.CurrentState
-import killua.dev.mediadownloader.ui.BaseViewModel
+import killua.dev.mediadownloader.ui.ViewModels.BaseViewModel
 import killua.dev.mediadownloader.ui.SnackbarUIEffect
 import killua.dev.mediadownloader.ui.UIIntent
 import killua.dev.mediadownloader.ui.UIState

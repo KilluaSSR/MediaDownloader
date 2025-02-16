@@ -1,9 +1,13 @@
-package killua.dev.mediadownloader.ui
+package killua.dev.mediadownloader.ui.ViewModels
 
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import killua.dev.mediadownloader.ui.SnackbarUIEffect
+import killua.dev.mediadownloader.ui.UIEffect
+import killua.dev.mediadownloader.ui.UIIntent
+import killua.dev.mediadownloader.ui.UIState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow

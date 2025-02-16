@@ -20,7 +20,7 @@ fun NotLoggedInAlert(
 ){
     val context = LocalContext.current
     CancellableAlert(
-        "${context.getString(platformName[platform]!!)}+ ${stringResource(R.string.not_logged_in)}",
+        "${context.getString(platformName[platform]!!)} ${stringResource(R.string.not_logged_in)}",
         "${stringResource(R.string.cookie_necessary)} ${context.getString(platformName[platform]!!)}",
         icon = {
             AppIcon(platform)

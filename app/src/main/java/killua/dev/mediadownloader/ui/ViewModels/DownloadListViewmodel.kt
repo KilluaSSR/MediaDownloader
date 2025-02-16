@@ -15,7 +15,6 @@ import killua.dev.mediadownloader.Model.DownloadedItem
 import killua.dev.mediadownloader.Model.MediaType
 import killua.dev.mediadownloader.download.DownloadListManager
 import killua.dev.mediadownloader.download.DownloadbyLink
-import killua.dev.mediadownloader.ui.BaseViewModel
 import killua.dev.mediadownloader.ui.SnackbarUIEffect
 import killua.dev.mediadownloader.ui.UIIntent
 import killua.dev.mediadownloader.ui.UIState

@@ -10,14 +10,15 @@ import killua.dev.mediadownloader.repository.DownloadServicesRepository
 import killua.dev.mediadownloader.utils.DownloadEventManager
 import killua.dev.mediadownloader.utils.DownloadPreChecks
 import killua.dev.mediadownloader.utils.MediaFileNameStrategy
+import killua.dev.mediadownloader.utils.ShowNotification
 import java.util.UUID
 import javax.inject.Inject
 
 class DownloadbyLink @Inject constructor(
 private val downloadRepository: DownloadServicesRepository,
 private val downloadQueueManager: DownloadQueueManager,
-downloadEventManager: DownloadEventManager,
-private val downloadPreChecks: DownloadPreChecks
+private val downloadEventManager: DownloadEventManager,
+private val downloadPreChecks: DownloadPreChecks,
 ) {
     val downloadCompletedFlow = downloadEventManager.downloadCompletedFlow
 
