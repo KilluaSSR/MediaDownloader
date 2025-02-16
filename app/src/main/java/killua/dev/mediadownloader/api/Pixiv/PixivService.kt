@@ -27,7 +27,6 @@ class PixivService @Inject constructor(
         val id = try {
             url.split("artworks/")[1]
         } catch (e: Exception) {
-            println("URL解析失败: ${e.message}")
             return@withContext NetworkResult.Error(message = "URL格式错误: ${e.message}")
         }
 
@@ -45,8 +44,6 @@ class PixivService @Inject constructor(
                     }
             ).use { response ->
                 if (!response.isSuccessful) {
-                    println("详情请求失败: ${response.code} ${response.message}")
-                    println("响应体: ${response.body?.string()}")
                     return@withContext NetworkResult.Error(
                         code = response.code,
                         message = "详情请求失败: ${response.code} ${response.message}"
@@ -55,8 +52,6 @@ class PixivService @Inject constructor(
                 try {
                     gson.fromJson(response.body?.string(), PixivPictureDetailResponse::class.java).body
                 } catch (e: Exception) {
-                    println("详情JSON解析失败: ${e.message}")
-                    println("原始JSON: ${response.body?.string()}")
                     return@withContext NetworkResult.Error(message = "详情JSON解析失败: ${e.message}")
                 }
             }
@@ -91,7 +86,6 @@ class PixivService @Inject constructor(
                 }
             }
 
-            println("请求成功: 用户名=${detailResult.userName}, ID=${detailResult.illustId}, 图片数量=${urls.size}")
             return@withContext NetworkResult.Success(
                 PixivImageInfo(
                     userName = detailResult.userName,
@@ -102,8 +96,6 @@ class PixivService @Inject constructor(
                 )
             )
         } catch (e: Exception) {
-            println("请求过程发生错误: ${e.message}")
-            println("错误堆栈: ${e.stackTraceToString()}")
             NetworkResult.Error(message = "请求过程发生错误: ${e.message}")
         }
     }

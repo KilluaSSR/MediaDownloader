@@ -1,8 +1,63 @@
 <resources>
-    <string name="app_name">MediaDownloader</string>
-    <string name="title_activity_splash">MediaDownloader</string>
-    <string name="githubAccount">KilluaSSR</string>
-    <string name="twitterAccount">ShakeItOff_pi</string>
-    <string name="mail">xiaotian2001@outlook.com</string>
-    <string name="githubIssues"></string>
+    <string name="app_name" translatable="false">MediaDownloader</string>
+    <string name="title_activity_splash" translatable="false">MediaDownloader</string>
+    <string name="githubAccount" translatable="false">KilluaSSR</string>
+    <string name="twitterAccount" translatable="false">ShakeItOff_pi</string>
+    <string name="mail" translatable="false">xiaotian2001@outlook.com</string>
+    <string name="download_by_link">Download by Link</string>
+    <string name="download_list">Download List</string>
+    <string name="advanced">Advanced</string>
+    <string name="actions">Actions</string>
+    <string name="overview">Overview</string>
+    <string name="your_favourite">Your Favourite</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="url_here">URL Here</string>
+    <string name="all">All</string>
+    <string name="completed">Completed</string>
+    <string name="failed">Failed</string>
+    <string name="settings">Settings</string>
+    <string name="report">Report</string>
+    <string name="about">About</string>
+    <string name="notification">Notification</string>
+    <string name="notification_desc">Send notification after download</string>
+    <string name="wifi_only">Download via WIFI only</string>
+    <string name="wifi_only_enabled">Download is disabled if you\'re using Cellar Data</string>
+    <string name="wifi_only_disabled">Extra carrier charges may apply</string>
+    <string name="twitter_images">Download Twitter Images</string>
+    <string name="max_retries">Max Retries</string>
+    <string name="delay">Delay</string>
+    <string name="reset_desc">Clear your all login informations. You need to login again</string>
+    <string name="dangerous">Dangerous</string>
+    <string name="platform_configurations">Platform Configurations</string>
+    <string name="reset">Reset</string>
+    <string name="download">Download</string>
+    <string name="kuaikan">Kuaikan</string>
+    <string name="twitter_images_enabled">Download twitter images too. This setting is only effective when you download using the link.</string>
+    <string name="twitter_images_disabled">Download twitter videos only. This setting is only effective when you download using the link.</string>
+    <string name="max_cocurrent_downloads">Max Concurrent Downloads</string>
+    <string name="delay_desc">This means that when retrieving images in bulk, there should be a set value interval between each page request.</string>
+    <string name="reset_title">Reset Now?</string>
+    <string name="current">Current</string>
+    <string name="unsupported_url">Unsupported url</string>
+    <string name="paste_url_here.">You need to paste a url here</string>
+    <string name="not_logged_in">NOT logged in</string>
+    <string name="cookie_necessary">Your cookie is necessary when downloading this content from </string>
+    <string name="ok">OK</string>
+    <string name="tags">Tags</string>
+    <string name="add_tags_here">Add tags here</string>
+    <string name="save">Save</string>
+    <string name="clear_all">Clear All</string>
+    <string name="edit_tags">Edit Tags</string>
+    <string name="get_bookmarks">Get my Bookmarks</string>
+    <string name="get_likes">Get my Likes</string>
+    <string name="get_user_media">Get someone\'s all media</string>
+    <string name="get_by_tags">Get pics by Tags</string>
+    <string name="get_bookmarks_desc">Get the content I bookmarked on Twitter</string>
+    <string name="get_entire_comic">Get Entire Comic</string>
+    <string name="get_likes_desc">Get the content I liked on Twitter. Note that if you have a lot of liked content, it may trigger a rate limit risk and could even lead to account suspension.</string>
+    <string name="enter_twitter_username">Enter Twitter Username</string>
+    <string name="enter_lofter_author_homepage">Enter Lofter author\'s Homepage</string>
+    <string name="enter_kuaikan_comic_url">Enter Kuaikan Comic\'s URL</string>
+
 </resources>

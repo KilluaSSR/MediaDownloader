@@ -6,15 +6,16 @@ import androidx.compose.material.icons.rounded.Bookmarks
 import androidx.compose.material.icons.rounded.ThumbUp
 import androidx.compose.material.icons.rounded.VideoLibrary
 import killua.dev.base.ui.AdvancedpageRoutes
+import killua.dev.mediadownloader.R
 
 val AdvancedPageTwitterButtons = listOf(
     ButtonsEssentials(
-        "Get my Bookmarks",
+        R.string.get_bookmarks,
         Icons.Rounded.Bookmarks,
         AdvancedpageRoutes.TwitterGetMyBookmarks.route
     ),
     ButtonsEssentials(
-        "Get my Likes",
+        R.string.get_likes,
         Icons.Rounded.ThumbUp,
         AdvancedpageRoutes.TwitterGetMyBookmarks.route
     ),
@@ -24,7 +25,7 @@ val AdvancedPageTwitterButtons = listOf(
 //        AdvancedpageRoutes.TwitterSubscribe.route
 //    ),
     ButtonsEssentials(
-        "Get someone's all media",
+        R.string.get_user_media,
         Icons.Rounded.VideoLibrary,
         AdvancedpageRoutes.TwitterGetAll.route
     )
@@ -37,7 +38,7 @@ val AdvancedPageLofterButtons = listOf(
 //        AdvancedpageRoutes.LofterAuthors.route
 //    ),
     ButtonsEssentials(
-        "Get pics by Tags",
+        R.string.get_by_tags,
         Icons.Rounded.Bookmarks,
         AdvancedpageRoutes.LofterGetAuthorImagesByTags.route,
     ),
@@ -45,7 +46,7 @@ val AdvancedPageLofterButtons = listOf(
 
 val AdvancedPageKuaikanButtons = listOf(
     ButtonsEssentials(
-        "Entire comic",
+        R.string.get_entire_comic,
         Icons.Rounded.Book,
         AdvancedpageRoutes.KuaikanEntireComic.route
     ),

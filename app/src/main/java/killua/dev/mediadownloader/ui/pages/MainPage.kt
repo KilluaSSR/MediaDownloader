@@ -16,6 +16,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.base.Model.AppIcon
@@ -43,6 +44,7 @@ import killua.dev.mediadownloader.ui.components.MainPageBottomSheet
 import killua.dev.mediadownloader.ui.components.MainPageButtons
 import killua.dev.mediadownloader.ui.components.ReportDialog
 import kotlinx.coroutines.launch
+import killua.dev.mediadownloader.R
 
 @ExperimentalFoundationApi
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -76,13 +78,13 @@ fun MainPage(
         }
 
         if (showReportDialog){
-            ReportDialog("Report",icon = null, onDismiss = {showReportDialog = false})
+            ReportDialog(stringResource(R.string.report),icon = null, onDismiss = {showReportDialog = false})
         }
 
         if(uiState.value.showNotLoggedInDialog){
             CancellableAlert(
-                "${uiState.value.loginErrorPlatform.name} NOT logged in",
-                "Your cookie is necessary when downloading this content from ${uiState.value.loginErrorPlatform.name}",
+                "${uiState.value.loginErrorPlatform.name}+ ${stringResource(R.string.not_logged_in)}",
+                "${stringResource(R.string.cookie_necessary)} ${uiState.value.loginErrorPlatform.name}",
                 icon = {
                     AppIcon(uiState.value.loginErrorPlatform)
                 },
@@ -111,7 +113,7 @@ fun MainPage(
             }
         }
         MainInputDialog(
-            title = "URL here",
+            title = stringResource(R.string.url_here),
             placeholder = "https://...",
             showDialog = showDialog,
             onDismiss = { showDialog = false },
@@ -119,12 +121,12 @@ fun MainPage(
                 viewmodel.launchOnIO {
                     when {
                         url.isBlank() -> {
-                            viewmodel.emitEffect(SnackbarUIEffect.ShowSnackbar("You need to paste a url here."))
+                            viewmodel.emitEffect(SnackbarUIEffect.ShowSnackbar(context.getString(R.string.paste_url_here_)))
                         }
                         else -> {
                             when (SupportedUrlType.fromUrl(url)) {
                                 SupportedUrlType.UNKNOWN -> {
-                                    viewmodel.emitEffect(SnackbarUIEffect.ShowSnackbar("Unsupported url"))
+                                    viewmodel.emitEffect(SnackbarUIEffect.ShowSnackbar(context.getString(R.string.unsupported_url)))
                                 }
                                 else -> {
                                     viewmodel.emitIntent(MainPageUIIntent.ExecuteDownload(url))
@@ -141,7 +143,7 @@ fun MainPage(
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(SizeTokens.Level24)
         ) {
-            Section(title = "Overview") {
+            Section(title = stringResource(R.string.overview)) {
                 if(uiState.value.youHaveDownloadedSth) {
                     val userInfo = FavouriteUserInfo(
                         name = uiState.value.favouriteUserName,
@@ -175,7 +177,7 @@ fun MainPage(
                 }
             }
 
-            Section(title = "Actions") {
+            Section(title = stringResource(R.string.actions)) {
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(SizeTokens.Level8),
@@ -186,7 +188,7 @@ fun MainPage(
                         ActionsBotton(
                             modifier = Modifier.weight(1f),
                             enabled = true,
-                            title = item.title,
+                            title = context.getString(item.titleRes),
                             icon = item.icon,
                             color = randomColors[index].container
                         ) {

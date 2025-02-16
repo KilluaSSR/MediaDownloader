@@ -1,5 +1,6 @@
 package killua.dev.mediadownloader.ui.components
 
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Help
 import androidx.compose.material.icons.rounded.Download
@@ -10,17 +11,17 @@ import androidx.compose.material.icons.rounded.Star
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import killua.dev.base.ui.MainRoutes
-
+import killua.dev.mediadownloader.R
 
 data class ButtonsEssentials(
-    val title: String,
+    @StringRes val titleRes: Int,
     val icon: ImageVector,
     val route: String,
     val color: Color = Color.Unspecified
 )
 
 data class MainPageBottomButtonsEssentials(
-    val title: String,
+    @StringRes val titleRes: Int,
     val icon: ImageVector,
     val action: MainPageButtonsAction
 )
@@ -31,17 +32,17 @@ sealed class MainPageButtonsAction {
 }
 val MainPageButtons = listOf(
     ButtonsEssentials(
-        "Download by Link",
+        R.string.download_by_link,
         Icons.Rounded.Download,
         MainRoutes.Download.route
     ),
     ButtonsEssentials(
-        "Download List",
+        R.string.download_list,
         Icons.Rounded.DownloadDone,
         MainRoutes.DownloadListPage.route
     ),
     ButtonsEssentials(
-        "Advanced",
+        R.string.advanced,
         Icons.Rounded.Star,
         MainRoutes.AdvancedPage.route
     ),
@@ -54,17 +55,17 @@ val MainPageButtons = listOf(
 
 val MainPageMenuButtons = listOf(
     MainPageBottomButtonsEssentials(
-        "Settings",
+        R.string.advanced,
         Icons.Rounded.Settings,
         MainPageButtonsAction.Navigate(MainRoutes.SettingPage.route)
     ),
     MainPageBottomButtonsEssentials(
-        "Report",
+        R.string.report,
         Icons.Rounded.Report,
         MainPageButtonsAction.ShowDialog
     ),
     MainPageBottomButtonsEssentials(
-        "About",
+        R.string.about,
         Icons.AutoMirrored.Rounded.Help,
         MainPageButtonsAction.Navigate(MainRoutes.AboutPage.route)
     )

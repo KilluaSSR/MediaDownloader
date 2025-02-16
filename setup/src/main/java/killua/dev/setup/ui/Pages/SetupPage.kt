@@ -105,7 +105,7 @@ fun SetupPage() {
         Section(title = "You're invited to log in to your Twitter account.") {
             ClickableConfigurationButton(
                 title = "Log in",
-                description = "We need your account's cookie to download videos.",
+                description = "We need your account's cookie to download videos from twitter.",
                 state = loginState.value,
                 onClick = {
                    if(loginState.value != CurrentState.Success){

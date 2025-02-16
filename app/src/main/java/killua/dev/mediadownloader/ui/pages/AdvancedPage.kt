@@ -15,6 +15,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.base.ui.LocalNavController
@@ -38,6 +39,7 @@ import killua.dev.mediadownloader.ui.components.MainScaffold
 import killua.dev.mediadownloader.ui.pages.AdvancedPage.ChapterSelectionDialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import killua.dev.mediadownloader.R
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -51,7 +53,7 @@ fun AdvancedPage(){
     val eligibleToUseLofterGetByTags = viewModel.lofterGetByTagsEligibility.collectAsStateWithLifecycle()
     var dialogTitle by remember { mutableStateOf("") }
     var dialogPlaceholder by remember { mutableStateOf("") }
-    LocalContext.current
+    val context = LocalContext.current
     LaunchedEffect(Unit) {
         viewModel.emitIntentOnIO(AdvancedPageUIIntent.OnEntry)
     }
@@ -70,8 +72,8 @@ fun AdvancedPage(){
         var showGetAllMyTwitterBookmarks by remember { mutableStateOf(false) }
         if(showGetAllMyTwitterBookmarks){
             CancellableAlert(
-                title = "Get my Bookmarks",
-                mainText = "Get the content I bookmarked on Twitter.",
+                title = stringResource(R.string.get_bookmarks),
+                mainText = stringResource(R.string.get_bookmarks_desc),
                 onDismiss = {showGetAllMyTwitterBookmarks = false}
             ) {
                 scope.launch{
@@ -82,8 +84,8 @@ fun AdvancedPage(){
         var showGetMyTwitterLikes by remember { mutableStateOf(false) }
         if(showGetMyTwitterLikes){
             CancellableAlert(
-                title = "Get my Likes",
-                mainText = "Get the content I liked on Twitter.\nNote that if you have a lot of liked content, it may trigger a rate limit risk and could even lead to account suspension.",
+                title = stringResource(R.string.get_likes),
+                mainText = stringResource(R.string.get_bookmarks_desc),
                 onDismiss = {showGetMyTwitterLikes = false}
             ) {
                 scope.launch{
@@ -204,7 +206,7 @@ fun AdvancedPage(){
                         ActionsBotton(
                             modifier = Modifier.weight(1f),
                             enabled = true,
-                            title = item.title,
+                            title = stringResource(item.titleRes),
                             icon = item.icon,
                             color = MaterialTheme.colorScheme.primaryContainer
                         ) {
@@ -215,7 +217,7 @@ fun AdvancedPage(){
                                     scope.launch{
                                         viewModel.emitState(uiState.value.copy(currentDialogType = DialogType.TWITTER_USER_INFO_DOWNLOAD))
                                     }
-                                    dialogTitle = "Enter Twitter Username"
+                                    dialogTitle = context.getString(R.string.enter_twitter_username)
                                     dialogPlaceholder = "@ExampleUser"
                                     showDialog = true
                                 }
@@ -235,7 +237,7 @@ fun AdvancedPage(){
                         ActionsBotton(
                             modifier = Modifier.weight(1f),
                             enabled = true,
-                            title = item.title,
+                            title = stringResource(item.titleRes),
                             icon = item.icon,
                             color = when (index) {
                                 0 -> if (eligibleToUseLofterGetByTags.value) {
@@ -252,7 +254,7 @@ fun AdvancedPage(){
                                         scope.launch{
                                             viewModel.emitState(uiState.value.copy(currentDialogType = DialogType.LOFTER_AUTHOR_TAGS))
                                         }
-                                        dialogTitle = "Enter Lofter author's Homepage"
+                                        dialogTitle = context.getString(R.string.enter_lofter_author_homepage)
                                         dialogPlaceholder = "https://username.lofter.com/"
                                         showDialog = true
                                     } else {
@@ -265,7 +267,7 @@ fun AdvancedPage(){
                 }
             }
 
-            Section(title = "Kuaikan") {
+            Section(title = stringResource(R.string.kuaikan)) {
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(SizeTokens.Level8),
@@ -276,7 +278,7 @@ fun AdvancedPage(){
                         ActionsBotton(
                             modifier = Modifier.weight(1f),
                             enabled = true,
-                            title = item.title,
+                            title = stringResource(item.titleRes),
                             icon = item.icon,
                             color = MaterialTheme.colorScheme.primaryContainer
                         ) {
@@ -285,7 +287,7 @@ fun AdvancedPage(){
                                     scope.launch{
                                         viewModel.emitState(uiState.value.copy(currentDialogType = DialogType.KUAIKAN_ENTIRE))
                                     }
-                                    dialogTitle = "Enter Kuaikan Comic's URL"
+                                    dialogTitle = context.getString(R.string.enter_kuaikan_comic_url)
                                     dialogPlaceholder = "kuaikanmanhua.com/web/topic/..."
                                     showDialog = true
                                 }

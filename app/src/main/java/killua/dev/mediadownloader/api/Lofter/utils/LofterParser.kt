@@ -48,53 +48,34 @@ object LofterParser {
     }
 
     fun parseAuthorInfo(document: Document, authorUrl: String): AuthorInfo {
-        Log.d("LofterParser", "开始解析作者信息，原始URL: $authorUrl")
-
-        // 解析作者ID
-        Log.d("LofterParser", "正在解析作者ID...")
         val controlFrame = document.select("iframe#control_frame").first()
-        Log.d("LofterParser", "control_frame元素: ${controlFrame != null}")
 
         val frameSrc = controlFrame?.attr("src")
-        Log.d("LofterParser", "frame源地址: $frameSrc")
 
         val authorId = frameSrc?.split("blogId=")?.getOrNull(1)
             ?: throw IllegalStateException("Failed to parse author ID").also {
                 Log.e("LofterParser", "解析作者ID失败", it)
             }
-        Log.d("LofterParser", "成功解析作者ID: $authorId")
 
-        // 解析作者域名
-        Log.d("LofterParser", "正在解析作者域名...")
         val domainPattern = Regex("""https?://([^.]+)\.lofter\.com/""")
         val domainMatch = domainPattern.find(authorUrl)
-        Log.d("LofterParser", "域名匹配结果: ${domainMatch != null}")
-
         val authorDomain = domainMatch?.groupValues?.getOrNull(1)
             ?: throw IllegalStateException("Failed to parse author IP").also {
                 Log.e("LofterParser", "解析作者域名失败", it)
             }
-        Log.d("LofterParser", "成功解析作者域名: $authorDomain")
 
-        // 解析作者名称
-        Log.d("LofterParser", "正在解析作者名称...")
         val nameSelector = "h1.w-bttl2.w-bttl-hd > a:last-child"
         val nameElement = document.select(nameSelector)
-        Log.d("LofterParser", "名称元素是否存在: ${nameElement.isNotEmpty()}")
 
         val authorName = nameElement.text().takeIf { it.isNotEmpty() }
-            ?: throw Exception("未找到作者名").also {
-                Log.e("LofterParser", "解析作者名称失败", it)
-            }
-        Log.d("LofterParser", "成功解析作者名称: $authorName")
+            ?: throw Exception("未找到作者名")
+
 
         return AuthorInfo(
             authorId = authorId,
             authorDomain = authorDomain,
             authorName = authorName
-        ).also {
-            Log.d("LofterParser", "作者信息解析完成: $it")
-        }
+        )
     }
 
     fun parseImages(content: String): List<String> {
@@ -301,7 +282,6 @@ object LofterParser {
 
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     private fun matchTags(content: String, targetTags: List<String>?, saveNoTags: Boolean): Boolean {
-        // 如果没有目标标签，则全部保存
         if (targetTags.isNullOrEmpty()) return true
 
         val pageTags = TAGS_PATTERN.matcher(content)
@@ -309,12 +289,10 @@ object LofterParser {
             .map { URLDecoder.decode(it.group(1), "UTF-8").replace("\u00a0", " ") }
             .toList()
 
-        // 如果页面没有标签
         if (pageTags.isEmpty()) {
-            return saveNoTags // 根据saveNoTags决定是否保存无标签内容
+            return saveNoTags
         }
 
-        // 检查是否有任意一个目标标签匹配
         return pageTags.any { it in targetTags }
     }
 
@@ -332,12 +310,12 @@ object LofterParser {
                 .toList()
         }
         return return urls
-            .filter { it.contains("imglf", true) }  // 确保是Lofter图片服务器的URL
-            .filterNot { it.contains("&amp;") }     // 过滤掉包含 &amp; 的URL
-            .filterNot { url ->                     // 过滤掉头像图片
+            .filter { it.contains("imglf", true) }
+            .filterNot { it.contains("&amp;") }
+            .filterNot { url ->
                 Regex("[1649]{2}[x,y][1649]{2}").find(url) != null
             }
-            .map { it.split("imageView")[0] }       // 删除图片链接中的大小参数
+            .map { it.split("imageView")[0] }
             .distinct()
     }
 

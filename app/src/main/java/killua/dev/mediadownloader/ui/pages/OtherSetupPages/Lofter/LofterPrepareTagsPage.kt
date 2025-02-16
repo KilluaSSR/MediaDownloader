@@ -26,6 +26,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -36,6 +37,7 @@ import killua.dev.base.ui.components.Title
 import killua.dev.base.ui.components.paddingHorizontal
 import killua.dev.base.ui.tokens.SizeTokens
 import kotlinx.coroutines.launch
+import killua.dev.mediadownloader.R
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class, ExperimentalLayoutApi::class)
 @Composable
@@ -51,7 +53,7 @@ fun LofterPrepareTagsPage(){
     }
     InputSetupScaffold(
         scrollBehavior = scrollBehavior,
-        title = "Edit Tags",
+        title = stringResource(R.string.edit_tags),
         actions = {
             Button(
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error, contentColor = MaterialTheme.colorScheme.onError),
@@ -61,7 +63,7 @@ fun LofterPrepareTagsPage(){
                     }
                 }
             ) {
-                Text(text = "Clear All")
+                Text(text = stringResource(R.string.clear_all))
             }
             Button(
                 onClick = {
@@ -71,7 +73,7 @@ fun LofterPrepareTagsPage(){
                     navController.popBackStack()
                 }
             ) {
-                Text(text = "Save")
+                Text(text = stringResource(R.string.save))
             }
         },
         snackbarHostState = viewModel.snackbarHostState
@@ -80,7 +82,7 @@ fun LofterPrepareTagsPage(){
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(SizeTokens.Level24)
         ) {
-            Title(title = "Add tags here") {
+            Title(title = stringResource(R.string.add_tags_here)) {
                 SetupTextField(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -97,11 +99,11 @@ fun LofterPrepareTagsPage(){
                     keyboardOptions = KeyboardOptions(
                         imeAction = ImeAction.Done
                     ),
-                    label = "Tags"
+                    label = stringResource(R.string.tags)
                 )
             }
 
-            Title(title = "Tags") {
+            Title(title = stringResource(R.string.tags)) {
                 FlowRow(
                     modifier = Modifier
                         .fillMaxWidth()

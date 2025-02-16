@@ -19,6 +19,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.base.Model.AppIcon
 import killua.dev.base.Model.AvailablePlatforms
@@ -31,6 +32,7 @@ import killua.dev.base.ui.components.paddingTop
 import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.setup.ui.components.SetupScaffold
 import kotlinx.coroutines.flow.StateFlow
+import killua.dev.mediadownloader.R
 
 @Composable
 fun ConfigurationPage(
@@ -61,8 +63,8 @@ fun ConfigurationPage(
     ) {
         if (isShowReset) {
             CancellableAlert(
-                title = "Reset now?",
-                mainText = "Your login information will be cleared, and you will need to log in again to continue using ${platform.name}'s functions",
+                title = stringResource(R.string.reset_title),
+                mainText = stringResource(R.string.reset_desc),
                 onDismiss = { isShowReset = false },
                 icon = {
                     Icon(

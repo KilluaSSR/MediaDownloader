@@ -23,6 +23,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.base.datastore.NOTIFICATION_ENABLED
 import killua.dev.base.datastore.PHOTOS_KEY
@@ -56,6 +57,7 @@ import killua.dev.base.utils.getActivity
 import killua.dev.base.utils.navigateSingle
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+import killua.dev.mediadownloader.R
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -66,13 +68,13 @@ fun SettingsPage(){
     val scope = rememberCoroutineScope()
     SettingsScaffold(
         scrollBehavior = scrollBehavior,
-        title = "Settings",
+        title = stringResource(R.string.settings),
     ) {
         var isShowReset by remember { mutableStateOf(false) }
         if(isShowReset){
             CancellableAlert(
-                title = "Reset now?",
-                mainText = "Your login information will be cleared, and you will need to log in again to continue using",
+                title = stringResource(R.string.reset_title),
+                mainText = stringResource(R.string.reset_desc),
                 onDismiss = {isShowReset = false},
                 icon = {
                     Icon(
@@ -111,25 +113,25 @@ fun SettingsPage(){
             Title(title = "Download") {
                 Switchable(
                     key = NOTIFICATION_ENABLED,
-                    title = "Notification",
-                    checkedText = "Send notification after download"
+                    title = stringResource(R.string.notification),
+                    checkedText = stringResource(R.string.notification_desc)
                 )
                 Switchable(
                     key = WIFI,
-                    title = "Download via WIFI only",
-                    checkedText = if(wifi){"Download is disabled if you're using Cellar Data"} else{"Extra carrier charges may apply"}
+                    title = stringResource(R.string.wifi_only),
+                    checkedText = if(wifi){stringResource(R.string.wifi_only_enabled)} else{stringResource(R.string.wifi_only_disabled)}
                 )
                 Switchable(
                     key = PHOTOS_KEY,
-                    title = "Download Twitter images",
-                    checkedText = if(photos){"Download twitter images too. This setting is only effective when you download using the link."} else{"Download twitter videos only. This setting is only effective when you download using the link."}
+                    title = stringResource(R.string.twitter_images),
+                    checkedText = if(photos){stringResource(R.string.twitter_images_enabled)} else{stringResource(R.string.wifi_only_disabled)}
                 )
                 Slideable(
-                    title = "Max concurrent downloads",
+                    title = stringResource(R.string.max_cocurrent_downloads),
                     value = concurrent.toFloat(),
                     valueRange = 1F..10F,
                     steps = 8,
-                    desc = remember(concurrent) {"Current: $concurrent"}
+                    desc = remember(concurrent) {"${context.getString(R.string.current)}:" +concurrent}
                 ) {
                     scope.launch{
                         context.writeMaxConcurrentDownloads(it.roundToInt())
@@ -137,11 +139,11 @@ fun SettingsPage(){
                 }
 
                 Slideable(
-                    title = "Max retries",
+                    title = stringResource(R.string.max_retries),
                     value = retry.toFloat(),
                     valueRange = 0F..3F,
                     steps = 2,
-                    desc = remember(retry) {"Current: $retry"}
+                    desc = remember(retry) {"${context.getString(R.string.current)}:" + retry }
                 ) {
                     scope.launch{
                         context.writeMaxRetries(it.roundToInt())
@@ -149,7 +151,7 @@ fun SettingsPage(){
                 }
 
                 Slideable(
-                    title = "Delay",
+                    title = stringResource(R.string.delay),
                     value = delay.toFloat(),
                     valueRange = 2F..10F,
                     steps = 7,
@@ -161,7 +163,7 @@ fun SettingsPage(){
                 }
             }
 
-            Title(title = "Platform configurations", color = MaterialTheme.colorScheme.error) {
+            Title(title = stringResource(R.string.platform_configurations), color = MaterialTheme.colorScheme.error) {
                 Clickable(
                     title = "Twitter",
                     value = "Log in / out."
@@ -188,7 +190,7 @@ fun SettingsPage(){
                     }
                 }
                 Clickable(
-                    title = "Kuaikan",
+                    title = stringResource(R.string.kuaikan),
                     value = "Log in / out."
                 ){
                     scope.launch{
@@ -197,11 +199,11 @@ fun SettingsPage(){
                 }
             }
 
-            Title(title = "Dangerous", color = MaterialTheme.colorScheme.error) {
+            Title(title = stringResource(R.string.dangerous), color = MaterialTheme.colorScheme.error) {
 
                 Clickable(
-                    title = "Reset",
-                    value = "Clear your login information (cookies). You need to login again."
+                    title = stringResource(R.string.reset),
+                    value = stringResource(R.string.reset_desc)
                 ){
                     isShowReset = true
                 }
