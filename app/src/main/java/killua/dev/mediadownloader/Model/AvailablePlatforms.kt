@@ -34,7 +34,7 @@ val platformsDrawable: Map<AvailablePlatforms,Int> = mapOf(
 )
 
 val platformName: Map<AvailablePlatforms, Int> = mapOf(
-    AvailablePlatforms.Twitter to R.string.twitter_images,
+    AvailablePlatforms.Twitter to R.string.twitter,
     AvailablePlatforms.Lofter to R.string.lofter,
     AvailablePlatforms.Pixiv to R.string.pixiv,
     AvailablePlatforms.Kuaikan to R.string.kuaikan

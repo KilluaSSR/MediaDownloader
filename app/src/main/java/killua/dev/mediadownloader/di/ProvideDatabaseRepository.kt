@@ -4,7 +4,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import db.DownloadDao
+import killua.dev.mediadownloader.db.DownloadDao
 import killua.dev.mediadownloader.db.LofterTagsRepository
 import killua.dev.mediadownloader.db.TagDao
 import killua.dev.mediadownloader.repository.DownloadRepository

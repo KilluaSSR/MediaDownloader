@@ -51,6 +51,7 @@ fun AdvancedPage(){
     var showDialog by remember { mutableStateOf(false) }
     var showDevelopingAlert by remember { mutableStateOf(false) }
     val eligibleToUseLofterGetByTags = viewModel.lofterGetByTagsEligibility.collectAsStateWithLifecycle()
+    val eligibleToUseTwitterFunctions = viewModel.twitterEligibility.collectAsStateWithLifecycle()
     var dialogTitle by remember { mutableStateOf("") }
     var dialogPlaceholder by remember { mutableStateOf("") }
     val context = LocalContext.current
@@ -208,18 +209,36 @@ fun AdvancedPage(){
                             enabled = true,
                             title = stringResource(item.titleRes),
                             icon = item.icon,
-                            color = MaterialTheme.colorScheme.primaryContainer
+                            color = if(eligibleToUseTwitterFunctions.value){
+                                MaterialTheme.colorScheme.primaryContainer
+                            }else{
+                                MaterialTheme.colorScheme.errorContainer
+                            }
                         ) {
                             when(index){
-                                0 ->{showGetAllMyTwitterBookmarks = true}
-                                1 ->{showGetMyTwitterLikes = true}
-                                2 ->{
-                                    scope.launch{
-                                        viewModel.emitState(uiState.value.copy(currentDialogType = DialogType.TWITTER_USER_INFO_DOWNLOAD))
+                                0 ->{
+                                    if (eligibleToUseTwitterFunctions.value) {
+                                        showGetAllMyTwitterBookmarks = true
+                                    }else{
+                                        navController.navigateSingle(PrepareRoutes.TwitterPreparePage.route)
                                     }
-                                    dialogTitle = context.getString(R.string.enter_twitter_username)
-                                    dialogPlaceholder = "@ExampleUser"
-                                    showDialog = true
+                                }
+                                1 ->{if (eligibleToUseTwitterFunctions.value) {
+                                    showGetMyTwitterLikes = true
+                                }else{
+                                    navController.navigateSingle(PrepareRoutes.TwitterPreparePage.route)
+                                }}
+                                2 ->{
+                                    if(eligibleToUseTwitterFunctions.value){
+                                        scope.launch{
+                                            viewModel.emitState(uiState.value.copy(currentDialogType = DialogType.TWITTER_USER_INFO_DOWNLOAD))
+                                        }
+                                        dialogTitle = context.getString(R.string.enter_twitter_username)
+                                        dialogPlaceholder = "@ExampleUser"
+                                        showDialog = true
+                                    }else{
+                                        navController.navigateSingle(PrepareRoutes.TwitterPreparePage.route)
+                                    }
                                 }
                             }
                         }

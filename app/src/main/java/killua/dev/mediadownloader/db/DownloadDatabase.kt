@@ -1,4 +1,4 @@
-package db
+package killua.dev.mediadownloader.db
 
 import android.content.Context
 import androidx.room.Database
@@ -7,10 +7,8 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import killua.dev.mediadownloader.db.TagDao
-import killua.dev.mediadownloader.db.TagEntry
-import killua.dev.mediadownloader.db.TagsConverter
-import killua.dev.mediadownloader.db.TypesConverter
+import db.Download
+import db.UriTypeConverter
 
 @Database(
     entities = [Download::class, TagEntry::class],

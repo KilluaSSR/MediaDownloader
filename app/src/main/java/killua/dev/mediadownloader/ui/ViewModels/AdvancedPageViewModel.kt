@@ -25,9 +25,7 @@ import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
 data class AdvancedPageUIState(
-    val showNotLoggedIn: Boolean = false,
     val currentDialogType: DialogType = DialogType.NONE,
-    val isEligibleToUseLofterGetByTags: Boolean = false,
     val isGettingMyTwitterBookmark: Boolean = false,
     val isFetching: Boolean = false,
     val info: Triple<String, String, String> = Triple("","",""),
@@ -65,11 +63,17 @@ class AdvancedPageViewModel @Inject constructor(
 ): BaseViewModel<AdvancedPageUIIntent, AdvancedPageUIState, SnackbarUIEffect>(AdvancedPageUIState()) {
     private val mutex = Mutex()
     private val _lofterUsableState = MutableStateFlow<CurrentState>(CurrentState.Idle)
+    private val _twitterUsableState = MutableStateFlow<CurrentState>(CurrentState.Idle)
 
     val lofterGetByTagsEligibility: StateFlow<Boolean> = _lofterUsableState
         .map { it == CurrentState.Success }
         .flowOnIO()
         .stateInScope(false)
+    val twitterEligibility: StateFlow<Boolean> = _twitterUsableState
+        .map { it == CurrentState.Success }
+        .flowOnIO()
+        .stateInScope(false)
+
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override suspend fun onEvent(state: AdvancedPageUIState, intent: AdvancedPageUIIntent) {
         when(intent) {
@@ -95,13 +99,19 @@ class AdvancedPageViewModel @Inject constructor(
             mutex.withLock {
                 val (startDate, endDate) = advancedFeaturesManager.readStartDateAndEndDate()
                 val (loginKey, loginAuth) = advancedFeaturesManager.readLofterCredits()
-
-                val allConditionsMet = loginKey.isNotBlank() &&
+                val (ct0, auth) = advancedFeaturesManager.readLofterCredits()
+                val allLofterConditionsMet = loginKey.isNotBlank() &&
                         loginAuth.isNotBlank() &&
                         startDate != 0L &&
                         endDate != 0L &&
                         tagsState
-                _lofterUsableState.value = if (allConditionsMet) {
+                _lofterUsableState.value = if (allLofterConditionsMet) {
+                    CurrentState.Success
+                } else {
+                    CurrentState.Idle
+                }
+                val twitterConditionMet = ct0.isNotBlank() && auth.isNotBlank()
+                _twitterUsableState.value = if (twitterConditionMet) {
                     CurrentState.Success
                 } else {
                     CurrentState.Idle

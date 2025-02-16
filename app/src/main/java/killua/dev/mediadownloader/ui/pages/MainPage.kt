@@ -20,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.mediadownloader.Model.FavouriteUserInfo
+import killua.dev.mediadownloader.Model.NotLoggedInPlatform
 import killua.dev.mediadownloader.Model.SupportedUrlType
 import killua.dev.mediadownloader.R
 import killua.dev.mediadownloader.ui.LocalNavController
@@ -78,10 +79,10 @@ fun MainPage(
             ReportDialog(stringResource(R.string.report),icon = null, onDismiss = {showReportDialog = false})
         }
 
-        if(uiState.value.showNotLoggedInDialog){
-            NotLoggedInAlert(uiState.value.loginErrorPlatform, navController) {
+        if(uiState.value.showNotLoggedIn.showNotLoggedInAlert){
+            NotLoggedInAlert(uiState.value.showNotLoggedIn.platforms!!, navController) {
                 scope.launch{
-                    viewmodel.emitIntent(MainPageUIIntent.DismissLoginDialog)
+                    viewmodel.emitState(uiState.value.copy(showNotLoggedIn = NotLoggedInPlatform()))
                 }
             }
         }

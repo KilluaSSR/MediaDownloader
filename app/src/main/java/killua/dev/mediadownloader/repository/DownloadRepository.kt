@@ -4,9 +4,9 @@ import android.net.Uri
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import db.Download
-import db.DownloadDao
 import db.DownloadStatus
 import killua.dev.mediadownloader.Model.MostDownloadedUser
+import killua.dev.mediadownloader.db.DownloadDao
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 

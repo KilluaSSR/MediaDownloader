@@ -1,6 +1,7 @@
 package killua.dev.mediadownloader.ui.components
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import killua.dev.mediadownloader.Model.AppIcon
@@ -17,9 +18,10 @@ fun NotLoggedInAlert(
     navController: NavHostController,
     onDismiss: ()-> Unit
 ){
+    val context = LocalContext.current
     CancellableAlert(
-        "${platformName[platform]}+ ${stringResource(R.string.not_logged_in)}",
-        "${stringResource(R.string.cookie_necessary)} ${platformName[platform]}",
+        "${context.getString(platformName[platform]!!)}+ ${stringResource(R.string.not_logged_in)}",
+        "${stringResource(R.string.cookie_necessary)} ${context.getString(platformName[platform]!!)}",
         icon = {
             AppIcon(platform)
         },

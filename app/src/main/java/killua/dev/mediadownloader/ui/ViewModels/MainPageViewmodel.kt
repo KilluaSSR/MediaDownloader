@@ -5,6 +5,7 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import killua.dev.mediadownloader.Model.AvailablePlatforms
+import killua.dev.mediadownloader.Model.NotLoggedInPlatform
 import killua.dev.mediadownloader.Model.patterns
 import killua.dev.mediadownloader.download.DownloadbyLink
 import killua.dev.mediadownloader.repository.DownloadRepository
@@ -24,7 +25,6 @@ import javax.inject.Inject
 sealed class MainPageUIIntent : UIIntent {
     data class ExecuteDownload(val url: String) : MainPageUIIntent()
     data class NavigateToFavouriteUser(val context: Context, val userID: String,val platforms: AvailablePlatforms, val screenName: String) : MainPageUIIntent()
-    object DismissLoginDialog : MainPageUIIntent()
 }
 
 data class MainPageUIState(
@@ -34,8 +34,7 @@ data class MainPageUIState(
     val favouriteUserID: String = "",
     val favouriteUserFromPlatform: AvailablePlatforms = AvailablePlatforms.Twitter,
     val downloadedTimes: Int = 0,
-    val showNotLoggedInDialog: Boolean = false,
-    val loginErrorPlatform: AvailablePlatforms = AvailablePlatforms.Twitter
+    val showNotLoggedIn: NotLoggedInPlatform = NotLoggedInPlatform()
 ) : UIState
 
 @HiltViewModel
@@ -105,10 +104,7 @@ class MainPageViewmodel @Inject constructor(
                             }
                         }
                         .onFailure { error ->
-                            emitState(uiState.value.copy(
-                                showNotLoggedInDialog = true,
-                                loginErrorPlatform = platform
-                            ))
+                            emitState(uiState.value.copy(showNotLoggedIn = NotLoggedInPlatform(true,platform)))
                         }
                 }
             }
@@ -121,9 +117,6 @@ class MainPageViewmodel @Inject constructor(
                         AvailablePlatforms.Kuaikan -> {}
                     }
                 }
-            }
-            MainPageUIIntent.DismissLoginDialog -> {
-                emitState(uiState.value.copy(showNotLoggedInDialog = false))
             }
         }
     }

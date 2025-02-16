@@ -2,11 +2,12 @@ package killua.dev.mediadownloader.api.Twitter.BuildRequest
 
 object TwitterAPIURL {
     const val Host = "https://x.com"
-    const val TweetDetailUrl = Host + "/i/api/graphql/tivxwX7ezCWlYBkrhxoR0A/TweetDetail"
-    const val LikeUrl = Host + "/i/api/graphql/oLLzvV4gwmdq_nhPM4cLwg/Likes"
-    const val BookmarkUrl = Host + "/i/api/graphql/Ds7FCVYEIivOKHsGcE84xQ/Bookmarks"
-    const val UserMediaUrl = Host + "/i/api/graphql/ophTtKkfXcUKnXlxh9fU5w/UserMedia"
-    const val ProfileSpotlightsUrl = Host + "/i/api/graphql/-0XdHI-mrHWBQd8-oLo1aA/ProfileSpotlightsQuery"
+    const val TweetDetailUrl = "$Host/i/api/graphql/tivxwX7ezCWlYBkrhxoR0A/TweetDetail"
+    const val LikeUrl = "$Host/i/api/graphql/oLLzvV4gwmdq_nhPM4cLwg/Likes"
+    const val BookmarkUrl = "$Host/i/api/graphql/Ds7FCVYEIivOKHsGcE84xQ/Bookmarks"
+    const val UserMediaUrl = "$Host/i/api/graphql/ophTtKkfXcUKnXlxh9fU5w/UserMedia"
+    const val ProfileSpotlightsUrl =
+        "$Host/i/api/graphql/-0XdHI-mrHWBQd8-oLo1aA/ProfileSpotlightsQuery"
 
     const val Bearer =
         "AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA"

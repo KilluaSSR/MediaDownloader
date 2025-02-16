@@ -6,9 +6,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import db.DownloadDao
-import db.TwitterDownloadDatabase
+import killua.dev.mediadownloader.db.DownloadDao
 import killua.dev.mediadownloader.db.TagDao
+import killua.dev.mediadownloader.db.TwitterDownloadDatabase
 import javax.inject.Singleton
 
 @Module

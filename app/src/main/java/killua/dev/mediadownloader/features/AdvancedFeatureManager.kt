@@ -58,6 +58,8 @@ class AdvancedFeaturesManager @Inject constructor(
 
     fun isTwitterLoggedIn() = preChecks.checkTwitterLoggedIn()
 
+    fun isLofterLoggedIn() = preChecks.checkLofterLoggedIn()
+
     suspend fun readLofterTags() = tagsRepository.observeAllDownloads().first()?.tags
 
     suspend fun readStartDateAndEndDate() = Pair(context.readLofterStartTime().first(),context.readLofterEndTime().first())
