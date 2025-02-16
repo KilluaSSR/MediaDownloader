@@ -5,27 +5,28 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import db.Download
 import db.DownloadStatus
-import killua.dev.base.Model.AvailablePlatforms
-import killua.dev.base.Model.DownloadTask
-import killua.dev.base.Model.MediaType
-import killua.dev.base.datastore.readLofterEndTime
-import killua.dev.base.datastore.readLofterLoginAuth
-import killua.dev.base.datastore.readLofterLoginKey
-import killua.dev.base.datastore.readLofterStartTime
-import killua.dev.base.di.ApplicationScope
-import killua.dev.base.utils.KUAIKAN_ENTIRE_NOTIFICATION_ID
-import killua.dev.base.utils.LOFTER_GET_BY_TAGS_ID
-import killua.dev.base.utils.MediaFileNameStrategy
-import killua.dev.base.utils.ShowNotification
+import killua.dev.mediadownloader.Model.AvailablePlatforms
+import killua.dev.mediadownloader.Model.DownloadTask
+import killua.dev.mediadownloader.Model.MediaType
 import killua.dev.mediadownloader.Model.NetworkResult
 import killua.dev.mediadownloader.api.Kuaikan.Chapter
 import killua.dev.mediadownloader.api.Kuaikan.KuaikanService
 import killua.dev.mediadownloader.api.Lofter.LofterService
 import killua.dev.mediadownloader.api.Twitter.Model.TwitterUser
 import killua.dev.mediadownloader.api.Twitter.TwitterDownloadAPI
+import killua.dev.mediadownloader.datastore.readLofterEndTime
+import killua.dev.mediadownloader.datastore.readLofterLoginAuth
+import killua.dev.mediadownloader.datastore.readLofterLoginKey
+import killua.dev.mediadownloader.datastore.readLofterStartTime
 import killua.dev.mediadownloader.db.LofterTagsRepository
+import killua.dev.mediadownloader.di.ApplicationScope
 import killua.dev.mediadownloader.download.DownloadQueueManager
 import killua.dev.mediadownloader.repository.DownloadRepository
+import killua.dev.mediadownloader.utils.DownloadPreChecks
+import killua.dev.mediadownloader.utils.KUAIKAN_ENTIRE_NOTIFICATION_ID
+import killua.dev.mediadownloader.utils.LOFTER_GET_BY_TAGS_ID
+import killua.dev.mediadownloader.utils.MediaFileNameStrategy
+import killua.dev.mediadownloader.utils.ShowNotification
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import java.util.UUID
@@ -40,6 +41,7 @@ class AdvancedFeaturesManager @Inject constructor(
     private val downloadQueueManager: DownloadQueueManager,
     private val downloadRepository: DownloadRepository,
     private val tagsRepository: LofterTagsRepository,
+    private val preChecks: DownloadPreChecks,
     @ApplicationScope private val context: Context
 ) {
     suspend fun handleTwitterBookmarks(): Result<Unit> = runCatching {
@@ -53,6 +55,8 @@ class AdvancedFeaturesManager @Inject constructor(
             onError = { throw Exception(it) }
         )
     }
+
+    fun isTwitterLoggedIn() = preChecks.checkTwitterLoggedIn()
 
     suspend fun readLofterTags() = tagsRepository.observeAllDownloads().first()?.tags
 

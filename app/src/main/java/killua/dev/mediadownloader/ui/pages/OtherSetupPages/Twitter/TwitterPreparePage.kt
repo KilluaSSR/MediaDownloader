@@ -5,16 +5,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
-import killua.dev.base.Model.AvailablePlatforms
-import killua.dev.base.datastore.writeApplicationUserAuth
-import killua.dev.base.datastore.writeApplicationUserCt0
-import killua.dev.base.datastore.writeApplicationUserID
-import killua.dev.base.ui.CookiesRoutes
-import killua.dev.base.ui.LocalNavController
-import killua.dev.base.utils.navigateSingle
+import killua.dev.mediadownloader.Model.AvailablePlatforms
+import killua.dev.mediadownloader.datastore.writeApplicationUserAuth
+import killua.dev.mediadownloader.datastore.writeApplicationUserCt0
+import killua.dev.mediadownloader.datastore.writeApplicationUserID
+import killua.dev.mediadownloader.ui.CookiesRoutes
+import killua.dev.mediadownloader.ui.LocalNavController
 import killua.dev.mediadownloader.ui.components.ConfigurationPage
 import killua.dev.mediadownloader.ui.pages.OtherSetupPages.PreparePageUIIntent
 import killua.dev.mediadownloader.ui.pages.OtherSetupPages.PreparePageViewModel
+import killua.dev.mediadownloader.utils.navigateSingle
 import kotlinx.coroutines.launch
 
 
@@ -25,7 +25,7 @@ fun TwitterPreparePage() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
-        viewModel.emitIntentOnIO(PreparePageUIIntent.OnEntryTwitter(context))
+        viewModel.emitIntentOnIO(PreparePageUIIntent.OnEntryTwitter)
     }
 
     ConfigurationPage(

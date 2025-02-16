@@ -5,8 +5,8 @@ import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.Bookmarks
 import androidx.compose.material.icons.rounded.ThumbUp
 import androidx.compose.material.icons.rounded.VideoLibrary
-import killua.dev.base.ui.AdvancedpageRoutes
 import killua.dev.mediadownloader.R
+import killua.dev.mediadownloader.ui.AdvancedpageRoutes
 
 val AdvancedPageTwitterButtons = listOf(
     ButtonsEssentials(

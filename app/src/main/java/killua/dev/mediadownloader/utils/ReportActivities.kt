@@ -5,9 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import killua.dev.base.ui.SnackbarUIEffect
-import killua.dev.base.utils.getAppVersion
 import killua.dev.mediadownloader.R
+import killua.dev.mediadownloader.ui.SnackbarUIEffect
 
 fun openMail(context: Context) {
     val intent = Intent(Intent.ACTION_SENDTO).apply {

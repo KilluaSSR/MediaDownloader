@@ -55,4 +55,5 @@
     <string name="enter_twitter_username">输入Twitter用户名</string>
     <string name="enter_lofter_author_homepage">输入Lofter用户主页URL</string>
     <string name="enter_kuaikan_comic_url">输入快看漫画URL</string>
+    <string name="twitter">推特</string>
 </resources>

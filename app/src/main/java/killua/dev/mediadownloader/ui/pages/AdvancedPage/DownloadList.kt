@@ -33,8 +33,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import killua.dev.base.ui.tokens.SizeTokens
 import killua.dev.mediadownloader.api.Kuaikan.Chapter
+import killua.dev.mediadownloader.ui.tokens.SizeTokens
 
 
 @Composable

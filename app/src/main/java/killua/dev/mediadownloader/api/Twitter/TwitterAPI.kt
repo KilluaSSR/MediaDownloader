@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import killua.dev.base.utils.ShowNotification
 import killua.dev.mediadownloader.Model.NetworkResult
 import killua.dev.mediadownloader.api.NetworkHelper
 import killua.dev.mediadownloader.api.Twitter.BuildRequest.GetLikeParams
@@ -27,6 +26,7 @@ import killua.dev.mediadownloader.api.Twitter.Model.extractMediaPageData
 import killua.dev.mediadownloader.api.Twitter.Model.extractTwitterUser
 import killua.dev.mediadownloader.api.Twitter.Model.extractUserMediaPageData
 import killua.dev.mediadownloader.di.UserDataManager
+import killua.dev.mediadownloader.utils.ShowNotification
 import killua.dev.mediadownloader.utils.getAllHighestBitrateUrls
 import killua.dev.mediadownloader.utils.getAllImageUrls
 import kotlinx.coroutines.Dispatchers

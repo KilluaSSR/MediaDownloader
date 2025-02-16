@@ -1,21 +1,13 @@
 package killua.dev.mediadownloader.ui.pages.OtherSetupPages
 
-import android.content.Context
 import dagger.hilt.android.lifecycle.HiltViewModel
-import killua.dev.base.datastore.readApplicationUserAuth
-import killua.dev.base.datastore.readApplicationUserCt0
-import killua.dev.base.datastore.readKuaikanPassToken
-import killua.dev.base.datastore.readLofterEndTime
-import killua.dev.base.datastore.readLofterLoginAuth
-import killua.dev.base.datastore.readLofterLoginKey
-import killua.dev.base.datastore.readLofterStartTime
-import killua.dev.base.datastore.readPixivPHPSSID
-import killua.dev.base.states.CurrentState
-import killua.dev.base.ui.BaseViewModel
-import killua.dev.base.ui.SnackbarUIEffect
-import killua.dev.base.ui.UIIntent
-import killua.dev.base.ui.UIState
 import killua.dev.mediadownloader.db.LofterTagsRepository
+import killua.dev.mediadownloader.di.UserDataManager
+import killua.dev.mediadownloader.states.CurrentState
+import killua.dev.mediadownloader.ui.BaseViewModel
+import killua.dev.mediadownloader.ui.SnackbarUIEffect
+import killua.dev.mediadownloader.ui.UIIntent
+import killua.dev.mediadownloader.ui.UIState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -31,11 +23,11 @@ data class PreparePageUIState(
 
 sealed class PreparePageUIIntent : UIIntent {
     data object OnDateChanged : PreparePageUIIntent()
-    data class OnEntryLofter(val context: Context) : PreparePageUIIntent()
-    data class OnEntryPixiv(val context: Context) : PreparePageUIIntent()
-    data class OnEntryKuaikan(val context: Context) : PreparePageUIIntent()
-    data class OnEntryTwitter(val context: Context) : PreparePageUIIntent()
-    data class OnTagsChanged(val context: Context) : PreparePageUIIntent()
+    data object OnEntryLofter : PreparePageUIIntent()
+    data object OnEntryPixiv : PreparePageUIIntent()
+    data object OnEntryKuaikan : PreparePageUIIntent()
+    data object OnEntryTwitter : PreparePageUIIntent()
+    data object OnTagsChanged : PreparePageUIIntent()
     data object OnLofterLoggedOut: PreparePageUIIntent()
     data object OnPixivLoggedOut: PreparePageUIIntent()
     data object OnKuaikanLoggedOut: PreparePageUIIntent()
@@ -44,7 +36,8 @@ sealed class PreparePageUIIntent : UIIntent {
 
 @HiltViewModel
 class PreparePageViewModel @Inject constructor(
-    private val tagsRepository: LofterTagsRepository
+    private val tagsRepository: LofterTagsRepository,
+    private val userDataManager: UserDataManager
 ): BaseViewModel<PreparePageUIIntent, PreparePageUIState,SnackbarUIEffect>(
     PreparePageUIState()
 ){
@@ -89,7 +82,7 @@ class PreparePageViewModel @Inject constructor(
         state: PreparePageUIState,
         intent: PreparePageUIIntent
     ) {
-        when(intent){
+        when(intent) {
             is PreparePageUIIntent.OnDateChanged -> {
                 _dateSelectedState.value = CurrentState.Success
             }
@@ -97,28 +90,25 @@ class PreparePageViewModel @Inject constructor(
             is PreparePageUIIntent.OnEntryLofter -> {
                 launchOnIO {
                     val tags = tagsRepository.observeAllDownloads().first()?.tags
-                    if(!tags.isNullOrEmpty()){
+                    if (!tags.isNullOrEmpty()) {
                         _tagsAddedState.value = CurrentState.Success
                     }
                 }
                 mutex.withLock {
-                    val loginKey = intent.context.readLofterLoginKey().first()
-                    val loginAuth = intent.context.readLofterLoginAuth().first()
-                    val startDate = intent.context.readLofterStartTime().first()
-                    val endDate = intent.context.readLofterEndTime().first()
-                    if(loginKey.isNotBlank() && loginAuth.isNotBlank()){
+                    val (loginKey, loginAuth, startDate, endDate) = userDataManager.userLofterData.value
+                    if (loginKey.isNotBlank() && loginAuth.isNotBlank()) {
                         _lofterLoginState.value = CurrentState.Success
                     }
-                    if(startDate != 0L && endDate != 0L){
+                    if (startDate != 0L && endDate != 0L) {
                         _dateSelectedState.value = CurrentState.Success
                     }
                 }
             }
 
             is PreparePageUIIntent.OnEntryPixiv -> {
-                mutex.withLock{
-                    val PHPSSID = intent.context.readPixivPHPSSID().first()
-                    if (PHPSSID.isNotBlank()){
+                mutex.withLock {
+                    val PHPSSID = userDataManager.userPixivPHPSSID.value
+                    if (PHPSSID.isNotBlank()) {
                         _pixivLoginState.value = CurrentState.Success
                     }
                 }
@@ -130,13 +120,13 @@ class PreparePageViewModel @Inject constructor(
             }
 
 
-            PreparePageUIIntent.OnPixivLoggedOut, -> {
+            PreparePageUIIntent.OnPixivLoggedOut -> {
                 _pixivLoginState.value = CurrentState.Idle
             }
 
             is PreparePageUIIntent.OnEntryKuaikan -> {
                 mutex.withLock{
-                    val PassToken = intent.context.readKuaikanPassToken().first()
+                    val PassToken = userDataManager.userKuaikanData.value
                     if (PassToken.isNotBlank()){
                         _kuaikanLoginState.value = CurrentState.Success
                     }
@@ -148,7 +138,7 @@ class PreparePageViewModel @Inject constructor(
 
             is PreparePageUIIntent.OnEntryTwitter -> {
                 mutex.withLock{
-                    val (ct0,auth) = Pair(intent.context.readApplicationUserCt0().first(), intent.context.readApplicationUserAuth().first())
+                    val (ct0,auth) = userDataManager.userTwitterData.value
                     if (ct0.isNotBlank() && auth.isNotBlank()){
                         _twitterLoginState.value = CurrentState.Success
                     }

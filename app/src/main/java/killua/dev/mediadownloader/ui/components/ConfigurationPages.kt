@@ -21,18 +21,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import killua.dev.base.Model.AppIcon
-import killua.dev.base.Model.AvailablePlatforms
-import killua.dev.base.states.CurrentState
-import killua.dev.base.ui.components.CancellableAlert
-import killua.dev.base.ui.components.ClickableConfigurationButton
-import killua.dev.base.ui.components.HeadlineMediumText
-import killua.dev.base.ui.components.Section
-import killua.dev.base.ui.components.paddingTop
-import killua.dev.base.ui.tokens.SizeTokens
-import killua.dev.setup.ui.components.SetupScaffold
-import kotlinx.coroutines.flow.StateFlow
+import killua.dev.mediadownloader.Model.AppIcon
+import killua.dev.mediadownloader.Model.AvailablePlatforms
 import killua.dev.mediadownloader.R
+import killua.dev.mediadownloader.Setup.ui.components.SetupScaffold
+import killua.dev.mediadownloader.states.CurrentState
+import killua.dev.mediadownloader.ui.components.common.CancellableAlert
+import killua.dev.mediadownloader.ui.components.common.ClickableConfigurationButton
+import killua.dev.mediadownloader.ui.components.common.HeadlineMediumText
+import killua.dev.mediadownloader.ui.components.common.Section
+import killua.dev.mediadownloader.ui.components.common.paddingTop
+import killua.dev.mediadownloader.ui.tokens.SizeTokens
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun ConfigurationPage(

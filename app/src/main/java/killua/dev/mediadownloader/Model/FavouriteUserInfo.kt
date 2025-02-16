@@ -1,7 +1,5 @@
 package killua.dev.mediadownloader.Model
 
-import killua.dev.base.Model.AvailablePlatforms
-
 data class FavouriteUserInfo(
     val name: String = "",
     val screenName: String = "",

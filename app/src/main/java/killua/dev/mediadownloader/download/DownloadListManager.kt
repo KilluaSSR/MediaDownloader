@@ -3,16 +3,16 @@ package killua.dev.mediadownloader.download
 import android.net.Uri
 import db.Download
 import db.DownloadStatus
-import killua.dev.base.Model.DownloadTask
-import killua.dev.base.repository.ThumbnailRepository
-import killua.dev.base.utils.FileDelete
-import killua.dev.base.utils.VideoDurationRepository
+import killua.dev.mediadownloader.Model.DownloadTask
 import killua.dev.mediadownloader.repository.DownloadRepository
+import killua.dev.mediadownloader.repository.ThumbnailRepository
+import killua.dev.mediadownloader.utils.FileDelete
+import killua.dev.mediadownloader.utils.VideoDurationRepository
 import javax.inject.Inject
 
 class DownloadListManager @Inject constructor(
     private val downloadRepository: DownloadRepository,
-    private val downloadManager: DownloadManager,
+    downloadManager: DownloadManager,
     private val thumbnailRepository: ThumbnailRepository,
     private val videoDurationRepository: VideoDurationRepository,
     private val downloadQueueManager: DownloadQueueManager,
@@ -20,7 +20,7 @@ class DownloadListManager @Inject constructor(
 ) {
     val downloadProgress = downloadManager.downloadProgress
 
-    suspend fun observeAllDownloads() = downloadRepository.observeAllDownloads()
+    fun observeAllDownloads() = downloadRepository.observeAllDownloads()
 
     suspend fun getById(downloadId: String) = downloadRepository.getById(downloadId)
 
@@ -37,7 +37,7 @@ class DownloadListManager @Inject constructor(
 
     suspend fun getThumbnail(uri: Uri) = thumbnailRepository.getThumbnail(uri)
 
-    suspend fun deleteFile(uri: Uri) = fileDelete.deleteFile(uri)
+    fun deleteFile(uri: Uri) = fileDelete.deleteFile(uri)
 
     suspend fun enqueueDownload(task: DownloadTask) = downloadQueueManager.enqueue(task)
 }

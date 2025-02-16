@@ -38,19 +38,20 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.sp
-import killua.dev.base.Model.ReportOption
-import killua.dev.base.ui.LocalNavController
-import killua.dev.base.ui.animations.AnimatedTextContainer
-import killua.dev.base.ui.components.BodyMediumText
-import killua.dev.base.ui.components.BottomSheet
-import killua.dev.base.ui.components.BottomSheetItem
-import killua.dev.base.ui.components.OverviewCard
-import killua.dev.base.ui.components.TitleLargeText
-import killua.dev.base.ui.tokens.SizeTokens
-import killua.dev.base.utils.navigateSingle
 import killua.dev.mediadownloader.Model.FavouriteUserInfo
+import killua.dev.mediadownloader.Model.ReportOption
+import killua.dev.mediadownloader.ui.LocalNavController
+import killua.dev.mediadownloader.ui.animations.AnimatedTextContainer
+import killua.dev.mediadownloader.ui.components.common.BodyMediumText
+import killua.dev.mediadownloader.ui.components.common.BottomSheet
+import killua.dev.mediadownloader.ui.components.common.BottomSheetItem
+import killua.dev.mediadownloader.ui.components.common.OverviewCard
+import killua.dev.mediadownloader.ui.components.common.TitleLargeText
+import killua.dev.mediadownloader.ui.tokens.SizeTokens
+import killua.dev.mediadownloader.utils.navigateSingle
 import killua.dev.mediadownloader.utils.openGithubIssues
 import killua.dev.mediadownloader.utils.openMail
 import kotlinx.coroutines.delay
@@ -121,7 +122,7 @@ fun MainPageBottomSheet(onDismiss: () -> Unit,sheetState: SheetState, showDevelo
     val navController = LocalNavController.current!!
     BottomSheet(onDismiss, sheetState) {
         MainPageMenuButtons.forEach { item ->
-            BottomSheetItem(item.icon, item.title) {
+            BottomSheetItem(item.icon, stringResource(item.titleRes)) {
                 when (item.action) {
                     is MainPageButtonsAction.Navigate -> {
                         onDismiss()

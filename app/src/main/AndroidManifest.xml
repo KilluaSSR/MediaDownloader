@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <queries>
         <package android:name="com.twitter.android" />
+
         <intent>
             <action android:name="android.intent.action.VIEW" />
+
             <data android:mimeType="application/pdf" />
         </intent>
         <!-- 用于打开图片 -->
         <intent>
             <action android:name="android.intent.action.VIEW" />
+
             <data android:mimeType="image/*" />
         </intent>
         <!-- 用于打开视频 -->
         <intent>
             <action android:name="android.intent.action.VIEW" />
+
             <data android:mimeType="video/*" />
         </intent>
     </queries>
@@ -23,8 +27,6 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.MANAGE_MEDIA" />
-
-
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
@@ -38,13 +40,17 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.TwitterDownloader"
-        >
+        android:theme="@style/Theme.TwitterDownloader" >
+        <activity
+            android:name=".Setup.SetupActivity"
+            android:exported="false"
+            android:label="@string/title_activity_setup"
+            android:theme="@style/Theme.TwitterDownloader" />
         <activity
             android:name=".SplashActivity"
             android:exported="true"
             android:label="@string/title_activity_splash"
-            android:theme="@style/Theme.TwitterDownloader">
+            android:theme="@style/Theme.TwitterDownloader" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -54,7 +60,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.TwitterDownloader">
+            android:theme="@style/Theme.TwitterDownloader" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>

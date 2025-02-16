@@ -14,26 +14,26 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import killua.dev.base.Model.AvailablePlatforms
-import killua.dev.base.datastore.readLofterCookieExpiration
-import killua.dev.base.datastore.readLofterEndTime
-import killua.dev.base.datastore.readLofterStartTime
-import killua.dev.base.datastore.writeLofterEndTime
-import killua.dev.base.datastore.writeLofterLoginAuth
-import killua.dev.base.datastore.writeLofterLoginKey
-import killua.dev.base.datastore.writeLofterStartTime
-import killua.dev.base.ui.CookiesRoutes
-import killua.dev.base.ui.LocalNavController
-import killua.dev.base.ui.PrepareRoutes
-import killua.dev.base.ui.SnackbarUIEffect
-import killua.dev.base.ui.components.ClickableConfigurationButton
-import killua.dev.base.ui.components.DateRangePickerModal
-import killua.dev.base.ui.components.Section
-import killua.dev.base.utils.navigateSingle
-import killua.dev.base.utils.parseTimestamp
+import killua.dev.mediadownloader.Model.AvailablePlatforms
+import killua.dev.mediadownloader.datastore.readLofterCookieExpiration
+import killua.dev.mediadownloader.datastore.readLofterEndTime
+import killua.dev.mediadownloader.datastore.readLofterStartTime
+import killua.dev.mediadownloader.datastore.writeLofterEndTime
+import killua.dev.mediadownloader.datastore.writeLofterLoginAuth
+import killua.dev.mediadownloader.datastore.writeLofterLoginKey
+import killua.dev.mediadownloader.datastore.writeLofterStartTime
+import killua.dev.mediadownloader.ui.CookiesRoutes
+import killua.dev.mediadownloader.ui.LocalNavController
+import killua.dev.mediadownloader.ui.PrepareRoutes
+import killua.dev.mediadownloader.ui.SnackbarUIEffect
 import killua.dev.mediadownloader.ui.components.ConfigurationPage
+import killua.dev.mediadownloader.ui.components.common.ClickableConfigurationButton
+import killua.dev.mediadownloader.ui.components.common.DateRangePickerModal
+import killua.dev.mediadownloader.ui.components.common.Section
 import killua.dev.mediadownloader.ui.pages.OtherSetupPages.PreparePageUIIntent
 import killua.dev.mediadownloader.ui.pages.OtherSetupPages.PreparePageViewModel
+import killua.dev.mediadownloader.utils.navigateSingle
+import killua.dev.mediadownloader.utils.parseTimestamp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -56,7 +56,7 @@ fun LofterPreparePage() {
     var endDate by remember { mutableStateOf<Long?>(null) }
     val snackbarHostState = viewModel.snackbarHostState
     LaunchedEffect(Unit) {
-        viewModel.emitIntentOnIO(PreparePageUIIntent.OnEntryLofter(context))
+        viewModel.emitIntentOnIO(PreparePageUIIntent.OnEntryLofter)
         startDate = context.readLofterStartTime().first()
         endDate = context.readLofterEndTime().first()
     }

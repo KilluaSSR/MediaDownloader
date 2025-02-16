@@ -2,7 +2,6 @@ package killua.dev.mediadownloader.api.Pixiv
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import killua.dev.base.di.ApplicationScope
 import killua.dev.mediadownloader.Model.NetworkResult
 import killua.dev.mediadownloader.api.NetworkHelper
 import killua.dev.mediadownloader.api.Pixiv.BuildRequest.PixivRequestPicturesDetailsURL
@@ -11,6 +10,7 @@ import killua.dev.mediadownloader.api.Pixiv.BuildRequest.addPixivPictureFetchHea
 import killua.dev.mediadownloader.api.Pixiv.Model.PixivImageInfo
 import killua.dev.mediadownloader.api.Pixiv.Model.PixivPictureDetailResponse
 import killua.dev.mediadownloader.api.Pixiv.Model.PixivPicturePageResponse
+import killua.dev.mediadownloader.di.ApplicationScope
 import killua.dev.mediadownloader.di.UserDataManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

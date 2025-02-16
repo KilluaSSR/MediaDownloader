@@ -2,8 +2,8 @@ package killua.dev.mediadownloader.download
 
 import android.content.Context
 import android.net.Uri
-import killua.dev.base.Model.DownloadTask
-import killua.dev.base.utils.MediaStoreHelper
+import killua.dev.mediadownloader.Model.DownloadTask
+import killua.dev.mediadownloader.utils.MediaStoreHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient

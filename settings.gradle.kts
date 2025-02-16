@@ -21,5 +21,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "MediaDownloader"
 include(":app")
-include(":setup")
-include(":base")

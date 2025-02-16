@@ -1,6 +1,6 @@
 package killua.dev.mediadownloader.api.Lofter.Model
 
-import killua.dev.base.Model.ImageType
+import killua.dev.mediadownloader.Model.ImageType
 
 data class BlogImage(
     val url: String,

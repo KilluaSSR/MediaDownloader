@@ -12,13 +12,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import killua.dev.base.ui.LocalNavController
-import killua.dev.base.ui.components.MainScaffold
-import killua.dev.base.ui.components.paddingTop
-import killua.dev.base.ui.getRandomColors
-import killua.dev.base.ui.tokens.SizeTokens
+import killua.dev.mediadownloader.ui.LocalNavController
 import killua.dev.mediadownloader.ui.ViewModels.UserInfoPageViewModel
 import killua.dev.mediadownloader.ui.components.UserInfoPageTopAppBar
+import killua.dev.mediadownloader.ui.components.common.MainScaffold
+import killua.dev.mediadownloader.ui.components.common.paddingTop
+import killua.dev.mediadownloader.ui.getRandomColors
+import killua.dev.mediadownloader.ui.tokens.SizeTokens
 
 @Composable
 @ExperimentalFoundationApi

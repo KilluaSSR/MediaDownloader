@@ -6,12 +6,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import killua.dev.base.ui.filters.FilterByAuthors
-import killua.dev.base.ui.filters.FilterByDuration
-import killua.dev.base.ui.filters.FilterByPlatforms
-import killua.dev.base.ui.filters.FilterByType
-import killua.dev.base.ui.filters.FilterOptions
-import killua.dev.base.ui.tokens.SizeTokens
+import killua.dev.mediadownloader.ui.filters.FilterByAuthors
+import killua.dev.mediadownloader.ui.filters.FilterByDuration
+import killua.dev.mediadownloader.ui.filters.FilterByPlatforms
+import killua.dev.mediadownloader.ui.filters.FilterByType
+import killua.dev.mediadownloader.ui.filters.FilterOptions
+import killua.dev.mediadownloader.ui.tokens.SizeTokens
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable

@@ -19,32 +19,29 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import killua.dev.base.Model.AppIcon
-import killua.dev.base.Model.AvailablePlatforms
-import killua.dev.base.Model.SupportedUrlType
-import killua.dev.base.ui.LocalNavController
-import killua.dev.base.ui.MainRoutes
-import killua.dev.base.ui.PrepareRoutes
-import killua.dev.base.ui.SnackbarUIEffect
-import killua.dev.base.ui.components.ActionsBotton
-import killua.dev.base.ui.components.CancellableAlert
-import killua.dev.base.ui.components.MainInputDialog
-import killua.dev.base.ui.components.MainScaffold
-import killua.dev.base.ui.components.MainTopBar
-import killua.dev.base.ui.components.Section
-import killua.dev.base.ui.components.paddingTop
-import killua.dev.base.ui.getRandomColors
-import killua.dev.base.ui.tokens.SizeTokens
-import killua.dev.base.utils.navigateSingle
 import killua.dev.mediadownloader.Model.FavouriteUserInfo
+import killua.dev.mediadownloader.Model.SupportedUrlType
+import killua.dev.mediadownloader.R
+import killua.dev.mediadownloader.ui.LocalNavController
+import killua.dev.mediadownloader.ui.MainRoutes
+import killua.dev.mediadownloader.ui.SnackbarUIEffect
 import killua.dev.mediadownloader.ui.ViewModels.MainPageUIIntent
 import killua.dev.mediadownloader.ui.ViewModels.MainPageViewmodel
 import killua.dev.mediadownloader.ui.components.FavouriteCard
 import killua.dev.mediadownloader.ui.components.MainPageBottomSheet
 import killua.dev.mediadownloader.ui.components.MainPageButtons
+import killua.dev.mediadownloader.ui.components.NotLoggedInAlert
 import killua.dev.mediadownloader.ui.components.ReportDialog
+import killua.dev.mediadownloader.ui.components.common.ActionsBotton
+import killua.dev.mediadownloader.ui.components.common.MainInputDialog
+import killua.dev.mediadownloader.ui.components.common.MainScaffold
+import killua.dev.mediadownloader.ui.components.common.MainTopBar
+import killua.dev.mediadownloader.ui.components.common.Section
+import killua.dev.mediadownloader.ui.components.common.paddingTop
+import killua.dev.mediadownloader.ui.getRandomColors
+import killua.dev.mediadownloader.ui.tokens.SizeTokens
+import killua.dev.mediadownloader.utils.navigateSingle
 import kotlinx.coroutines.launch
-import killua.dev.mediadownloader.R
 
 @ExperimentalFoundationApi
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -64,7 +61,7 @@ fun MainPage(
     var showReportDialog by remember { mutableStateOf(false) }
     MainScaffold(
         topBar = {
-            MainTopBar(navController, {showBottomSheet = true})
+            MainTopBar(navController) { showBottomSheet = true }
         },
         snackbarHostState = viewmodel.snackbarHostState
     ) {
@@ -82,33 +79,9 @@ fun MainPage(
         }
 
         if(uiState.value.showNotLoggedInDialog){
-            CancellableAlert(
-                "${uiState.value.loginErrorPlatform.name}+ ${stringResource(R.string.not_logged_in)}",
-                "${stringResource(R.string.cookie_necessary)} ${uiState.value.loginErrorPlatform.name}",
-                icon = {
-                    AppIcon(uiState.value.loginErrorPlatform)
-                },
-                onDismiss = {
-                    scope.launch{
-                        viewmodel.emitIntent(MainPageUIIntent.DismissLoginDialog)
-                    }
-                },
-            ) {
-                when(uiState.value.loginErrorPlatform){
-                    AvailablePlatforms.Twitter -> {
-                        navController.navigateSingle(PrepareRoutes.TwitterPreparePage.route)
-                    }
-                    AvailablePlatforms.Lofter -> {
-                        navController.navigateSingle(PrepareRoutes.LofterPreparePage.route)
-                    }
-
-                    AvailablePlatforms.Pixiv -> {
-                        navController.navigateSingle(PrepareRoutes.PixivPreparePage.route)
-                    }
-
-                    AvailablePlatforms.Kuaikan -> {
-                        navController.navigateSingle(PrepareRoutes.KuaikanPreparePage.route)
-                    }
+            NotLoggedInAlert(uiState.value.loginErrorPlatform, navController) {
+                scope.launch{
+                    viewmodel.emitIntent(MainPageUIIntent.DismissLoginDialog)
                 }
             }
         }

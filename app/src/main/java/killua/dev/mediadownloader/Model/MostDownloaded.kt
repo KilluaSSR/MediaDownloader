@@ -1,7 +1,5 @@
 package killua.dev.mediadownloader.Model
 
-import killua.dev.base.Model.AvailablePlatforms
-
 data class MostDownloadedUser(
     val userID: String?,
     val screenName: String?,

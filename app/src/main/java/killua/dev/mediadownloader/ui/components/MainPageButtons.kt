@@ -10,8 +10,8 @@ import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import killua.dev.base.ui.MainRoutes
 import killua.dev.mediadownloader.R
+import killua.dev.mediadownloader.ui.MainRoutes
 
 data class ButtonsEssentials(
     @StringRes val titleRes: Int,

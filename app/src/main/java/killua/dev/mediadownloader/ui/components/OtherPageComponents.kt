@@ -2,7 +2,7 @@ package killua.dev.mediadownloader.ui.components
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
-import killua.dev.base.ui.components.TopBar
+import killua.dev.mediadownloader.ui.components.common.TopBar
 
 @Composable
 fun AdvancedPageTopAppBar(navController: NavHostController){

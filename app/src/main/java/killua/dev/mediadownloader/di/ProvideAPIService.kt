@@ -6,30 +6,29 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import killua.dev.base.datastore.ApplicationUserDataLofter
-import killua.dev.base.datastore.ApplicationUserDataTwitter
-import killua.dev.base.datastore.readApplicationUserAuth
-import killua.dev.base.datastore.readApplicationUserCt0
-import killua.dev.base.datastore.readApplicationUserID
-import killua.dev.base.datastore.readDelay
-import killua.dev.base.datastore.readKuaikanPassToken
-import killua.dev.base.datastore.readLofterEndTime
-import killua.dev.base.datastore.readLofterLoginAuth
-import killua.dev.base.datastore.readLofterLoginKey
-import killua.dev.base.datastore.readLofterStartTime
-import killua.dev.base.datastore.readPixivPHPSSID
-import killua.dev.base.di.ApplicationScope
-import killua.dev.base.utils.DownloadEventManager
-import killua.dev.base.utils.DownloadPreChecks
-import killua.dev.base.utils.ShowNotification
 import killua.dev.mediadownloader.api.Kuaikan.KuaikanService
 import killua.dev.mediadownloader.api.Lofter.LofterService
 import killua.dev.mediadownloader.api.Pixiv.PixivService
 import killua.dev.mediadownloader.api.Twitter.TwitterDownloadAPI
+import killua.dev.mediadownloader.datastore.ApplicationUserDataLofter
+import killua.dev.mediadownloader.datastore.ApplicationUserDataTwitter
+import killua.dev.mediadownloader.datastore.readApplicationUserAuth
+import killua.dev.mediadownloader.datastore.readApplicationUserCt0
+import killua.dev.mediadownloader.datastore.readApplicationUserID
+import killua.dev.mediadownloader.datastore.readDelay
+import killua.dev.mediadownloader.datastore.readKuaikanPassToken
+import killua.dev.mediadownloader.datastore.readLofterEndTime
+import killua.dev.mediadownloader.datastore.readLofterLoginAuth
+import killua.dev.mediadownloader.datastore.readLofterLoginKey
+import killua.dev.mediadownloader.datastore.readLofterStartTime
+import killua.dev.mediadownloader.datastore.readPixivPHPSSID
 import killua.dev.mediadownloader.download.DownloadQueueManager
 import killua.dev.mediadownloader.download.DownloadbyLink
 import killua.dev.mediadownloader.repository.DownloadRepository
 import killua.dev.mediadownloader.repository.DownloadServicesRepository
+import killua.dev.mediadownloader.utils.DownloadEventManager
+import killua.dev.mediadownloader.utils.DownloadPreChecks
+import killua.dev.mediadownloader.utils.ShowNotification
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -61,6 +60,7 @@ class UserDataManager @Inject constructor(
 
     private val _userLofterData = MutableStateFlow(ApplicationUserDataLofter("", "", 0, 0))
     val userLofterData: StateFlow<ApplicationUserDataLofter> = _userLofterData.asStateFlow()
+
 
     private val _userPixivPHPSSID = MutableStateFlow("")
     val userPixivPHPSSID: StateFlow<String> = _userPixivPHPSSID.asStateFlow()

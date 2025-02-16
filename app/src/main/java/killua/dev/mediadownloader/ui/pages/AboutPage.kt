@@ -16,13 +16,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import killua.dev.base.ui.LocalNavController
-import killua.dev.base.ui.components.Clickable
-import killua.dev.base.ui.components.SettingsScaffold
-import killua.dev.base.ui.components.Title
-import killua.dev.base.ui.tokens.SizeTokens
-import killua.dev.base.utils.drawableToImageVector
 import killua.dev.mediadownloader.R
+import killua.dev.mediadownloader.ui.LocalNavController
+import killua.dev.mediadownloader.ui.components.common.Clickable
+import killua.dev.mediadownloader.ui.components.common.SettingsScaffold
+import killua.dev.mediadownloader.ui.components.common.Title
+import killua.dev.mediadownloader.ui.tokens.SizeTokens
+import killua.dev.mediadownloader.utils.drawableToImageVector
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun AboutPage() {
@@ -49,7 +50,7 @@ fun AboutPage() {
 
                 }
                 Clickable(
-                    icon = drawableToImageVector(killua.dev.base.R.drawable.logo_of_twitter),
+                    icon = drawableToImageVector(R.drawable.logo_of_twitter),
                     title = "Twitter",
                     value = "@Shakeitoff_pi"
                 ) {
@@ -60,7 +61,7 @@ fun AboutPage() {
                     context.startActivity(intent)
                 }
                 Clickable(
-                    icon = drawableToImageVector(killua.dev.base.R.drawable.github_mark),
+                    icon = drawableToImageVector(R.drawable.github_mark),
                     title = "Github",
                     value = "@KilluaSSR"
                 ) {

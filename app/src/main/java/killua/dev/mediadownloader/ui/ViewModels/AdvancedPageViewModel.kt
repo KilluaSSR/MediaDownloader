@@ -4,17 +4,17 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import killua.dev.base.di.ApplicationScope
-import killua.dev.base.states.CurrentState
-import killua.dev.base.ui.BaseViewModel
-import killua.dev.base.ui.SnackbarUIEffect
-import killua.dev.base.ui.SnackbarUIEffect.ShowSnackbar
-import killua.dev.base.ui.UIIntent
-import killua.dev.base.ui.UIState
 import killua.dev.mediadownloader.Model.NetworkResult
 import killua.dev.mediadownloader.api.Kuaikan.Chapter
 import killua.dev.mediadownloader.api.Twitter.TwitterDownloadAPI
+import killua.dev.mediadownloader.di.ApplicationScope
 import killua.dev.mediadownloader.features.AdvancedFeaturesManager
+import killua.dev.mediadownloader.states.CurrentState
+import killua.dev.mediadownloader.ui.BaseViewModel
+import killua.dev.mediadownloader.ui.SnackbarUIEffect
+import killua.dev.mediadownloader.ui.SnackbarUIEffect.ShowSnackbar
+import killua.dev.mediadownloader.ui.UIIntent
+import killua.dev.mediadownloader.ui.UIState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,6 +25,7 @@ import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
 data class AdvancedPageUIState(
+    val showNotLoggedIn: Boolean = false,
     val currentDialogType: DialogType = DialogType.NONE,
     val isEligibleToUseLofterGetByTags: Boolean = false,
     val isGettingMyTwitterBookmark: Boolean = false,
@@ -91,12 +92,9 @@ class AdvancedPageViewModel @Inject constructor(
         launchOnIO {
             val tags = advancedFeaturesManager.readLofterTags()
             val tagsState = !tags.isNullOrEmpty()
-            println("tags $tagsState")
             mutex.withLock {
                 val (startDate, endDate) = advancedFeaturesManager.readStartDateAndEndDate()
                 val (loginKey, loginAuth) = advancedFeaturesManager.readLofterCredits()
-                println("startDate: $startDate, endDate: $endDate")
-                println("loginKey: $loginKey, loginAuth: $loginAuth")
 
                 val allConditionsMet = loginKey.isNotBlank() &&
                         loginAuth.isNotBlank() &&

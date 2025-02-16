@@ -1,6 +1,6 @@
 package killua.dev.mediadownloader.api.Pixiv.BuildRequest
 
-import killua.dev.base.utils.USER_AGENT
+import killua.dev.mediadownloader.utils.USER_AGENT
 import okhttp3.Request
 
 object PixivHeaders {

@@ -18,16 +18,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import killua.dev.base.ui.LocalNavController
-import killua.dev.base.ui.PrepareRoutes
-import killua.dev.base.ui.components.ActionsBotton
-import killua.dev.base.ui.components.AdvancedInputDialog
-import killua.dev.base.ui.components.CancellableAlert
-import killua.dev.base.ui.components.DevelopingAlert
-import killua.dev.base.ui.components.Section
-import killua.dev.base.ui.components.paddingTop
-import killua.dev.base.ui.tokens.SizeTokens
-import killua.dev.base.utils.navigateSingle
+import killua.dev.mediadownloader.R
+import killua.dev.mediadownloader.ui.LocalNavController
+import killua.dev.mediadownloader.ui.PrepareRoutes
 import killua.dev.mediadownloader.ui.ViewModels.AdvancedPageUIIntent
 import killua.dev.mediadownloader.ui.ViewModels.AdvancedPageViewModel
 import killua.dev.mediadownloader.ui.ViewModels.DialogType
@@ -36,10 +29,17 @@ import killua.dev.mediadownloader.ui.components.AdvancedPageLofterButtons
 import killua.dev.mediadownloader.ui.components.AdvancedPageTopAppBar
 import killua.dev.mediadownloader.ui.components.AdvancedPageTwitterButtons
 import killua.dev.mediadownloader.ui.components.MainScaffold
+import killua.dev.mediadownloader.ui.components.common.ActionsBotton
+import killua.dev.mediadownloader.ui.components.common.AdvancedInputDialog
+import killua.dev.mediadownloader.ui.components.common.CancellableAlert
+import killua.dev.mediadownloader.ui.components.common.DevelopingAlert
+import killua.dev.mediadownloader.ui.components.common.Section
+import killua.dev.mediadownloader.ui.components.common.paddingTop
 import killua.dev.mediadownloader.ui.pages.AdvancedPage.ChapterSelectionDialog
+import killua.dev.mediadownloader.ui.tokens.SizeTokens
+import killua.dev.mediadownloader.utils.navigateSingle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import killua.dev.mediadownloader.R
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable

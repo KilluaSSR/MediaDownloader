@@ -30,14 +30,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import killua.dev.base.ui.LocalNavController
-import killua.dev.base.ui.components.InputSetupScaffold
-import killua.dev.base.ui.components.SetupTextField
-import killua.dev.base.ui.components.Title
-import killua.dev.base.ui.components.paddingHorizontal
-import killua.dev.base.ui.tokens.SizeTokens
-import kotlinx.coroutines.launch
 import killua.dev.mediadownloader.R
+import killua.dev.mediadownloader.ui.LocalNavController
+import killua.dev.mediadownloader.ui.components.common.InputSetupScaffold
+import killua.dev.mediadownloader.ui.components.common.SetupTextField
+import killua.dev.mediadownloader.ui.components.common.Title
+import killua.dev.mediadownloader.ui.components.common.paddingHorizontal
+import killua.dev.mediadownloader.ui.tokens.SizeTokens
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class, ExperimentalLayoutApi::class)
 @Composable

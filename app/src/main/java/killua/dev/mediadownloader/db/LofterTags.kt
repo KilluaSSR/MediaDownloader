@@ -8,7 +8,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.TypeConverter
-import killua.dev.base.Model.AvailablePlatforms
+import killua.dev.mediadownloader.Model.AvailablePlatforms
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first

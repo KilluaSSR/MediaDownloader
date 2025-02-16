@@ -4,13 +4,13 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
-import killua.dev.base.repository.ThumbnailRepository
-import killua.dev.base.utils.FileDelete
-import killua.dev.base.utils.VideoDurationRepository
 import killua.dev.mediadownloader.download.DownloadListManager
 import killua.dev.mediadownloader.download.DownloadManager
 import killua.dev.mediadownloader.download.DownloadQueueManager
 import killua.dev.mediadownloader.repository.DownloadRepository
+import killua.dev.mediadownloader.repository.ThumbnailRepository
+import killua.dev.mediadownloader.utils.FileDelete
+import killua.dev.mediadownloader.utils.VideoDurationRepository
 
 @Module
 @InstallIn(ViewModelComponent::class)

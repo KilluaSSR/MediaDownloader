@@ -3,9 +3,9 @@ package killua.dev.mediadownloader.download
 import android.content.Context
 import android.net.Uri
 import dagger.hilt.android.qualifiers.ApplicationContext
-import killua.dev.base.Model.DownloadTask
-import killua.dev.base.datastore.readMaxConcurrentDownloads
-import killua.dev.base.di.ApplicationScope
+import killua.dev.mediadownloader.Model.DownloadTask
+import killua.dev.mediadownloader.datastore.readMaxConcurrentDownloads
+import killua.dev.mediadownloader.di.ApplicationScope
 import killua.dev.mediadownloader.repository.DownloadRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow

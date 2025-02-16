@@ -1,3 +1,5 @@
+@file:Suppress("KotlinConstantConditions")
+
 package killua.dev.mediadownloader.download.Platforms
 
 import android.content.Context
@@ -5,10 +7,10 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.pdf.PdfDocument
 import android.net.Uri
-import killua.dev.base.Model.DownloadTask
-import killua.dev.base.Model.MediaType
-import killua.dev.base.utils.MediaStoreHelper
+import killua.dev.mediadownloader.Model.DownloadTask
+import killua.dev.mediadownloader.Model.MediaType
 import killua.dev.mediadownloader.download.BaseMediaDownloader
+import killua.dev.mediadownloader.utils.MediaStoreHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext

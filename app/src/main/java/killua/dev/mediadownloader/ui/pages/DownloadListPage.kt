@@ -38,21 +38,21 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import killua.dev.base.Model.DownloadPageCommands
-import killua.dev.base.Model.DownloadPageDestinations
-import killua.dev.base.ui.LocalNavController
-import killua.dev.base.ui.components.BottomSheet
-import killua.dev.base.ui.components.DownloadPageTopAppBar
-import killua.dev.base.ui.components.FileNotFountAlert
-import killua.dev.base.ui.components.paddingBottom
-import killua.dev.base.ui.components.paddingHorizontal
-import killua.dev.base.ui.tokens.SizeTokens
+import killua.dev.mediadownloader.Model.DownloadPageCommands
+import killua.dev.mediadownloader.Model.DownloadPageDestinations
 import killua.dev.mediadownloader.ui.FilterContent
+import killua.dev.mediadownloader.ui.LocalNavController
 import killua.dev.mediadownloader.ui.ViewModels.DownloadListPageUIIntent.*
 import killua.dev.mediadownloader.ui.ViewModels.DownloadListViewModel
 import killua.dev.mediadownloader.ui.components.DownloadItemCard
 import killua.dev.mediadownloader.ui.components.Loading
 import killua.dev.mediadownloader.ui.components.MainScaffold
+import killua.dev.mediadownloader.ui.components.common.BottomSheet
+import killua.dev.mediadownloader.ui.components.common.DownloadPageTopAppBar
+import killua.dev.mediadownloader.ui.components.common.FileNotFountAlert
+import killua.dev.mediadownloader.ui.components.common.paddingBottom
+import killua.dev.mediadownloader.ui.components.common.paddingHorizontal
+import killua.dev.mediadownloader.ui.tokens.SizeTokens
 
 @SuppressLint("UnusedContentLambdaTargetStateParameter")
 @OptIn(ExperimentalAnimationApi::class, ExperimentalFoundationApi::class,

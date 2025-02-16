@@ -1,11 +1,8 @@
 package killua.dev.mediadownloader.api.Lofter
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
-import killua.dev.base.Model.ImageType
-import killua.dev.base.di.ApplicationScope
-import killua.dev.base.utils.UserAgentUtils
+import killua.dev.mediadownloader.Model.ImageType
 import killua.dev.mediadownloader.Model.LofterParseRequiredInformation
 import killua.dev.mediadownloader.Model.NetworkResult
 import killua.dev.mediadownloader.api.Lofter.BuildRequest.makeArchiveData
@@ -17,7 +14,9 @@ import killua.dev.mediadownloader.api.Lofter.utils.LofterParser.parseArchivePage
 import killua.dev.mediadownloader.api.Lofter.utils.LofterParser.parseAuthorInfo
 import killua.dev.mediadownloader.api.Lofter.utils.LofterParser.parseFromArchiveInfos
 import killua.dev.mediadownloader.api.NetworkHelper
+import killua.dev.mediadownloader.di.ApplicationScope
 import killua.dev.mediadownloader.di.UserDataManager
+import killua.dev.mediadownloader.utils.UserAgentUtils
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

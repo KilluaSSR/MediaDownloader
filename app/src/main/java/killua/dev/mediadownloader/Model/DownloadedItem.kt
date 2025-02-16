@@ -4,9 +4,6 @@ import android.net.Uri
 import db.Download
 import db.DownloadState
 import db.DownloadStatus
-import killua.dev.base.Model.AvailablePlatforms
-import killua.dev.base.Model.DownloadItem
-import killua.dev.base.Model.MediaType
 
 data class DownloadedItem(
     override val id: String,

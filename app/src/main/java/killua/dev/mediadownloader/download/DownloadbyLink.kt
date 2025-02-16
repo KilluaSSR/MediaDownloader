@@ -2,20 +2,21 @@ package killua.dev.mediadownloader.download
 
 import db.Download
 import db.DownloadStatus
-import killua.dev.base.Model.AvailablePlatforms
-import killua.dev.base.Model.DownloadTask
-import killua.dev.base.Model.MediaType
-import killua.dev.base.utils.DownloadEventManager
-import killua.dev.base.utils.DownloadPreChecks
-import killua.dev.base.utils.MediaFileNameStrategy
+import killua.dev.mediadownloader.Model.AvailablePlatforms
+import killua.dev.mediadownloader.Model.DownloadTask
+import killua.dev.mediadownloader.Model.MediaType
 import killua.dev.mediadownloader.Model.NetworkResult
 import killua.dev.mediadownloader.repository.DownloadServicesRepository
+import killua.dev.mediadownloader.utils.DownloadEventManager
+import killua.dev.mediadownloader.utils.DownloadPreChecks
+import killua.dev.mediadownloader.utils.MediaFileNameStrategy
 import java.util.UUID
 import javax.inject.Inject
+
 class DownloadbyLink @Inject constructor(
 private val downloadRepository: DownloadServicesRepository,
 private val downloadQueueManager: DownloadQueueManager,
-private val downloadEventManager: DownloadEventManager,
+downloadEventManager: DownloadEventManager,
 private val downloadPreChecks: DownloadPreChecks
 ) {
     val downloadCompletedFlow = downloadEventManager.downloadCompletedFlow

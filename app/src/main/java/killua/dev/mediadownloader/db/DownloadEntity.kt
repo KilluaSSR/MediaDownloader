@@ -5,7 +5,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverter
-import killua.dev.base.Model.AvailablePlatforms
+import killua.dev.mediadownloader.Model.AvailablePlatforms
 import kotlin.uuid.ExperimentalUuidApi
 
 @Entity

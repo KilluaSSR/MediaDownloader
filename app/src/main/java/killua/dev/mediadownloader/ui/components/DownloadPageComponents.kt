@@ -28,14 +28,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import db.DownloadStatus
-import killua.dev.base.Model.DownloadPageCommands
-import killua.dev.base.Model.DownloadProgress
-import killua.dev.base.ui.components.DownloadActions
-import killua.dev.base.ui.components.DownloadThumbnail
-import killua.dev.base.ui.components.ShowStatus
-import killua.dev.base.ui.tokens.SizeTokens
-import killua.dev.base.utils.mediaClickable
+import killua.dev.mediadownloader.Model.DownloadPageCommands
+import killua.dev.mediadownloader.Model.DownloadProgress
 import killua.dev.mediadownloader.Model.DownloadedItem
+import killua.dev.mediadownloader.ui.components.common.DownloadActions
+import killua.dev.mediadownloader.ui.components.common.DownloadThumbnail
+import killua.dev.mediadownloader.ui.components.common.ShowStatus
+import killua.dev.mediadownloader.ui.tokens.SizeTokens
+import killua.dev.mediadownloader.utils.mediaClickable
 
 @Composable
 fun DownloadItemCard(
