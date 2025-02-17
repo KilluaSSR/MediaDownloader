@@ -41,6 +41,7 @@ import killua.dev.mediadownloader.utils.navigateSingle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AdvancedPage(){

@@ -23,6 +23,7 @@ import killua.dev.mediadownloader.Setup.ui.SetupPageViewModel
 import killua.dev.mediadownloader.Setup.ui.SetupUIIntent
 import killua.dev.mediadownloader.Setup.ui.components.SetupScaffold
 import killua.dev.mediadownloader.states.CurrentState
+import killua.dev.mediadownloader.ui.CookiesRoutes
 import killua.dev.mediadownloader.ui.LocalNavController
 import killua.dev.mediadownloader.ui.components.common.ClickableConfigurationButton
 import killua.dev.mediadownloader.ui.components.common.Section
@@ -63,7 +64,7 @@ fun SetupPage() {
                 }
             }
             Button(
-                enabled = true, //eligibility.value,
+                enabled = true,
                 onClick = {
                     viewModel.launchOnIO {
                         viewModel.emitIntent(SetupUIIntent.StartApplication(context))
@@ -109,7 +110,7 @@ fun SetupPage() {
                 state = loginState.value,
                 onClick = {
                     if (loginState.value != CurrentState.Success) {
-                        navController.navigateSingle(SetupRoutes.BrowserPage.route)
+                        navController.navigateSingle(CookiesRoutes.TwitterCookiesBrowser.route)
                     }
                 },
                 color = loginState.value.backgroundColor

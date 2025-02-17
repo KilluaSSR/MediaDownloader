@@ -12,8 +12,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import killua.dev.mediadownloader.ui.tokens.SizeTokens
-
+import killua.dev.mediadownloader.R
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun FilterByPlatforms(
@@ -23,7 +24,7 @@ fun FilterByPlatforms(
     Brush.horizontalGradient(listOf(Color.Red, Color.Blue))
 
     Text(
-        text = "Filter by platforms",
+        text = stringResource(R.string.filter_by_platforms),
         style = MaterialTheme.typography.titleMedium,
         modifier = Modifier.padding(vertical = SizeTokens.Level8)
     )
@@ -37,35 +38,35 @@ fun FilterByPlatforms(
             onClick = {
                 onFilterChange(currentFilter.copy(platformFilter = PlatformFilter.All))
             },
-            label = { Text("All") }
+            label = { Text(stringResource(R.string.all)) }
         )
         FilterChip(
             selected = currentFilter.platformFilter == PlatformFilter.Twitter,
             onClick = {
                 onFilterChange(currentFilter.copy(platformFilter = PlatformFilter.Twitter))
             },
-            label = { Text("Twitter") }
+            label = { Text(stringResource(R.string.twitter)) }
         )
         FilterChip(
             selected = currentFilter.platformFilter == PlatformFilter.Lofter,
             onClick = {
                 onFilterChange(currentFilter.copy(platformFilter = PlatformFilter.Lofter))
             },
-            label = { Text("Lofter") }
+            label = { Text(stringResource(R.string.lofter)) }
         )
         FilterChip(
             selected = currentFilter.platformFilter == PlatformFilter.Pixiv,
             onClick = {
                 onFilterChange(currentFilter.copy(platformFilter = PlatformFilter.Pixiv))
             },
-            label = { Text("Pixiv") }
+            label = { Text(stringResource(R.string.pixiv)) }
         )
         FilterChip(
             selected = currentFilter.platformFilter == PlatformFilter.Kuaikan,
             onClick = {
                 onFilterChange(currentFilter.copy(platformFilter = PlatformFilter.Kuaikan))
             },
-            label = { Text("Kuaikan") }
+            label = { Text(stringResource(R.string.kuaikan)) }
         )
     }
 }

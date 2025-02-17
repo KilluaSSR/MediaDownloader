@@ -56,7 +56,7 @@ import killua.dev.mediadownloader.utils.openGithubIssues
 import killua.dev.mediadownloader.utils.openMail
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
+import killua.dev.mediadownloader.R
 @Composable
 fun MainScaffold(
     topBar: @Composable () -> Unit = {},
@@ -87,7 +87,7 @@ fun FavouriteCard(
     onClick: () -> Unit = {}
 ) {
     OverviewCard(
-        title = "Your Favourite",
+        title = stringResource(R.string.your_favourite),
         icon = Icons.Default.FavoriteBorder,
         colorContainer = MaterialTheme.colorScheme.primaryContainer,
         onColorContainer = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -230,7 +230,7 @@ fun ReportDialog(
                         onClick = null
                     )
                     Text(
-                        text = "Mail",
+                        text = stringResource(R.string.mail),
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.padding(start = SizeTokens.Level4),
                         fontSize = 18.sp
@@ -280,7 +280,7 @@ fun ReportDialog(
             ) {
                 TextButton(onClick = { dismissWithAnimation() }) {
                     Text(
-                        text = "Cancel",
+                        text = stringResource(R.string.cancel),
                         style = MaterialTheme.typography.labelLarge
                     )
                 }
@@ -292,7 +292,7 @@ fun ReportDialog(
                     dismissWithAnimation()
                 }) {
                     Text(
-                        text = "Confirm",
+                        text = stringResource(R.string.confirm),
                         style = MaterialTheme.typography.labelLarge
                     )
                 }

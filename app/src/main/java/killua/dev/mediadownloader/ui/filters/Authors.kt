@@ -10,7 +10,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import killua.dev.mediadownloader.ui.tokens.SizeTokens
+import killua.dev.mediadownloader.R
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -20,7 +22,7 @@ fun FilterByAuthors(
     onFilterChange: (FilterOptions) -> Unit
 ){
     Text(
-        text = "Filter by author",
+        text = stringResource(R.string.filter_by_authors),
         style = MaterialTheme.typography.titleMedium,
         modifier = Modifier.padding(vertical = SizeTokens.Level8)
     )

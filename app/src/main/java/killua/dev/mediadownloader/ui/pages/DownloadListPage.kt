@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -53,7 +54,7 @@ import killua.dev.mediadownloader.ui.components.common.FileNotFountAlert
 import killua.dev.mediadownloader.ui.components.common.paddingBottom
 import killua.dev.mediadownloader.ui.components.common.paddingHorizontal
 import killua.dev.mediadownloader.ui.tokens.SizeTokens
-
+import killua.dev.mediadownloader.R
 @SuppressLint("UnusedContentLambdaTargetStateParameter")
 @OptIn(ExperimentalAnimationApi::class, ExperimentalFoundationApi::class,
     ExperimentalMaterial3Api::class
@@ -184,7 +185,7 @@ fun DownloadListPage() {
                             )
                             Spacer(modifier = Modifier.size(SizeTokens.Level16))
                             Text(
-                                text = "Nothing to show",
+                                text = stringResource(R.string.nothing_to_show),
                                 modifier = Modifier.alpha(0.3f)
                             )
                         }

@@ -56,7 +56,7 @@ fun ConfigurationPage(
                 enabled = eligibility,
                 onClick = onContinue
             ) {
-                Text(text = "Continue")
+                Text(text = stringResource(R.string.confirm))
             }
         },
         snackbarHostState = snackbarHostState
@@ -97,7 +97,7 @@ fun ConfigurationPage(
 
             Section(title = "Log in to your ${platform.name} account") {
                 ClickableConfigurationButton(
-                    title = "Log in",
+                    title = stringResource(R.string.log_in),
                     description = "Your ${platform.name}'s cookie is necessary when downloading pictures from it.",
                     state = loginState,
                     onClick = {
@@ -111,9 +111,9 @@ fun ConfigurationPage(
 
             additionalSections()
 
-            Section(title = "Log out") {
+            Section(title = stringResource(R.string.log_out)) {
                 ClickableConfigurationButton(
-                    title = "Log out",
+                    title = stringResource(R.string.log_out),
                     description = "Clear your ${platform.name} account's cookie",
                     state = CurrentState.Error,
                     onClick = { isShowReset = true },

@@ -23,12 +23,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.window.DialogProperties
 import killua.dev.mediadownloader.ui.tokens.SizeTokens
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
+import killua.dev.mediadownloader.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BaseAnimatedDialog(
@@ -145,7 +146,7 @@ fun OKAlert(
                 onClick = {dismissWithAnimation()}
             ) {
                 Text(
-                    text = "OK",
+                    text = stringResource(R.string.ok),
                     style = MaterialTheme.typography.labelLarge
                 )
             }
@@ -169,7 +170,7 @@ fun CancellableAlert(
 
             TextButton(onClick = { dismissWithAnimation() }) {
                 Text(
-                    text = "Cancel",
+                    text = stringResource(R.string.cancel),
                     style = MaterialTheme.typography.labelLarge
                 )
             }
@@ -179,7 +180,7 @@ fun CancellableAlert(
                 dismissWithAnimation()
             }) {
                 Text(
-                    text = "Confirm",
+                    text = stringResource(R.string.confirm),
                     style = MaterialTheme.typography.labelLarge
                 )
             }

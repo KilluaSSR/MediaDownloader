@@ -12,8 +12,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import killua.dev.mediadownloader.ui.tokens.SizeTokens
-
+import killua.dev.mediadownloader.R
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun FilterByType(
@@ -23,7 +24,7 @@ fun FilterByType(
     Brush.horizontalGradient(listOf(Color.Red, Color.Blue))
 
     Text(
-        text = "Filter by type",
+        text = stringResource(R.string.filter_by_platforms),
         style = MaterialTheme.typography.titleMedium,
         modifier = Modifier.padding(vertical = SizeTokens.Level8)
     )
@@ -37,28 +38,28 @@ fun FilterByType(
             onClick = {
                 onFilterChange(currentFilter.copy(typeFilter = TypeFilter.All))
             },
-            label = { Text("All") }
+            label = { Text(stringResource(R.string.all)) }
         )
         FilterChip(
             selected = currentFilter.typeFilter== TypeFilter.Videos,
             onClick = {
                 onFilterChange(currentFilter.copy(typeFilter = TypeFilter.Videos))
             },
-            label = { Text("Videos") }
+            label = { Text(stringResource(R.string.videos)) }
         )
         FilterChip(
             selected = currentFilter.typeFilter== TypeFilter.Images,
             onClick = {
                 onFilterChange(currentFilter.copy(typeFilter = TypeFilter.Images))
             },
-            label = { Text("Images") }
+            label = { Text(stringResource(R.string.images)) }
         )
         FilterChip(
             selected = currentFilter.typeFilter== TypeFilter.PDF,
             onClick = {
                 onFilterChange(currentFilter.copy(typeFilter = TypeFilter.PDF))
             },
-            label = { Text("PDF") }
+            label = { Text(stringResource(R.string.pdf)) }
         )
     }
 }

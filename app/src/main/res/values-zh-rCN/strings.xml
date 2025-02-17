@@ -14,6 +14,7 @@
     <string name="failed">失败</string>
     <string name="settings">设置</string>
     <string name="report">反馈</string>
+    <string name="filter_by_type">根据类型过滤</string>
     <string name="about">关于</string>
     <string name="notification">通知</string>
     <string name="notification_desc">下载完成后发送通知</string>
@@ -43,7 +44,9 @@
     <string name="tags">标签</string>
     <string name="add_tags_here">在此添加标签</string>
     <string name="save">保存</string>
+    <string name="edit_tags_desc">包含这些标签的图片将被下载</string>
     <string name="clear_all">清空</string>
+    <string name="date_range_image_title">选择下载项的日期范围</string>
     <string name="edit_tags">编辑标签</string>
     <string name="get_bookmarks">获取我的书签</string>
     <string name="get_likes">获取我的点赞</string>
@@ -56,4 +59,23 @@
     <string name="enter_lofter_author_homepage">输入Lofter用户主页URL</string>
     <string name="enter_kuaikan_comic_url">输入快看漫画URL</string>
     <string name="twitter">推特</string>
+    <string name="mail">邮箱</string>
+    <string name="log_out">登录</string>
+    <string name="log_in">登出</string>
+    <string name="select_all">全选</string>
+    <string name="select_chapters">选择章节</string>
+    <string name="less_than_one_min">小于1分钟</string>
+    <string name="one_to_three_min">1-3分钟</string>
+    <string name="three_to_ten_min">3-10分钟</string>
+    <string name="more_than_ten_min">10分钟以上</string>
+    <string name="nothing_to_show">没有项目</string>
+    <string name="filter_by_platforms">根据平台过滤</string>
+    <string name="filter_by_authors">根据作者过滤</string>
+    <string name="filter_by_duration">根据时长过滤</string>
+    <string name="select_date_range">选择日期范围</string>
+    <string name="videos">视频</string>
+    <string name="images">图片</string>
+    <string name="date_range_image_desc">请选择一个日期范围，只有在这个范围内发布的图片会被下载</string>
+    <string name="date_range">日期范围</string>
+    <string name="your_favourite_tags">您喜欢的标签</string>
 </resources>

@@ -10,7 +10,7 @@ import killua.dev.mediadownloader.ui.SnackbarUIEffect
 
 fun openMail(context: Context) {
     val intent = Intent(Intent.ACTION_SENDTO).apply {
-        data = Uri.parse("mailto:${context.getString(R.string.mail)}")
+        data = Uri.parse("mailto:${context.getString(R.string.mail_addr)}")
         putExtra(Intent.EXTRA_SUBJECT, "App Feedback")
         putExtra(Intent.EXTRA_TEXT, """
             Device Information:

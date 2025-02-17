@@ -10,7 +10,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import killua.dev.mediadownloader.ui.tokens.SizeTokens
+import killua.dev.mediadownloader.R
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -19,7 +21,7 @@ fun FilterByDuration(
     onFilterChange: (FilterOptions) -> Unit
 ){
     Text(
-        text = "Filter by duration",
+        text = stringResource(R.string.filter_by_duration),
         style = MaterialTheme.typography.titleMedium,
         modifier = Modifier.padding(vertical = SizeTokens.Level8)
     )
@@ -33,28 +35,28 @@ fun FilterByDuration(
             onClick = {
                 onFilterChange(currentFilter.copy(durationFilter = DurationFilter.UnderOneMinute))
             },
-            label = { Text("Less than 1 min") }
+            label = { Text(stringResource(R.string.less_than_one_min))}
         )
         FilterChip(
             selected = currentFilter.durationFilter == DurationFilter.OneToThreeMinutes,
             onClick = {
                 onFilterChange(currentFilter.copy(durationFilter = DurationFilter.OneToThreeMinutes))
             },
-            label = { Text("1-3 min") }
+            label = { Text(stringResource(R.string.one_to_three_min)) }
         )
         FilterChip(
             selected = currentFilter.durationFilter == DurationFilter.ThreeToTenMinutes,
             onClick = {
                 onFilterChange(currentFilter.copy(durationFilter = DurationFilter.ThreeToTenMinutes))
             },
-            label = { Text("3-10 min") }
+            label = { Text(stringResource(R.string.three_to_ten_min)) }
         )
         FilterChip(
             selected = currentFilter.durationFilter == DurationFilter.MoreThanTemMinutes,
             onClick = {
                 onFilterChange(currentFilter.copy(durationFilter = DurationFilter.MoreThanTemMinutes))
             },
-            label = { Text("More than 10 min") }
+            label = { Text(stringResource(R.string.more_than_ten_min)) }
         )
     }
 }

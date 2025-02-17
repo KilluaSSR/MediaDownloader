@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import killua.dev.mediadownloader.R
 import killua.dev.mediadownloader.ui.LocalNavController
 import killua.dev.mediadownloader.ui.components.common.Clickable
@@ -34,7 +35,7 @@ fun AboutPage() {
     rememberCoroutineScope()
     SettingsScaffold(
         scrollBehavior = scrollBehavior,
-        title = "About",
+        title = stringResource(R.string.about),
     ) {
         Column(
             modifier = Modifier
@@ -42,7 +43,7 @@ fun AboutPage() {
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(SizeTokens.Level24)
         ) {
-            Title(title = "Author", color = MaterialTheme.colorScheme.primary) {
+            Title(title = stringResource(R.string.about), color = MaterialTheme.colorScheme.primary) {
                 Clickable(
                     title = "风过荒野",
                     value = "KilluaDev.kt"
@@ -51,7 +52,7 @@ fun AboutPage() {
                 }
                 Clickable(
                     icon = drawableToImageVector(R.drawable.logo_of_twitter),
-                    title = "Twitter",
+                    title = stringResource(R.string.twitter),
                     value = "@Shakeitoff_pi"
                 ) {
                     val twitterUrl = "https://x.com/${context.getString(R.string.twitterAccount)}"

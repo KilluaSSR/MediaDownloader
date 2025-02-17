@@ -29,13 +29,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import killua.dev.mediadownloader.api.Kuaikan.Chapter
 import killua.dev.mediadownloader.ui.tokens.SizeTokens
-
+import killua.dev.mediadownloader.R
 
 @Composable
 fun ExpandableFullScreenDialog(
@@ -122,7 +123,7 @@ fun ChapterSelectionDialog(
                 modifier = Modifier.fillMaxSize()
             ) {
                 TopAppBar(
-                    title = { Text("Select chapters") },
+                    title = { Text(stringResource(R.string.select_chapters)) },
                     navigationIcon = {
                         IconButton(onClick = onDismiss) {
                             Icon(Icons.AutoMirrored.Default.ArrowBack, contentDescription = "关闭")
@@ -130,16 +131,16 @@ fun ChapterSelectionDialog(
                     },
                     actions = {
                         TextButton(onClick = onSelectAll) {
-                            Text("Select all",fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.select_all),fontWeight = FontWeight.Bold)
                         }
                         TextButton(onClick = onClearAll) {
-                            Text("Clear all",fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.clear_all),fontWeight = FontWeight.Bold)
                         }
                         TextButton(onClick = {
                             onConfirm()
                             onDismiss()
                         }) {
-                            Text("Confirm",fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.confirm),fontWeight = FontWeight.Bold)
                         }
                     }
                 )

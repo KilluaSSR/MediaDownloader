@@ -3,7 +3,7 @@
     <string name="title_activity_splash" translatable="false">MediaDownloader</string>
     <string name="githubAccount" translatable="false">KilluaSSR</string>
     <string name="twitterAccount" translatable="false">ShakeItOff_pi</string>
-    <string name="mail" translatable="false">xiaotian2001@outlook.com</string>
+    <string name="mail_addr" translatable="false">xiaotian2001@outlook.com</string>
     <string name="download_by_link">Download by Link</string>
     <string name="download_list">Download List</string>
     <string name="advanced">Advanced</string>
@@ -63,5 +63,27 @@
     <string name="enter_lofter_author_homepage">Enter Lofter author\'s Homepage</string>
     <string name="enter_kuaikan_comic_url">Enter Kuaikan Comic\'s URL</string>
     <string name="title_activity_setup" translatable="false">SetupActivity</string>
-
+    <string name="filter_by_platforms">Filter by platforms</string>
+    <string name="filter_by_authors">Filter by authors</string>
+    <string name="filter_by_duration">Filter by duration</string>
+    <string name="filter_by_type">Filter by type</string>
+    <string name="select_date_range">Select date range</string>
+    <string name="videos">Videos</string>
+    <string name="images">Images</string>
+    <string name="pdf" translatable="false">PDF</string>
+    <string name="date_range_image_desc">Please select a date range, and only the images within this range will be downloaded</string>
+    <string name="date_range">Date Range</string>
+    <string name="your_favourite_tags">Your favorite Tags</string>
+    <string name="date_range_image_title">Date Range for Image Download</string>
+    <string name="edit_tags_desc">Images including selected tags will be downloaded</string>
+    <string name="select_all">Select All</string>
+    <string name="select_chapters">Select chapters</string>
+    <string name="less_than_one_min">Less than 1 min</string>
+    <string name="one_to_three_min">1-3 min</string>
+    <string name="three_to_ten_min">3-10 min</string>
+    <string name="more_than_ten_min">More than 10 min</string>
+    <string name="nothing_to_show">Nothing to show</string>
+    <string name="mail">Mail</string>
+    <string name="log_out">Log out</string>
+    <string name="log_in">Log in</string>
 </resources>

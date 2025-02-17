@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.mediadownloader.Model.AvailablePlatforms
@@ -40,7 +41,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
+import killua.dev.mediadownloader.R
 @SuppressLint("SetJavaScriptEnabled")
 @ExperimentalFoundationApi
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,7 +77,7 @@ fun LofterPreparePage() {
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                 "From ${dateFormat.format(Date(startDate!!))} to ${dateFormat.format(Date(endDate!!))}"
             } else {
-                "Please select a date range, and only the images within this range will be downloaded"
+                context.getString(R.string.date_range_image_desc)
             }
         )
     }
@@ -100,9 +101,9 @@ fun LofterPreparePage() {
             navController.popBackStack()
         }
     ) {
-        Section(title = "Date Range") {
+        Section(title = stringResource(R.string.date_range)) {
             ClickableConfigurationButton(
-                title = "Date Range for Image Download",
+                title = stringResource(R.string.date_range_image_title),
                 description = dateString,
                 state = viewModel.dateSelectedState.collectAsStateWithLifecycle().value,
                 onClick = { showDatePicker = true },
@@ -110,10 +111,10 @@ fun LofterPreparePage() {
             )
         }
 
-        Section(title = "Your favorite Tags") {
+        Section(title = stringResource(R.string.your_favourite_tags)) {
             ClickableConfigurationButton(
-                title = "Edit tags",
-                description = "Images including selected tags will be downloaded.",
+                title = stringResource(R.string.edit_tags),
+                description = stringResource(R.string.edit_tags_desc),
                 state = viewModel.tagsAddedState.collectAsStateWithLifecycle().value,
                 onClick = {
                     navController.navigateSingle(PrepareRoutes.LofterPrepareTagsPage.route)
