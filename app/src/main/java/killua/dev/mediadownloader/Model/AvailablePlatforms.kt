@@ -44,7 +44,8 @@ val platformName: Map<AvailablePlatforms, Int> = mapOf(
 enum class SupportedUrlType(val pattern: Regex) {
     TWITTER("""(?:twitter\.com|x\.com)/.*""".toRegex()),
     LOFTER("""lofter\.com/post/.*""".toRegex()),
-    PIXIV("""pixiv\.net/artworks/.*""".toRegex()),
+    PIXIV_IMG("""pixiv\.net/artworks/.*""".toRegex()),
+    PIXIV_NOVEL("""pixiv\.net/novel/show\.php\?id=\d+""".toRegex()),
     KUAIKAN("""kuaikanmanhua\.com/.*""".toRegex()),
     UNKNOWN("".toRegex());
 

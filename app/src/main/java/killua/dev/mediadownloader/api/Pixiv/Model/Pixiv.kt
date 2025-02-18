@@ -3,6 +3,15 @@ package killua.dev.mediadownloader.api.Pixiv.Model
 import kotlinx.serialization.Serializable
 
 @Serializable
+data class PixivBlogInfo(
+    val userName: String,
+    val userId: String,
+    val title: String,
+    val id: String,
+    val content: String
+)
+
+@Serializable
 data class PixivImageInfo(
     val userName: String,
     val userId: String,
@@ -38,6 +47,13 @@ data class PixivPictureDetailResponse(
     val error: Boolean,
     val message: String,
     val body: PixivIllustDetail
+)
+
+@Serializable
+data class PixivNovelDetailResponse(
+    val error: Boolean,
+    val message: String,
+    val body: PixivBlogInfo
 )
 
 @Serializable

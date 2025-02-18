@@ -11,10 +11,22 @@ object PixivHeaders {
         "Accept" to "application/json",
         "Referer" to "https://www.pixiv.net/artworks/$id"
     )
+
+    fun getNovelHeaders(id: String) = mapOf(
+        "User-Agent" to USER_AGENT,
+        "Accept" to "application/json",
+        "Referer" to "https://www.pixiv.net/novel/show.php?id=$id"
+    )
 }
 
 fun Request.Builder.addPixivPictureFetchHeaders(id: String): Request.Builder = apply {
     PixivHeaders.getPictureHeaders(id).forEach { (key, value) ->
+        addHeader(key, value)
+    }
+}
+
+fun Request.Builder.addPixivNovelFetchHeaders(id: String): Request.Builder = apply {
+    PixivHeaders.getNovelHeaders(id).forEach { (key, value) ->
         addHeader(key, value)
     }
 }

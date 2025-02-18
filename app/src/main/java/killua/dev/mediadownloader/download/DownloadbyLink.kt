@@ -9,16 +9,20 @@ import killua.dev.mediadownloader.Model.NetworkResult
 import killua.dev.mediadownloader.repository.DownloadServicesRepository
 import killua.dev.mediadownloader.utils.DownloadEventManager
 import killua.dev.mediadownloader.utils.DownloadPreChecks
+import killua.dev.mediadownloader.utils.FileUtils
 import killua.dev.mediadownloader.utils.MediaFileNameStrategy
 import killua.dev.mediadownloader.utils.ShowNotification
+import killua.dev.mediadownloader.utils.StringUtils.formatUnicodeToReadable
+import java.io.File
 import java.util.UUID
 import javax.inject.Inject
 
 class DownloadbyLink @Inject constructor(
-private val downloadRepository: DownloadServicesRepository,
-private val downloadQueueManager: DownloadQueueManager,
-private val downloadEventManager: DownloadEventManager,
-private val downloadPreChecks: DownloadPreChecks,
+    private val downloadRepository: DownloadServicesRepository,
+    private val downloadQueueManager: DownloadQueueManager,
+    private val downloadEventManager: DownloadEventManager,
+    private val downloadPreChecks: DownloadPreChecks,
+    private val fileUtils: FileUtils
 ) {
     val downloadCompletedFlow = downloadEventManager.downloadCompletedFlow
 
@@ -61,22 +65,53 @@ private val downloadPreChecks: DownloadPreChecks,
     }
 
     private suspend fun handlePixivDownload(url: String) {
-        when(val result = downloadRepository.getPixivMedia(url)) {
-            is NetworkResult.Success -> {
-                result.data.originalUrls.forEach { imageURL ->
-                    createDownloadTask(
-                        url = imageURL,
-                        userId = result.data.userId,
-                        screenName = result.data.userName,
-                        platform = AvailablePlatforms.Pixiv,
-                        name = result.data.title,
-                        tweetID = imageURL,
-                        mainLink = url,
-                        mediaType = MediaType.PHOTO
-                    )
+        if(url.contains("artwork")){
+            when(val result = downloadRepository.getPixivMedia(url)) {
+                is NetworkResult.Success -> {
+                    result.data.originalUrls.forEach { imageURL ->
+                        createDownloadTask(
+                            url = imageURL,
+                            userId = result.data.userId,
+                            screenName = result.data.userName,
+                            platform = AvailablePlatforms.Pixiv,
+                            name = result.data.title,
+                            tweetID = imageURL,
+                            mainLink = url,
+                            mediaType = MediaType.PHOTO
+                        )
+                    }
                 }
+                is NetworkResult.Error -> throw Exception("Pixiv request error")
             }
-            is NetworkResult.Error -> throw Exception("Pixiv request error")
+        }else if (url.contains("novel")){
+            when(val result = downloadRepository.getPixivNovel(url)) {
+                is NetworkResult.Success -> {
+                    val formattedContent = result.data.content.formatUnicodeToReadable()
+                    val formattedTitle = result.data.title.formatUnicodeToReadable()
+                    fileUtils.writeTextToFile(
+                        text = formattedContent,
+                        fileName = formattedTitle,
+                        mediaType = MediaType.TXT,
+                        platform = AvailablePlatforms.Pixiv
+                    )?.let { fileUri ->
+                        val file = File(fileUri.path)
+                        val fileSize = file.length()
+                        downloadRepository.insert(
+                            Download(
+                                uuid = UUID.randomUUID().toString(),
+                                fileUri = fileUri,
+                                link = url,
+                                tweetID = url,
+                                fileName = formattedTitle,
+                                fileType = MediaType.TXT.name,
+                                fileSize = fileSize,
+                                type = AvailablePlatforms.Pixiv
+                            )
+                        )
+                    }
+                }
+                is NetworkResult.Error -> throw Exception("Pixiv request error")
+            }
         }
     }
 

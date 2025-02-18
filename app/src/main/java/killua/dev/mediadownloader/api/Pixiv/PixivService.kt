@@ -4,10 +4,14 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import killua.dev.mediadownloader.Model.NetworkResult
 import killua.dev.mediadownloader.api.NetworkHelper
+import killua.dev.mediadownloader.api.Pixiv.BuildRequest.PixivRequestNovelURL
 import killua.dev.mediadownloader.api.Pixiv.BuildRequest.PixivRequestPicturesDetailsURL
 import killua.dev.mediadownloader.api.Pixiv.BuildRequest.PixivRequestPicturesURL
+import killua.dev.mediadownloader.api.Pixiv.BuildRequest.addPixivNovelFetchHeaders
 import killua.dev.mediadownloader.api.Pixiv.BuildRequest.addPixivPictureFetchHeaders
+import killua.dev.mediadownloader.api.Pixiv.Model.PixivBlogInfo
 import killua.dev.mediadownloader.api.Pixiv.Model.PixivImageInfo
+import killua.dev.mediadownloader.api.Pixiv.Model.PixivNovelDetailResponse
 import killua.dev.mediadownloader.api.Pixiv.Model.PixivPictureDetailResponse
 import killua.dev.mediadownloader.api.Pixiv.Model.PixivPicturePageResponse
 import killua.dev.mediadownloader.di.ApplicationScope
@@ -23,6 +27,45 @@ class PixivService @Inject constructor(
     @ApplicationScope private val scope: CoroutineScope
 ) {
     private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
+    suspend fun getNovel(url: String): NetworkResult<PixivBlogInfo> = withContext(Dispatchers.IO){
+        val id = try {
+            url.split("show.php?id=")[1]
+        } catch (e: Exception) {
+            return@withContext NetworkResult.Error(message = "URL格式错误: ${e.message}")
+        }
+        try {
+            val detailResult = NetworkHelper.doRequest(
+                Request.Builder()
+                    .get()
+                    .url(PixivRequestNovelURL(id))
+                    .addPixivNovelFetchHeaders(id)
+                    .build()
+                    .also {
+                        NetworkHelper.setCookies("pixiv.net", mapOf(
+                            "PHPSESSID" to userdata.userPixivPHPSSID.value
+                        ))
+                    }
+            ).use { response ->
+                if (!response.isSuccessful) {
+                    return@withContext NetworkResult.Error(
+                        code = response.code,
+                        message = "详情请求失败: ${response.code} ${response.message}"
+                    )
+                }
+                try {
+                    gson.fromJson(response.body?.string(), PixivNovelDetailResponse::class.java).body
+                } catch (e: Exception) {
+                    return@withContext NetworkResult.Error(message = "详情JSON解析失败: ${e.message}")
+                }
+            }
+            return@withContext NetworkResult.Success(detailResult)
+
+        } catch (e: Exception) {
+            NetworkResult.Error(message = "请求过程发生错误: ${e.message}")
+        }
+
+    }
+
     suspend fun getSingleBlogImage(url: String): NetworkResult<PixivImageInfo> = withContext(Dispatchers.IO) {
         val id = try {
             url.split("artworks/")[1]
