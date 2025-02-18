@@ -28,6 +28,7 @@ import killua.dev.mediadownloader.repository.DownloadRepository
 import killua.dev.mediadownloader.repository.DownloadServicesRepository
 import killua.dev.mediadownloader.utils.DownloadEventManager
 import killua.dev.mediadownloader.utils.DownloadPreChecks
+import killua.dev.mediadownloader.utils.FileUtils
 import killua.dev.mediadownloader.utils.ShowNotification
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -135,8 +136,9 @@ object ProvideAPI {
         downloadQueueManager: DownloadQueueManager,
         downloadEventManager: DownloadEventManager,
         downloadPreChecks: DownloadPreChecks,
+        fileUtils: FileUtils
     ): DownloadbyLink {
-        return DownloadbyLink(downloadRepository, downloadQueueManager, downloadEventManager, downloadPreChecks)
+        return DownloadbyLink(downloadRepository, downloadQueueManager, downloadEventManager, downloadPreChecks, fileUtils)
     }
 
     @Provides
@@ -186,5 +188,11 @@ object ProvideAPI {
     ): KuaikanService {
         return KuaikanService(userDataManager,scope)
     }
+
+    @Provides
+    @Singleton
+    fun provideFileUtils(
+        @ApplicationContext context: Context
+    ) = FileUtils(context)
 }
 

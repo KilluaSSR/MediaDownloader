@@ -23,6 +23,7 @@ val patterns: Map<String, AvailablePlatforms> = mapOf(
     "twitter.com" to AvailablePlatforms.Twitter,
     ".lofter.com/post/" to AvailablePlatforms.Lofter,
     "pixiv.net/artworks/" to AvailablePlatforms.Pixiv,
+    "pixiv.net/novel/show.php?" to AvailablePlatforms.Pixiv,
     "kuaikanmanhua.com" to AvailablePlatforms.Kuaikan
 )
 

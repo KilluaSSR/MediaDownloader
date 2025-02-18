@@ -18,12 +18,7 @@ fun Modifier.mediaClickable(
     fileUri?.let { uri ->
         try {
             context.contentResolver.openInputStream(uri)?.use {
-                val mimeType = when (fileType) {
-                    MediaType.VIDEO -> "video/*"
-                    MediaType.PHOTO -> "image/*"
-                    MediaType.PDF -> "application/pdf"
-                    MediaType.GIF -> "image/gif"
-                }
+                val mimeType = fileType.mimeType
 
                 val openIntent = Intent(Intent.ACTION_VIEW).apply {
                     setDataAndType(uri, mimeType)

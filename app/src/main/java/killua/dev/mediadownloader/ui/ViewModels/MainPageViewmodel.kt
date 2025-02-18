@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.lang.IllegalArgumentException
 import javax.inject.Inject
 
 sealed class MainPageUIIntent : UIIntent {
@@ -113,16 +114,20 @@ class MainPageViewmodel @Inject constructor(
         when (intent) {
             is MainPageUIIntent.ExecuteDownload -> {
                 mutex.withLock {
-                    val platform = classifyLinks(intent.url)
-                    downloadbyLink.checkPlatformLogin(platform)
-                        .onSuccess {
-                            downloadbyLink.handlePlatformDownload(intent.url, platform).onFailure { error ->
-                                emitEffect(ShowSnackbar(error.message ?: "Error", "OK", true, SnackbarDuration.Short))
+                    try {
+                        val platform = classifyLinks(intent.url)
+                        downloadbyLink.checkPlatformLogin(platform)
+                            .onSuccess {
+                                downloadbyLink.handlePlatformDownload(intent.url, platform).onFailure { error ->
+                                    emitEffect(ShowSnackbar(error.message ?: "Error", "OK", true, SnackbarDuration.Short))
+                                }
                             }
-                        }
-                        .onFailure { error ->
-                            emitState(uiState.value.copy(showNotLoggedIn = NotLoggedInPlatform(true,platform)))
-                        }
+                            .onFailure { error ->
+                                emitState(uiState.value.copy(showNotLoggedIn = NotLoggedInPlatform(true,platform)))
+                            }
+                    }catch (e: IllegalArgumentException){
+                        emitEffect(ShowSnackbar(e.message.toString(), "OK", true, SnackbarDuration.Short))
+                    }
                 }
             }
             is MainPageUIIntent.NavigateToFavouriteUser -> {
