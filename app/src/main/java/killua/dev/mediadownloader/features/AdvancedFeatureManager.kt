@@ -12,21 +12,24 @@ import killua.dev.mediadownloader.Model.NetworkResult
 import killua.dev.mediadownloader.api.Kuaikan.Chapter
 import killua.dev.mediadownloader.api.Kuaikan.KuaikanService
 import killua.dev.mediadownloader.api.Lofter.LofterService
+import killua.dev.mediadownloader.api.Pixiv.Model.NovelInfo
+import killua.dev.mediadownloader.api.Pixiv.PixivService
 import killua.dev.mediadownloader.api.Twitter.Model.TwitterUser
 import killua.dev.mediadownloader.api.Twitter.TwitterDownloadAPI
 import killua.dev.mediadownloader.datastore.readLofterEndTime
-import killua.dev.mediadownloader.datastore.readLofterLoginAuth
-import killua.dev.mediadownloader.datastore.readLofterLoginKey
 import killua.dev.mediadownloader.datastore.readLofterStartTime
 import killua.dev.mediadownloader.db.LofterTagsRepository
 import killua.dev.mediadownloader.di.ApplicationScope
 import killua.dev.mediadownloader.download.DownloadQueueManager
 import killua.dev.mediadownloader.repository.DownloadRepository
 import killua.dev.mediadownloader.utils.DownloadPreChecks
+import killua.dev.mediadownloader.utils.FileUtils
 import killua.dev.mediadownloader.utils.KUAIKAN_ENTIRE_NOTIFICATION_ID
 import killua.dev.mediadownloader.utils.LOFTER_GET_BY_TAGS_ID
 import killua.dev.mediadownloader.utils.MediaFileNameStrategy
+import killua.dev.mediadownloader.utils.PIXIV_ENTIRE_NOTIFICATION_ID
 import killua.dev.mediadownloader.utils.ShowNotification
+import killua.dev.mediadownloader.utils.StringUtils.formatUnicodeToReadable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import java.util.UUID
@@ -37,13 +40,25 @@ class AdvancedFeaturesManager @Inject constructor(
     private val twitterDownloadAPI: TwitterDownloadAPI,
     private val kuaikanService: KuaikanService,
     private val lofterService: LofterService,
+    private val pixelService: PixivService,
     private val notification: ShowNotification,
     private val downloadQueueManager: DownloadQueueManager,
     private val downloadRepository: DownloadRepository,
     private val tagsRepository: LofterTagsRepository,
     private val preChecks: DownloadPreChecks,
+    private val fileUtils: FileUtils,
     @ApplicationScope private val context: Context
 ) {
+    fun isTwitterLoggedIn() = preChecks.checkTwitterLoggedIn()
+
+    fun isLofterLoggedIn() = preChecks.checkLofterLoggedIn()
+
+    suspend fun readLofterTags() = tagsRepository.observeAllDownloads().first()?.tags
+
+    suspend fun readStartDateAndEndDate() = Pair(context.readLofterStartTime().first(),context.readLofterEndTime().first())
+
+    fun cancelKuaikanProgressNotification() = notification.cancelSpecificNotification(KUAIKAN_ENTIRE_NOTIFICATION_ID)
+    fun cancelPixivProgressNotification() = notification.cancelSpecificNotification(PIXIV_ENTIRE_NOTIFICATION_ID)
     suspend fun handleTwitterBookmarks(): Result<Unit> = runCatching {
         twitterDownloadAPI.getBookmarksAllTweets(
             onNewItems = { bookmarks ->
@@ -55,18 +70,6 @@ class AdvancedFeaturesManager @Inject constructor(
             onError = { throw Exception(it) }
         )
     }
-
-    fun isTwitterLoggedIn() = preChecks.checkTwitterLoggedIn()
-
-    fun isLofterLoggedIn() = preChecks.checkLofterLoggedIn()
-
-    suspend fun readLofterTags() = tagsRepository.observeAllDownloads().first()?.tags
-
-    suspend fun readStartDateAndEndDate() = Pair(context.readLofterStartTime().first(),context.readLofterEndTime().first())
-
-    suspend fun readLofterCredits() = Pair(context.readLofterLoginKey().first(),context.readLofterLoginAuth().first())
-
-    fun cancelKuaikanProgressNotification() = notification.cancelSpecificNotification(KUAIKAN_ENTIRE_NOTIFICATION_ID)
 
     suspend fun handleTwitterLikes(): Result<Unit> = runCatching {
         twitterDownloadAPI.getLikesAllTweets(
@@ -124,11 +127,9 @@ class AdvancedFeaturesManager @Inject constructor(
         }
     }
 
-    suspend fun getWholeManga(url: String): NetworkResult<List<Chapter>> = runCatching {
-        when(val result = kuaikanService.getWholeComic(url)) {
+    suspend fun getKuaikanEntireComic(url: String): NetworkResult<List<Chapter>> = runCatching {
+        when(val result = kuaikanService.getEntireComic(url)) {
             is NetworkResult.Error -> {
-                println(result.code)
-                println(result.message)
                 NetworkResult.Error(
                     code = result.code,
                     message = result.message
@@ -136,7 +137,6 @@ class AdvancedFeaturesManager @Inject constructor(
             }
             is NetworkResult.Success -> {
                 val manga = result.data
-
                 NetworkResult.Success(manga)
             }
         }
@@ -146,10 +146,30 @@ class AdvancedFeaturesManager @Inject constructor(
         )
     }
 
-    suspend fun downloadEntireManga(mangaList: List<Chapter>) = runCatching {
+    suspend fun getPixivEntireNovel(url: String): NetworkResult<List<NovelInfo>> = runCatching {
+        val id = url.split("series/")[1]
+        when(val result = pixelService.getEntireNovel(id)) {
+            is NetworkResult.Error -> {
+                NetworkResult.Error(
+                    code = result.code,
+                    message = result.message
+                )
+            }
+            is NetworkResult.Success -> {
+                val novel = result.data
+                NetworkResult.Success(novel)
+            }
+        }
+    }.getOrElse { e ->
+        NetworkResult.Error(
+            message = e.message ?: "Unknown error"
+        )
+    }
+
+    suspend fun downloadEntireKuaikanComic(mangaList: List<Chapter>) = runCatching {
         mangaList.forEach{
             delay(Random.nextLong(500, 7000))
-            notification.updateGettingComicProgress(it.name)
+            notification.updateGettingProgress(it.name)
             when(val mangaResult = kuaikanService.getSingleChapter("https://www.kuaikanmanhua.com/webs/comic-next/${it.id}")){
                 is NetworkResult.Error -> return@forEach
                 is NetworkResult.Success -> {
@@ -164,6 +184,26 @@ class AdvancedFeaturesManager @Inject constructor(
                         mediaType = MediaType.PDF
                     )
                 }
+            }
+        }
+    }
+
+    suspend fun downloadEntirePixivNovel(novelList: List<NovelInfo>) = runCatching {
+        novelList.forEach{
+            notification.updateGettingProgress(it.title, downloadId = PIXIV_ENTIRE_NOTIFICATION_ID, type = "novel")
+            when(val result = pixelService.getNovel(it.id)) {
+                is NetworkResult.Success -> {
+                    val formattedContent = result.data.content.formatUnicodeToReadable()
+                    val formattedTitle = result.data.title.formatUnicodeToReadable()
+                    fileUtils.writeTextToFile(
+                        mainFolder = it.seriesTitle,
+                        text = formattedContent,
+                        fileName = formattedTitle,
+                        mediaType = MediaType.TXT,
+                        platform = AvailablePlatforms.Pixiv
+                    )
+                }
+                is NetworkResult.Error -> throw Exception("Pixiv request error")
             }
         }
     }

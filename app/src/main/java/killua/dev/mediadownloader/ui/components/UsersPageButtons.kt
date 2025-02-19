@@ -51,3 +51,10 @@ val AdvancedPageKuaikanButtons = listOf(
         AdvancedpageRoutes.KuaikanEntireComic.route
     ),
 )
+val AdvancedPixivButtons = listOf(
+    ButtonsEssentials(
+        R.string.get_entire_novel,
+        Icons.Rounded.Book,
+        AdvancedpageRoutes.KuaikanEntireComic.route
+    ),
+)

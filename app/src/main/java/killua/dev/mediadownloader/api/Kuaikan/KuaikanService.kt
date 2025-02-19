@@ -68,7 +68,7 @@ class KuaikanService @Inject constructor(
         }
     }
 
-    suspend fun getWholeComic(url: String): NetworkResult<List<Chapter>> = withContext(Dispatchers.IO) {
+    suspend fun getEntireComic(url: String): NetworkResult<List<Chapter>> = withContext(Dispatchers.IO) {
         val pattern = """(?:topic|mobile)/(\d+)(?:/list)?(?:[/?].*)?$""".toRegex()
 
         val id = try {

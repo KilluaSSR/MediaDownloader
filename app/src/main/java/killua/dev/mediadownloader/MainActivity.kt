@@ -9,6 +9,7 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -16,8 +17,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import killua.dev.mediadownloader.Login.BrowserPage
 import killua.dev.mediadownloader.Model.AvailablePlatforms
 import killua.dev.mediadownloader.Model.SupportedUrlType
@@ -39,7 +38,6 @@ import killua.dev.mediadownloader.ui.pages.OtherSetupPages.Twitter.TwitterPrepar
 import killua.dev.mediadownloader.ui.pages.SettingsPage
 import killua.dev.mediadownloader.ui.pages.UserInfoPage
 import killua.dev.mediadownloader.ui.theme.MediaDownloaderTheme
-import killua.dev.mediadownloader.utils.classifyLinks
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {

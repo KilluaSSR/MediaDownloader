@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 class DownloadListManager @Inject constructor(
     private val downloadRepository: DownloadRepository,
-    downloadManager: DownloadManager,
+    private val downloadManager: DownloadManager,
     private val thumbnailRepository: ThumbnailRepository,
     private val videoDurationRepository: VideoDurationRepository,
     private val downloadQueueManager: DownloadQueueManager,

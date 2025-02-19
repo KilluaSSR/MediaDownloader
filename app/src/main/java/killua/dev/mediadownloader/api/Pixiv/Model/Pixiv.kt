@@ -8,7 +8,13 @@ data class PixivBlogInfo(
     val userId: String,
     val title: String,
     val id: String,
-    val content: String
+    val content: String,
+    val seriesNavData: SeriesNavData
+)
+
+@Serializable
+data class SeriesNavData(
+    val title: String
 )
 
 @Serializable
@@ -56,6 +62,7 @@ data class PixivNovelDetailResponse(
     val body: PixivBlogInfo
 )
 
+
 @Serializable
 data class PixivIllustDetail(
     val illustId: String,
@@ -66,4 +73,28 @@ data class PixivIllustDetail(
     val pageCount: Int,
     val width: Int,
     val height: Int
+)
+
+@Serializable
+data class PixivEntireNovelDetailResponse(
+    val error: Boolean,
+    val message: String,
+    val body: PixivEntireNovel
+)
+
+@Serializable
+data class PixivEntireNovel(
+    val thumbnails: Thumbnails
+)
+
+@Serializable
+data class Thumbnails(
+    val novel: List<NovelInfo>
+)
+
+@Serializable
+data class NovelInfo(
+    val id: String,
+    val title: String,
+    val seriesTitle: String
 )

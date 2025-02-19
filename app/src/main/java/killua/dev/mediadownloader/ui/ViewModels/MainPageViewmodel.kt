@@ -12,7 +12,6 @@ import killua.dev.mediadownloader.ui.SnackbarUIEffect
 import killua.dev.mediadownloader.ui.SnackbarUIEffect.*
 import killua.dev.mediadownloader.ui.UIIntent
 import killua.dev.mediadownloader.ui.UIState
-import killua.dev.mediadownloader.utils.classifyLinks
 import killua.dev.mediadownloader.utils.navigateLofterProfile
 import killua.dev.mediadownloader.utils.navigatePixivProfile
 import killua.dev.mediadownloader.utils.navigateTwitterProfile
@@ -26,6 +25,8 @@ import javax.inject.Inject
 
 sealed class MainPageUIIntent : UIIntent {
     data class ExecuteDownload(val url: String, val platforms: AvailablePlatforms) : MainPageUIIntent()
+    data class NavigateToFavouriteUser(val context: Context, val userID: String,val platforms: AvailablePlatforms, val screenName: String) : MainPageUIIntent()
+
 }
 
 data class MainPageUIState(
@@ -126,6 +127,16 @@ class MainPageViewmodel @Inject constructor(
                             }
                     }catch (e: IllegalArgumentException){
                         emitEffect(ShowSnackbar(e.message.toString(), "OK", true, SnackbarDuration.Short))
+                    }
+                }
+            }
+            is MainPageUIIntent.NavigateToFavouriteUser -> {
+                withMainContext {
+                    when(intent.platforms) {
+                        AvailablePlatforms.Twitter -> intent.context.navigateTwitterProfile(intent.userID, intent.screenName)
+                        AvailablePlatforms.Lofter -> intent.context.navigateLofterProfile(intent.screenName)
+                        AvailablePlatforms.Pixiv -> intent.context.navigatePixivProfile(intent.userID)
+                        AvailablePlatforms.Kuaikan -> {}
                     }
                 }
             }

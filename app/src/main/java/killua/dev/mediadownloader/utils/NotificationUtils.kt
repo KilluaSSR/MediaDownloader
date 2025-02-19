@@ -133,9 +133,9 @@ class ShowNotification @Inject constructor(
         notificationManager.notify(BOOKMARK_NOTIFICATION_ID, notification)
     }
 
-    fun updateGettingComicProgress(chapter: String) {
+    fun updateGettingProgress(chapter: String, downloadId: Int = KUAIKAN_ENTIRE_NOTIFICATION_ID, type: String = "comics") {
         val notification = NotificationCompat.Builder(context, channelId)
-            .setContentTitle("Getting comics")
+            .setContentTitle("Getting $type")
             .setContentText("Current: Trying $chapter")
             .setProgress(0,0,true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -144,7 +144,7 @@ class ShowNotification @Inject constructor(
             .setSmallIcon(R.drawable.icon)
             .build()
 
-        notificationManager.notify(KUAIKAN_ENTIRE_NOTIFICATION_ID, notification)
+        notificationManager.notify(downloadId, notification)
     }
 
     fun completeGettingProgress(totalPhotoCount: Int, totalVideoCount: Int) {
@@ -169,4 +169,5 @@ class ShowNotification @Inject constructor(
 
 const val BOOKMARK_NOTIFICATION_ID = 10086
 const val KUAIKAN_ENTIRE_NOTIFICATION_ID = 10087
-const val LOFTER_GET_BY_TAGS_ID = 10088
+const val PIXIV_ENTIRE_NOTIFICATION_ID = 10088
+const val LOFTER_GET_BY_TAGS_ID = 10089

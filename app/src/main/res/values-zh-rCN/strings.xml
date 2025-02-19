@@ -54,6 +54,7 @@
     <string name="get_by_tags">根据标签下载图片</string>
     <string name="get_bookmarks_desc">下载我在Twitter上标签了的内容</string>
     <string name="get_entire_comic">下载整本漫画</string>
+    <string name="get_entire_novel">下载整本小说</string>
     <string name="get_likes_desc">下载我在Twitter上点赞了的内容</string>
     <string name="enter_twitter_username">输入Twitter用户名</string>
     <string name="enter_lofter_author_homepage">输入Lofter用户主页URL</string>
@@ -78,4 +79,5 @@
     <string name="date_range_image_desc">请选择一个日期范围，只有在这个范围内发布的图片会被下载</string>
     <string name="date_range">日期范围</string>
     <string name="your_favourite_tags">您喜欢的标签</string>
+    <string name="enter_pixiv_entire_novel_url">输入Pixiv小说URL</string>
 </resources>

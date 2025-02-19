@@ -22,12 +22,14 @@ import killua.dev.mediadownloader.R
 import killua.dev.mediadownloader.ui.LocalNavController
 import killua.dev.mediadownloader.ui.PrepareRoutes
 import killua.dev.mediadownloader.ui.ViewModels.AdvancedPageUIIntent
+import killua.dev.mediadownloader.ui.ViewModels.AdvancedPageUIIntent.*
 import killua.dev.mediadownloader.ui.ViewModels.AdvancedPageViewModel
 import killua.dev.mediadownloader.ui.ViewModels.DialogType
 import killua.dev.mediadownloader.ui.components.AdvancedPageKuaikanButtons
 import killua.dev.mediadownloader.ui.components.AdvancedPageLofterButtons
 import killua.dev.mediadownloader.ui.components.AdvancedPageTopAppBar
 import killua.dev.mediadownloader.ui.components.AdvancedPageTwitterButtons
+import killua.dev.mediadownloader.ui.components.AdvancedPixivButtons
 import killua.dev.mediadownloader.ui.components.MainScaffold
 import killua.dev.mediadownloader.ui.components.common.ActionsBotton
 import killua.dev.mediadownloader.ui.components.common.AdvancedInputDialog
@@ -57,7 +59,7 @@ fun AdvancedPage(){
     var dialogPlaceholder by remember { mutableStateOf("") }
     val context = LocalContext.current
     LaunchedEffect(Unit) {
-        viewModel.emitIntentOnIO(AdvancedPageUIIntent.OnEntry)
+        viewModel.emitIntentOnIO(OnEntry)
     }
     MainScaffold (
         topBar = {
@@ -79,7 +81,7 @@ fun AdvancedPage(){
                 onDismiss = {showGetAllMyTwitterBookmarks = false}
             ) {
                 scope.launch{
-                    viewModel.emitIntent(AdvancedPageUIIntent.GetMyTwitterBookmark)
+                    viewModel.emitIntent(GetMyTwitterBookmark)
                 }
             }
         }
@@ -91,7 +93,7 @@ fun AdvancedPage(){
                 onDismiss = {showGetMyTwitterLikes = false}
             ) {
                 scope.launch{
-                    viewModel.emitIntent(AdvancedPageUIIntent.GetMyTwitterLiked)
+                    viewModel.emitIntent(GetMyTwitterLiked)
                 }
             }
         }
@@ -100,27 +102,27 @@ fun AdvancedPage(){
                 chapters = uiState.value.chapters,
                 onToggle = { index ->
                     scope.launch {
-                        viewModel.emitIntent(AdvancedPageUIIntent.ToggleChapter(index))
+                        viewModel.emitIntent(ToggleChapter(index))
                     }
                 },
                 onConfirm = {
                     scope.launch {
-                        viewModel.emitIntent(AdvancedPageUIIntent.ConfirmChapterSelection)
+                        viewModel.emitIntent(ConfirmChapterSelection)
                     }
                 },
                 onDismiss = {
                     scope.launch {
-                        viewModel.emitIntent(AdvancedPageUIIntent.DismissChapterSelection)
+                        viewModel.emitIntent(DismissChapterSelection)
                     }
                 },
                 onSelectAll = {
                     scope.launch {
-                        viewModel.emitIntent(AdvancedPageUIIntent.SelectAllChapters)
+                        viewModel.emitIntent(SelectAllChapters)
                     }
                 },
                 onClearAll = {
                     scope.launch {
-                        viewModel.emitIntent(AdvancedPageUIIntent.ClearAllChapters)
+                        viewModel.emitIntent(ClearAllChapters)
                     }
                 }
             )
@@ -153,11 +155,11 @@ fun AdvancedPage(){
                     DialogType.TWITTER_USER_INFO_DOWNLOAD ->{
                         if (uiState.value.info.first.isEmpty()) {
                             scope.launch {
-                                viewModel.emitIntent(AdvancedPageUIIntent.GetSomeonesTwitterAccountInfo(input))
+                                viewModel.emitIntent(GetSomeonesTwitterAccountInfo(input))
                             }
                         } else {
                             scope.launch {
-                                viewModel.emitIntent(AdvancedPageUIIntent.OnConfirmTwitterDownloadMedia(uiState.value.info.third, uiState.value.info.first))
+                                viewModel.emitIntent(OnConfirmTwitterDownloadMedia(uiState.value.info.third, uiState.value.info.first))
                                 delay(200)
                                 viewModel.emitState(uiState.value.copy(
                                     info = Triple("", "", "")
@@ -168,7 +170,7 @@ fun AdvancedPage(){
                     }
                     DialogType.LOFTER_AUTHOR_TAGS -> {
                         scope.launch {
-                            viewModel.emitIntent(AdvancedPageUIIntent.GetLofterPicsByTags(input))
+                            viewModel.emitIntent(GetLofterPicsByTags(input))
                             delay(200)
                             viewModel.emitState(uiState.value.copy(
                                 info = Triple("", "", "")
@@ -178,16 +180,25 @@ fun AdvancedPage(){
                     }
                     DialogType.KUAIKAN_ENTIRE -> {
                         scope.launch {
-                            viewModel.emitIntent(AdvancedPageUIIntent.GetKuaikanEntireManga(input))
+                            viewModel.emitIntent(GetKuaikanEntireManga(input))
                             delay(200)
                             viewModel.emitState(uiState.value.copy(
                                 info = Triple("", "", "")
                             ))
                             showDialog = false
                         }
-
                     }
                     DialogType.NONE -> TODO()
+                    DialogType.PIXIV_ENTIRE_NOVEL -> {
+                        scope.launch {
+                            viewModel.emitIntent(GetPixivEntireNovel(input))
+                            delay(200)
+                            viewModel.emitState(uiState.value.copy(
+                                info = Triple("", "", "")
+                            ))
+                            showDialog = false
+                        }
+                    }
                 }
             }
         )
@@ -197,7 +208,7 @@ fun AdvancedPage(){
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(SizeTokens.Level24)
         ) {
-            Section(title = "Twitter") {
+            Section(title = stringResource(R.string.twitter)) {
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(SizeTokens.Level8),
@@ -246,7 +257,7 @@ fun AdvancedPage(){
                     }
                 }
             }
-            Section(title = "Lofter") {
+            Section(title = stringResource(R.string.lofter)) {
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(SizeTokens.Level8),
@@ -309,6 +320,35 @@ fun AdvancedPage(){
                                     }
                                     dialogTitle = context.getString(R.string.enter_kuaikan_comic_url)
                                     dialogPlaceholder = "kuaikanmanhua.com/web/topic/..."
+                                    showDialog = true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            Section(title = stringResource(R.string.pixiv)) {
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(SizeTokens.Level8),
+                    verticalArrangement = Arrangement.spacedBy(SizeTokens.Level8),
+                    maxItemsInEachRow = 2,
+                ) {
+                    AdvancedPixivButtons.forEachIndexed { index, item ->
+                        ActionsBotton(
+                            modifier = Modifier.weight(1f),
+                            enabled = true,
+                            title = stringResource(item.titleRes),
+                            icon = item.icon,
+                            color = MaterialTheme.colorScheme.primaryContainer
+                        ) {
+                            when (index) {
+                                0 -> {
+                                    scope.launch{
+                                        viewModel.emitState(uiState.value.copy(currentDialogType = DialogType.PIXIV_ENTIRE_NOVEL))
+                                    }
+                                    dialogTitle = context.getString(R.string.enter_pixiv_entire_novel_url)
+                                    dialogPlaceholder = "www.pixiv.net/novel/series/..."
                                     showDialog = true
                                 }
                             }

@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import killua.dev.mediadownloader.Model.ChapterInfo
 import killua.dev.mediadownloader.api.Kuaikan.Chapter
 import killua.dev.mediadownloader.ui.tokens.SizeTokens
 import killua.dev.mediadownloader.R
@@ -103,7 +104,7 @@ fun ExpandableFullScreenDialog(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChapterSelectionDialog(
-    chapters: List<Pair<Chapter, Boolean>>,
+    chapters: List<Pair<ChapterInfo, Boolean>>,
     onToggle: (Int) -> Unit,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
@@ -162,7 +163,7 @@ fun ChapterSelectionDialog(
 
 @Composable
 private fun ChapterItem(
-    chapter: Chapter,
+    chapter: ChapterInfo,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
@@ -175,7 +176,7 @@ private fun ChapterItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = chapter.name,
+            text = chapter.title,
             style = MaterialTheme.typography.bodyLarge.copy(
                 fontWeight = FontWeight.Bold
             ),

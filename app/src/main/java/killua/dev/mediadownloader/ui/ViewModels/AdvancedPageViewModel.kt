@@ -4,8 +4,11 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import killua.dev.mediadownloader.Model.ChapterInfo
 import killua.dev.mediadownloader.Model.NetworkResult
+import killua.dev.mediadownloader.Model.toChapterInfo
 import killua.dev.mediadownloader.api.Kuaikan.Chapter
+import killua.dev.mediadownloader.api.Pixiv.Model.NovelInfo
 import killua.dev.mediadownloader.api.Twitter.TwitterDownloadAPI
 import killua.dev.mediadownloader.di.ApplicationScope
 import killua.dev.mediadownloader.features.AdvancedFeaturesManager
@@ -23,14 +26,20 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
+enum class ChapterDownloadType {
+    KUAIKAN_MANGA,
+    PIXIV_NOVEL,
+    NONE
+}
 data class AdvancedPageUIState(
     val currentDialogType: DialogType = DialogType.NONE,
     val isGettingMyTwitterBookmark: Boolean = false,
     val isFetching: Boolean = false,
     val info: Triple<String, String, String> = Triple("","",""),
     val downloadList: Set<String> = emptySet(),
-    val chapters: List<Pair<Chapter, Boolean>> = emptyList(),
-    val showChapterSelection: Boolean = false
+    val chapters: List<Pair<ChapterInfo, Boolean>> = emptyList(),
+    val showChapterSelection: Boolean = false,
+    val currentDownloadType: ChapterDownloadType = ChapterDownloadType.NONE
 ): UIState
 
 sealed class AdvancedPageUIIntent : UIIntent {
@@ -40,6 +49,7 @@ sealed class AdvancedPageUIIntent : UIIntent {
     data class GetSomeonesTwitterAccountInfo(val screenName: String): AdvancedPageUIIntent()
     data class OnConfirmTwitterDownloadMedia(val screenName: String, val id: String): AdvancedPageUIIntent()
     data class GetKuaikanEntireManga(val url: String): AdvancedPageUIIntent()
+    data class GetPixivEntireNovel(val url: String): AdvancedPageUIIntent()
     data class GetLofterPicsByTags(val url: String): AdvancedPageUIIntent()
     data class ToggleChapter(val index: Int) : AdvancedPageUIIntent()
     data object ConfirmChapterSelection : AdvancedPageUIIntent()
@@ -51,6 +61,7 @@ enum class DialogType {
     TWITTER_USER_INFO_DOWNLOAD,
     LOFTER_AUTHOR_TAGS,
     KUAIKAN_ENTIRE,
+    PIXIV_ENTIRE_NOVEL,
     NONE
 }
 
@@ -88,9 +99,10 @@ class AdvancedPageViewModel @Inject constructor(
             AdvancedPageUIIntent.DismissChapterSelection -> handleDismissChapterSelection()
             AdvancedPageUIIntent.SelectAllChapters -> handleSelectAllChapters()
             AdvancedPageUIIntent.ClearAllChapters -> handleClearAllChapters()
+            is AdvancedPageUIIntent.GetPixivEntireNovel -> handlePixivEntireNovel(intent.url)
         }
     }
-    
+
     private fun handleEntry() {
         launchOnIO {
             val tags = advancedFeaturesManager.readLofterTags()
@@ -165,7 +177,7 @@ class AdvancedPageViewModel @Inject constructor(
     private fun handleKuaikanEntireManga(url: String) {
         applicationScope.launch {
             emitState(uiState.value.copy(isFetching = true))
-            when(val mangaList = advancedFeaturesManager.getWholeManga(url)){
+            when(val mangaList = advancedFeaturesManager.getKuaikanEntireComic(url)){
                 is NetworkResult.Error -> {
                     emitState(uiState.value.copy(isFetching = false))
                     showMessage("Error")
@@ -173,8 +185,29 @@ class AdvancedPageViewModel @Inject constructor(
                 is NetworkResult.Success -> {
                     emitState(uiState.value.copy(
                         isFetching = false,
-                        chapters = mangaList.data.map { it to true },
-                        showChapterSelection = true
+                        chapters = mangaList.data.map { it.toChapterInfo() }.map { it to true },
+                        showChapterSelection = true,
+                        currentDownloadType = ChapterDownloadType.KUAIKAN_MANGA  // 设置下载类型
+                    ))
+                }
+            }
+        }
+    }
+
+    private fun handlePixivEntireNovel(url: String) {
+        applicationScope.launch {
+            emitState(uiState.value.copy(isFetching = true))
+            when(val novelList = advancedFeaturesManager.getPixivEntireNovel(url)){
+                is NetworkResult.Error -> {
+                    emitState(uiState.value.copy(isFetching = false))
+                    showMessage("Error")
+                }
+                is NetworkResult.Success -> {
+                    emitState(uiState.value.copy(
+                        isFetching = false,
+                        chapters = novelList.data.map { it.toChapterInfo() }.map { it to true },
+                        showChapterSelection = true,
+                        currentDownloadType = ChapterDownloadType.PIXIV_NOVEL  // 设置下载类型
                     ))
                 }
             }
@@ -216,12 +249,47 @@ class AdvancedPageViewModel @Inject constructor(
             val selectedChapters = uiState.value.chapters
                 .filter { it.second }
                 .map { it.first }
+
+            when (uiState.value.currentDownloadType) {
+                ChapterDownloadType.KUAIKAN_MANGA -> {
+                    // 将 ChapterInfo 转换回 Kuaikan.Chapter
+                    val kuaikanChapters = selectedChapters.mapNotNull { chapterInfo ->
+                        when (chapterInfo) {
+                            is ChapterInfo.DownloadableChapter -> Chapter(
+                                id = chapterInfo.id,
+                                name = chapterInfo.title
+                            )
+                            else -> null
+                        }
+                    }
+                    advancedFeaturesManager.downloadEntireKuaikanComic(kuaikanChapters)
+                    advancedFeaturesManager.cancelKuaikanProgressNotification()
+                }
+                ChapterDownloadType.PIXIV_NOVEL -> {
+                    val pixivChapters = selectedChapters.mapNotNull { chapterInfo ->
+                        when (chapterInfo) {
+                            is ChapterInfo.DownloadableChapter -> NovelInfo(
+                                seriesTitle = chapterInfo.seriesName!!,
+                                id = chapterInfo.id,
+                                title = chapterInfo.title
+                            )
+                            else -> null
+                        }
+                    }
+                    advancedFeaturesManager.downloadEntirePixivNovel(pixivChapters)
+                    advancedFeaturesManager.cancelPixivProgressNotification()
+                }
+                ChapterDownloadType.NONE -> {
+                    showMessage("Invalid download type")
+                    return@launch
+                }
+            }
+
             emitState(uiState.value.copy(
                 showChapterSelection = false,
-                chapters = emptyList()
+                chapters = emptyList(),
+                currentDownloadType = ChapterDownloadType.NONE
             ))
-            advancedFeaturesManager.downloadEntireManga(selectedChapters)
-            advancedFeaturesManager.cancelKuaikanProgressNotification()
         }
     }
 

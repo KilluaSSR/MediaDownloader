@@ -16,8 +16,8 @@ class DownloadServicesRepository @Inject constructor(
 ) {
     suspend fun getTwitterMedia(tweetId: String) = twitterDownloadAPI.getTwitterSingleMediaDetailAsync(tweetId)
     fun getLofterMedia(url: String) = lofterService.getBlogImages(url)
-    suspend fun getPixivMedia(url: String) = pixivService.getSingleBlogImage(url)
-    suspend fun getPixivNovel(url: String) = pixivService.getNovel(url)
+    suspend fun getPixivMedia(id: String) = pixivService.getSingleBlogImage(id)
+    suspend fun getPixivNovel(id: String) = pixivService.getNovel(id)
     suspend fun getKuaikanMedia(url: String) = kuaikanService.getSingleChapter(url)
     suspend fun insert(download: Download) = downloadRepository.insert(download)
 }
