@@ -8,6 +8,7 @@ import killua.dev.mediadownloader.api.Pixiv.BuildRequest.PixivRequestEntireNovel
 import killua.dev.mediadownloader.api.Pixiv.BuildRequest.PixivRequestSingleNovelURL
 import killua.dev.mediadownloader.api.Pixiv.BuildRequest.PixivRequestPicturesDetailsURL
 import killua.dev.mediadownloader.api.Pixiv.BuildRequest.PixivRequestPicturesURL
+import killua.dev.mediadownloader.api.Pixiv.BuildRequest.addPixivEntireNovelHeaders
 import killua.dev.mediadownloader.api.Pixiv.BuildRequest.addPixivNovelFetchHeaders
 import killua.dev.mediadownloader.api.Pixiv.BuildRequest.addPixivPictureFetchHeaders
 import killua.dev.mediadownloader.api.Pixiv.Model.NovelInfo
@@ -70,12 +71,14 @@ class PixivService @Inject constructor(
                 Request.Builder()
                     .get()
                     .url(PixivRequestEntireNovelURL(id))
-                    .build()
                     .also {
-                        NetworkHelper.setCookies("pixiv.net", mapOf(
-                            "PHPSESSID" to userdata.userPixivPHPSSID.value
+                        NetworkHelper.setCookies("www.pixiv.net", mapOf(
+                            "PHPSESSID" to userdata.userPixivPHPSSID.value,
                         ))
                     }
+                    .addPixivEntireNovelHeaders(id)
+                    .build()
+
             ).use { response ->
                 if (!response.isSuccessful) {
                     return@withContext NetworkResult.Error(

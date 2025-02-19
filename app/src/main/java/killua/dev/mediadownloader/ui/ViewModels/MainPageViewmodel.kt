@@ -125,7 +125,7 @@ class MainPageViewmodel @Inject constructor(
                             .onFailure { error ->
                                 emitState(uiState.value.copy(showNotLoggedIn = NotLoggedInPlatform(true,platform)))
                             }
-                    }catch (e: IllegalArgumentException){
+                    }catch (e: Exception){
                         emitEffect(ShowSnackbar(e.message.toString(), "OK", true, SnackbarDuration.Short))
                     }
                 }
