@@ -98,15 +98,19 @@ fun MainPage(
                             viewmodel.emitEffect(SnackbarUIEffect.ShowSnackbar(context.getString(R.string.paste_url_here_)))
                         }
                         else -> {
-                            when (SupportedUrlType.fromUrl(url)) {
+                            val urlType = SupportedUrlType.fromUrl(url)
+                            when(urlType){
                                 SupportedUrlType.UNKNOWN -> {
                                     viewmodel.emitEffect(SnackbarUIEffect.ShowSnackbar(context.getString(R.string.unsupported_url)))
                                 }
                                 else -> {
-                                    viewmodel.emitIntent(MainPageUIIntent.ExecuteDownload(url))
+                                    SupportedUrlType.toPlatform(urlType).let {
+                                        viewmodel.emitIntent(MainPageUIIntent.ExecuteDownload(url,it!!))
+                                    }
                                 }
                             }
                         }
+
                     }
                 }
             }

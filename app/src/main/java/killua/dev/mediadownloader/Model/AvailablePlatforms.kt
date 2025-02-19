@@ -18,15 +18,6 @@ enum class AvailablePlatforms {
     Kuaikan
 }
 
-val patterns: Map<String, AvailablePlatforms> = mapOf(
-    "x.com" to AvailablePlatforms.Twitter,
-    "twitter.com" to AvailablePlatforms.Twitter,
-    ".lofter.com/post/" to AvailablePlatforms.Lofter,
-    "pixiv.net/artworks/" to AvailablePlatforms.Pixiv,
-    "pixiv.net/novel/show.php?" to AvailablePlatforms.Pixiv,
-    "kuaikanmanhua.com" to AvailablePlatforms.Kuaikan
-)
-
 val platformsDrawable: Map<AvailablePlatforms,Int> = mapOf(
     AvailablePlatforms.Twitter to R.drawable.logo_of_twitter,
     AvailablePlatforms.Lofter to R.drawable.lofter_logo,
@@ -53,6 +44,15 @@ enum class SupportedUrlType(val pattern: Regex) {
     companion object {
         fun fromUrl(url: String): SupportedUrlType {
             return entries.find { it.pattern.containsMatchIn(url) } ?: UNKNOWN
+        }
+
+        fun toPlatform(supportedUrlType: SupportedUrlType) = when(supportedUrlType){
+            SupportedUrlType.TWITTER -> AvailablePlatforms.Twitter
+            SupportedUrlType.LOFTER -> AvailablePlatforms.Lofter
+            SupportedUrlType.PIXIV_IMG -> AvailablePlatforms.Pixiv
+            SupportedUrlType.PIXIV_NOVEL -> AvailablePlatforms.Pixiv
+            SupportedUrlType.KUAIKAN -> AvailablePlatforms.Kuaikan
+            SupportedUrlType.UNKNOWN -> null
         }
     }
 }

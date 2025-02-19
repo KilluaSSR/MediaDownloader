@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import killua.dev.mediadownloader.Login.BrowserPage
 import killua.dev.mediadownloader.Model.AvailablePlatforms
+import killua.dev.mediadownloader.Model.SupportedUrlType
 import killua.dev.mediadownloader.ui.CookiesRoutes
 import killua.dev.mediadownloader.ui.LocalNavController
 import killua.dev.mediadownloader.ui.MainRoutes
@@ -61,7 +62,7 @@ class MainActivity : ComponentActivity() {
                 val downloadResult by viewModel.sharedDownloadResult.collectAsStateWithLifecycle()
                 LaunchedEffect(sharedLink) {
                     sharedLink?.let { url ->
-                        val platform = classifyLinks(url)
+                        val platform = SupportedUrlType.toPlatform(SupportedUrlType.fromUrl(url))!!
                         viewModel.handleSharedLink(platform, url)
                     }
                 }
