@@ -1,9 +1,9 @@
 package killua.dev.mediadownloader
 
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -12,14 +12,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.view.WindowCompat
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import killua.dev.mediadownloader.Login.BrowserPage
 import killua.dev.mediadownloader.Model.AvailablePlatforms
 import killua.dev.mediadownloader.Model.SupportedUrlType
+import killua.dev.mediadownloader.datastore.writeSecureMyDownload
 import killua.dev.mediadownloader.ui.CookiesRoutes
 import killua.dev.mediadownloader.ui.LocalNavController
 import killua.dev.mediadownloader.ui.MainRoutes
@@ -38,20 +41,35 @@ import killua.dev.mediadownloader.ui.pages.OtherSetupPages.Twitter.TwitterPrepar
 import killua.dev.mediadownloader.ui.pages.SettingsPage
 import killua.dev.mediadownloader.ui.pages.UserInfoPage
 import killua.dev.mediadownloader.ui.theme.MediaDownloaderTheme
+import killua.dev.mediadownloader.utils.BiometricManagerSingleton
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
+
     private val viewModel: MainPageViewmodel by viewModels()
     @OptIn(ExperimentalFoundationApi::class)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        BiometricManagerSingleton.init(this)
         val sharedLink = when{
             intent?.action == Intent.ACTION_SEND ->{
                 intent.getStringExtra(Intent.EXTRA_TEXT)
             }
             else -> null
         }
+        lifecycleScope.launch {
+            if (BiometricManagerSingleton.getBiometricHelper()?.canAuthenticate() == false) {
+                writeSecureMyDownload(false)
+            }
+        }
+
+        if (checkSelfPermission(android.Manifest.permission.USE_BIOMETRIC)
+            != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(android.Manifest.permission.USE_BIOMETRIC), 123)
+        }
+
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             MediaDownloaderTheme {
@@ -89,9 +107,11 @@ class MainActivity : ComponentActivity() {
                         composable(MainRoutes.MainPage.route) {
                             MainPage()
                         }
-                        composable(MainRoutes.DownloadListPage.route){
+
+                        composable(MainRoutes.DownloadListPage.route) {
                             DownloadListPage()
                         }
+
                         composable(MainRoutes.AdvancedPage.route){
                             AdvancedPage()
                         }

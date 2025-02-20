@@ -3,6 +3,7 @@ package killua.dev.mediadownloader.ui.ViewModels
 import android.content.Context
 import androidx.compose.material3.SnackbarDuration
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import killua.dev.mediadownloader.Model.AvailablePlatforms
 import killua.dev.mediadownloader.Model.NotLoggedInPlatform
@@ -12,6 +13,7 @@ import killua.dev.mediadownloader.ui.SnackbarUIEffect
 import killua.dev.mediadownloader.ui.SnackbarUIEffect.*
 import killua.dev.mediadownloader.ui.UIIntent
 import killua.dev.mediadownloader.ui.UIState
+import killua.dev.mediadownloader.utils.BiometricManagerSingleton
 import killua.dev.mediadownloader.utils.navigateLofterProfile
 import killua.dev.mediadownloader.utils.navigatePixivProfile
 import killua.dev.mediadownloader.utils.navigateTwitterProfile
@@ -20,7 +22,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.lang.IllegalArgumentException
 import javax.inject.Inject
 
 sealed class MainPageUIIntent : UIIntent {
@@ -47,7 +48,6 @@ class MainPageViewmodel @Inject constructor(
     MainPageUIState()
 ) {
     private val mutex = Mutex()
-
     private val _sharedDownloadResult = MutableStateFlow<Result<Unit>?>(null)
     val sharedDownloadResult = _sharedDownloadResult.asStateFlow()
 
@@ -65,6 +65,28 @@ class MainPageViewmodel @Inject constructor(
             downloadbyLink.downloadCompletedFlow.collect {
                 presentFavouriteCardDetails()
             }
+        }
+    }
+
+    suspend fun authenticateNavigation(
+        navController: NavController,
+        route: String,
+        onAuthFailed: (String) -> Unit
+    ) {
+        val biometricHelper = BiometricManagerSingleton.getBiometricHelper()
+        if (biometricHelper == null) {
+            onAuthFailed("生物识别服务未初始化")
+            return
+        }
+
+        if (biometricHelper.canAuthenticate()) {
+            if (biometricHelper.authenticate()) {
+                navController.navigate(route)
+            } else {
+                onAuthFailed("认证失败")
+            }
+        } else {
+            onAuthFailed("设备不支持生物识别")
         }
     }
 

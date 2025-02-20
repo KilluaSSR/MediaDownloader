@@ -28,12 +28,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.mediadownloader.R
 import killua.dev.mediadownloader.datastore.NOTIFICATION_ENABLED
 import killua.dev.mediadownloader.datastore.PHOTOS_KEY
+import killua.dev.mediadownloader.datastore.SECURE_MY_DOWNLOAD
 import killua.dev.mediadownloader.datastore.WIFI
 import killua.dev.mediadownloader.datastore.readDelay
 import killua.dev.mediadownloader.datastore.readDownloadPhotos
 import killua.dev.mediadownloader.datastore.readMaxConcurrentDownloads
 import killua.dev.mediadownloader.datastore.readMaxRetries
 import killua.dev.mediadownloader.datastore.readOnlyWifi
+import killua.dev.mediadownloader.datastore.readSecureMyDownload
 import killua.dev.mediadownloader.datastore.writeApplicationUserAuth
 import killua.dev.mediadownloader.datastore.writeApplicationUserCt0
 import killua.dev.mediadownloader.datastore.writeApplicationUserID
@@ -54,6 +56,7 @@ import killua.dev.mediadownloader.ui.components.common.Switchable
 import killua.dev.mediadownloader.ui.components.common.Title
 import killua.dev.mediadownloader.ui.tokens.SizeTokens
 import killua.dev.mediadownloader.utils.ActivityUtil
+import killua.dev.mediadownloader.utils.BiometricManagerSingleton
 import killua.dev.mediadownloader.utils.getActivity
 import killua.dev.mediadownloader.utils.navigateSingle
 import kotlinx.coroutines.launch
@@ -108,8 +111,12 @@ fun SettingsPage(){
             val concurrent by context.readMaxConcurrentDownloads().collectAsStateWithLifecycle(initialValue = 3)
             val retry by context.readMaxRetries().collectAsStateWithLifecycle(initialValue = 3)
             val wifi by context.readOnlyWifi().collectAsStateWithLifecycle(initialValue = true)
+            val securedDownloadList by context.readSecureMyDownload().collectAsStateWithLifecycle(initialValue = false)
             val photos by context.readDownloadPhotos().collectAsStateWithLifecycle(initialValue = true)
             val delay by context.readDelay().collectAsStateWithLifecycle(initialValue = 2)
+            val isBiometricAvailable = remember {
+                BiometricManagerSingleton.getBiometricHelper()?.canAuthenticate() == true
+            }
             Title(title = "Download") {
                 Switchable(
                     key = NOTIFICATION_ENABLED,
@@ -163,7 +170,21 @@ fun SettingsPage(){
                 }
             }
 
-            Title(title = stringResource(R.string.platform_configurations), color = MaterialTheme.colorScheme.error) {
+            Title(title = stringResource(R.string.privacy)) {
+
+                Switchable(
+                    enabled = isBiometricAvailable,
+                    key = SECURE_MY_DOWNLOAD,
+                    title = stringResource(R.string.biometric_auth),
+                    checkedText = when {
+                        !isBiometricAvailable -> stringResource(R.string.biometric_auth_disabled_desc)
+                        securedDownloadList -> stringResource(R.string.biometric_auth_desc_on)
+                        else -> stringResource(R.string.biometric_auth_desc_off)
+                    }
+                )
+            }
+
+            Title(title = stringResource(R.string.platform_configurations)) {
                 Clickable(
                     title = "Twitter",
                     value = "Log in / out."

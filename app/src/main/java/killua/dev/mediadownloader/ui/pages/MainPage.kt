@@ -23,6 +23,7 @@ import killua.dev.mediadownloader.Model.FavouriteUserInfo
 import killua.dev.mediadownloader.Model.NotLoggedInPlatform
 import killua.dev.mediadownloader.Model.SupportedUrlType
 import killua.dev.mediadownloader.R
+import killua.dev.mediadownloader.datastore.readSecureMyDownload
 import killua.dev.mediadownloader.ui.LocalNavController
 import killua.dev.mediadownloader.ui.MainRoutes
 import killua.dev.mediadownloader.ui.SnackbarUIEffect
@@ -42,6 +43,7 @@ import killua.dev.mediadownloader.ui.components.common.paddingTop
 import killua.dev.mediadownloader.ui.getRandomColors
 import killua.dev.mediadownloader.ui.tokens.SizeTokens
 import killua.dev.mediadownloader.utils.navigateSingle
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @ExperimentalFoundationApi
@@ -170,10 +172,22 @@ fun MainPage(
                             icon = item.icon,
                             color = randomColors[index].container
                         ) {
-                            if (item.route == MainRoutes.Download.route) {
-                                showDialog = true
-                            } else {
-                                navController.navigateSingle(item.route)
+                            when (item.route) {
+                                MainRoutes.Download.route -> showDialog = true
+                                MainRoutes.DownloadListPage.route -> scope.launch {
+                                    if (context.readSecureMyDownload().first()) {
+                                        viewmodel.authenticateNavigation(
+                                            navController = navController,
+                                            route = item.route,
+                                            onAuthFailed = { message ->
+                                                SnackbarUIEffect.ShowSnackbar(message)
+                                            }
+                                        )
+                                    }else{
+                                        navController.navigateSingle(item.route)
+                                    }
+                                }
+                                else -> navController.navigateSingle(item.route)
                             }
                         }
                     }

@@ -4,7 +4,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-
+val SECURE_MY_DOWNLOAD = booleanPreferencesKey("secure_my_download")
 // Twitter Userdata keys
 val APPLICATION_USER_SCREENNAME_KEY =
     stringPreferencesKey("app_user_screenname")
@@ -60,6 +60,7 @@ fun Context.readOnlyWifi() = readStoreBoolean(key = WIFI, defValue = true)
 fun Context.readDownloadPhotos() = readStoreBoolean(key = PHOTOS_KEY, defValue = true)
 fun Context.readLofterCookieExpiration() = readStoreString(key = LOFTER_EXPIRATION, defValue = "")
 fun Context.readApplicationUserID() = readStoreString(key = APPLICATION_USER_ID, defValue = "")
+fun Context.readSecureMyDownload() = readStoreBoolean(key = SECURE_MY_DOWNLOAD, defValue = false)
 //Write
 suspend fun Context.writeApplicationUserScreenName(screenName: String) = saveStoreString(key = APPLICATION_USER_SCREENNAME_KEY, value = screenName)
 suspend fun Context.writeApplicationUserName(name: String) = saveStoreString(key = APPLICATION_USER_NAME_KEY, value = name)
@@ -81,3 +82,4 @@ suspend fun Context.writeApplicationUserID(id: String) = saveStoreString(APPLICA
 suspend fun Context.writeDelay(delay: Int) = saveStoreInt(DELAY, delay)
 suspend fun Context.writePixivPHPSSID(PixivSSID: String) = saveStoreString(PIXIV_PHPSSID, PixivSSID)
 suspend fun Context.writeKuaikanPassToken(PassToken: String) = saveStoreString(KUAIKAN_PASSTOKEN, PassToken)
+suspend fun Context.writeSecureMyDownload(set: Boolean) = saveStoreBoolean(SECURE_MY_DOWNLOAD, set)

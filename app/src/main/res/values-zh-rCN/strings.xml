@@ -34,6 +34,8 @@
     <string name="reset">重置</string>
     <string name="reset_desc">清除所有登录信息，您需要重新登陆才能继续使用</string>
     <string name="dangerous">危险</string>
+    <string name="biometric_auth_disabled_desc">您的设备可能不支持生物识别认证，或者您未设置该功能</string>
+    <string name="biometric_auth_desc_off">当前任何人都可以看到我的下载列表</string>
     <string name="platform_configurations">平台设置</string>
     <string name="reset_title">现在重置?</string>
     <string name="unsupported_url">不支持的URL</string>
@@ -80,4 +82,9 @@
     <string name="date_range">日期范围</string>
     <string name="your_favourite_tags">您喜欢的标签</string>
     <string name="enter_pixiv_entire_novel_url">输入Pixiv小说URL</string>
+    <string name="privacy">隐私</string>
+    <string name="protected_content_desc">验证身份以继续</string>
+    <string name="biometric_auth">生物身份认证</string>
+    <string name="biometric_auth_desc_on">下载列表已经被保护</string>
+    <string name="protected_content_title">受保护的内容</string>
 </resources>
