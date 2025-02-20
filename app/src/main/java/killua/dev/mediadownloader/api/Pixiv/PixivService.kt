@@ -40,7 +40,7 @@ class PixivService @Inject constructor(
                     .addPixivNovelFetchHeaders(id)
                     .build()
                     .also {
-                        NetworkHelper.setCookies("pixiv.net", mapOf(
+                        NetworkHelper.setCookies("www.pixiv.net", mapOf(
                             "PHPSESSID" to userdata.userPixivPHPSSID.value
                         ))
                     }

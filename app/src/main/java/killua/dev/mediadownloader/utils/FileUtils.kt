@@ -14,14 +14,15 @@ class FileUtils @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     fun writeTextToFile(
-        mainFolder: String,
+        mainFolder: String?,
         text: String,
         fileName: String,
         mediaType: MediaType = MediaType.TXT,
         platform: AvailablePlatforms
     ): Uri? {
         val values = ContentValues().apply {
-            val path = "${mediaType.buildPath(platform)}/$mainFolder"
+            val path = mainFolder?.let { "${mediaType.buildPath(platform)}/$it" }
+                ?: mediaType.buildPath(platform)
             put(MediaStore.MediaColumns.DISPLAY_NAME, "$fileName.${mediaType.extension}")
             put(MediaStore.MediaColumns.MIME_TYPE, mediaType.mimeType)
             put(MediaStore.MediaColumns.RELATIVE_PATH, path)

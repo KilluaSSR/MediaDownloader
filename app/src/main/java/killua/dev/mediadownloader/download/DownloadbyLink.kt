@@ -98,7 +98,7 @@ class DownloadbyLink @Inject constructor(
                     val formattedContent = result.data.content.formatUnicodeToReadable()
                     val formattedTitle = result.data.title.formatUnicodeToReadable()
                     fileUtils.writeTextToFile(
-                        mainFolder = result.data.seriesNavData.title,
+                        mainFolder = result.data?.seriesNavData?.title,
                         text = formattedContent,
                         fileName = formattedTitle,
                         mediaType = MediaType.TXT,
