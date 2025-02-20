@@ -51,7 +51,6 @@ fun AdvancedPage(){
     val viewModel: AdvancedPageViewModel = hiltViewModel()
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
-    var showDialog by remember { mutableStateOf(false) }
     var showDevelopingAlert by remember { mutableStateOf(false) }
     val eligibleToUseLofterGetByTags = viewModel.lofterGetByTagsEligibility.collectAsStateWithLifecycle()
     val eligibleToUseTwitterFunctions = viewModel.twitterEligibility.collectAsStateWithLifecycle()
@@ -131,14 +130,13 @@ fun AdvancedPage(){
         AdvancedInputDialog(
             title = dialogTitle,
             placeholder = dialogPlaceholder,
-            showDialog = showDialog,
+            showDialog = uiState.value.showDialog,
             loading = uiState.value.isFetching,
             userInfo = if (uiState.value.info.first.isNotEmpty())
                 uiState.value.info else null,
             onDismiss = {
-                showDialog = false
                 scope.launch{
-                    viewModel.emitState(uiState.value.copy(isFetching = false,info = Triple("", "", "")))
+                    viewModel.emitState(uiState.value.copy(isFetching = false,info = Triple("", "", ""), showDialog = false))
                 }
             },
             onCancel = {
@@ -146,9 +144,9 @@ fun AdvancedPage(){
                     viewModel.emitState(uiState.value.copy(
                         info = Triple("", "", ""),
                         isFetching = false,
+                        showDialog = false
                     ))
                 }
-                showDialog = false
             },
             onConfirm = { input ->
                 when(uiState.value.currentDialogType){
@@ -162,10 +160,10 @@ fun AdvancedPage(){
                                 viewModel.emitIntent(OnConfirmTwitterDownloadMedia(uiState.value.info.third, uiState.value.info.first))
                                 delay(200)
                                 viewModel.emitState(uiState.value.copy(
-                                    info = Triple("", "", "")
+                                    info = Triple("", "", ""),
+                                    showDialog = false
                                 ))
                             }
-                            showDialog = false
                         }
                     }
                     DialogType.LOFTER_AUTHOR_TAGS -> {
@@ -173,9 +171,9 @@ fun AdvancedPage(){
                             viewModel.emitIntent(GetLofterPicsByTags(input))
                             delay(200)
                             viewModel.emitState(uiState.value.copy(
-                                info = Triple("", "", "")
+                                info = Triple("", "", ""),
+                                showDialog = false
                             ))
-                            showDialog = false
                         }
                     }
                     DialogType.KUAIKAN_ENTIRE -> {
@@ -185,10 +183,9 @@ fun AdvancedPage(){
                             viewModel.emitState(uiState.value.copy(
                                 info = Triple("", "", "")
                             ))
-                            showDialog = false
                         }
                     }
-                    DialogType.NONE -> TODO()
+                    DialogType.NONE -> {}
                     DialogType.PIXIV_ENTIRE_NOVEL -> {
                         scope.launch {
                             viewModel.emitIntent(GetPixivEntireNovel(input))
@@ -196,7 +193,6 @@ fun AdvancedPage(){
                             viewModel.emitState(uiState.value.copy(
                                 info = Triple("", "", "")
                             ))
-                            showDialog = false
                         }
                     }
                 }
@@ -243,11 +239,10 @@ fun AdvancedPage(){
                                 2 ->{
                                     if(eligibleToUseTwitterFunctions.value){
                                         scope.launch{
-                                            viewModel.emitState(uiState.value.copy(currentDialogType = DialogType.TWITTER_USER_INFO_DOWNLOAD))
+                                            viewModel.emitState(uiState.value.copy(currentDialogType = DialogType.TWITTER_USER_INFO_DOWNLOAD, showDialog = true))
                                         }
                                         dialogTitle = context.getString(R.string.enter_twitter_username)
                                         dialogPlaceholder = "@ExampleUser"
-                                        showDialog = true
                                     }else{
                                         navController.navigateSingle(PrepareRoutes.TwitterPreparePage.route)
                                     }
@@ -283,11 +278,10 @@ fun AdvancedPage(){
                                 0 -> {
                                     if (eligibleToUseLofterGetByTags.value) {
                                         scope.launch{
-                                            viewModel.emitState(uiState.value.copy(currentDialogType = DialogType.LOFTER_AUTHOR_TAGS))
+                                            viewModel.emitState(uiState.value.copy(currentDialogType = DialogType.LOFTER_AUTHOR_TAGS, showDialog = true))
                                         }
                                         dialogTitle = context.getString(R.string.enter_lofter_author_homepage)
                                         dialogPlaceholder = "https://username.lofter.com/"
-                                        showDialog = true
                                     } else {
                                         navController.navigateSingle(PrepareRoutes.LofterPreparePage.route)
                                     }
@@ -316,11 +310,10 @@ fun AdvancedPage(){
                             when (index) {
                                 0 -> {
                                     scope.launch{
-                                        viewModel.emitState(uiState.value.copy(currentDialogType = DialogType.KUAIKAN_ENTIRE))
+                                        viewModel.emitState(uiState.value.copy(currentDialogType = DialogType.KUAIKAN_ENTIRE, showDialog = true))
                                     }
                                     dialogTitle = context.getString(R.string.enter_kuaikan_comic_url)
                                     dialogPlaceholder = "kuaikanmanhua.com/web/topic/..."
-                                    showDialog = true
                                 }
                             }
                         }
@@ -345,11 +338,10 @@ fun AdvancedPage(){
                             when (index) {
                                 0 -> {
                                     scope.launch{
-                                        viewModel.emitState(uiState.value.copy(currentDialogType = DialogType.PIXIV_ENTIRE_NOVEL))
+                                        viewModel.emitState(uiState.value.copy(currentDialogType = DialogType.PIXIV_ENTIRE_NOVEL, showDialog = true))
                                     }
                                     dialogTitle = context.getString(R.string.enter_pixiv_entire_novel_url)
                                     dialogPlaceholder = "www.pixiv.net/novel/series/..."
-                                    showDialog = true
                                 }
                             }
                         }

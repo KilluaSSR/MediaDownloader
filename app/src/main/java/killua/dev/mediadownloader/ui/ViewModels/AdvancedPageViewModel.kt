@@ -35,6 +35,7 @@ data class AdvancedPageUIState(
     val currentDialogType: DialogType = DialogType.NONE,
     val isGettingMyTwitterBookmark: Boolean = false,
     val isFetching: Boolean = false,
+    val showDialog: Boolean = false,
     val info: Triple<String, String, String> = Triple("","",""),
     val downloadList: Set<String> = emptySet(),
     val chapters: List<Pair<ChapterInfo, Boolean>> = emptyList(),
@@ -185,6 +186,7 @@ class AdvancedPageViewModel @Inject constructor(
                 is NetworkResult.Success -> {
                     emitState(uiState.value.copy(
                         isFetching = false,
+                        showDialog = false,
                         chapters = mangaList.data.map { it.toChapterInfo() }.map { it to true },
                         showChapterSelection = true,
                         currentDownloadType = ChapterDownloadType.KUAIKAN_MANGA  // 设置下载类型
@@ -205,6 +207,7 @@ class AdvancedPageViewModel @Inject constructor(
                 is NetworkResult.Success -> {
                     emitState(uiState.value.copy(
                         isFetching = false,
+                        showDialog = false,
                         chapters = novelList.data.map { it.toChapterInfo() }.map { it to true },
                         showChapterSelection = true,
                         currentDownloadType = ChapterDownloadType.PIXIV_NOVEL  // 设置下载类型
