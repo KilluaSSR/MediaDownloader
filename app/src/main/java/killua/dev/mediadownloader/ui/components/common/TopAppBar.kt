@@ -14,9 +14,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import killua.dev.mediadownloader.utils.maybePopBackStack
-
+import killua.dev.mediadownloader.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,7 +89,7 @@ fun DownloadPageTopAppBar(
     cancelOnClick: () -> Unit,
     showMoreOnClick: () -> Unit
 ) {
-    TopBar(navController, "Download List", extraIcons = {
+    TopBar(navController, stringResource(R.string.download_list), extraIcons = {
         IconButton(
             onClick = retryAllOnClick
         ) {

@@ -26,10 +26,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.window.DialogProperties
+import killua.dev.mediadownloader.R
 import killua.dev.mediadownloader.ui.tokens.SizeTokens
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import killua.dev.mediadownloader.R
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BaseAnimatedDialog(

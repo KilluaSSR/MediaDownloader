@@ -1,7 +1,5 @@
 package killua.dev.mediadownloader.ui.ViewModels
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import killua.dev.mediadownloader.Model.ChapterInfo

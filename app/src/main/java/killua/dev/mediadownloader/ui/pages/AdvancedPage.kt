@@ -21,7 +21,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.mediadownloader.R
 import killua.dev.mediadownloader.ui.LocalNavController
 import killua.dev.mediadownloader.ui.PrepareRoutes
-import killua.dev.mediadownloader.ui.ViewModels.AdvancedPageUIIntent
 import killua.dev.mediadownloader.ui.ViewModels.AdvancedPageUIIntent.*
 import killua.dev.mediadownloader.ui.ViewModels.AdvancedPageViewModel
 import killua.dev.mediadownloader.ui.ViewModels.DialogType

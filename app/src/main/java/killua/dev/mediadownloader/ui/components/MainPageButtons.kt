@@ -55,7 +55,7 @@ val MainPageButtons = listOf(
 
 val MainPageMenuButtons = listOf(
     MainPageBottomButtonsEssentials(
-        R.string.advanced,
+        R.string.settings,
         Icons.Rounded.Settings,
         MainPageButtonsAction.Navigate(MainRoutes.SettingPage.route)
     ),

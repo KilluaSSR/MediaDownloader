@@ -16,9 +16,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import killua.dev.mediadownloader.Setup.SetupRoutes
 import killua.dev.mediadownloader.Setup.ui.SetupPageViewModel
 import killua.dev.mediadownloader.Setup.ui.SetupUIIntent
 import killua.dev.mediadownloader.Setup.ui.components.SetupScaffold
@@ -31,7 +31,7 @@ import killua.dev.mediadownloader.ui.components.common.SetOnResume
 import killua.dev.mediadownloader.ui.tokens.SizeTokens
 import killua.dev.mediadownloader.utils.getActivity
 import killua.dev.mediadownloader.utils.navigateSingle
-
+import killua.dev.mediadownloader.R
 @SuppressLint("SetJavaScriptEnabled")
 @ExperimentalFoundationApi
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,7 +60,7 @@ fun SetupPage() {
                         }
                     }
                 ) {
-                    Text(text = "Grant All")
+                    Text(text = stringResource(R.string.grant_all))
                 }
             }
             Button(
@@ -72,7 +72,7 @@ fun SetupPage() {
                     context.getActivity().finish()
                 }
             ) {
-                Text(text = "Continue")
+                Text(text = stringResource(R.string.confirm))
             }
         }
     ) {
@@ -85,10 +85,10 @@ fun SetupPage() {
 
         }
         Spacer(modifier = Modifier.size(SizeTokens.Level24))
-        Section(title = "We want to ask you for something.") {
+        Section(title = stringResource(R.string.ask_for_sth)) {
             ClickableConfigurationButton(
-                title = "Notification Permission",
-                description = "We want to send you notifications to keep you updated.",
+                title = stringResource(R.string.notification_permission),
+                description = stringResource(R.string.notification_permission_desc),
                 state = notificationState.value,
                 onClick = {
                     viewModel.launchOnIO {
@@ -103,10 +103,10 @@ fun SetupPage() {
             )
         }
         Spacer(modifier = Modifier.size(SizeTokens.Level24))
-        Section(title = "You're invited to log in to your Twitter account.") {
+        Section(title = stringResource(R.string.invited_to_login_twitter)) {
             ClickableConfigurationButton(
-                title = "Log in",
-                description = "We need your account's cookie to download videos from twitter.",
+                title = stringResource(R.string.log_in),
+                description = stringResource(R.string.twitter_login_desc),
                 state = loginState.value,
                 onClick = {
                     if (loginState.value != CurrentState.Success) {

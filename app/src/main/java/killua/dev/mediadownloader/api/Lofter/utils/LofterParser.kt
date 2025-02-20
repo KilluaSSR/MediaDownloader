@@ -1,8 +1,6 @@
 package killua.dev.mediadownloader.api.Lofter.utils
 
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import killua.dev.mediadownloader.Model.AuthorInfo
 import killua.dev.mediadownloader.Model.ImageType
 import killua.dev.mediadownloader.Model.LofterParseRequiredInformation

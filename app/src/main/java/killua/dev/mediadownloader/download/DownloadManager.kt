@@ -9,7 +9,6 @@ import killua.dev.mediadownloader.datastore.readMaxRetries
 import killua.dev.mediadownloader.datastore.readNotificationEnabled
 import killua.dev.mediadownloader.di.DownloadScope
 import killua.dev.mediadownloader.repository.DownloadRepository
-import killua.dev.mediadownloader.ui.SnackbarUIEffect
 import killua.dev.mediadownloader.utils.ShowNotification
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow

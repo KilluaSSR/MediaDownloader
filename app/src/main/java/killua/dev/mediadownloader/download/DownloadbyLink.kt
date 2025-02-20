@@ -12,7 +12,6 @@ import killua.dev.mediadownloader.utils.DownloadPreChecks
 import killua.dev.mediadownloader.utils.FileUtils
 import killua.dev.mediadownloader.utils.MediaFileNameStrategy
 import killua.dev.mediadownloader.utils.StringUtils.formatUnicodeToReadable
-import java.io.File
 import java.util.UUID
 import javax.inject.Inject
 

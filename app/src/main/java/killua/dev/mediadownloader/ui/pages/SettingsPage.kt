@@ -117,7 +117,7 @@ fun SettingsPage(){
             val isBiometricAvailable = remember {
                 BiometricManagerSingleton.getBiometricHelper()?.canAuthenticate() == true
             }
-            Title(title = "Download") {
+            Title(title = stringResource(R.string.download)) {
                 Switchable(
                     key = NOTIFICATION_ENABLED,
                     title = stringResource(R.string.notification),
@@ -131,7 +131,7 @@ fun SettingsPage(){
                 Switchable(
                     key = PHOTOS_KEY,
                     title = stringResource(R.string.twitter_images),
-                    checkedText = if(photos){stringResource(R.string.twitter_images_enabled)} else{stringResource(R.string.wifi_only_disabled)}
+                    checkedText = if(photos){stringResource(R.string.twitter_images_enabled)} else{stringResource(R.string.twitter_images_disabled)}
                 )
                 Slideable(
                     title = stringResource(R.string.max_cocurrent_downloads),

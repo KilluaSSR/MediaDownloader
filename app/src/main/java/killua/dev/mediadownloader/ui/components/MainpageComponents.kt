@@ -43,6 +43,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.sp
 import killua.dev.mediadownloader.Model.FavouriteUserInfo
 import killua.dev.mediadownloader.Model.ReportOption
+import killua.dev.mediadownloader.R
 import killua.dev.mediadownloader.ui.LocalNavController
 import killua.dev.mediadownloader.ui.animations.AnimatedTextContainer
 import killua.dev.mediadownloader.ui.components.common.BodyMediumText
@@ -56,7 +57,7 @@ import killua.dev.mediadownloader.utils.openGithubIssues
 import killua.dev.mediadownloader.utils.openMail
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import killua.dev.mediadownloader.R
+
 @Composable
 fun MainScaffold(
     topBar: @Composable () -> Unit = {},

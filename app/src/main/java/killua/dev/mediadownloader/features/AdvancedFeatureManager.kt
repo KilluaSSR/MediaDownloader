@@ -1,8 +1,6 @@
 package killua.dev.mediadownloader.features
 
 import android.content.Context
-import android.os.Build
-import androidx.annotation.RequiresApi
 import db.Download
 import db.DownloadStatus
 import killua.dev.mediadownloader.Model.AvailablePlatforms

@@ -35,9 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import killua.dev.mediadownloader.Model.ChapterInfo
-import killua.dev.mediadownloader.api.Kuaikan.Chapter
-import killua.dev.mediadownloader.ui.tokens.SizeTokens
 import killua.dev.mediadownloader.R
+import killua.dev.mediadownloader.ui.tokens.SizeTokens
 
 @Composable
 fun ExpandableFullScreenDialog(

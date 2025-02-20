@@ -16,6 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.mediadownloader.Model.AvailablePlatforms
+import killua.dev.mediadownloader.R
 import killua.dev.mediadownloader.datastore.readLofterCookieExpiration
 import killua.dev.mediadownloader.datastore.readLofterEndTime
 import killua.dev.mediadownloader.datastore.readLofterStartTime
@@ -41,7 +42,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import killua.dev.mediadownloader.R
+
 @SuppressLint("SetJavaScriptEnabled")
 @ExperimentalFoundationApi
 @OptIn(ExperimentalMaterial3Api::class)

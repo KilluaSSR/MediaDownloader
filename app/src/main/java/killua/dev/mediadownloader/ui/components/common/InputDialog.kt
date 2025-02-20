@@ -34,17 +34,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import killua.dev.mediadownloader.ui.tokens.SizeTokens
 import kotlinx.coroutines.delay
-
+import killua.dev.mediadownloader.R
 data class InputDialogConfig(
     val title: String,
     val placeholder: String = "",
-    val confirmText: String = "Confirm",
-    val cancelText: String = "Cancel",
     val singleLine: Boolean = true
 )
 
@@ -121,7 +120,7 @@ fun CommonInputDialog(
                                 onDismiss()
                             }
                         ) {
-                            Text(config.cancelText)
+                            Text(stringResource(R.string.cancel))
                         }
 
                         Spacer(modifier = Modifier.width(SizeTokens.Level8))
@@ -132,7 +131,7 @@ fun CommonInputDialog(
                                 onDismiss()
                             }
                         ) {
-                            Text(config.confirmText)
+                            Text(stringResource(R.string.confirm))
                         }
                     }
                 }
@@ -257,7 +256,7 @@ fun AdvancedInputDialog(
                                 onCancel()
                             }
                         ) {
-                            Text(config.cancelText)
+                            Text(stringResource(R.string.cancel))
                         }
 
                         Spacer(modifier = Modifier.width(SizeTokens.Level8))
@@ -279,7 +278,7 @@ fun AdvancedInputDialog(
                                 else -> inputText.isNotEmpty()
                             }
                         ) {
-                            Text("Confirm")
+                            Text(stringResource(R.string.confirm))
                         }
                     }
                 }

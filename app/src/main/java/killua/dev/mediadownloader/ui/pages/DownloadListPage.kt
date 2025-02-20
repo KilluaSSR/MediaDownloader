@@ -41,6 +41,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.mediadownloader.Model.DownloadPageCommands
 import killua.dev.mediadownloader.Model.DownloadPageDestinations
+import killua.dev.mediadownloader.R
 import killua.dev.mediadownloader.ui.FilterContent
 import killua.dev.mediadownloader.ui.LocalNavController
 import killua.dev.mediadownloader.ui.ViewModels.DownloadListPageUIIntent.*
@@ -54,7 +55,7 @@ import killua.dev.mediadownloader.ui.components.common.FileNotFountAlert
 import killua.dev.mediadownloader.ui.components.common.paddingBottom
 import killua.dev.mediadownloader.ui.components.common.paddingHorizontal
 import killua.dev.mediadownloader.ui.tokens.SizeTokens
-import killua.dev.mediadownloader.R
+
 @SuppressLint("UnusedContentLambdaTargetStateParameter")
 @OptIn(ExperimentalAnimationApi::class, ExperimentalFoundationApi::class,
     ExperimentalMaterial3Api::class
@@ -148,7 +149,14 @@ fun DownloadListPage() {
                         ),
                         selected = (index == uiState.value.optionIndex)
                     ) {
-                        Text(label.name, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(
+                            when(index){
+                            0 -> stringResource(R.string.all)
+                            1 -> stringResource(R.string.downloading)
+                            2 -> stringResource(R.string.completed)
+                            3 -> stringResource(R.string.failed)
+                            else -> stringResource(R.string.all)
+                            }, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }
             }

@@ -3,10 +3,10 @@ package killua.dev.mediadownloader.ui.pages.OtherSetupPages.Lofter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import killua.dev.mediadownloader.db.LofterTagsRepository
 import killua.dev.mediadownloader.db.TagEntry
-import killua.dev.mediadownloader.ui.ViewModels.BaseViewModel
 import killua.dev.mediadownloader.ui.SnackbarUIEffect
 import killua.dev.mediadownloader.ui.UIIntent
 import killua.dev.mediadownloader.ui.UIState
+import killua.dev.mediadownloader.ui.ViewModels.BaseViewModel
 import javax.inject.Inject
 
 object TagUtils {

@@ -5,9 +5,9 @@ import com.google.gson.GsonBuilder
 import killua.dev.mediadownloader.Model.NetworkResult
 import killua.dev.mediadownloader.api.NetworkHelper
 import killua.dev.mediadownloader.api.Pixiv.BuildRequest.PixivRequestEntireNovelURL
-import killua.dev.mediadownloader.api.Pixiv.BuildRequest.PixivRequestSingleNovelURL
 import killua.dev.mediadownloader.api.Pixiv.BuildRequest.PixivRequestPicturesDetailsURL
 import killua.dev.mediadownloader.api.Pixiv.BuildRequest.PixivRequestPicturesURL
+import killua.dev.mediadownloader.api.Pixiv.BuildRequest.PixivRequestSingleNovelURL
 import killua.dev.mediadownloader.api.Pixiv.BuildRequest.addPixivEntireNovelHeaders
 import killua.dev.mediadownloader.api.Pixiv.BuildRequest.addPixivNovelFetchHeaders
 import killua.dev.mediadownloader.api.Pixiv.BuildRequest.addPixivPictureFetchHeaders

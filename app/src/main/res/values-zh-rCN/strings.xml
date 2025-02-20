@@ -2,6 +2,10 @@
 <resources>
     <string name="download_by_link">根据链接下载</string>
     <string name="download_list">下载列表</string>
+    <string name="notification_permission">通知权限</string>
+    <string name="twitter_login_desc">我们需要您账户的 cookie 才能从 Twitter 下载媒体</string>
+    <string name="nothing_here">什么也没有</string>
+    <string name="grant_all">授权全部</string>
     <string name="advanced">高级功能</string>
     <string name="actions">功能</string>
     <string name="overview">总结</string>
@@ -10,6 +14,7 @@
     <string name="confirm">确认</string>
     <string name="url_here">请输入链接</string>
     <string name="all">全部</string>
+    <string name="downloading">下载中</string>
     <string name="completed">已完成</string>
     <string name="failed">失败</string>
     <string name="settings">设置</string>
@@ -63,8 +68,8 @@
     <string name="enter_kuaikan_comic_url">输入快看漫画URL</string>
     <string name="twitter">推特</string>
     <string name="mail">邮箱</string>
-    <string name="log_out">登录</string>
-    <string name="log_in">登出</string>
+    <string name="log_out">登出</string>
+    <string name="log_in">登陆</string>
     <string name="select_all">全选</string>
     <string name="select_chapters">选择章节</string>
     <string name="less_than_one_min">小于1分钟</string>
@@ -87,4 +92,7 @@
     <string name="biometric_auth">生物身份认证</string>
     <string name="biometric_auth_desc_on">下载列表已经被保护</string>
     <string name="protected_content_title">受保护的内容</string>
+    <string name="ask_for_sth">我们需要请求一些权限</string>
+    <string name="invited_to_login_twitter">请您登陆您的Twitter账号</string>
+    <string name="notification_permission_desc">我们希望向您发送通知，以便保持更新</string>
 </resources>

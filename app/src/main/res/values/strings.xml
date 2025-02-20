@@ -6,6 +6,13 @@
     <string name="mail_addr" translatable="false">xiaotian2001@outlook.com</string>
     <string name="download_by_link">Download by Link</string>
     <string name="download_list">Download List</string>
+    <string name="notification_permission">Notification Permission</string>
+    <string name="ask_for_sth">We want to ask you for something</string>
+    <string name="invited_to_login_twitter">You\'re invited to log in to your Twitter account</string>
+    <string name="notification_permission_desc">We want to send you notifications to keep you updated</string>
+    <string name="twitter_login_desc">We need your account\'s cookie to download media from twitter</string>
+    <string name="nothing_here">Nothing here</string>
+    <string name="grant_all">Grant All</string>
     <string name="advanced">Advanced</string>
     <string name="actions">Actions</string>
     <string name="overview">Overview</string>
@@ -14,6 +21,7 @@
     <string name="confirm">Confirm</string>
     <string name="url_here">URL Here</string>
     <string name="all">All</string>
+    <string name="downloading">Downloading</string>
     <string name="completed">Completed</string>
     <string name="failed">Failed</string>
     <string name="settings">Settings</string>

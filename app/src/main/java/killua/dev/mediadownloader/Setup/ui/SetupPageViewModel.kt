@@ -5,8 +5,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import killua.dev.mediadownloader.datastore.readApplicationUserAuth
 import killua.dev.mediadownloader.datastore.readApplicationUserCt0
 import killua.dev.mediadownloader.states.CurrentState
-import killua.dev.mediadownloader.ui.ViewModels.BaseViewModel
 import killua.dev.mediadownloader.ui.SnackbarUIEffect
+import killua.dev.mediadownloader.ui.ViewModels.BaseViewModel
 import killua.dev.mediadownloader.utils.ActivityUtil
 import killua.dev.mediadownloader.utils.NotificationUtils
 import killua.dev.mediadownloader.utils.getActivity

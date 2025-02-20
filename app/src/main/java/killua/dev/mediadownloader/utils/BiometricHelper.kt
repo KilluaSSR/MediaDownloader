@@ -4,10 +4,11 @@ import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
+import killua.dev.mediadownloader.R
 import java.lang.ref.WeakReference
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
-import killua.dev.mediadownloader.R
+
 class BiometricHelper(private val activity: FragmentActivity) {
     private val executor = ContextCompat.getMainExecutor(activity)
     private lateinit var biometricPrompt: BiometricPrompt
