@@ -97,7 +97,6 @@ class AdvancedFeaturesManager @Inject constructor(
         )
     }
 
-    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     suspend fun getLofterPicsByAuthorTags(url: String){
         var link = url
         if(url.last() != '/'){

@@ -223,7 +223,6 @@ object LofterParser {
         return parsedBlogInfo
     }
 
-    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     suspend fun parseFromArchiveInfos(
         archiveInfos: List<ArchiveInfo>,
         info: LofterParseRequiredInformation,
@@ -280,14 +279,17 @@ object LofterParser {
         )
     }
 
-    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     private fun matchTags(content: String, targetTags: List<String>?, saveNoTags: Boolean): Boolean {
         if (targetTags.isNullOrEmpty()) return true
 
-        val pageTags = TAGS_PATTERN.matcher(content)
-            .results()
-            .map { URLDecoder.decode(it.group(1), "UTF-8").replace("\u00a0", " ") }
-            .toList()
+        val pageTags = mutableListOf<String>()
+        val matcher = TAGS_PATTERN.matcher(content)
+
+        // 使用 find() 替代 results()
+        while (matcher.find()) {
+            val tag = URLDecoder.decode(matcher.group(1), "UTF-8").replace("\u00a0", " ")
+            pageTags.add(tag)
+        }
 
         if (pageTags.isEmpty()) {
             return saveNoTags
@@ -296,20 +298,23 @@ object LofterParser {
         return pageTags.any { it in targetTags }
     }
 
-    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     private fun findImageUrls(content: String): List<String> {
-        var urls = IMG_URL_PATTERN.matcher(content)
-            .results()
-            .map { it.group(1) }
-            .toList()
+        var urls = mutableListOf<String>()
+        val matcher = IMG_URL_PATTERN.matcher(content)
+
+        // 使用 find() 替代 results()
+        while (matcher.find()) {
+            matcher.group(1)?.let { urls.add(it) }
+        }
 
         if (urls.isEmpty()) {
-            urls = OLD_IMG_URL_PATTERN.matcher(content)
-                .results()
-                .map { it.group(1) }
-                .toList()
+            val oldMatcher = OLD_IMG_URL_PATTERN.matcher(content)
+            while (oldMatcher.find()) {
+                oldMatcher.group(1)?.let { urls.add(it) }
+            }
         }
-        return return urls
+
+        return urls
             .filter { it.contains("imglf", true) }
             .filterNot { it.contains("&amp;") }
             .filterNot { url ->

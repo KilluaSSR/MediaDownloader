@@ -85,7 +85,6 @@ class AdvancedPageViewModel @Inject constructor(
         .flowOnIO()
         .stateInScope(false)
 
-    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override suspend fun onEvent(state: AdvancedPageUIState, intent: AdvancedPageUIIntent) {
         when(intent) {
             is AdvancedPageUIIntent.OnEntry -> handleEntry()
@@ -137,7 +136,6 @@ class AdvancedPageViewModel @Inject constructor(
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     private fun handleLofterPicsByAuthorTags(url: String) {
         applicationScope.launch {
             advancedFeaturesManager.getLofterPicsByAuthorTags(url = url)

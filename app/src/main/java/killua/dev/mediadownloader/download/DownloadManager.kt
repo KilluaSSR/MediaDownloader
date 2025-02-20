@@ -73,17 +73,8 @@ class DownloadManager @Inject constructor(
                 if(isNotificationEnabled.value) {
                     showNotification.showDownloadFailed(task.id, e.message.toString())
                 }
-
                 attempt++
                 if (attempt > maxRetries.value) break
-
-                SnackbarUIEffect.ShowSnackbar(
-                    "${task.screenName}'s ${task.type} failed to download. Retrying $attempt",
-                    actionLabel = "STOP!",
-                    withDismissAction = true
-                ) {
-                    attempt = maxRetries.value + 1
-                }
             }
         }
     }

@@ -1,7 +1,5 @@
 package killua.dev.mediadownloader.api.Lofter
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import killua.dev.mediadownloader.Model.ImageType
 import killua.dev.mediadownloader.Model.LofterParseRequiredInformation
 import killua.dev.mediadownloader.Model.NetworkResult
@@ -85,7 +83,6 @@ class LofterService @Inject constructor(
     }
 
 
-    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     suspend fun getByAuthorTags(
         authorUrl: String,
         tags: Set<String>,
