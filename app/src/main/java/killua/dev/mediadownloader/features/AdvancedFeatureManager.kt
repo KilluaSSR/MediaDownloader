@@ -10,6 +10,9 @@ import killua.dev.mediadownloader.Model.NetworkResult
 import killua.dev.mediadownloader.api.Kuaikan.Chapter
 import killua.dev.mediadownloader.api.Kuaikan.KuaikanService
 import killua.dev.mediadownloader.api.Lofter.LofterService
+import killua.dev.mediadownloader.api.MissEvan.MissEvanService
+import killua.dev.mediadownloader.api.MissEvan.Model.MissEvanDownloadDrama
+import killua.dev.mediadownloader.api.MissEvan.Model.MissEvanDramaResult
 import killua.dev.mediadownloader.api.Pixiv.Model.NovelInfo
 import killua.dev.mediadownloader.api.Pixiv.PixivService
 import killua.dev.mediadownloader.api.Twitter.Model.TwitterUser
@@ -39,6 +42,7 @@ class AdvancedFeaturesManager @Inject constructor(
     private val kuaikanService: KuaikanService,
     private val lofterService: LofterService,
     private val pixelService: PixivService,
+    private val missEvanService: MissEvanService,
     private val notification: ShowNotification,
     private val downloadQueueManager: DownloadQueueManager,
     private val downloadRepository: DownloadRepository,
@@ -163,6 +167,26 @@ class AdvancedFeaturesManager @Inject constructor(
         )
     }
 
+    suspend fun getMissEvanEntireDrama(url: String): NetworkResult<MissEvanDramaResult> = runCatching {
+        val id = url.split("mdrama/")[1]
+        when(val result = missEvanService.getEntireDrama(id)) {
+            is NetworkResult.Error -> {
+                NetworkResult.Error(
+                    code = result.code,
+                    message = result.message
+                )
+            }
+            is NetworkResult.Success -> {
+                val drama = result.data
+                NetworkResult.Success(drama)
+            }
+        }
+    }.getOrElse { e ->
+        NetworkResult.Error(
+            message = e.message ?: "Unknown error"
+        )
+    }
+
     suspend fun downloadEntireKuaikanComic(mangaList: List<Chapter>) = runCatching {
         mangaList.forEach{
             delay(Random.nextLong(500, 7000))
@@ -179,6 +203,28 @@ class AdvancedFeaturesManager @Inject constructor(
                         tweetID = mangaResult.data.title,
                         mainLink = "https://www.kuaikanmanhua.com/webs/comic-next/${it.id}",
                         mediaType = MediaType.PDF
+                    )
+                }
+            }
+        }
+    }
+
+    suspend fun downloadEntireMissEvanDrama(dramaList:  List<MissEvanDownloadDrama>) = runCatching {
+        dramaList.forEach{
+            delay(Random.nextLong(500, 3000))
+            notification.updateGettingProgress(it.title)
+            when(val result = missEvanService.getDrama(it.id)){
+                is NetworkResult.Error -> return@forEach
+                is NetworkResult.Success -> {
+                    createDownloadTask(
+                        url = result.data.soundurl,
+                        userId = it.mainTitle,
+                        screenName = it.mainTitle,
+                        platform = AvailablePlatforms.MissEvan,
+                        name = it.title,
+                        tweetID = it.title,
+                        mainLink = "https://www.missevan.com/sound/player?id=${it.id}",
+                        mediaType = MediaType.M4A
                     )
                 }
             }

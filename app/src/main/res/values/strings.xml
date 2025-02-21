@@ -62,6 +62,7 @@
     <string name="twitter">Twitter</string>
     <string name="lofter" translatable="false">Lofter</string>
     <string name="pixiv" translatable="false">Pixiv</string>
+    <string name="missevan">MissEvan</string>
     <string name="tags">Tags</string>
     <string name="add_tags_here">Add tags here</string>
     <string name="save">Save</string>
@@ -74,11 +75,13 @@
     <string name="get_bookmarks_desc">Get the content I bookmarked on Twitter</string>
     <string name="get_entire_comic">Get Entire Comic</string>
     <string name="get_entire_novel">Get Entire Novel</string>
+    <string name="get_entire_drama">Get Entire Drama</string>
     <string name="get_likes_desc">Get the content I liked on Twitter. Note that if you have a lot of liked content, it may trigger a rate limit risk and could even lead to account suspension.</string>
     <string name="enter_twitter_username">Enter Twitter Username</string>
     <string name="enter_lofter_author_homepage">Enter Lofter author\'s Homepage</string>
     <string name="enter_kuaikan_comic_url">Enter Kuaikan Comic\'s URL</string>
     <string name="enter_pixiv_entire_novel_url">Enter Pixiv Novel\'s URL</string>
+    <string name="enter_missevan_drama_url">Enter MissEvan Drama\'s URL</string>
     <string name="title_activity_setup" translatable="false">SetupActivity</string>
     <string name="filter_by_platforms">Filter by platforms</string>
     <string name="filter_by_authors">Filter by authors</string>

@@ -105,7 +105,7 @@ class DownloadListViewModel @Inject constructor(
                     AvailablePlatforms.Twitter,
                     AvailablePlatforms.Lofter -> download.name
                     AvailablePlatforms.Pixiv -> download.screenName
-                    AvailablePlatforms.Kuaikan -> download.screenName
+                    else -> download.screenName
                 }
             }
             .filter { it.isNotBlank() }
@@ -269,7 +269,7 @@ class DownloadListViewModel @Inject constructor(
                         AvailablePlatforms.Twitter,
                         AvailablePlatforms.Lofter -> item.name in filterOptions.selectedAuthors
                         AvailablePlatforms.Pixiv -> item.screenName in filterOptions.selectedAuthors
-                        AvailablePlatforms.Kuaikan -> item.name in filterOptions.selectedAuthors
+                        else -> item.name in filterOptions.selectedAuthors
                     }
 
             // 判断是否选择了具体时长（非 All）
@@ -439,8 +439,7 @@ class DownloadListViewModel @Inject constructor(
                         intent.context.navigateToLofter(download.link!!)
                     }
 
-                    AvailablePlatforms.Pixiv -> {}
-                    AvailablePlatforms.Kuaikan -> {}
+                    else -> {}
                 }
             }
         }

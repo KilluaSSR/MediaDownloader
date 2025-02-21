@@ -114,7 +114,7 @@ class MainPageViewmodel @Inject constructor(
                         downloadedTimes = mostDownloaded.totalDownloads
                     )
                 }
-                AvailablePlatforms.Kuaikan -> uiState.value
+                else -> uiState.value
             }
             emitState(state)
         }
@@ -158,7 +158,7 @@ class MainPageViewmodel @Inject constructor(
                         AvailablePlatforms.Twitter -> intent.context.navigateTwitterProfile(intent.userID, intent.screenName)
                         AvailablePlatforms.Lofter -> intent.context.navigateLofterProfile(intent.screenName)
                         AvailablePlatforms.Pixiv -> intent.context.navigatePixivProfile(intent.userID)
-                        AvailablePlatforms.Kuaikan -> {}
+                        else -> {}
                     }
                 }
             }

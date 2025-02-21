@@ -40,7 +40,7 @@ class DownloadbyLink @Inject constructor(
             AvailablePlatforms.Twitter -> downloadPreChecks.checkTwitterLoggedIn()
             AvailablePlatforms.Lofter -> downloadPreChecks.checkLofterLoggedIn()
             AvailablePlatforms.Pixiv -> downloadPreChecks.checkPixivLoggedIn()
-            AvailablePlatforms.Kuaikan -> Result.success(Unit)
+            else -> Result.success(Unit)
         }
     }
 

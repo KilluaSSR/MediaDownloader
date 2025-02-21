@@ -3,6 +3,7 @@ package killua.dev.mediadownloader.ui.components
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Book
 import androidx.compose.material.icons.rounded.Bookmarks
+import androidx.compose.material.icons.rounded.Radio
 import androidx.compose.material.icons.rounded.ThumbUp
 import androidx.compose.material.icons.rounded.VideoLibrary
 import killua.dev.mediadownloader.R
@@ -55,6 +56,13 @@ val AdvancedPixivButtons = listOf(
     ButtonsEssentials(
         R.string.get_entire_novel,
         Icons.Rounded.Book,
+        AdvancedpageRoutes.KuaikanEntireComic.route
+    ),
+)
+val AdvancedMissEvanButtons = listOf(
+    ButtonsEssentials(
+        R.string.get_entire_drama,
+        Icons.Rounded.Radio,
         AdvancedpageRoutes.KuaikanEntireComic.route
     ),
 )

@@ -48,6 +48,7 @@
     <string name="not_logged_in">没有登陆</string>
     <string name="cookie_necessary">您需要cookie才能从以下平台下载该内容：</string>
     <string name="ok">好</string>
+    <string name="missevan">猫耳FM</string>
     <string name="tags">标签</string>
     <string name="add_tags_here">在此添加标签</string>
     <string name="save">保存</string>
@@ -62,6 +63,7 @@
     <string name="get_bookmarks_desc">下载我在Twitter上标签了的内容</string>
     <string name="get_entire_comic">下载整本漫画</string>
     <string name="get_entire_novel">下载整本小说</string>
+    <string name="get_entire_drama">下载整部广播剧</string>
     <string name="get_likes_desc">下载我在Twitter上点赞了的内容</string>
     <string name="enter_twitter_username">输入Twitter用户名</string>
     <string name="enter_lofter_author_homepage">输入Lofter用户主页URL</string>
@@ -95,4 +97,5 @@
     <string name="ask_for_sth">我们需要请求一些权限</string>
     <string name="invited_to_login_twitter">请您登陆您的Twitter账号</string>
     <string name="notification_permission_desc">我们希望向您发送通知，以便保持更新</string>
+    <string name="enter_missevan_drama_url">输入猫耳FM广播剧链接</string>
 </resources>

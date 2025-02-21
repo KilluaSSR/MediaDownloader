@@ -24,6 +24,7 @@ import killua.dev.mediadownloader.ui.PrepareRoutes
 import killua.dev.mediadownloader.ui.ViewModels.AdvancedPageUIIntent.*
 import killua.dev.mediadownloader.ui.ViewModels.AdvancedPageViewModel
 import killua.dev.mediadownloader.ui.ViewModels.DialogType
+import killua.dev.mediadownloader.ui.components.AdvancedMissEvanButtons
 import killua.dev.mediadownloader.ui.components.AdvancedPageKuaikanButtons
 import killua.dev.mediadownloader.ui.components.AdvancedPageLofterButtons
 import killua.dev.mediadownloader.ui.components.AdvancedPageTopAppBar
@@ -194,6 +195,16 @@ fun AdvancedPage(){
                             ))
                         }
                     }
+
+                    DialogType.MissEvan -> {
+                        scope.launch {
+                            viewModel.emitIntent(GetMissEvanEntireDrama(input))
+                            delay(200)
+                            viewModel.emitState(uiState.value.copy(
+                                info = Triple("", "", "")
+                            ))
+                        }
+                    }
                 }
             }
         )
@@ -341,6 +352,35 @@ fun AdvancedPage(){
                                     }
                                     dialogTitle = context.getString(R.string.enter_pixiv_entire_novel_url)
                                     dialogPlaceholder = "www.pixiv.net/novel/series/..."
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            Section(title = stringResource(R.string.missevan)) {
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(SizeTokens.Level8),
+                    verticalArrangement = Arrangement.spacedBy(SizeTokens.Level8),
+                    maxItemsInEachRow = 2,
+                ) {
+                    AdvancedMissEvanButtons.forEachIndexed { index, item ->
+                        ActionsBotton(
+                            modifier = Modifier.weight(1f),
+                            enabled = true,
+                            title = stringResource(item.titleRes),
+                            icon = item.icon,
+                            color = MaterialTheme.colorScheme.primaryContainer
+                        ) {
+                            when (index) {
+                                0 -> {
+                                    scope.launch{
+                                        viewModel.emitState(uiState.value.copy(currentDialogType = DialogType.MissEvan, showDialog = true))
+                                    }
+                                    dialogTitle = context.getString(R.string.enter_missevan_drama_url)
+                                    dialogPlaceholder = "https://www.missevan.com/mdrama/..."
                                 }
                             }
                         }

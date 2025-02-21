@@ -8,6 +8,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import killua.dev.mediadownloader.api.Kuaikan.KuaikanService
 import killua.dev.mediadownloader.api.Lofter.LofterService
+import killua.dev.mediadownloader.api.MissEvan.MissEvanService
 import killua.dev.mediadownloader.api.Pixiv.PixivService
 import killua.dev.mediadownloader.api.Twitter.TwitterDownloadAPI
 import killua.dev.mediadownloader.datastore.ApplicationUserDataLofter
@@ -178,6 +179,15 @@ object ProvideAPI {
         @ApplicationScope scope: CoroutineScope
     ): PixivService {
         return PixivService(userDataManager,scope)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMissEvanService(
+        userDataManager: UserDataManager,
+        @ApplicationScope scope: CoroutineScope
+    ): MissEvanService {
+        return MissEvanService(userDataManager,scope)
     }
 
     @Provides

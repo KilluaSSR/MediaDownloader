@@ -8,6 +8,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import killua.dev.mediadownloader.api.Kuaikan.KuaikanService
 import killua.dev.mediadownloader.api.Lofter.LofterService
+import killua.dev.mediadownloader.api.MissEvan.MissEvanService
 import killua.dev.mediadownloader.api.Pixiv.PixivService
 import killua.dev.mediadownloader.api.Twitter.TwitterDownloadAPI
 import killua.dev.mediadownloader.db.LofterTagsRepository
@@ -30,6 +31,7 @@ object ProvideAdvancedFeaturesManagerModule {
         lofterService: LofterService,
         notification: ShowNotification,
         pixelService: PixivService,
+        missEvanService: MissEvanService,
         downloadQueueManager: DownloadQueueManager,
         downloadRepository: DownloadRepository,
         tagsRepository: LofterTagsRepository,
@@ -41,6 +43,7 @@ object ProvideAdvancedFeaturesManagerModule {
         kuaikanService,
         lofterService,
         pixelService,
+        missEvanService,
         notification,
         downloadQueueManager,
         downloadRepository,

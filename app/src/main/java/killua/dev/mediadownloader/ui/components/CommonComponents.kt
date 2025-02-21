@@ -42,6 +42,10 @@ fun NotLoggedInAlert(
             AvailablePlatforms.Kuaikan -> {
                 navController.navigateSingle(PrepareRoutes.KuaikanPreparePage.route)
             }
+
+            AvailablePlatforms.MissEvan -> {
+                TODO()
+            }
         }
     }
 }

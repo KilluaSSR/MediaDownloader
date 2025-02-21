@@ -13,7 +13,7 @@ data class FavouriteUserInfo(
                 AvailablePlatforms.Twitter,
                 AvailablePlatforms.Lofter -> "$name @$screenName"
                 AvailablePlatforms.Pixiv -> "@$screenName"
-                AvailablePlatforms.Kuaikan -> screenName
+                else -> screenName
             }
         } else {
             "Nothing here"

@@ -6,6 +6,8 @@ import killua.dev.mediadownloader.Model.ChapterInfo
 import killua.dev.mediadownloader.Model.NetworkResult
 import killua.dev.mediadownloader.Model.toChapterInfo
 import killua.dev.mediadownloader.api.Kuaikan.Chapter
+import killua.dev.mediadownloader.api.MissEvan.Model.MissEvanDownloadDrama
+import killua.dev.mediadownloader.api.MissEvan.Model.MissEvanEpisodes
 import killua.dev.mediadownloader.api.Pixiv.Model.NovelInfo
 import killua.dev.mediadownloader.api.Twitter.TwitterDownloadAPI
 import killua.dev.mediadownloader.di.ApplicationScope
@@ -27,6 +29,7 @@ import javax.inject.Inject
 enum class ChapterDownloadType {
     KUAIKAN_MANGA,
     PIXIV_NOVEL,
+    MISSEVAN_DRAMA,
     NONE
 }
 data class AdvancedPageUIState(
@@ -49,6 +52,7 @@ sealed class AdvancedPageUIIntent : UIIntent {
     data class OnConfirmTwitterDownloadMedia(val screenName: String, val id: String): AdvancedPageUIIntent()
     data class GetKuaikanEntireManga(val url: String): AdvancedPageUIIntent()
     data class GetPixivEntireNovel(val url: String): AdvancedPageUIIntent()
+    data class GetMissEvanEntireDrama(val url: String): AdvancedPageUIIntent()
     data class GetLofterPicsByTags(val url: String): AdvancedPageUIIntent()
     data class ToggleChapter(val index: Int) : AdvancedPageUIIntent()
     data object ConfirmChapterSelection : AdvancedPageUIIntent()
@@ -61,6 +65,7 @@ enum class DialogType {
     LOFTER_AUTHOR_TAGS,
     KUAIKAN_ENTIRE,
     PIXIV_ENTIRE_NOVEL,
+    MissEvan,
     NONE
 }
 
@@ -98,6 +103,7 @@ class AdvancedPageViewModel @Inject constructor(
             AdvancedPageUIIntent.SelectAllChapters -> handleSelectAllChapters()
             AdvancedPageUIIntent.ClearAllChapters -> handleClearAllChapters()
             is AdvancedPageUIIntent.GetPixivEntireNovel -> handlePixivEntireNovel(intent.url)
+            is AdvancedPageUIIntent.GetMissEvanEntireDrama -> handleMissEvanEntireDrama(intent.url)
         }
     }
 
@@ -206,7 +212,28 @@ class AdvancedPageViewModel @Inject constructor(
                         showDialog = false,
                         chapters = novelList.data.map { it.toChapterInfo() }.map { it to true },
                         showChapterSelection = true,
-                        currentDownloadType = ChapterDownloadType.PIXIV_NOVEL  // 设置下载类型
+                        currentDownloadType = ChapterDownloadType.PIXIV_NOVEL
+                    ))
+                }
+            }
+        }
+    }
+
+    private fun handleMissEvanEntireDrama(url: String){
+        applicationScope.launch {
+            emitState(uiState.value.copy(isFetching = true))
+            when(val dramaList = advancedFeaturesManager.getMissEvanEntireDrama(url)){
+                is NetworkResult.Error -> {
+                    emitState(uiState.value.copy(isFetching = false))
+                    showMessage("Error")
+                }
+                is NetworkResult.Success -> {
+                    emitState(uiState.value.copy(
+                        isFetching = false,
+                        showDialog = false,
+                        chapters = dramaList.data.dramaList.map { it.toChapterInfo(dramaList.data.title) }.map { it to true },
+                        showChapterSelection = true,
+                        currentDownloadType = ChapterDownloadType.MISSEVAN_DRAMA
                     ))
                 }
             }
@@ -281,6 +308,19 @@ class AdvancedPageViewModel @Inject constructor(
                 ChapterDownloadType.NONE -> {
                     showMessage("Invalid download type")
                     return@launch
+                }
+
+                ChapterDownloadType.MISSEVAN_DRAMA -> {
+                    selectedChapters.mapNotNull { chapterInfo ->
+                        when (chapterInfo) {
+                            is ChapterInfo.DownloadableChapter -> MissEvanDownloadDrama(
+                                id = chapterInfo.id,
+                                title = chapterInfo.title,
+                                mainTitle = chapterInfo.seriesName!!
+                            )
+                            else -> null
+                        }
+                    }
                 }
             }
 

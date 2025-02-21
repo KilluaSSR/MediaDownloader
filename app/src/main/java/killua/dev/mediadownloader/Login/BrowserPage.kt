@@ -52,6 +52,7 @@ fun BrowserPage(
             AvailablePlatforms.Lofter -> LofterConfig()
             AvailablePlatforms.Pixiv -> PixivConfig()
             AvailablePlatforms.Kuaikan -> KuaikanConfig()
+            AvailablePlatforms.MissEvan -> TODO()
         }
     }
 

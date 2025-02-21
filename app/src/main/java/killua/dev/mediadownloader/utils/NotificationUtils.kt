@@ -71,6 +71,7 @@ class ShowNotification @Inject constructor(
             MediaType.GIF -> "image/*" to "$name's photo is ready"
             MediaType.PDF -> "application/pdf" to "$name is ready"
             MediaType.TXT -> "text/*" to "$name is ready"
+            MediaType.M4A -> "audio/mp4" to "$name is ready"
         }
         val intent = Intent(Intent.ACTION_VIEW).apply {
             setDataAndType(fileUri, mimeType)

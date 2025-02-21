@@ -15,21 +15,24 @@ enum class AvailablePlatforms {
     Twitter,
     Lofter,
     Pixiv,
-    Kuaikan
+    Kuaikan,
+    MissEvan
 }
 
 val platformsDrawable: Map<AvailablePlatforms,Int> = mapOf(
     AvailablePlatforms.Twitter to R.drawable.logo_of_twitter,
     AvailablePlatforms.Lofter to R.drawable.lofter_logo,
     AvailablePlatforms.Pixiv to R.drawable.pixiv_logo__2025_,
-    AvailablePlatforms.Kuaikan to R.drawable.kuaikanmanhua
+    AvailablePlatforms.Kuaikan to R.drawable.kuaikanmanhua,
+
 )
 
 val platformName: Map<AvailablePlatforms, Int> = mapOf(
     AvailablePlatforms.Twitter to R.string.twitter,
     AvailablePlatforms.Lofter to R.string.lofter,
     AvailablePlatforms.Pixiv to R.string.pixiv,
-    AvailablePlatforms.Kuaikan to R.string.kuaikan
+    AvailablePlatforms.Kuaikan to R.string.kuaikan,
+    AvailablePlatforms.MissEvan to R.string.missevan
 )
 
 
@@ -47,12 +50,12 @@ enum class SupportedUrlType(val pattern: Regex) {
         }
 
         fun toPlatform(supportedUrlType: SupportedUrlType) = when(supportedUrlType){
-            SupportedUrlType.TWITTER -> AvailablePlatforms.Twitter
-            SupportedUrlType.LOFTER -> AvailablePlatforms.Lofter
-            SupportedUrlType.PIXIV_IMG -> AvailablePlatforms.Pixiv
-            SupportedUrlType.PIXIV_NOVEL -> AvailablePlatforms.Pixiv
-            SupportedUrlType.KUAIKAN -> AvailablePlatforms.Kuaikan
-            SupportedUrlType.UNKNOWN -> null
+            TWITTER -> AvailablePlatforms.Twitter
+            LOFTER -> AvailablePlatforms.Lofter
+            PIXIV_IMG -> AvailablePlatforms.Pixiv
+            PIXIV_NOVEL -> AvailablePlatforms.Pixiv
+            KUAIKAN -> AvailablePlatforms.Kuaikan
+            UNKNOWN -> null
         }
     }
 }
@@ -65,6 +68,7 @@ fun AppIcon(platforms: AvailablePlatforms, modifier: Modifier = Modifier) {
         AvailablePlatforms.Lofter -> SizeTokens.Level152
         AvailablePlatforms.Pixiv -> SizeTokens.Level152
         AvailablePlatforms.Kuaikan -> SizeTokens.Level152
+        else -> SizeTokens.Level152
     }
     Box(
         modifier = modifier
