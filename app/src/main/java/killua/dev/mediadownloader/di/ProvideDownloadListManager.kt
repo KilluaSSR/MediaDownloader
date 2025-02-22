@@ -1,9 +1,11 @@
 package killua.dev.mediadownloader.di
 
+import android.content.Context
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
+import dagger.hilt.android.qualifiers.ApplicationContext
 import killua.dev.mediadownloader.download.DownloadListManager
 import killua.dev.mediadownloader.download.DownloadManager
 import killua.dev.mediadownloader.download.DownloadQueueManager
@@ -22,13 +24,15 @@ object ManagerModule {
         thumbnailRepository: ThumbnailRepository,
         videoDurationRepository: VideoDurationRepository,
         downloadQueueManager: DownloadQueueManager,
-        fileDelete: FileDelete
+        fileDelete: FileDelete,
+        @ApplicationContext context: Context
     ): DownloadListManager = DownloadListManager(
         downloadRepository,
         downloadManager,
         thumbnailRepository,
         videoDurationRepository,
         downloadQueueManager,
-        fileDelete
+        fileDelete,
+        context
     )
 }
