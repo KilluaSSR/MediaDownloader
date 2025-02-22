@@ -1,5 +1,6 @@
 package killua.dev.mediadownloader.ui.ViewModels
 
+import androidx.compose.material3.SnackbarDuration
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import killua.dev.mediadownloader.Model.ChapterInfo
@@ -17,6 +18,7 @@ import killua.dev.mediadownloader.ui.SnackbarUIEffect
 import killua.dev.mediadownloader.ui.SnackbarUIEffect.ShowSnackbar
 import killua.dev.mediadownloader.ui.UIIntent
 import killua.dev.mediadownloader.ui.UIState
+import killua.dev.mediadownloader.utils.DownloadPreChecks
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -73,6 +75,7 @@ enum class DialogType {
 class AdvancedPageViewModel @Inject constructor(
     private val twitterDownloadAPI: TwitterDownloadAPI,
     private val advancedFeaturesManager: AdvancedFeaturesManager,
+    private val downloadPreChecks: DownloadPreChecks,
     @ApplicationScope private val applicationScope: CoroutineScope
 ): BaseViewModel<AdvancedPageUIIntent, AdvancedPageUIState, SnackbarUIEffect>(AdvancedPageUIState()) {
     private val mutex = Mutex()
@@ -133,110 +136,138 @@ class AdvancedPageViewModel @Inject constructor(
         }
     }
 
-    private fun handleTwitterBookmarks() {
-        applicationScope.launch {
-            advancedFeaturesManager.handleTwitterBookmarks()
-                .onFailure { showMessage(it.message ?: "Download failed") }
+    private suspend fun handleTwitterBookmarks() {
+        downloadPreChecks.canStartDownload().onSuccess {
+            applicationScope.launch {
+                advancedFeaturesManager.handleTwitterBookmarks()
+                    .onFailure { emitEffect(ShowSnackbar(it.message ?: "Error", "OK", true, SnackbarDuration.Short)) }
+            }
+        }.onFailure {
+            emitEffect(ShowSnackbar(it.message ?: "Error", "OK", true, SnackbarDuration.Short))
+        }
+
+    }
+
+    private suspend fun handleLofterPicsByAuthorTags(url: String) {
+        downloadPreChecks.canStartDownload().onSuccess {
+            applicationScope.launch {
+                advancedFeaturesManager.getLofterPicsByAuthorTags(url = url)
+            }
+        }.onFailure {
+            emitEffect(ShowSnackbar(it.message ?: "Error", "OK", true, SnackbarDuration.Short))
         }
     }
 
-    private fun handleLofterPicsByAuthorTags(url: String) {
-        applicationScope.launch {
-            advancedFeaturesManager.getLofterPicsByAuthorTags(url = url)
+    private suspend fun handleTwitterLikes() {
+        downloadPreChecks.canStartDownload().onSuccess {
+            applicationScope.launch {
+                advancedFeaturesManager.handleTwitterLikes()
+                    .onFailure { emitEffect(ShowSnackbar(it.message ?: "Error", "OK", true, SnackbarDuration.Short)) }
+            }
+        }.onFailure {
+            emitEffect(ShowSnackbar(it.message ?: "Error", "OK", true, SnackbarDuration.Short))
         }
     }
 
-    private fun handleTwitterLikes() {
-        applicationScope.launch {
-            advancedFeaturesManager.handleTwitterLikes()
-                .onFailure { showMessage(it.message ?: "Download failed") }
-        }
-    }
-
-
-    private fun handleTwitterUserInfo(screenName: String) {
-        applicationScope.launch {
-            emitState(uiState.value.copy(isFetching = true))
-            when (val result = twitterDownloadAPI.getUserBasicInfo(screenName)) {
-                is NetworkResult.Success -> {
-                    emitState(uiState.value.copy(
-                        isFetching = false,
-                        info = Triple(
-                            result.data.id ?: "",
-                            result.data.name ?: "",
-                            result.data.screenName ?: ""
-                        )
-                    ))
-                }
-                is NetworkResult.Error -> {
-                    emitState(uiState.value.copy(isFetching = false))
-                    showMessage(result.message)
+    private suspend fun handleTwitterUserInfo(screenName: String) {
+        downloadPreChecks.canStartDownload().onSuccess {
+            applicationScope.launch {
+                emitState(uiState.value.copy(isFetching = true))
+                when (val result = twitterDownloadAPI.getUserBasicInfo(screenName)) {
+                    is NetworkResult.Success -> {
+                        emitState(uiState.value.copy(
+                            isFetching = false,
+                            info = Triple(
+                                result.data.id ?: "",
+                                result.data.name ?: "",
+                                result.data.screenName ?: ""
+                            )
+                        ))
+                    }
+                    is NetworkResult.Error -> {
+                        emitState(uiState.value.copy(isFetching = false))
+                        emitEffect(ShowSnackbar(result.message, "OK", true, SnackbarDuration.Short))
+                    }
                 }
             }
+        }.onFailure {
+            emitEffect(ShowSnackbar(it.message ?: "Error", "OK", true, SnackbarDuration.Short))
         }
     }
 
 
-    private fun handleKuaikanEntireManga(url: String) {
-        applicationScope.launch {
-            emitState(uiState.value.copy(isFetching = true))
-            when(val mangaList = advancedFeaturesManager.getKuaikanEntireComic(url)){
-                is NetworkResult.Error -> {
-                    emitState(uiState.value.copy(isFetching = false))
-                    showMessage("Error")
-                }
-                is NetworkResult.Success -> {
-                    emitState(uiState.value.copy(
-                        isFetching = false,
-                        showDialog = false,
-                        chapters = mangaList.data.map { it.toChapterInfo() }.map { it to true },
-                        showChapterSelection = true,
-                        currentDownloadType = ChapterDownloadType.KUAIKAN_MANGA  // 设置下载类型
-                    ))
+    private suspend fun handleKuaikanEntireManga(url: String) {
+        downloadPreChecks.canStartDownload().onSuccess {
+            applicationScope.launch {
+                emitState(uiState.value.copy(isFetching = true))
+                when(val mangaList = advancedFeaturesManager.getKuaikanEntireComic(url)){
+                    is NetworkResult.Error -> {
+                        emitState(uiState.value.copy(isFetching = false))
+                        emitEffect(ShowSnackbar(mangaList.message, "OK", true, SnackbarDuration.Short))
+                    }
+                    is NetworkResult.Success -> {
+                        emitState(uiState.value.copy(
+                            isFetching = false,
+                            showDialog = false,
+                            chapters = mangaList.data.map { it.toChapterInfo() }.map { it to true },
+                            showChapterSelection = true,
+                            currentDownloadType = ChapterDownloadType.KUAIKAN_MANGA  // 设置下载类型
+                        ))
+                    }
                 }
             }
+        }.onFailure {
+            emitEffect(ShowSnackbar(it.message ?: "Error", "OK", true, SnackbarDuration.Short))
         }
     }
 
-    private fun handlePixivEntireNovel(url: String) {
-        applicationScope.launch {
-            emitState(uiState.value.copy(isFetching = true))
-            when(val novelList = advancedFeaturesManager.getPixivEntireNovel(url)){
-                is NetworkResult.Error -> {
-                    emitState(uiState.value.copy(isFetching = false))
-                    showMessage("Error")
-                }
-                is NetworkResult.Success -> {
-                    emitState(uiState.value.copy(
-                        isFetching = false,
-                        showDialog = false,
-                        chapters = novelList.data.map { it.toChapterInfo() }.map { it to true },
-                        showChapterSelection = true,
-                        currentDownloadType = ChapterDownloadType.PIXIV_NOVEL
-                    ))
+    private suspend fun handlePixivEntireNovel(url: String) {
+        downloadPreChecks.canStartDownload().onSuccess {
+            applicationScope.launch {
+                emitState(uiState.value.copy(isFetching = true))
+                when(val novelList = advancedFeaturesManager.getPixivEntireNovel(url)){
+                    is NetworkResult.Error -> {
+                        emitState(uiState.value.copy(isFetching = false))
+                        emitEffect(ShowSnackbar(novelList.message, "OK", true, SnackbarDuration.Short))
+                    }
+                    is NetworkResult.Success -> {
+                        emitState(uiState.value.copy(
+                            isFetching = false,
+                            showDialog = false,
+                            chapters = novelList.data.map { it.toChapterInfo() }.map { it to true },
+                            showChapterSelection = true,
+                            currentDownloadType = ChapterDownloadType.PIXIV_NOVEL
+                        ))
+                    }
                 }
             }
+        }.onFailure {
+            emitEffect(ShowSnackbar(it.message ?: "Error", "OK", true, SnackbarDuration.Short))
         }
     }
 
-    private fun handleMissEvanEntireDrama(url: String){
-        applicationScope.launch {
-            emitState(uiState.value.copy(isFetching = true))
-            when(val dramaList = advancedFeaturesManager.getMissEvanEntireDrama(url)){
-                is NetworkResult.Error -> {
-                    emitState(uiState.value.copy(isFetching = false))
-                    showMessage("Error")
-                }
-                is NetworkResult.Success -> {
-                    emitState(uiState.value.copy(
-                        isFetching = false,
-                        showDialog = false,
-                        chapters = dramaList.data.dramaList.map { it.toChapterInfo(dramaList.data.title) }.map { it to true },
-                        showChapterSelection = true,
-                        currentDownloadType = ChapterDownloadType.MISSEVAN_DRAMA
-                    ))
+    private suspend fun handleMissEvanEntireDrama(url: String){
+        downloadPreChecks.canStartDownload().onSuccess {
+            applicationScope.launch {
+                emitState(uiState.value.copy(isFetching = true))
+                when(val dramaList = advancedFeaturesManager.getMissEvanEntireDrama(url)){
+                    is NetworkResult.Error -> {
+                        emitState(uiState.value.copy(isFetching = false))
+
+                    }
+                    is NetworkResult.Success -> {
+                        emitState(uiState.value.copy(
+                            isFetching = false,
+                            showDialog = false,
+                            chapters = dramaList.data.dramaList.map { it.toChapterInfo(dramaList.data.title) }.map { it to true },
+                            showChapterSelection = true,
+                            currentDownloadType = ChapterDownloadType.MISSEVAN_DRAMA
+                        ))
+                    }
                 }
             }
+        }.onFailure {
+            emitEffect(ShowSnackbar(it.message ?: "Error", "OK", true, SnackbarDuration.Short))
         }
     }
 
@@ -244,7 +275,6 @@ class AdvancedPageViewModel @Inject constructor(
         if (id.isEmpty()) return
         applicationScope.launch {
             advancedFeaturesManager.getUserMediaByUserId(id, screenName)
-                .onFailure { showMessage(it.message ?: "Download failed") }
         }
     }
 
@@ -278,7 +308,6 @@ class AdvancedPageViewModel @Inject constructor(
 
             when (uiState.value.currentDownloadType) {
                 ChapterDownloadType.KUAIKAN_MANGA -> {
-                    // 将 ChapterInfo 转换回 Kuaikan.Chapter
                     val kuaikanChapters = selectedChapters.mapNotNull { chapterInfo ->
                         when (chapterInfo) {
                             is ChapterInfo.DownloadableChapter -> Chapter(
@@ -306,7 +335,6 @@ class AdvancedPageViewModel @Inject constructor(
                     advancedFeaturesManager.cancelPixivProgressNotification()
                 }
                 ChapterDownloadType.NONE -> {
-                    showMessage("Invalid download type")
                     return@launch
                 }
 
@@ -325,7 +353,6 @@ class AdvancedPageViewModel @Inject constructor(
                     advancedFeaturesManager.cancelMissEvanProgressNotification()
                 }
             }
-
             emitState(uiState.value.copy(
                 showChapterSelection = false,
                 chapters = emptyList(),
@@ -340,12 +367,6 @@ class AdvancedPageViewModel @Inject constructor(
                 showChapterSelection = false,
                 chapters = emptyList()
             ))
-        }
-    }
-
-    private fun showMessage(message: String) {
-        viewModelScope.launch {
-            emitEffect(ShowSnackbar(message))
         }
     }
 }

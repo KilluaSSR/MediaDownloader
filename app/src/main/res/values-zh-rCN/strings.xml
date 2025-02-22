@@ -37,7 +37,7 @@
     <string name="delay_desc">这意味着批量下载图片时，每页请求之间有一定的延迟</string>
     <string name="download">下载</string>
     <string name="reset">重置</string>
-    <string name="reset_desc">清除所有登录信息，您需要重新登陆才能继续使用</string>
+    <string name="reset_desc">清除所有登录信息，您需要重新登录才能继续使用</string>
     <string name="dangerous">危险</string>
     <string name="biometric_auth_disabled_desc">您的设备可能不支持生物识别认证，或者您未设置该功能</string>
     <string name="biometric_auth_desc_off">当前任何人都可以看到我的下载列表</string>
@@ -45,7 +45,7 @@
     <string name="reset_title">现在重置?</string>
     <string name="unsupported_url">不支持的URL</string>
     <string name="paste_url_here.">请输入URL</string>
-    <string name="not_logged_in">没有登陆</string>
+    <string name="not_logged_in">没有登录</string>
     <string name="cookie_necessary">您需要cookie才能从以下平台下载该内容：</string>
     <string name="ok">好</string>
     <string name="missevan">猫耳FM</string>
@@ -71,7 +71,7 @@
     <string name="twitter">推特</string>
     <string name="mail">邮箱</string>
     <string name="log_out">登出</string>
-    <string name="log_in">登陆</string>
+    <string name="log_in">登录</string>
     <string name="select_all">全选</string>
     <string name="select_chapters">选择章节</string>
     <string name="less_than_one_min">小于1分钟</string>
@@ -95,7 +95,7 @@
     <string name="biometric_auth_desc_on">下载列表已经被保护</string>
     <string name="protected_content_title">受保护的内容</string>
     <string name="ask_for_sth">我们需要请求一些权限</string>
-    <string name="invited_to_login_twitter">请您登陆您的Twitter账号</string>
+    <string name="invited_to_login_twitter">请您登录您的Twitter账号</string>
     <string name="notification_permission_desc">我们希望向您发送通知，以便保持更新</string>
     <string name="enter_missevan_drama_url">输入猫耳FM广播剧链接</string>
 </resources>
