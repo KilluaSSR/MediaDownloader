@@ -11,6 +11,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -55,6 +56,7 @@ class MainActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         BiometricManagerSingleton.init(this)
         val sharedLink = when{
             intent?.action == Intent.ACTION_SEND ->{
@@ -75,6 +77,7 @@ class MainActivity : FragmentActivity() {
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
+            LocalContext.current
             val themeMode by this.observeThemeMode()
                 .collectAsStateWithLifecycle(initialValue = ThemeMode.SYSTEM)
             MediaDownloaderTheme(
@@ -89,7 +92,6 @@ class MainActivity : FragmentActivity() {
                         viewModel.handleSharedLink(platform, url)
                     }
                 }
-
                 downloadResult?.let { result ->
                     LaunchedEffect(result) {
                         when {
@@ -154,7 +156,6 @@ class MainActivity : FragmentActivity() {
                         composable(PrepareRoutes.MissEvavnPreparePage.route){
                             MissEvanPreparePage()
                         }
-
                         //Prepare Cookies
                         composable(CookiesRoutes.LofterCookiesBrowser.route){
                             BrowserPage(AvailablePlatforms.Lofter)

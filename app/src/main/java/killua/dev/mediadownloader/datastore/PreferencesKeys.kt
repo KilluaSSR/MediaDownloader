@@ -32,7 +32,7 @@ val MISSEVAN_TOKEN = stringPreferencesKey("missevan_token")
 
 val KUAIKAN_PASSTOKEN = stringPreferencesKey("kuaikan_passtoken")
 // AppSettings keys
-val LANGUAGE_KEY = stringPreferencesKey("language")
+val LOCALE_MODE = stringPreferencesKey("locale_mode")
 val THEME_MODE = stringPreferencesKey("theme_mode")
 val NOTIFICATION_ENABLED =
     booleanPreferencesKey("notification_enabled")
@@ -56,7 +56,6 @@ fun Context.readLofterEndTime() = readStoreLong(key = LOFTER_END_TIME, defValue 
 fun Context.readPixivPHPSSID() = readStoreString(PIXIV_PHPSSID, "")
 fun Context.readKuaikanPassToken() = readStoreString(KUAIKAN_PASSTOKEN, "")
 fun Context.readDelay() = readStoreInt(DELAY, 2)
-fun Context.readLanguage() = readStoreString(key = LANGUAGE_KEY, defValue = "en")
 fun Context.readNotificationEnabled() = readStoreBoolean(key = NOTIFICATION_ENABLED, defValue = true)
 fun Context.readDownloadPath() = readStoreString(key = DOWNLOAD_PATH, defValue = "")
 fun Context.readMaxConcurrentDownloads() = readStoreInt(key = MAX_CONCURRENT_DOWNLOADS, defValue = 3)
@@ -75,7 +74,6 @@ suspend fun Context.writeApplicationUserCt0(ct0: String) = saveStoreString(key =
 suspend fun Context.writeApplicationUserAuth(auth: String) = saveStoreString(key = APPLICATION_USER_USERAUTH_KEY, value = auth)
 suspend fun Context.writeLofterLoginKey(key: String) = saveStoreString(key = LOFTER_LOGIN_KEY, value = key)
 suspend fun Context.writeLofterLoginAuth(auth: String) = saveStoreString(key = LOFTER_LOGIN_AUTH, value = auth)
-suspend fun Context.writeLanguage(language: String) = saveStoreString(key = LANGUAGE_KEY, value = language)
 suspend fun Context.writeNotificationEnabled(enabled: Boolean) = saveStoreBoolean(key = NOTIFICATION_ENABLED, value = enabled)
 suspend fun Context.writeDownloadPath(path: String) = saveStoreString(key = DOWNLOAD_PATH, value = path)
 suspend fun Context.writeMaxConcurrentDownloads(max: Int) = saveStoreInt(key = MAX_CONCURRENT_DOWNLOADS, value = max)

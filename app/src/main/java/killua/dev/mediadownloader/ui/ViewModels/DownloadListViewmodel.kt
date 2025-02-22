@@ -3,7 +3,6 @@ package killua.dev.mediadownloader.ui.ViewModels
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
-import androidx.annotation.StringRes
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import db.Download
@@ -19,7 +18,6 @@ import killua.dev.mediadownloader.Model.MediaType.PDF
 import killua.dev.mediadownloader.Model.MediaType.PHOTO
 import killua.dev.mediadownloader.Model.MediaType.TXT
 import killua.dev.mediadownloader.Model.MediaType.VIDEO
-import killua.dev.mediadownloader.R
 import killua.dev.mediadownloader.download.DownloadListManager
 import killua.dev.mediadownloader.download.DownloadbyLink
 import killua.dev.mediadownloader.ui.SnackbarUIEffect

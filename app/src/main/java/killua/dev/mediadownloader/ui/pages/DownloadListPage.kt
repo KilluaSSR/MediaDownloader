@@ -21,7 +21,6 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,7 +36,6 @@ import killua.dev.mediadownloader.Model.DownloadPageDestinations
 import killua.dev.mediadownloader.R
 import killua.dev.mediadownloader.ui.FilterContent
 import killua.dev.mediadownloader.ui.LocalNavController
-import killua.dev.mediadownloader.ui.SnackbarUIEffect
 import killua.dev.mediadownloader.ui.ViewModels.DownloadListPageUIIntent.*
 import killua.dev.mediadownloader.ui.ViewModels.DownloadListViewModel
 import killua.dev.mediadownloader.ui.components.DownloadItemCard

@@ -11,12 +11,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import killua.dev.mediadownloader.R
 import killua.dev.mediadownloader.datastore.THEME_MODE
 import killua.dev.mediadownloader.datastore.readStoreString
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import androidx.compose.ui.res.stringResource
-import killua.dev.mediadownloader.R
+
 enum class ThemeMode {
     LIGHT, DARK, SYSTEM
 }
@@ -25,7 +26,7 @@ fun Context.observeThemeMode(): Flow<ThemeMode> = readStoreString(THEME_MODE, Th
     .map { themeName ->
         try {
             ThemeMode.valueOf(themeName)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             ThemeMode.SYSTEM
         }
     }

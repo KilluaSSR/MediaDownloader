@@ -101,6 +101,7 @@
     <string name="biometric_auth">生物身份认证</string>
     <string name="biometric_auth_desc_on">下载列表已经被保护</string>
     <string name="dark">深色</string>
+    <string name="language_chinese_simplified">简体中文</string>
     <string name="protected_content_title">受保护的内容</string>
     <string name="ask_for_sth">我们需要请求一些权限</string>
     <string name="invited_to_login_twitter">请您登录您的推特账号</string>
@@ -110,6 +111,8 @@
     <string name="no_active_downloads">没有正在进行的下载</string>
     <string name="application_settings">应用设置</string>
     <string name="theme">主题</string>
+    <string name="language_setting">语言</string>
     <string name="system">跟随系统</string>
     <string name="light">浅色</string>
+    <string name="language_english">英语</string>
 </resources>
