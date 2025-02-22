@@ -13,6 +13,7 @@ import killua.dev.mediadownloader.api.Lofter.LofterService
 import killua.dev.mediadownloader.api.MissEvan.MissEvanService
 import killua.dev.mediadownloader.api.MissEvan.Model.MissEvanDownloadDrama
 import killua.dev.mediadownloader.api.MissEvan.Model.MissEvanDramaResult
+import killua.dev.mediadownloader.api.MissEvan.extractDramaId
 import killua.dev.mediadownloader.api.Pixiv.Model.NovelInfo
 import killua.dev.mediadownloader.api.Pixiv.PixivService
 import killua.dev.mediadownloader.api.Twitter.Model.TwitterUser
@@ -170,7 +171,7 @@ class AdvancedFeaturesManager @Inject constructor(
     }
 
     suspend fun getMissEvanEntireDrama(url: String): NetworkResult<MissEvanDramaResult> = runCatching {
-        val id = url.split("mdrama/")[1]
+        val id = extractDramaId(url)!!
         when(val result = missEvanService.getEntireDrama(id)) {
             is NetworkResult.Error -> {
                 NetworkResult.Error(

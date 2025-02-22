@@ -102,6 +102,11 @@ fun extractMissEvanSoundId(url: String): String? {
             return id
         }
     }
-
     return null
+}
+
+private val DRAMA_PATTERN = """missevan\.com/mdrama/(\d+)""".toRegex()
+
+fun extractDramaId(url: String): String? {
+    return DRAMA_PATTERN.find(url)?.groupValues?.getOrNull(1)
 }
