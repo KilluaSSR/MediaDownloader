@@ -27,6 +27,7 @@ import killua.dev.mediadownloader.utils.DownloadPreChecks
 import killua.dev.mediadownloader.utils.FileUtils
 import killua.dev.mediadownloader.utils.KUAIKAN_ENTIRE_NOTIFICATION_ID
 import killua.dev.mediadownloader.utils.LOFTER_GET_BY_TAGS_ID
+import killua.dev.mediadownloader.utils.MISSEVAN_ENTIRE_DRAMA_ID
 import killua.dev.mediadownloader.utils.MediaFileNameStrategy
 import killua.dev.mediadownloader.utils.PIXIV_ENTIRE_NOTIFICATION_ID
 import killua.dev.mediadownloader.utils.ShowNotification
@@ -61,6 +62,7 @@ class AdvancedFeaturesManager @Inject constructor(
 
     fun cancelKuaikanProgressNotification() = notification.cancelSpecificNotification(KUAIKAN_ENTIRE_NOTIFICATION_ID)
     fun cancelPixivProgressNotification() = notification.cancelSpecificNotification(PIXIV_ENTIRE_NOTIFICATION_ID)
+    fun cancelMissEvanProgressNotification() = notification.cancelSpecificNotification(MISSEVAN_ENTIRE_DRAMA_ID)
     suspend fun handleTwitterBookmarks(): Result<Unit> = runCatching {
         twitterDownloadAPI.getBookmarksAllTweets(
             onNewItems = { bookmarks ->
@@ -300,6 +302,7 @@ class AdvancedFeaturesManager @Inject constructor(
             DownloadTask(
                 id = download.uuid,
                 url = url,
+                refererNecessary = mainLink,
                 from = download.type,
                 fileName = fileName,
                 screenName = screenName,

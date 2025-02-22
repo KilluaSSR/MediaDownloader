@@ -1,5 +1,6 @@
 package killua.dev.mediadownloader.download
 
+import android.util.Log
 import db.Download
 import db.DownloadStatus
 import killua.dev.mediadownloader.Model.AvailablePlatforms
@@ -31,6 +32,7 @@ class DownloadbyLink @Inject constructor(
                 AvailablePlatforms.Lofter -> handleLofterDownload(url)
                 AvailablePlatforms.Pixiv -> handlePixivDownload(url)
                 AvailablePlatforms.Kuaikan -> handleKuaikanDownload(url)
+                AvailablePlatforms.MissEvan ->  handleMissEvanDownload(url)
             }
         }
     }
@@ -166,6 +168,26 @@ class DownloadbyLink @Inject constructor(
                 }
             }
             is NetworkResult.Error -> throw Exception("Twitter request error")
+        }
+    }
+
+    private suspend fun handleMissEvanDownload(url: String) {
+        val id = url.split("id=")[1]
+        when(val result = downloadRepository.getMissEvanDrama(id)) {
+            is NetworkResult.Success -> {
+                Log.d("MISSEVAN",result.data.soundurl)
+                createDownloadTask(
+                    url = result.data.soundurl,
+                    userId = result.data.soundstr,
+                    screenName = result.data.soundstr,
+                    platform = AvailablePlatforms.MissEvan,
+                    name = result.data.soundstr,
+                    tweetID = result.data.soundstr,
+                    mainLink = url,
+                    mediaType = MediaType.M4A
+                )
+            }
+            is NetworkResult.Error -> throw Exception(result.message)
         }
     }
 

@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import killua.dev.mediadownloader.Login.Platforms.KuaikanConfig
 import killua.dev.mediadownloader.Login.Platforms.LofterConfig
+import killua.dev.mediadownloader.Login.Platforms.MissEvanConfig
 import killua.dev.mediadownloader.Login.Platforms.PixivConfig
 import killua.dev.mediadownloader.Login.Platforms.TwitterConfig
 import killua.dev.mediadownloader.Model.AvailablePlatforms
@@ -52,7 +53,7 @@ fun BrowserPage(
             AvailablePlatforms.Lofter -> LofterConfig()
             AvailablePlatforms.Pixiv -> PixivConfig()
             AvailablePlatforms.Kuaikan -> KuaikanConfig()
-            AvailablePlatforms.MissEvan -> TODO()
+            AvailablePlatforms.MissEvan -> MissEvanConfig()
         }
     }
 

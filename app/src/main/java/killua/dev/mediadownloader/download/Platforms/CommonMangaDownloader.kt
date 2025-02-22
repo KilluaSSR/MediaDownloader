@@ -74,19 +74,14 @@ class CommonMangaDownloader(
                 return@withContext Result.failure(IOException("没有有效的图片URL"))
             }
 
-            log("开始下载漫画章节，共 ${imageUrls.size} 页")
             val bitmaps = mutableListOf<Bitmap>()
 
             // 顺序下载每张图片
             imageUrls.forEachIndexed { index, url ->
                 try {
-                    log("开始下载第 ${index + 1}/${imageUrls.size} 张图片")
-                    log("下载地址: $url")
-
                     val startTime = System.currentTimeMillis()
                     val imageBytes = downloadSingleFile(url, headers + getHeaders(task))
-                    val downloadTime = System.currentTimeMillis() - startTime
-                    log("图片下载完成，大小: ${imageBytes.size / 1024}KB，耗时: ${downloadTime}ms")
+                    System.currentTimeMillis() - startTime
 
                     val decodeStartTime = System.currentTimeMillis()
                     val options = BitmapFactory.Options().apply {

@@ -44,7 +44,7 @@ fun NotLoggedInAlert(
             }
 
             AvailablePlatforms.MissEvan -> {
-                TODO()
+                navController.navigateSingle(PrepareRoutes.MissEvavnPreparePage.route)
             }
         }
     }

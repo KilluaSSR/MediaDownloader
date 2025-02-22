@@ -27,11 +27,13 @@ sealed class PreparePageUIIntent : UIIntent {
     data object OnEntryPixiv : PreparePageUIIntent()
     data object OnEntryKuaikan : PreparePageUIIntent()
     data object OnEntryTwitter : PreparePageUIIntent()
+    data object OnEntryMissEvan: PreparePageUIIntent()
     data object OnTagsChanged : PreparePageUIIntent()
     data object OnLofterLoggedOut: PreparePageUIIntent()
     data object OnPixivLoggedOut: PreparePageUIIntent()
     data object OnKuaikanLoggedOut: PreparePageUIIntent()
     data object OnTwitterLoggedOut: PreparePageUIIntent()
+    data object OnMissEvanLoggedOut: PreparePageUIIntent()
 }
 
 @HiltViewModel
@@ -51,6 +53,11 @@ class PreparePageViewModel @Inject constructor(
         MutableStateFlow(CurrentState.Idle)
     val pixivLoginState: StateFlow<CurrentState> =
         _pixivLoginState.stateInScope(CurrentState.Idle)
+
+    private val _missevanLoginState: MutableStateFlow<CurrentState> =
+        MutableStateFlow(CurrentState.Idle)
+    val missevanLoginState: StateFlow<CurrentState> =
+        _missevanLoginState.stateInScope(CurrentState.Idle)
 
     private val _kuaikanLoginState: MutableStateFlow<CurrentState> =
         MutableStateFlow(CurrentState.Idle)
@@ -73,6 +80,8 @@ class PreparePageViewModel @Inject constructor(
     val lofterEligibility: StateFlow<Boolean> = _lofterLoginState.map { login ->
         login == CurrentState.Success}.flowOnIO().stateInScope(false)
     val pixivEligibility: StateFlow<Boolean> = _pixivLoginState.map { login ->
+        login == CurrentState.Success}.flowOnIO().stateInScope(false)
+    val missEvanEligibility: StateFlow<Boolean> = _missevanLoginState.map { login ->
         login == CurrentState.Success}.flowOnIO().stateInScope(false)
     val kuaikanEligibility: StateFlow<Boolean> = _kuaikanLoginState.map { login ->
         login == CurrentState.Success}.flowOnIO().stateInScope(false)
@@ -146,6 +155,18 @@ class PreparePageViewModel @Inject constructor(
             }
             PreparePageUIIntent.OnTwitterLoggedOut -> {
                 _twitterLoginState.value = CurrentState.Idle
+            }
+
+            PreparePageUIIntent.OnEntryMissEvan -> {
+                mutex.withLock{
+                    val token = userDataManager.userMissEvanData.value
+                    if(token.isNotBlank()){
+                        _missevanLoginState.value = CurrentState.Success
+                    }
+                }
+            }
+            PreparePageUIIntent.OnMissEvanLoggedOut -> {
+                _missevanLoginState.value = CurrentState.Idle
             }
         }
     }

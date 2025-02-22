@@ -5,6 +5,7 @@ data class DownloadTask(
     val url: String,
     val from: AvailablePlatforms = AvailablePlatforms.Twitter,
     val type: MediaType = MediaType.VIDEO,
+    val refererNecessary: String? = null,
     val fileName: String,
     val screenName: String,
     val destinationFolder: String = type.buildPath(from),

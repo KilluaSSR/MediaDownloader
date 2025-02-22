@@ -36,6 +36,7 @@ import killua.dev.mediadownloader.ui.pages.MainPage
 import killua.dev.mediadownloader.ui.pages.OtherSetupPages.Kuaikan.KuaikanPreparePage
 import killua.dev.mediadownloader.ui.pages.OtherSetupPages.Lofter.LofterPreparePage
 import killua.dev.mediadownloader.ui.pages.OtherSetupPages.Lofter.LofterPrepareTagsPage
+import killua.dev.mediadownloader.ui.pages.OtherSetupPages.MissEvan.MissEvanPreparePage
 import killua.dev.mediadownloader.ui.pages.OtherSetupPages.Pixiv.PixivPreparePage
 import killua.dev.mediadownloader.ui.pages.OtherSetupPages.Twitter.TwitterPreparePage
 import killua.dev.mediadownloader.ui.pages.SettingsPage
@@ -144,6 +145,10 @@ class MainActivity : FragmentActivity() {
                             TwitterPreparePage()
                         }
 
+                        composable(PrepareRoutes.MissEvavnPreparePage.route){
+                            MissEvanPreparePage()
+                        }
+
                         //Prepare Cookies
                         composable(CookiesRoutes.LofterCookiesBrowser.route){
                             BrowserPage(AvailablePlatforms.Lofter)
@@ -156,6 +161,9 @@ class MainActivity : FragmentActivity() {
                         }
                         composable(CookiesRoutes.TwitterCookiesBrowser.route){
                             BrowserPage(AvailablePlatforms.Twitter)
+                        }
+                        composable(CookiesRoutes.MissEvanCookiesBrowser.route){
+                            BrowserPage(AvailablePlatforms.MissEvan)
                         }
                     }
                 }

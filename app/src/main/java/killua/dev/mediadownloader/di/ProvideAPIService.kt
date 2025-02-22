@@ -22,6 +22,7 @@ import killua.dev.mediadownloader.datastore.readLofterEndTime
 import killua.dev.mediadownloader.datastore.readLofterLoginAuth
 import killua.dev.mediadownloader.datastore.readLofterLoginKey
 import killua.dev.mediadownloader.datastore.readLofterStartTime
+import killua.dev.mediadownloader.datastore.readMissEvanToken
 import killua.dev.mediadownloader.datastore.readPixivPHPSSID
 import killua.dev.mediadownloader.download.DownloadQueueManager
 import killua.dev.mediadownloader.download.DownloadbyLink
@@ -69,6 +70,9 @@ class UserDataManager @Inject constructor(
 
     private val _userKuaikanData = MutableStateFlow("")
     val userKuaikanData: StateFlow<String> = _userKuaikanData.asStateFlow()
+
+    private val _userMissEvanData = MutableStateFlow("")
+    val userMissEvanData: StateFlow<String> = _userMissEvanData.asStateFlow()
 
     private val _delay = MutableStateFlow(2)
     val delay : StateFlow<Int> = _delay.asStateFlow()
@@ -123,6 +127,12 @@ class UserDataManager @Inject constructor(
                 _userPixivPHPSSID.value = it
             }
         }
+
+        scope.launch{
+            context.readMissEvanToken().collect{
+                _userMissEvanData.value = it
+            }
+        }
     }
 }
 
@@ -148,10 +158,11 @@ object ProvideAPI {
         twitterDownloadAPI: TwitterDownloadAPI,
         lofterService: LofterService,
         pixivService: PixivService,
+        missEvanService: MissEvanService,
         kuaikanService: KuaikanService,
         downloadRepository: DownloadRepository
     ): DownloadServicesRepository {
-        return DownloadServicesRepository(twitterDownloadAPI, lofterService, pixivService, kuaikanService, downloadRepository)
+        return DownloadServicesRepository(twitterDownloadAPI, lofterService, pixivService,missEvanService, kuaikanService, downloadRepository)
     }
 
     @Provides

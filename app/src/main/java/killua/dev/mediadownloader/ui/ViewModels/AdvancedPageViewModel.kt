@@ -311,7 +311,7 @@ class AdvancedPageViewModel @Inject constructor(
                 }
 
                 ChapterDownloadType.MISSEVAN_DRAMA -> {
-                    selectedChapters.mapNotNull { chapterInfo ->
+                    val missEvanChapters = selectedChapters.mapNotNull { chapterInfo ->
                         when (chapterInfo) {
                             is ChapterInfo.DownloadableChapter -> MissEvanDownloadDrama(
                                 id = chapterInfo.id,
@@ -321,6 +321,8 @@ class AdvancedPageViewModel @Inject constructor(
                             else -> null
                         }
                     }
+                    advancedFeaturesManager.downloadEntireMissEvanDrama(missEvanChapters)
+                    advancedFeaturesManager.cancelMissEvanProgressNotification()
                 }
             }
 

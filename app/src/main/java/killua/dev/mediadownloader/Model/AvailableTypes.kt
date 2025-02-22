@@ -19,7 +19,7 @@ enum class MediaType(
     M4A(
         extension = "m4a",
         mimeType = "audio/mp4",
-        collection = MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
+        collection = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
         baseFolder = "Download"
     ),
     PHOTO(

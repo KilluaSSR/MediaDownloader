@@ -42,6 +42,7 @@ enum class SupportedUrlType(val pattern: Regex) {
     PIXIV_IMG("""pixiv\.net/artworks/.*""".toRegex()),
     PIXIV_NOVEL("""pixiv\.net/novel/show\.php\?id=\d+""".toRegex()),
     KUAIKAN("""kuaikanmanhua\.com/.*""".toRegex()),
+    MISSEVAN("""missevan\.com/sound/player\?id=(\d+)""".toRegex()),
     UNKNOWN("".toRegex());
 
     companion object {
@@ -56,6 +57,7 @@ enum class SupportedUrlType(val pattern: Regex) {
             PIXIV_NOVEL -> AvailablePlatforms.Pixiv
             KUAIKAN -> AvailablePlatforms.Kuaikan
             UNKNOWN -> null
+            MISSEVAN -> AvailablePlatforms.MissEvan
         }
     }
 }

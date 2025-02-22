@@ -92,14 +92,15 @@ dependencies {
 
     // Network
     implementation(libs.okhttp)
-    implementation(libs.ktor.client.serialization)
     implementation(libs.gson)
 
     // WorkManager
     implementation(libs.androidx.work.runtime.ktx)
-
+    implementation(libs.androidx.hilt.work)
     // DataStore
     implementation(libs.androidx.datastore.preferences)
+
+    implementation(libs.androidx.startup.runtime)
 
     // Material Design
     implementation(libs.material)
