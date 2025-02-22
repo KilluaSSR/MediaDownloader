@@ -6,8 +6,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import killua.dev.mediadownloader.utils.VideoDurationRepository
-import killua.dev.mediadownloader.utils.VideoDurationRepositoryImpl
+import killua.dev.mediadownloader.utils.MeidaDurationRepository
+import killua.dev.mediadownloader.utils.MediaDurationRepositoryImpl
 import javax.inject.Singleton
 
 @Module
@@ -17,5 +17,5 @@ object RepositoryModule {
     @Singleton
     fun provideVideoDurationRepository(
         @ApplicationContext context: Context
-    ): VideoDurationRepository = VideoDurationRepositoryImpl(context)
+    ): MeidaDurationRepository = MediaDurationRepositoryImpl(context)
 }

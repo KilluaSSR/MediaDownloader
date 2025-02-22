@@ -10,7 +10,7 @@ import killua.dev.mediadownloader.Model.DownloadTask
 import killua.dev.mediadownloader.repository.DownloadRepository
 import killua.dev.mediadownloader.repository.ThumbnailRepository
 import killua.dev.mediadownloader.utils.FileDelete
-import killua.dev.mediadownloader.utils.VideoDurationRepository
+import killua.dev.mediadownloader.utils.MeidaDurationRepository
 import killua.dev.mediadownloader.utils.navigateToLink
 import killua.dev.mediadownloader.utils.navigateTwitterTweet
 import javax.inject.Inject
@@ -19,7 +19,7 @@ class DownloadListManager @Inject constructor(
     private val downloadRepository: DownloadRepository,
     private val downloadManager: DownloadManager,
     private val thumbnailRepository: ThumbnailRepository,
-    private val videoDurationRepository: VideoDurationRepository,
+    private val mediaDurationRepository: MeidaDurationRepository,
     private val downloadQueueManager: DownloadQueueManager,
     private val fileDelete: FileDelete,
     @ApplicationContext private val context: Context
@@ -39,7 +39,7 @@ class DownloadListManager @Inject constructor(
 
     suspend fun deleteById(downloadId: String) = downloadRepository.deleteById(downloadId)
 
-    suspend fun getVideoDuration(uri: Uri) = videoDurationRepository.getVideoDuration(uri)
+    suspend fun getMediaDuration(uri: Uri) = mediaDurationRepository.getMediaDuration(uri)
 
     suspend fun getThumbnail(uri: Uri) = thumbnailRepository.getThumbnail(uri)
 

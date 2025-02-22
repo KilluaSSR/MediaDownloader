@@ -105,6 +105,7 @@
     <string name="videos">Videos</string>
     <string name="images">Images</string>
     <string name="pdf" translatable="false">PDF</string>
+    <string name="audio">Audio</string>
     <string name="date_range_image_desc">Please select a date range, and only the images within this range will be downloaded</string>
     <string name="no_active_downloads">No active downloads</string>
     <string name="no_failed_downloads">No failed downloads</string>

@@ -69,5 +69,12 @@ fun FilterByPlatforms(
             },
             label = { Text(stringResource(R.string.kuaikan)) }
         )
+        FilterChip(
+            selected = currentFilter.platformFilter == PlatformFilter.MissEvan,
+            onClick = {
+                onFilterChange(currentFilter.copy(platformFilter = PlatformFilter.MissEvan))
+            },
+            label = { Text(stringResource(R.string.missevan)) }
+        )
     }
 }

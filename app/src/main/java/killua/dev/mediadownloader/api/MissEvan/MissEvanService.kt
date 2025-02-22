@@ -89,3 +89,19 @@ class MissEvanService @Inject constructor(
     }
 
 }
+
+fun extractMissEvanSoundId(url: String): String? {
+    // 匹配可能的 URL 模式
+    val patterns = listOf(
+        """missevan\.com/sound/(\d+)""".toRegex(),         // 普通链接
+        """missevan\.com/sound/player\?id=(\d+)""".toRegex() // 播放器链接
+    )
+
+    patterns.forEach { pattern ->
+        pattern.find(url)?.groupValues?.getOrNull(1)?.let { id ->
+            return id
+        }
+    }
+
+    return null
+}

@@ -10,16 +10,16 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-interface VideoDurationRepository {
-    suspend fun getVideoDuration(uri: Uri): Long
+interface MeidaDurationRepository {
+    suspend fun getMediaDuration(uri: Uri): Long
 }
-class VideoDurationRepositoryImpl @Inject constructor(
+class MediaDurationRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
-) : VideoDurationRepository {
+) : MeidaDurationRepository {
     private val durationCache = LruCache<String, Long>(100)
     private val retrieverPool = Semaphore(4)
 
-    override suspend fun getVideoDuration(uri: Uri): Long = withContext(Dispatchers.IO) {
+    override suspend fun getMediaDuration(uri: Uri): Long = withContext(Dispatchers.IO) {
         val key = uri.toString()
         durationCache.get(key)?.let { return@withContext it }
 

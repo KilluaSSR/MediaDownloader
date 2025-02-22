@@ -62,5 +62,12 @@ fun FilterByType(
             },
             label = { Text(stringResource(R.string.pdf)) }
         )
+        FilterChip(
+            selected = currentFilter.typeFilter== TypeFilter.Audio,
+            onClick = {
+                onFilterChange(currentFilter.copy(typeFilter = TypeFilter.Audio))
+            },
+            label = { Text(stringResource(R.string.audio)) }
+        )
     }
 }

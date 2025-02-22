@@ -204,7 +204,6 @@ class DownloadListViewModel @Inject constructor(
         destination: DownloadPageDestinations,
         filterOptions: FilterOptions
     ): List<DownloadedItem> = withContext(Dispatchers.Default) {
-        // 1. 首先按状态过滤，这是最快的操作
         val statusFiltered = when (destination) {
             DownloadPageDestinations.All -> unfiltered
             DownloadPageDestinations.Downloading -> unfiltered.filter {
@@ -218,22 +217,20 @@ class DownloadListViewModel @Inject constructor(
             }
         }
 
-        // 2. 如果过滤后列表为空，直接返回
         if (statusFiltered.isEmpty()) {
             return@withContext emptyList()
         }
 
-        // 3. 预加载视频时长（如果需要）
         val durationFilterSelected = filterOptions.durationFilter != DurationFilter.All
         val durationMap = if (durationFilterSelected) {
             statusFiltered.asSequence()
-                .filter { it.fileType == VIDEO }
+                .filter { it.fileType == VIDEO || it.fileType == M4A }
                 .mapNotNull { it.fileUri }
                 .distinct()
                 .toList()
                 .map { uri ->
                     async {
-                        uri to downloadListManager.getVideoDuration(uri)
+                        uri to downloadListManager.getMediaDuration(uri)
                     }
                 }
                 .awaitAll()
@@ -242,7 +239,6 @@ class DownloadListViewModel @Inject constructor(
             emptyMap()
         }
 
-        // 4. 加载缩略图
         val newThumbnails = statusFiltered
             .mapNotNull { it.fileUri }
             .filter { uri -> !uiState.value.thumbnailCache.containsKey(uri) }
@@ -306,6 +302,7 @@ class DownloadListViewModel @Inject constructor(
                     TypeFilter.Videos -> item.fileType == VIDEO
                     TypeFilter.Images -> item.fileType == PHOTO
                     TypeFilter.PDF -> item.fileType == PDF
+                    TypeFilter.Audio -> item.fileType == M4A
                 }
             }
 
@@ -316,6 +313,7 @@ class DownloadListViewModel @Inject constructor(
                 PlatformFilter.Lofter -> item.platform == AvailablePlatforms.Lofter
                 PlatformFilter.Pixiv -> item.platform == AvailablePlatforms.Pixiv
                 PlatformFilter.Kuaikan -> item.platform == AvailablePlatforms.Kuaikan
+                PlatformFilter.MissEvan -> item.platform == AvailablePlatforms.MissEvan
             }
 
             authorMatch && durationMatch && typeMatch && platformMatch

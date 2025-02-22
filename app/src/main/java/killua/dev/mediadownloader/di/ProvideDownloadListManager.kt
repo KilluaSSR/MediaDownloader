@@ -12,7 +12,7 @@ import killua.dev.mediadownloader.download.DownloadQueueManager
 import killua.dev.mediadownloader.repository.DownloadRepository
 import killua.dev.mediadownloader.repository.ThumbnailRepository
 import killua.dev.mediadownloader.utils.FileDelete
-import killua.dev.mediadownloader.utils.VideoDurationRepository
+import killua.dev.mediadownloader.utils.MeidaDurationRepository
 
 @Module
 @InstallIn(ViewModelComponent::class)
@@ -22,7 +22,7 @@ object ManagerModule {
         downloadRepository: DownloadRepository,
         downloadManager: DownloadManager,
         thumbnailRepository: ThumbnailRepository,
-        videoDurationRepository: VideoDurationRepository,
+        videoDurationRepository: MeidaDurationRepository,
         downloadQueueManager: DownloadQueueManager,
         fileDelete: FileDelete,
         @ApplicationContext context: Context
