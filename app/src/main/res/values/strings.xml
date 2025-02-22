@@ -45,6 +45,8 @@
     <string name="biometric_auth_disabled_desc">Your device may not support biometric authentication, or you may not have set it up</string>
     <string name="biometric_auth_desc_off">Everyone can access my download list now</string>
     <string name="platform_configurations">Platform Configurations</string>
+    <string name="log_in_out">Log in / out</string>
+    <string name="lofter_settings_desc">Date range, Tags and Log in / out</string>
     <string name="reset">Reset</string>
     <string name="download">Download</string>
     <string name="kuaikan">Kuaikan</string>

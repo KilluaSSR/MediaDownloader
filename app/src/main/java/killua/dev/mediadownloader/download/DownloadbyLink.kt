@@ -55,7 +55,7 @@ class DownloadbyLink @Inject constructor(
                     screenName = result.data.title,
                     platform = AvailablePlatforms.Kuaikan,
                     name = result.data.chapter,
-                    tweetID = result.data.title,
+                    uniqueID = url,
                     mainLink = url,
                     mediaType = MediaType.PDF
                 )
@@ -80,7 +80,7 @@ class DownloadbyLink @Inject constructor(
                             screenName = result.data.userName,
                             platform = AvailablePlatforms.Pixiv,
                             name = result.data.title,
-                            tweetID = imageURL,
+                            uniqueID = imageURL,
                             mainLink = url,
                             mediaType = MediaType.PHOTO
                         )
@@ -122,8 +122,8 @@ class DownloadbyLink @Inject constructor(
                         screenName = data.authorDomain,
                         platform = AvailablePlatforms.Lofter,
                         name = data.authorName,
-                        tweetID = image.url,
-                        mainLink = url,
+                        uniqueID = url,
+                        mainLink = image.url,
                         mediaType = MediaType.PHOTO
                     )
                 }
@@ -144,7 +144,7 @@ class DownloadbyLink @Inject constructor(
                         screenName = user?.screenName ?: "",
                         platform = AvailablePlatforms.Twitter,
                         name = user?.name ?: "",
-                        tweetID = tweetId,
+                        uniqueID = tweetId,
                         mainLink = videoUrl,
                         mediaType = MediaType.VIDEO
                     )
@@ -159,7 +159,7 @@ class DownloadbyLink @Inject constructor(
                                 screenName = user?.screenName ?: "",
                                 platform = AvailablePlatforms.Twitter,
                                 name = user?.name ?: "",
-                                tweetID = tweetId,
+                                uniqueID = tweetId,
                                 mainLink = photoUrl,
                                 mediaType = MediaType.PHOTO
                             )
@@ -175,15 +175,14 @@ class DownloadbyLink @Inject constructor(
         val id = url.split("id=")[1]
         when(val result = downloadRepository.getMissEvanDrama(id)) {
             is NetworkResult.Success -> {
-                Log.d("MISSEVAN",result.data.soundurl)
                 createDownloadTask(
                     url = result.data.soundurl,
                     userId = result.data.soundstr,
                     screenName = result.data.soundstr,
                     platform = AvailablePlatforms.MissEvan,
                     name = result.data.soundstr,
-                    tweetID = result.data.soundstr,
-                    mainLink = url,
+                    uniqueID = url,
+                    mainLink = result.data.soundurl,
                     mediaType = MediaType.M4A
                 )
             }
@@ -197,7 +196,7 @@ class DownloadbyLink @Inject constructor(
         screenName: String,
         platform: AvailablePlatforms,
         name: String,
-        tweetID: String,
+        uniqueID: String,
         mainLink: String,
         mediaType: MediaType
     ) {
@@ -211,9 +210,9 @@ class DownloadbyLink @Inject constructor(
             uuid = UUID.randomUUID().toString(),
             userId = userId,
             screenName = screenName,
-            type = platform,
+            platform = platform,
             name = name,
-            tweetID = tweetID,
+            uniqueID = uniqueID,
             fileUri = null,
             link = mainLink,
             fileName = fileName,
@@ -228,7 +227,7 @@ class DownloadbyLink @Inject constructor(
             DownloadTask(
                 id = download.uuid,
                 url = url,
-                from = download.type,
+                from = download.platform,
                 fileName = fileName,
                 screenName = screenName,
                 type = mediaType

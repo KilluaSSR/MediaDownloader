@@ -43,7 +43,6 @@ class TwitterDownloadAPI @Inject constructor(
 ) {
     private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     suspend fun getTwitterSingleMediaDetailAsync(tweetId: String): NetworkResult<TweetData> {
         if (tweetId.isBlank()) return NetworkResult.Error(message = "ID cannot be empty")
 
@@ -60,7 +59,6 @@ class TwitterDownloadAPI @Inject constructor(
             }
         )
     }
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     suspend fun getBookmarksAllTweets(
         onNewItems: suspend (List<Bookmark>) -> Unit,
         onError: (String) -> Unit
@@ -70,7 +68,6 @@ class TwitterDownloadAPI @Inject constructor(
         onError = onError
     )
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private suspend fun getTwitterBookmarkAsync(
         cursor: String,
         count: Int = 20
@@ -81,7 +78,6 @@ class TwitterDownloadAPI @Inject constructor(
         extractData = { rootDto, cur -> rootDto.extractMediaPageData(cur, true) }
     )
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     suspend fun getLikesAllTweets(
         onNewItems: suspend (List<Bookmark>) -> Unit,
         onError: (String) -> Unit
@@ -91,7 +87,6 @@ class TwitterDownloadAPI @Inject constructor(
         onError = onError
     )
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private suspend fun getTwitterLikesAsync(
         cursor: String,
         count: Int = 20
@@ -102,7 +97,6 @@ class TwitterDownloadAPI @Inject constructor(
         extractData = { rootDto, cur -> rootDto.extractMediaPageData(cur, false) }
     )
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private suspend fun getUserMediaAsync(
         userId: String,
         screenName: String,
@@ -120,11 +114,9 @@ class TwitterDownloadAPI @Inject constructor(
         extractData = { rootDto, cur -> rootDto.extractUserMediaPageData(cur) }
     )
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     suspend fun getUserBasicInfo(screenName: String): NetworkResult<UserBasicInfo> =
         getUserIdByScreenNameAsync(screenName.removePrefix("@"))
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private suspend fun getUserIdByScreenNameAsync(
         screenName: String
     ): NetworkResult<UserBasicInfo> = fetchTwitterPage(
@@ -140,7 +132,6 @@ class TwitterDownloadAPI @Inject constructor(
         }
     )
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     suspend fun getUserMediaByUserId(
         userId: String,
         screenName: String,
@@ -152,7 +143,6 @@ class TwitterDownloadAPI @Inject constructor(
         onError = onError
     )
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private suspend fun <T> fetchTwitterPage(
         apiUrl: String,
         params: Map<String, String>,
@@ -270,7 +260,6 @@ class TwitterDownloadAPI @Inject constructor(
             )
         )
     }
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun buildUrl(baseUrl: String, params: Map<String, String>): String {
         if (params.isEmpty()) return baseUrl
         val query = params.map {

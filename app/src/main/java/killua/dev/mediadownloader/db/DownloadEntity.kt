@@ -15,12 +15,12 @@ data class Download @OptIn(ExperimentalUuidApi::class) constructor(
     @ColumnInfo(name = "user_id") val userId: String? = null,
     @ColumnInfo(name = "screen_name") val screenName: String? = null,
     @ColumnInfo(name = "name") val name: String? = null,
-    @ColumnInfo(name = "type") val type: AvailablePlatforms = AvailablePlatforms.Twitter,
+    @ColumnInfo(name = "platform") val platform: AvailablePlatforms = AvailablePlatforms.Twitter,
 
     @ColumnInfo(name = "file_uri") val fileUri: Uri?,
     @ColumnInfo(name = "link") val link: String?,
 
-    @ColumnInfo(name = "tweetID") val tweetID: String?,
+    @ColumnInfo(name = "unique_id") val uniqueID: String?,
 
     @ColumnInfo(name = "file_name") val fileName: String,
     @ColumnInfo(name = "file_type") val fileType: String,
@@ -29,7 +29,6 @@ data class Download @OptIn(ExperimentalUuidApi::class) constructor(
     @ColumnInfo(name = "range_header") val rangeHeader: String? = null,
 
     @ColumnInfo(name = "status") val status: DownloadStatus = DownloadStatus.PENDING,
-    @ColumnInfo(name = "progress") val progress: Int = 0,
     @ColumnInfo(name = "error_message") val errorMessage: String? = null,
 
     @ColumnInfo(name = "created_at") val createdAt: Long = System.currentTimeMillis(),

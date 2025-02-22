@@ -121,8 +121,8 @@ class AdvancedFeaturesManager @Inject constructor(
                 screenName = authorDomain,
                 platform = AvailablePlatforms.Lofter,
                 name = authorName,
-                tweetID = it.url,
-                mainLink = it.blogUrl,
+                uniqueID = it.blogUrl,
+                mainLink = it.url,
                 mediaType = MediaType.PHOTO
             )
 
@@ -202,7 +202,7 @@ class AdvancedFeaturesManager @Inject constructor(
                         screenName = mangaResult.data.title,
                         platform = AvailablePlatforms.Kuaikan,
                         name = mangaResult.data.chapter,
-                        tweetID = mangaResult.data.title,
+                        uniqueID = "https://www.kuaikanmanhua.com/webs/comic-next/${it.id}",
                         mainLink = "https://www.kuaikanmanhua.com/webs/comic-next/${it.id}",
                         mediaType = MediaType.PDF
                     )
@@ -224,8 +224,8 @@ class AdvancedFeaturesManager @Inject constructor(
                         screenName = it.mainTitle,
                         platform = AvailablePlatforms.MissEvan,
                         name = it.title,
-                        tweetID = it.title,
-                        mainLink = "https://www.missevan.com/sound/player?id=${it.id}",
+                        uniqueID = "https://www.missevan.com/sound/player?id=${it.id}",
+                        mainLink = result.data.soundurl,
                         mediaType = MediaType.M4A
                     )
                 }
@@ -271,7 +271,7 @@ class AdvancedFeaturesManager @Inject constructor(
         screenName: String,
         platform: AvailablePlatforms,
         name: String,
-        tweetID: String,
+        uniqueID: String,
         mainLink: String,
         mediaType: MediaType
     ) {
@@ -285,9 +285,9 @@ class AdvancedFeaturesManager @Inject constructor(
             uuid = UUID.randomUUID().toString(),
             userId = userId,
             screenName = screenName,
-            type = platform,
+            platform = platform,
             name = name,
-            tweetID = tweetID,
+            uniqueID = uniqueID,
             fileUri = null,
             link = mainLink,
             fileName = fileName,
@@ -303,7 +303,7 @@ class AdvancedFeaturesManager @Inject constructor(
                 id = download.uuid,
                 url = url,
                 refererNecessary = mainLink,
-                from = download.type,
+                from = download.platform,
                 fileName = fileName,
                 screenName = screenName,
                 type = mediaType

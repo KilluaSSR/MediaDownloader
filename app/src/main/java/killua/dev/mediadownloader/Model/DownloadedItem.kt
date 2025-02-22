@@ -9,10 +9,9 @@ data class DownloadedItem(
     override val id: String,
     val screenName: String,
     val name: String,
-    val type: AvailablePlatforms,
+    val platform: AvailablePlatforms,
     override val downloadState: DownloadState,
     override val link: String,
-    override val progress: Int = 0,
     override val fileUri: Uri? = null,
     override val fileType: MediaType,
     override val createdAt: Long,
@@ -21,7 +20,6 @@ data class DownloadedItem(
     id = id,
     downloadState = downloadState,
     link = link,
-    progress = progress,
     fileUri = fileUri,
     fileType = fileType,
     createdAt = createdAt,
@@ -32,7 +30,7 @@ data class DownloadedItem(
             id = download.uuid,
             screenName = download.screenName ?: "",
             name = download.name ?: "",
-            type = download.type,
+            platform = download.platform,
             downloadState = when (download.status) {
                 DownloadStatus.PENDING -> DownloadState.Pending
                 DownloadStatus.DOWNLOADING -> DownloadState.Downloading()
@@ -46,7 +44,6 @@ data class DownloadedItem(
             },
             fileType = MediaType.fromString(download.fileType),
             link = download.link ?: "",
-            progress = download.progress,
             fileUri = download.fileUri,
             createdAt = download.createdAt,
             completedAt = download.completedAt

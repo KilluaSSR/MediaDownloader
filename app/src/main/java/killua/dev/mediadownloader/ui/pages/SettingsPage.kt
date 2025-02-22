@@ -186,16 +186,16 @@ fun SettingsPage(){
 
             Title(title = stringResource(R.string.platform_configurations)) {
                 Clickable(
-                    title = "Twitter",
-                    value = "Log in / out."
+                    title = stringResource(R.string.twitter),
+                    value = stringResource(R.string.log_in_out)
                 ){
                     scope.launch{
                         navController.navigateSingle(PrepareRoutes.TwitterPreparePage.route)
                     }
                 }
                 Clickable(
-                    title = "Lofter",
-                    value = "Date range, Tags and Log in / out."
+                    title = stringResource(R.string.lofter),
+                    value = stringResource(R.string.lofter_settings_desc),
                 ){
                     scope.launch{
                         navController.navigateSingle(PrepareRoutes.LofterPreparePage.route)
@@ -203,8 +203,8 @@ fun SettingsPage(){
                 }
 
                 Clickable(
-                    title = "Pixiv",
-                    value = "Log in / out."
+                    title = stringResource(R.string.pixiv),
+                    value = stringResource(R.string.log_in_out)
                 ){
                     scope.launch{
                         navController.navigateSingle(PrepareRoutes.PixivPreparePage.route)
@@ -212,10 +212,18 @@ fun SettingsPage(){
                 }
                 Clickable(
                     title = stringResource(R.string.kuaikan),
-                    value = "Log in / out."
+                    value = stringResource(R.string.log_in_out)
                 ){
                     scope.launch{
                         navController.navigateSingle(PrepareRoutes.KuaikanPreparePage.route)
+                    }
+                }
+                Clickable(
+                    title = stringResource(R.string.missevan),
+                    value = stringResource(R.string.log_in_out)
+                ){
+                    scope.launch{
+                        navController.navigateSingle(PrepareRoutes.MissEvavnPreparePage.route)
                     }
                 }
             }

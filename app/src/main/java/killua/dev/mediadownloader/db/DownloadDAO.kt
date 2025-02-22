@@ -14,53 +14,42 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface DownloadDao {
 
-    // ✅ 监听所有下载项（Flow 方式，让 UI 自动更新）
     @Query("SELECT * FROM Download ORDER BY created_at DESC")
     fun observeAllDownloads(): Flow<List<Download>>
 
-    // ✅ 获取所有下载项（一次性获取）
     @Query("SELECT * FROM Download ORDER BY created_at DESC")
     suspend fun getAll(): List<Download>
 
-    // ✅ 通过 UUID 查询下载项
     @Query("SELECT * FROM Download WHERE uuid = :uuid")
     suspend fun getById(uuid: String): Download?
 
-    // ✅ 插入单个下载项，若冲突则替换
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(download: Download)
 
-    // ✅ 批量插入，若冲突则替换
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(vararg downloads: Download)
 
-    // ✅ 删除指定下载项
     @Delete
     suspend fun delete(download: Download)
 
-    // ✅ 通过 Twitter 用户 ID 查询下载记录
     @Query("SELECT * FROM Download WHERE user_id = :userID")
     suspend fun getByUserID(userID: String): List<Download>
 
-    // ✅ 根据下载状态查询
     @Query("SELECT * FROM Download WHERE status = :status")
     suspend fun getByStatus(status: DownloadStatus): List<Download>
 
-    // ✅ 查询正在下载的任务
     @Query("SELECT * FROM Download WHERE status = 'DOWNLOADING'")
     suspend fun getDownloading(): List<Download>
 
-    // ✅ 按文件类型查询
     @Query("SELECT * FROM Download WHERE file_type = :fileType")
     suspend fun getByFileType(fileType: String): List<Download>
 
-    // ✅ 更新下载进度
     @Query("""
         UPDATE Download 
-        SET status = :status, progress = :progress 
+        SET status = :status
         WHERE uuid = :uuid
     """)
-    suspend fun updateProgress(uuid: String, status: DownloadStatus, progress: Int)
+    suspend fun updateStatus(uuid: String, status: DownloadStatus)
 
 
     @Query("""
@@ -114,7 +103,7 @@ interface DownloadDao {
         screen_name AS screenName,
         name AS name,
         COUNT(*) AS totalDownloads,
-        type AS platforms
+        platform AS platforms
     FROM Download
     WHERE status = :status 
         AND user_id IS NOT NULL 
@@ -123,13 +112,12 @@ interface DownloadDao {
         AND screen_name != ''
         AND name IS NOT NULL 
         AND name != ''
-        AND type IN ('Twitter', 'Lofter', 'PIXIV')
-    GROUP BY user_id, type
+        AND platform IN ('Twitter', 'Lofter', 'PIXIV')
+    GROUP BY user_id, platform
     ORDER BY totalDownloads DESC
     LIMIT 1
 """) suspend fun getMostDownloadedUser(status: DownloadStatus = DownloadStatus.COMPLETED): MostDownloadedUser?
 
-    // ✅ 记录下载失败信息
     @Query("""
         UPDATE Download 
         SET status = :status, error_message = :errorMessage 

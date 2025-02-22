@@ -7,8 +7,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import killua.dev.mediadownloader.db.DownloadDao
+import killua.dev.mediadownloader.db.MediaDownloadDatabase
 import killua.dev.mediadownloader.db.TagDao
-import killua.dev.mediadownloader.db.TwitterDownloadDatabase
 import javax.inject.Singleton
 
 @Module
@@ -16,19 +16,19 @@ import javax.inject.Singleton
 object ProvideDownloadDatabaseModule {
     @Provides
     @Singleton
-    fun provideDownloadDatabase(@ApplicationContext context: Context): TwitterDownloadDatabase {
-        return TwitterDownloadDatabase.getInstance(context)
+    fun provideDownloadDatabase(@ApplicationContext context: Context): MediaDownloadDatabase {
+        return MediaDownloadDatabase.getInstance(context)
     }
 
     @Provides
     @Singleton
-    fun provideDownloadDao(database: TwitterDownloadDatabase): DownloadDao {
+    fun provideDownloadDao(database: MediaDownloadDatabase): DownloadDao {
         return database.downloadDao()
     }
 
     @Provides
     @Singleton
-    fun provideTagsDao(database: TwitterDownloadDatabase): TagDao {
+    fun provideTagsDao(database: MediaDownloadDatabase): TagDao {
         return database.tagDao()
     }
 }

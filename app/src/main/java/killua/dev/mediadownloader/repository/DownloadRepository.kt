@@ -18,9 +18,6 @@ class DownloadRepository @Inject constructor(
     // ✅ 监听所有下载项（UI 自动更新）
     fun observeAllDownloads(): Flow<List<Download>> = downloadDao.observeAllDownloads()
 
-    // ✅ 获取所有下载项（一次性获取）
-    suspend fun getAllDownloads(): List<Download> = downloadDao.getAll()
-
     // ✅ 通过 UUID 获取下载项
     suspend fun getById(uuid: String): Download? = downloadDao.getById(uuid)
 
@@ -37,7 +34,6 @@ class DownloadRepository @Inject constructor(
     // ✅ 获取状态为 "DOWNLOADING" 的任务
     suspend fun getDownloadingItems(): List<Download> = downloadDao.getDownloading()
 
-
     suspend fun getMostDownloadedUser(): MostDownloadedUser? = downloadDao.getMostDownloadedUser()
 
     // ✅ 获取所有 Pending 状态的下载项（等待下载）
@@ -52,16 +48,7 @@ class DownloadRepository @Inject constructor(
     // ✅ 更新下载状态
 
     suspend fun updateStatus(uuid: String, status: DownloadStatus) {
-        downloadDao.updateProgress(uuid, status, progress = 0)
-    }
-
-    // ✅ 更新下载进度
-    suspend fun updateDownloadProgress(uuid: String, progress: Int) {
-        downloadDao.updateProgress(
-            uuid = uuid,
-            status = DownloadStatus.DOWNLOADING,
-            progress = progress
-        )
+        downloadDao.updateStatus(uuid, status)
     }
 
     suspend fun updateDownloadingStatus(uuid: String) = downloadDao.updateDownloadingStatus(uuid = uuid)

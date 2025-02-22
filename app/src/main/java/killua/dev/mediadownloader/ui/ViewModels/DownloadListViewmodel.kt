@@ -13,6 +13,12 @@ import killua.dev.mediadownloader.Model.DownloadProgress
 import killua.dev.mediadownloader.Model.DownloadTask
 import killua.dev.mediadownloader.Model.DownloadedItem
 import killua.dev.mediadownloader.Model.MediaType
+import killua.dev.mediadownloader.Model.MediaType.GIF
+import killua.dev.mediadownloader.Model.MediaType.M4A
+import killua.dev.mediadownloader.Model.MediaType.PDF
+import killua.dev.mediadownloader.Model.MediaType.PHOTO
+import killua.dev.mediadownloader.Model.MediaType.TXT
+import killua.dev.mediadownloader.Model.MediaType.VIDEO
 import killua.dev.mediadownloader.download.DownloadListManager
 import killua.dev.mediadownloader.download.DownloadbyLink
 import killua.dev.mediadownloader.ui.SnackbarUIEffect
@@ -23,8 +29,6 @@ import killua.dev.mediadownloader.ui.filters.FilterOptions
 import killua.dev.mediadownloader.ui.filters.PlatformFilter
 import killua.dev.mediadownloader.ui.filters.TypeFilter
 import killua.dev.mediadownloader.utils.MediaFileNameStrategy
-import killua.dev.mediadownloader.utils.navigateToLofter
-import killua.dev.mediadownloader.utils.navigateTwitterTweet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.async
@@ -101,7 +105,7 @@ class DownloadListViewModel @Inject constructor(
         // 1. 处理作者列表
         val authors = downloads
             .mapNotNull { download ->
-                when (download.type) {
+                when (download.platform) {
                     AvailablePlatforms.Twitter,
                     AvailablePlatforms.Lofter -> download.name
                     AvailablePlatforms.Pixiv -> download.screenName
@@ -225,7 +229,7 @@ class DownloadListViewModel @Inject constructor(
         val durationFilterSelected = filterOptions.durationFilter != DurationFilter.All
         val durationMap = if (durationFilterSelected) {
             statusFiltered.asSequence()
-                .filter { it.fileType == MediaType.VIDEO }
+                .filter { it.fileType == VIDEO }
                 .mapNotNull { it.fileUri }
                 .distinct()
                 .toList()
@@ -265,7 +269,7 @@ class DownloadListViewModel @Inject constructor(
         statusFiltered.filter { item ->
             // 作者过滤
             val authorMatch = filterOptions.selectedAuthors.isEmpty() ||
-                    when (item.type) {
+                    when (item.platform) {
                         AvailablePlatforms.Twitter,
                         AvailablePlatforms.Lofter -> item.name in filterOptions.selectedAuthors
                         AvailablePlatforms.Pixiv -> item.screenName in filterOptions.selectedAuthors
@@ -276,7 +280,7 @@ class DownloadListViewModel @Inject constructor(
             val durationFilterSelected = filterOptions.durationFilter != DurationFilter.All
 
             // 如果选择了具体时长，就只显示视频
-            if (durationFilterSelected && item.fileType != MediaType.VIDEO) {
+            if (durationFilterSelected && item.fileType != VIDEO) {
                 return@filter false
             }
 
@@ -301,19 +305,19 @@ class DownloadListViewModel @Inject constructor(
             } else {
                 when (filterOptions.typeFilter) {
                     TypeFilter.All -> true
-                    TypeFilter.Videos -> item.fileType == MediaType.VIDEO
-                    TypeFilter.Images -> item.fileType == MediaType.PHOTO
-                    TypeFilter.PDF -> item.fileType == MediaType.PDF
+                    TypeFilter.Videos -> item.fileType == VIDEO
+                    TypeFilter.Images -> item.fileType == PHOTO
+                    TypeFilter.PDF -> item.fileType == PDF
                 }
             }
 
             // 平台过滤
             val platformMatch = when (filterOptions.platformFilter) {
                 PlatformFilter.All -> true
-                PlatformFilter.Twitter -> item.type == AvailablePlatforms.Twitter
-                PlatformFilter.Lofter -> item.type == AvailablePlatforms.Lofter
-                PlatformFilter.Pixiv -> item.type == AvailablePlatforms.Pixiv
-                PlatformFilter.Kuaikan -> item.type == AvailablePlatforms.Kuaikan
+                PlatformFilter.Twitter -> item.platform == AvailablePlatforms.Twitter
+                PlatformFilter.Lofter -> item.platform == AvailablePlatforms.Lofter
+                PlatformFilter.Pixiv -> item.platform == AvailablePlatforms.Pixiv
+                PlatformFilter.Kuaikan -> item.platform == AvailablePlatforms.Kuaikan
             }
 
             authorMatch && durationMatch && typeMatch && platformMatch
@@ -364,16 +368,19 @@ class DownloadListViewModel @Inject constructor(
     private suspend fun retryDownload(downloadId: String) {
         val old = downloadListManager.getById(downloadId) ?: return
         val mediaType = when(old.fileType) {
-            "video" -> MediaType.VIDEO
-            "photo" -> MediaType.PHOTO
-            "pdf" -> MediaType.PDF
-            else -> MediaType.VIDEO
+            "video" -> VIDEO
+            "photo" -> PHOTO
+            "gif" -> GIF
+            "pdf" -> PDF
+            "txt" -> TXT
+            "m4a" -> M4A
+            else -> VIDEO
         }
 
         val fileNameStrategy = MediaFileNameStrategy(mediaType)
         val fileName = fileNameStrategy.generateMedia(old.screenName)
         cancelDownload(downloadId)
-        when(old.type){
+        when(old.platform){
             AvailablePlatforms.Kuaikan -> {
                 downloadbyLink.handlePlatformDownload(old.link!!, AvailablePlatforms.Kuaikan)
             }
@@ -383,8 +390,8 @@ class DownloadListViewModel @Inject constructor(
                     userId  = old.userId,
                     screenName = old.screenName,
                     name = old.name,
-                    type = old.type,
-                    tweetID = old.tweetID,
+                    platform = old.platform,
+                    uniqueID = old.uniqueID,
                     fileUri = null,
                     link = old.link,
                     fileName = fileName,
@@ -425,25 +432,12 @@ class DownloadListViewModel @Inject constructor(
                 showMessage("Not Found")
                 return@launchOnIO
             }
-
             withMainContext {
-                when(download.type) {
-                    AvailablePlatforms.Twitter -> {
-                        intent.context.navigateTwitterTweet(
-                            download.screenName,
-                            download.tweetID,
-                            download.link
-                        )
-                    }
-                    AvailablePlatforms.Lofter -> {
-                        intent.context.navigateToLofter(download.link!!)
-                    }
-
-                    else -> {}
-                }
+                downloadListManager.handleNavigation(download)
             }
         }
     }
+
     private suspend fun handleFilterDownloads(
         state: DownloadListPageUIState,
         intent: DownloadListPageUIIntent.FilterDownloads

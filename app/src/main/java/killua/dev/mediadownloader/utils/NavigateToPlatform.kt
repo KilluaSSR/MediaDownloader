@@ -45,7 +45,7 @@ fun Context.navigateTwitterTweet(userScreenName:String?, tweetID: String? = null
     startActivity(intent)
 }
 
-fun Context.navigateToLofter(link: String? = null){
+fun Context.navigateToLink(link: String? = null){
     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     startActivity(intent)

@@ -36,6 +36,7 @@
     <string name="delay">每项延迟</string>
     <string name="delay_desc">这意味着批量下载图片时，每页请求之间有一定的延迟</string>
     <string name="download">下载</string>
+    <string name="lofter_settings_desc">设置日期范围、标签和登录登出</string>
     <string name="reset">重置</string>
     <string name="reset_desc">清除所有登录信息，您需要重新登录才能继续使用</string>
     <string name="dangerous">危险</string>
@@ -98,4 +99,5 @@
     <string name="invited_to_login_twitter">请您登录您的Twitter账号</string>
     <string name="notification_permission_desc">我们希望向您发送通知，以便保持更新</string>
     <string name="enter_missevan_drama_url">输入猫耳FM广播剧链接</string>
+    <string name="log_in_out">登录/登出</string>
 </resources>
