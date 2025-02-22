@@ -65,7 +65,6 @@ fun AdvancedPage(){
             AdvancedPageTopAppBar(navController)
         },
         snackbarHostState = viewModel.snackbarHostState
-
     ){
         if (showDevelopingAlert) {
             DevelopingAlert(

@@ -1,6 +1,5 @@
 package killua.dev.mediadownloader.download
 
-import android.util.Log
 import db.Download
 import db.DownloadStatus
 import killua.dev.mediadownloader.Model.AvailablePlatforms

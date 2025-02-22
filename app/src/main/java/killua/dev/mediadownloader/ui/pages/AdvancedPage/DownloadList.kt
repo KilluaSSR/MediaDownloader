@@ -36,6 +36,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import killua.dev.mediadownloader.Model.ChapterInfo
 import killua.dev.mediadownloader.R
+import killua.dev.mediadownloader.ui.components.EmptyIndicator
 import killua.dev.mediadownloader.ui.tokens.SizeTokens
 
 @Composable
@@ -145,14 +146,18 @@ fun ChapterSelectionDialog(
                     }
                 )
 
-                LazyColumn {
-                    items(chapters.size) { index ->
-                        val (chapter, isSelected) = chapters[index]
-                        ChapterItem(
-                            chapter = chapter,
-                            isSelected = isSelected,
-                            onClick = { onToggle(index) }
-                        )
+                if(chapters.isEmpty()){
+                    EmptyIndicator(R.string.nothing_to_show_not_logged_in)
+                }else{
+                    LazyColumn {
+                        items(chapters.size) { index ->
+                            val (chapter, isSelected) = chapters[index]
+                            ChapterItem(
+                                chapter = chapter,
+                                isSelected = isSelected,
+                                onClick = { onToggle(index) }
+                            )
+                        }
                     }
                 }
             }

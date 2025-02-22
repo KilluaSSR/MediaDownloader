@@ -83,6 +83,7 @@
     <string name="one_to_three_min">1–3分钟</string>
     <string name="three_to_ten_min">3–10分钟</string>
     <string name="more_than_ten_min">10分钟以上</string>
+    <string name="nothing_to_show_not_logged_in">这可能是因为您尚未登录\n或者您的账号没有访问此付费/受限内容的权限</string>
     <string name="nothing_to_show">没有项目</string>
     <string name="filter_by_platforms">根据平台过滤</string>
     <string name="filter_by_authors">根据作者过滤</string>
@@ -91,6 +92,7 @@
     <string name="videos">视频</string>
     <string name="images">图片</string>
     <string name="date_range_image_desc">请选择一个日期范围，只有在这个范围内发布的图片会被下载</string>
+    <string name="no_failed_downloads">没有失败的下载</string>
     <string name="date_range">日期范围</string>
     <string name="your_favourite_tags">您喜欢的标签</string>
     <string name="enter_pixiv_entire_novel_url">输入Pixiv小说URL</string>
@@ -98,10 +100,16 @@
     <string name="protected_content_desc">验证身份以继续</string>
     <string name="biometric_auth">生物身份认证</string>
     <string name="biometric_auth_desc_on">下载列表已经被保护</string>
+    <string name="dark">深色</string>
     <string name="protected_content_title">受保护的内容</string>
     <string name="ask_for_sth">我们需要请求一些权限</string>
     <string name="invited_to_login_twitter">请您登录您的推特账号</string>
     <string name="notification_permission_desc">我们希望向您发送通知，以便保持更新</string>
     <string name="enter_missevan_drama_url">输入猫耳FM广播剧链接</string>
     <string name="log_in_out">登录/登出</string>
+    <string name="no_active_downloads">没有正在进行的下载</string>
+    <string name="application_settings">应用设置</string>
+    <string name="theme">主题</string>
+    <string name="system">跟随系统</string>
+    <string name="light">浅色</string>
 </resources>

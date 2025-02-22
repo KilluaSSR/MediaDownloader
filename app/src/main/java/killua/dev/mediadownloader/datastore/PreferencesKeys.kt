@@ -4,6 +4,8 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import killua.dev.mediadownloader.ui.theme.ThemeMode
+
 val SECURE_MY_DOWNLOAD = booleanPreferencesKey("secure_my_download")
 // Twitter Userdata keys
 val APPLICATION_USER_SCREENNAME_KEY =
@@ -31,6 +33,7 @@ val MISSEVAN_TOKEN = stringPreferencesKey("missevan_token")
 val KUAIKAN_PASSTOKEN = stringPreferencesKey("kuaikan_passtoken")
 // AppSettings keys
 val LANGUAGE_KEY = stringPreferencesKey("language")
+val THEME_MODE = stringPreferencesKey("theme_mode")
 val NOTIFICATION_ENABLED =
     booleanPreferencesKey("notification_enabled")
 val DOWNLOAD_PATH = stringPreferencesKey("download_path")
@@ -64,6 +67,7 @@ fun Context.readLofterCookieExpiration() = readStoreString(key = LOFTER_EXPIRATI
 fun Context.readApplicationUserID() = readStoreString(key = APPLICATION_USER_ID, defValue = "")
 fun Context.readSecureMyDownload() = readStoreBoolean(key = SECURE_MY_DOWNLOAD, defValue = false)
 fun Context.readMissEvanToken() = readStoreString(key = MISSEVAN_TOKEN, defValue = "")
+fun Context.readTheme() = readStoreString(THEME_MODE, defValue = ThemeMode.SYSTEM.name)
 //Write
 suspend fun Context.writeApplicationUserScreenName(screenName: String) = saveStoreString(key = APPLICATION_USER_SCREENNAME_KEY, value = screenName)
 suspend fun Context.writeApplicationUserName(name: String) = saveStoreString(key = APPLICATION_USER_NAME_KEY, value = name)
@@ -87,3 +91,4 @@ suspend fun Context.writePixivPHPSSID(PixivSSID: String) = saveStoreString(PIXIV
 suspend fun Context.writeKuaikanPassToken(PassToken: String) = saveStoreString(KUAIKAN_PASSTOKEN, PassToken)
 suspend fun Context.writeSecureMyDownload(set: Boolean) = saveStoreBoolean(SECURE_MY_DOWNLOAD, set)
 suspend fun Context.writeMissEvanToken(token: String) = saveStoreString(MISSEVAN_TOKEN, token)
+suspend fun Context.writeTheme(theme: String) = saveStoreString(THEME_MODE, theme)

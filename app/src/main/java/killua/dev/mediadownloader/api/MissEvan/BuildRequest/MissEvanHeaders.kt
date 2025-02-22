@@ -1,6 +1,5 @@
 package killua.dev.mediadownloader.api.MissEvan.BuildRequest
 
-import killua.dev.mediadownloader.api.Pixiv.BuildRequest.PixivHeaders
 import killua.dev.mediadownloader.utils.USER_AGENT
 import okhttp3.Request
 import kotlin.collections.component1

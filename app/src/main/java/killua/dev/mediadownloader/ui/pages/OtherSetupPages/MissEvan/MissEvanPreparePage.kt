@@ -10,7 +10,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import killua.dev.mediadownloader.Model.AvailablePlatforms
 import killua.dev.mediadownloader.datastore.writeMissEvanToken
-import killua.dev.mediadownloader.datastore.writePixivPHPSSID
 import killua.dev.mediadownloader.ui.CookiesRoutes
 import killua.dev.mediadownloader.ui.LocalNavController
 import killua.dev.mediadownloader.ui.components.ConfigurationPage

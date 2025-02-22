@@ -8,7 +8,6 @@ import killua.dev.mediadownloader.Model.NetworkResult
 import killua.dev.mediadownloader.Model.toChapterInfo
 import killua.dev.mediadownloader.api.Kuaikan.Chapter
 import killua.dev.mediadownloader.api.MissEvan.Model.MissEvanDownloadDrama
-import killua.dev.mediadownloader.api.MissEvan.Model.MissEvanEpisodes
 import killua.dev.mediadownloader.api.Pixiv.Model.NovelInfo
 import killua.dev.mediadownloader.api.Twitter.TwitterDownloadAPI
 import killua.dev.mediadownloader.di.ApplicationScope

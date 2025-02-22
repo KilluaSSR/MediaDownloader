@@ -1,8 +1,6 @@
 package killua.dev.mediadownloader.api.Twitter
 
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import killua.dev.mediadownloader.Model.NetworkResult

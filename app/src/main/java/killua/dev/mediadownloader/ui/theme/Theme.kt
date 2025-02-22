@@ -1,6 +1,6 @@
 package killua.dev.mediadownloader.ui.theme
 
-import android.os.Build
+import android.content.Context
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -11,6 +11,34 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import killua.dev.mediadownloader.datastore.THEME_MODE
+import killua.dev.mediadownloader.datastore.readStoreString
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import androidx.compose.ui.res.stringResource
+import killua.dev.mediadownloader.R
+enum class ThemeMode {
+    LIGHT, DARK, SYSTEM
+}
+
+fun Context.observeThemeMode(): Flow<ThemeMode> = readStoreString(THEME_MODE, ThemeMode.SYSTEM.name)
+    .map { themeName ->
+        try {
+            ThemeMode.valueOf(themeName)
+        } catch (e: Exception) {
+            ThemeMode.SYSTEM
+        }
+    }
+
+@Composable
+fun getThemeModeName(mode: ThemeMode): String {
+    return when(mode) {
+        ThemeMode.LIGHT -> stringResource(R.string.light)
+        ThemeMode.DARK -> stringResource(R.string.dark)
+        ThemeMode.SYSTEM -> stringResource(R.string.system)
+    }
+}
+
 
 private val lightScheme = lightColorScheme(
     primary = primaryLight,
@@ -254,13 +282,19 @@ val unspecified_scheme = ColorFamily(
 
 @Composable
 fun MediaDownloaderTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    themeMode: ThemeMode = ThemeMode.SYSTEM,
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
     content: @Composable() () -> Unit
 ) {
+    val darkTheme = when (themeMode) {
+        ThemeMode.LIGHT -> false
+        ThemeMode.DARK -> true
+        ThemeMode.SYSTEM -> isSystemInDarkTheme()
+    }
+
     val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+        dynamicColor -> {
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }

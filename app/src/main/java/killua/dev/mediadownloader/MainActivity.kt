@@ -42,6 +42,8 @@ import killua.dev.mediadownloader.ui.pages.OtherSetupPages.Twitter.TwitterPrepar
 import killua.dev.mediadownloader.ui.pages.SettingsPage
 import killua.dev.mediadownloader.ui.pages.UserInfoPage
 import killua.dev.mediadownloader.ui.theme.MediaDownloaderTheme
+import killua.dev.mediadownloader.ui.theme.ThemeMode
+import killua.dev.mediadownloader.ui.theme.observeThemeMode
 import killua.dev.mediadownloader.utils.BiometricManagerSingleton
 import kotlinx.coroutines.launch
 
@@ -73,7 +75,11 @@ class MainActivity : FragmentActivity() {
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
-            MediaDownloaderTheme {
+            val themeMode by this.observeThemeMode()
+                .collectAsStateWithLifecycle(initialValue = ThemeMode.SYSTEM)
+            MediaDownloaderTheme(
+                themeMode = themeMode
+            ) {
                 val navController = rememberNavController()
                 rememberCoroutineScope()
                 val downloadResult by viewModel.sharedDownloadResult.collectAsStateWithLifecycle()

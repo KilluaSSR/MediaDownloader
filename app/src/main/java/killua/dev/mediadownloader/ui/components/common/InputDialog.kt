@@ -38,9 +38,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import killua.dev.mediadownloader.R
 import killua.dev.mediadownloader.ui.tokens.SizeTokens
 import kotlinx.coroutines.delay
-import killua.dev.mediadownloader.R
+
 data class InputDialogConfig(
     val title: String,
     val placeholder: String = "",

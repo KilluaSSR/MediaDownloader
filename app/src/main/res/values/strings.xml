@@ -41,6 +41,11 @@
     <string name="reset_desc">Clear your all login informations. You need to login again</string>
     <string name="dangerous">Dangerous</string>
     <string name="privacy">Privacy</string>
+    <string name="application_settings">Application Settings</string>
+    <string name="theme">Theme</string>
+    <string name="system">System</string>
+    <string name="light">Light</string>
+    <string name="dark">Dark</string>
     <string name="protected_content_title">Protected Content</string>
     <string name="protected_content_desc">Please verify your identity to continue</string>
     <string name="biometric_auth">Biometric Authentication</string>
@@ -98,6 +103,8 @@
     <string name="images">Images</string>
     <string name="pdf" translatable="false">PDF</string>
     <string name="date_range_image_desc">Please select a date range, and only the images within this range will be downloaded</string>
+    <string name="no_active_downloads">No active downloads</string>
+    <string name="no_failed_downloads">No failed downloads</string>
     <string name="date_range">Date Range</string>
     <string name="your_favourite_tags">Your favorite Tags</string>
     <string name="date_range_image_title">Date Range for Image Download</string>
@@ -108,6 +115,7 @@
     <string name="one_to_three_min">1–3 min</string>
     <string name="three_to_ten_min">3-10 min</string>
     <string name="more_than_ten_min">More than 10 min</string>
+    <string name="nothing_to_show_not_logged_in">It could be because you are not logged in \n or your account does not have the necessary permissions to access this paid/limited content</string>
     <string name="nothing_to_show">Nothing to show</string>
     <string name="mail">Mail</string>
     <string name="log_out">Log out</string>

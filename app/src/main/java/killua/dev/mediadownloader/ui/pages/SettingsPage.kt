@@ -11,9 +11,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Warning
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -25,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.DpOffset
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.mediadownloader.R
 import killua.dev.mediadownloader.datastore.NOTIFICATION_ENABLED
@@ -37,6 +40,7 @@ import killua.dev.mediadownloader.datastore.readMaxConcurrentDownloads
 import killua.dev.mediadownloader.datastore.readMaxRetries
 import killua.dev.mediadownloader.datastore.readOnlyWifi
 import killua.dev.mediadownloader.datastore.readSecureMyDownload
+import killua.dev.mediadownloader.datastore.readTheme
 import killua.dev.mediadownloader.datastore.writeApplicationUserAuth
 import killua.dev.mediadownloader.datastore.writeApplicationUserCt0
 import killua.dev.mediadownloader.datastore.writeApplicationUserID
@@ -47,14 +51,18 @@ import killua.dev.mediadownloader.datastore.writeLofterLoginKey
 import killua.dev.mediadownloader.datastore.writeMaxConcurrentDownloads
 import killua.dev.mediadownloader.datastore.writeMaxRetries
 import killua.dev.mediadownloader.datastore.writePixivPHPSSID
+import killua.dev.mediadownloader.datastore.writeTheme
 import killua.dev.mediadownloader.ui.LocalNavController
 import killua.dev.mediadownloader.ui.PrepareRoutes
+import killua.dev.mediadownloader.ui.components.AnimatedDropdownMenu
 import killua.dev.mediadownloader.ui.components.common.CancellableAlert
 import killua.dev.mediadownloader.ui.components.common.Clickable
 import killua.dev.mediadownloader.ui.components.common.SettingsScaffold
 import killua.dev.mediadownloader.ui.components.common.Slideable
 import killua.dev.mediadownloader.ui.components.common.Switchable
 import killua.dev.mediadownloader.ui.components.common.Title
+import killua.dev.mediadownloader.ui.theme.ThemeMode
+import killua.dev.mediadownloader.ui.theme.getThemeModeName
 import killua.dev.mediadownloader.ui.tokens.SizeTokens
 import killua.dev.mediadownloader.utils.ActivityUtil
 import killua.dev.mediadownloader.utils.BiometricManagerSingleton
@@ -119,6 +127,7 @@ fun SettingsPage(){
             val isBiometricAvailable = remember {
                 BiometricManagerSingleton.getBiometricHelper()?.canAuthenticate() == true
             }
+
             Title(title = stringResource(R.string.download)) {
                 Switchable(
                     key = NOTIFICATION_ENABLED,
@@ -171,7 +180,40 @@ fun SettingsPage(){
                     }
                 }
             }
+            Title(title =stringResource(R.string.application_settings)) {
+                var showThemeMenu by remember { mutableStateOf(false) }
+                var menuOffset by remember { mutableStateOf(DpOffset.Zero) }
+                val currentTheme by context.readTheme()
+                    .collectAsStateWithLifecycle(initialValue = ThemeMode.SYSTEM.name)
+                val selectedIndex = remember(currentTheme) {
+                    ThemeMode.entries.toTypedArray().indexOfFirst { it.name == currentTheme }
+                }
+                Clickable(
+                    title = stringResource(R.string.theme),
+                    value = getThemeModeName(ThemeMode.valueOf(currentTheme)),
+                ){
+                    showThemeMenu = true
+                }
 
+                AnimatedDropdownMenu(
+                    expanded = showThemeMenu,
+                    selectedIndex = selectedIndex,
+                    onDismissRequest = { showThemeMenu = false },
+                    offset = menuOffset
+                ) {
+                    ThemeMode.entries.forEach { theme ->
+                        DropdownMenuItem(
+                            text = { Text(getThemeModeName(theme)) },
+                            onClick = {
+                                scope.launch {
+                                    context.writeTheme(theme.name)
+                                    showThemeMenu = false
+                                }
+                            }
+                        )
+                    }
+                }
+            }
             Title(title = stringResource(R.string.privacy)) {
 
                 Switchable(

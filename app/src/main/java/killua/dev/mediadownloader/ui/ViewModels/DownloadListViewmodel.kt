@@ -3,6 +3,7 @@ package killua.dev.mediadownloader.ui.ViewModels
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
+import androidx.annotation.StringRes
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import db.Download
@@ -12,13 +13,13 @@ import killua.dev.mediadownloader.Model.DownloadPageDestinations
 import killua.dev.mediadownloader.Model.DownloadProgress
 import killua.dev.mediadownloader.Model.DownloadTask
 import killua.dev.mediadownloader.Model.DownloadedItem
-import killua.dev.mediadownloader.Model.MediaType
 import killua.dev.mediadownloader.Model.MediaType.GIF
 import killua.dev.mediadownloader.Model.MediaType.M4A
 import killua.dev.mediadownloader.Model.MediaType.PDF
 import killua.dev.mediadownloader.Model.MediaType.PHOTO
 import killua.dev.mediadownloader.Model.MediaType.TXT
 import killua.dev.mediadownloader.Model.MediaType.VIDEO
+import killua.dev.mediadownloader.R
 import killua.dev.mediadownloader.download.DownloadListManager
 import killua.dev.mediadownloader.download.DownloadbyLink
 import killua.dev.mediadownloader.ui.SnackbarUIEffect
@@ -39,7 +40,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-
 
 sealed interface DownloadListPageUIIntent : UIIntent {
     object LoadDownloads : DownloadListPageUIIntent

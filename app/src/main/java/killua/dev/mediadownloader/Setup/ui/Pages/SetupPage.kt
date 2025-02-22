@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import killua.dev.mediadownloader.R
 import killua.dev.mediadownloader.Setup.ui.SetupPageViewModel
 import killua.dev.mediadownloader.Setup.ui.SetupUIIntent
 import killua.dev.mediadownloader.Setup.ui.components.SetupScaffold
@@ -31,7 +32,7 @@ import killua.dev.mediadownloader.ui.components.common.SetOnResume
 import killua.dev.mediadownloader.ui.tokens.SizeTokens
 import killua.dev.mediadownloader.utils.getActivity
 import killua.dev.mediadownloader.utils.navigateSingle
-import killua.dev.mediadownloader.R
+
 @SuppressLint("SetJavaScriptEnabled")
 @ExperimentalFoundationApi
 @OptIn(ExperimentalMaterial3Api::class)

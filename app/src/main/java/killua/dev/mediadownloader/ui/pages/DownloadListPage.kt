@@ -9,31 +9,24 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.NotInterested
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -44,9 +37,11 @@ import killua.dev.mediadownloader.Model.DownloadPageDestinations
 import killua.dev.mediadownloader.R
 import killua.dev.mediadownloader.ui.FilterContent
 import killua.dev.mediadownloader.ui.LocalNavController
+import killua.dev.mediadownloader.ui.SnackbarUIEffect
 import killua.dev.mediadownloader.ui.ViewModels.DownloadListPageUIIntent.*
 import killua.dev.mediadownloader.ui.ViewModels.DownloadListViewModel
 import killua.dev.mediadownloader.ui.components.DownloadItemCard
+import killua.dev.mediadownloader.ui.components.EmptyIndicator
 import killua.dev.mediadownloader.ui.components.Loading
 import killua.dev.mediadownloader.ui.components.MainScaffold
 import killua.dev.mediadownloader.ui.components.common.BottomSheet
@@ -179,25 +174,7 @@ fun DownloadListPage() {
                     .fillMaxWidth()
             ) {
                 if (uiState.value.downloads.isEmpty()) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                imageVector = Icons.Rounded.NotInterested,
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .alpha(0.3f)
-                                    .size(SizeTokens.Level72)
-                            )
-                            Spacer(modifier = Modifier.size(SizeTokens.Level16))
-                            Text(
-                                text = stringResource(R.string.nothing_to_show),
-                                modifier = Modifier.alpha(0.3f)
-                            )
-                        }
-                    }
+                    EmptyIndicator(R.string.nothing_to_show)
                 } else{
                         LazyColumn(
                             modifier = Modifier.fillMaxWidth(),
