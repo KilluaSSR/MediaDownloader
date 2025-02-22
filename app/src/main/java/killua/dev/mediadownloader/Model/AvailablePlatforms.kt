@@ -24,7 +24,7 @@ val platformsDrawable: Map<AvailablePlatforms,Int> = mapOf(
     AvailablePlatforms.Lofter to R.drawable.lofter_logo,
     AvailablePlatforms.Pixiv to R.drawable.pixiv_logo__2025_,
     AvailablePlatforms.Kuaikan to R.drawable.kuaikanmanhua,
-
+    AvailablePlatforms.MissEvan to R.drawable.missevan_logo
 )
 
 val platformName: Map<AvailablePlatforms, Int> = mapOf(
@@ -34,7 +34,6 @@ val platformName: Map<AvailablePlatforms, Int> = mapOf(
     AvailablePlatforms.Kuaikan to R.string.kuaikan,
     AvailablePlatforms.MissEvan to R.string.missevan
 )
-
 
 enum class SupportedUrlType(val pattern: Regex) {
     TWITTER("""(?:twitter\.com|x\.com)/.*""".toRegex()),

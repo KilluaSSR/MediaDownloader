@@ -19,10 +19,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.mediadownloader.Model.AppIcon
 import killua.dev.mediadownloader.Model.AvailablePlatforms
+import killua.dev.mediadownloader.Model.platformName
 import killua.dev.mediadownloader.R
 import killua.dev.mediadownloader.Setup.ui.components.SetupScaffold
 import killua.dev.mediadownloader.states.CurrentState
@@ -49,7 +51,7 @@ fun ConfigurationPage(
     val eligibility by eligibilityFlow.collectAsStateWithLifecycle()
     rememberCoroutineScope()
     var isShowReset by remember { mutableStateOf(false) }
-
+    val context = LocalContext.current
     SetupScaffold(
         actions = {
             Button(
@@ -91,14 +93,14 @@ fun ConfigurationPage(
                 AppIcon(platform)
                 HeadlineMediumText(
                     modifier = Modifier.paddingTop(SizeTokens.Level12),
-                    text = "${platform.name} Configurations"
+                    text = stringResource(R.string.platform_config_str, context.getString(platformName[platform]!!))
                 )
             }
 
-            Section(title = "Log in to your ${platform.name} account") {
+            Section(title = stringResource(R.string.login_to_your_platform_account, context.getString(platformName[platform]!!))) {
                 ClickableConfigurationButton(
                     title = stringResource(R.string.log_in),
-                    description = "Your ${platform.name}'s cookie is necessary when downloading pictures from it.",
+                    description = stringResource(R.string.cookie_necessary_in_settings, context.getString(platformName[platform]!!)),
                     state = loginState,
                     onClick = {
                         if (loginState != CurrentState.Success) {
@@ -114,7 +116,7 @@ fun ConfigurationPage(
             Section(title = stringResource(R.string.log_out)) {
                 ClickableConfigurationButton(
                     title = stringResource(R.string.log_out),
-                    description = "Clear your ${platform.name} account's cookie",
+                    description = stringResource(R.string.clear_your_platform_cookie, context.getString(platformName[platform]!!)),
                     state = CurrentState.Error,
                     onClick = { isShowReset = true },
                     color = CurrentState.Error.backgroundColor

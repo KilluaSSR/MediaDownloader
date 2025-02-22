@@ -1,5 +1,6 @@
 package killua.dev.mediadownloader.ui.pages
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Arrangement
@@ -62,6 +63,7 @@ import killua.dev.mediadownloader.utils.navigateSingle
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
+@SuppressLint("StringFormatMatches")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun SettingsPage(){
@@ -162,7 +164,7 @@ fun SettingsPage(){
                     value = delay.toFloat(),
                     valueRange = 2F..10F,
                     steps = 7,
-                    desc = remember(delay) {"Current: $delay seconds. This means that when retrieving images in bulk, there should be a $delay-second interval between each page request."}
+                    desc = remember(delay) {context.getString(R.string.delay_desc, delay)}
                 ) {
                     scope.launch{
                         context.writeDelay(it.roundToInt())
