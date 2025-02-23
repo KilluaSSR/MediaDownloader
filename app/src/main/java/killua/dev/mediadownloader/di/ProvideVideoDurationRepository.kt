@@ -6,8 +6,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import killua.dev.mediadownloader.utils.MeidaDurationRepository
 import killua.dev.mediadownloader.utils.MediaDurationRepositoryImpl
+import killua.dev.mediadownloader.utils.MeidaDurationRepository
 import javax.inject.Singleton
 
 @Module
