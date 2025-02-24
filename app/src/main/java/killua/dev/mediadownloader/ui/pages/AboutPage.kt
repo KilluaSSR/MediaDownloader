@@ -29,7 +29,6 @@ import killua.dev.mediadownloader.utils.drawableToImageVector
 @Composable
 fun AboutPage() {
     val context = LocalContext.current
-    LocalNavController.current!!
     val scrollBehavior =
         TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     rememberCoroutineScope()
