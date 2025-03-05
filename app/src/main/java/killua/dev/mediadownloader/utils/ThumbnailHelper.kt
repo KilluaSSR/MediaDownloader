@@ -12,7 +12,7 @@ import java.io.FileOutputStream
 import java.security.MessageDigest
 
 object ThumbnailHelper{
-    private const val MAX_THUMBNAIL_SIZE = 512
+    private const val MAX_THUMBNAIL_SIZE = 1024
 
     fun generateCacheKey(uriString: String): String {
         val digester = MessageDigest.getInstance("MD5")
