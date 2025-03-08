@@ -3,7 +3,6 @@ import org.gradle.kotlin.dsl.android
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    //alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
     id("dagger.hilt.android.plugin")
     id("com.google.dagger.hilt.android")
