@@ -44,7 +44,7 @@ fun AboutPage() {
         ) {
             Title(title = stringResource(R.string.about), color = MaterialTheme.colorScheme.primary) {
                 Clickable(
-                    title = "风过荒野",
+                    title = context.getString(R.string.developer_name),
                     value = "KilluaDev.kt"
                 ) {
 

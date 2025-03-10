@@ -122,6 +122,7 @@
     <string name="nothing_to_show_not_logged_in">It could be because you are not logged in \n or your account does not have the necessary permissions to access this paid/limited content</string>
     <string name="nothing_to_show">Nothing to show</string>
     <string name="mail">Mail</string>
+    <string name="developer_name">KilluaDev</string>
     <string name="log_out">Log out</string>
     <string name="log_in">Log in</string>
 </resources>

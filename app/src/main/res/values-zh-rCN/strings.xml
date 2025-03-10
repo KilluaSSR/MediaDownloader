@@ -115,5 +115,6 @@
     <string name="language_setting">语言</string>
     <string name="system">跟随系统</string>
     <string name="light">浅色</string>
+    <string name="developer_name">风过荒野</string>
     <string name="language_english">英语</string>
 </resources>
