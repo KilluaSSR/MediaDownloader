@@ -117,4 +117,8 @@
     <string name="light">浅色</string>
     <string name="developer_name">风过荒野</string>
     <string name="language_english">英语</string>
+    <string name="sorry">很抱歉</string>
+    <string name="under_dev">该功能正在开发中，暂时不可用</string>
+    <string name="file_not_found">找不到文件</string>
+    <string name="file_not_found_desc">该文件可能被移动或删除</string>
 </resources>

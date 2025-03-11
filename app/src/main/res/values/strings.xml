@@ -125,4 +125,8 @@
     <string name="developer_name">KilluaDev</string>
     <string name="log_out">Log out</string>
     <string name="log_in">Log in</string>
+    <string name="sorry">Sorry</string>
+    <string name="under_dev">This feature is under development, it\'s unavailable, currently</string>
+    <string name="file_not_found">File not found</string>
+    <string name="file_not_found_desc">The file may have been moved or deleted</string>
 </resources>

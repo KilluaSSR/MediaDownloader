@@ -46,11 +46,7 @@ val MainPageButtons = listOf(
         Icons.Rounded.Star,
         MainRoutes.AdvancedPage.route
     ),
-//    ButtonsEssentials(
-//        "User Info",
-//        Icons.Rounded.AccountCircle,
-//        MainRoutes.UserinfoPage.route
-//    ),
+
 )
 
 val MainPageMenuButtons = listOf(
