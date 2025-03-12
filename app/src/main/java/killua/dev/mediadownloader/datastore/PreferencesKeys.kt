@@ -5,7 +5,9 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import killua.dev.mediadownloader.ui.theme.ThemeMode
+import kotlinx.coroutines.flow.map
 
+const val TWITTER_AUTHOR_SUBSCRIPTION_PREFIX = "twitter_author_subscription_"
 val SECURE_MY_DOWNLOAD = booleanPreferencesKey("secure_my_download")
 // Twitter Userdata keys
 val APPLICATION_USER_SCREENNAME_KEY =
@@ -67,6 +69,16 @@ fun Context.readApplicationUserID() = readStoreString(key = APPLICATION_USER_ID,
 fun Context.readSecureMyDownload() = readStoreBoolean(key = SECURE_MY_DOWNLOAD, defValue = false)
 fun Context.readMissEvanToken() = readStoreString(key = MISSEVAN_TOKEN, defValue = "")
 fun Context.readTheme() = readStoreString(THEME_MODE, defValue = ThemeMode.SYSTEM.name)
+fun Context.readTwitterAuthorSubscription(authorScreenName: String) =
+    readStoreBoolean(key = getTwitterAuthorSubscriptionKey(authorScreenName), defValue = false)
+fun Context.readAllTwitterAuthorSubscriptions() = dataStore.data.map { preferences ->
+    preferences.asMap().entries
+        .filter { it.key.name.startsWith(TWITTER_AUTHOR_SUBSCRIPTION_PREFIX) }
+        .associate {
+            val authorScreenName = it.key.name.removePrefix(TWITTER_AUTHOR_SUBSCRIPTION_PREFIX)
+            authorScreenName to (it.value as Boolean)
+        }
+}
 //Write
 suspend fun Context.writeApplicationUserScreenName(screenName: String) = saveStoreString(key = APPLICATION_USER_SCREENNAME_KEY, value = screenName)
 suspend fun Context.writeApplicationUserName(name: String) = saveStoreString(key = APPLICATION_USER_NAME_KEY, value = name)
@@ -90,3 +102,5 @@ suspend fun Context.writeKuaikanPassToken(PassToken: String) = saveStoreString(K
 suspend fun Context.writeSecureMyDownload(set: Boolean) = saveStoreBoolean(SECURE_MY_DOWNLOAD, set)
 suspend fun Context.writeMissEvanToken(token: String) = saveStoreString(MISSEVAN_TOKEN, token)
 suspend fun Context.writeTheme(theme: String) = saveStoreString(THEME_MODE, theme)
+suspend fun Context.writeTwitterAuthorSubscription(authorScreenName: String, isSubscribed: Boolean) =
+    saveStoreBoolean(key = getTwitterAuthorSubscriptionKey(authorScreenName), value = isSubscribed)
