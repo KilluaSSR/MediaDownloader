@@ -130,4 +130,23 @@
     <string name="under_dev">This feature is under development, it\'s unavailable, currently</string>
     <string name="file_not_found">File not found</string>
     <string name="file_not_found_desc">The file may have been moved or deleted</string>
+    <string name="search_authors">Search authors</string>
+    <string name="search">Search</string>
+    <string name="clear">Clear</string>
+    <string name="loading_failed">Loading failed: %1$s</string>
+    <string name="retry">Retry</string>
+    <string name="no_matching_authors">No authors matching \"%1$s\"</string>
+    <string name="no_twitter_authors">No Twitter authors to subscribe</string>
+    <string name="subscribed">Subscribed</string>
+    <string name="not_subscribed">Not subscribed</string>
+    <string name="batch_operations">Batch Operations</string>
+    <string name="subscribe_all">Subscribe All</string>
+    <string name="unsubscribe_all">Unsubscribe All</string>
+    <string name="no_authors_available">No authors available</string>
+    <string name="close">Close</string>
+    <string name="subscription_added">Subscribed to %1$s</string>
+    <string name="subscription_removed">Unsubscribed from %1$s</string>
+    <string name="batch_update_success">Batch update successful</string>
+    <string name="operation_failed">Operation failed: %1$s</string>
+    <string name="unknown_error">Unknown error</string>
 </resources>

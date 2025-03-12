@@ -122,4 +122,23 @@
     <string name="under_dev">该功能正在开发中，暂时不可用</string>
     <string name="file_not_found">找不到文件</string>
     <string name="file_not_found_desc">该文件可能被移动或删除</string>
+    <string name="search_authors">搜索作者</string>
+    <string name="search">搜索</string>
+    <string name="clear">清除</string>
+    <string name="loading_failed">加载失败: %1$s</string>
+    <string name="retry">重试</string>
+    <string name="no_matching_authors">没有找到匹配 \"%1$s\" 的作者</string>
+    <string name="no_twitter_authors">暂无可订阅的 Twitter 作者</string>
+    <string name="subscribed">已订阅</string>
+    <string name="not_subscribed">未订阅</string>
+    <string name="batch_operations">批量操作</string>
+    <string name="subscribe_all">订阅全部</string>
+    <string name="unsubscribe_all">取消全部订阅</string>
+    <string name="no_authors_available">没有可用的作者</string>
+    <string name="close">关闭</string>
+    <string name="subscription_added">已订阅 %1$s</string>
+    <string name="subscription_removed">已取消订阅 %1$s</string>
+    <string name="batch_update_success">批量更新订阅状态成功</string>
+    <string name="operation_failed">操作失败: %1$s</string>
+    <string name="unknown_error">未知错误</string>
 </resources>

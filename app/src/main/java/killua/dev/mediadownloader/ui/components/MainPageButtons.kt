@@ -43,16 +43,15 @@ val MainPageButtons = listOf(
         MainRoutes.DownloadListPage.route
     ),
     ButtonsEssentials(
-        R.string.advanced,
-        Icons.Rounded.Star,
-        MainRoutes.AdvancedPage.route
-    ),
-    ButtonsEssentials(
         R.string.subscribe,
         Icons.Rounded.Subscriptions,
         MainRoutes.SubscribePage.route
     ),
-
+    ButtonsEssentials(
+        R.string.advanced,
+        Icons.Rounded.Star,
+        MainRoutes.AdvancedPage.route
+    ),
 )
 
 val MainPageMenuButtons = listOf(
