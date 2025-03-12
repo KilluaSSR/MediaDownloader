@@ -2,7 +2,6 @@ package killua.dev.mediadownloader.ui.ViewModels
 
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import db.Download
 import killua.dev.mediadownloader.Model.AvailablePlatforms
 import killua.dev.mediadownloader.download.DownloadListManager
 import killua.dev.mediadownloader.repository.TwitterSubscriptionRepository
@@ -11,6 +10,7 @@ import killua.dev.mediadownloader.ui.UIIntent
 import killua.dev.mediadownloader.ui.UIState
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -55,10 +55,14 @@ class SubscribePageViewModel @Inject constructor(
     private suspend fun loadData() {
         try {
             emitState(uiState.value.copy(isLoading = true))
-
             downloadListManager.observeAllDownloads()
-                .combine(twitterSubscriptionRepository.getAllSubscriptions()) { downloads, subscriptions ->
-                    Pair(downloads, subscriptions)
+                .map { downloads ->
+                    downloads.filter { it.platform == AvailablePlatforms.Twitter }
+                        .mapNotNull { it.name }
+                        .toSet()
+                }
+                .combine(twitterSubscriptionRepository.getAllSubscriptions()) { twitterAuthors, subscriptions ->
+                    Pair(twitterAuthors, subscriptions)
                 }
                 .catch { error ->
                     emitState(uiState.value.copy(
@@ -66,9 +70,9 @@ class SubscribePageViewModel @Inject constructor(
                         error = error.message
                     ))
                 }
-                .collect { (downloads, subscriptions) ->
+                .collect { (twitterAuthors, subscriptions) ->
                     mutex.withLock {
-                        updateState(downloads, subscriptions)
+                        updateState(twitterAuthors, subscriptions)
                     }
                 }
         } catch (e: Exception) {
@@ -80,14 +84,10 @@ class SubscribePageViewModel @Inject constructor(
     }
 
     private suspend fun updateState(
-        downloads: List<Download>,
+        twitterAuthors: Set<String>,
         subscriptions: Map<String, Boolean>
     ) {
-        val authors = downloads.filter {
-            it.platform == AvailablePlatforms.Twitter
-        }.mapNotNull { it.name }.toSet()
-
-        val authorPairs = authors.map { author ->
+        val authorPairs = twitterAuthors.map { author ->
             Pair(author, subscriptions[author] == true)
         }
 
@@ -168,7 +168,8 @@ class SubscribePageViewModel @Inject constructor(
 
                 val updatedAuthors = uiState.value.twitterAuthors.map { (name, _) ->
                     Pair(name,
-                        updates[name] ?: uiState.value.twitterAuthors.find { it.first == name }?.second == true
+                        (updates[name]
+                            ?: uiState.value.twitterAuthors.find { it.first == name }?.second) == true
                     )
                 }
 
