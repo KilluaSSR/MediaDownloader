@@ -6,6 +6,7 @@ sealed class MainRoutes(val route: String) {
     }
     data object MainPage : MainRoutes(route = "main_page")
     data object UserinfoPage : MainRoutes(route = "userinfo_page")
+    data object SubscribePage : MainRoutes(route = "subscribe_page")
     data object Download : MainRoutes(route = "downloading")
     data object DownloadListPage : MainRoutes(route = "downloaded_page")
     data object AdvancedPage : MainRoutes(route = "advanced_page")

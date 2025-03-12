@@ -110,3 +110,13 @@ fun DownloadPageTopAppBar(
         showMoreOnClick = showMoreOnClick
     )
 }
+
+@Composable
+fun SubscribePageTopAppBar(
+    navController: NavHostController,
+    showMoreOnClick: () -> Unit
+) {
+    TopBar(navController, stringResource(R.string.subscribe),
+        showMoreOnClick = showMoreOnClick
+    )
+}

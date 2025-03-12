@@ -41,6 +41,7 @@ import killua.dev.mediadownloader.ui.pages.OtherSetupPages.MissEvan.MissEvanPrep
 import killua.dev.mediadownloader.ui.pages.OtherSetupPages.Pixiv.PixivPreparePage
 import killua.dev.mediadownloader.ui.pages.OtherSetupPages.Twitter.TwitterPreparePage
 import killua.dev.mediadownloader.ui.pages.SettingsPage
+import killua.dev.mediadownloader.ui.pages.SubscribePage
 import killua.dev.mediadownloader.ui.pages.UserInfoPage
 import killua.dev.mediadownloader.ui.theme.MediaDownloaderTheme
 import killua.dev.mediadownloader.ui.theme.ThemeMode
@@ -119,6 +120,10 @@ class MainActivity : FragmentActivity() {
 
                         composable(MainRoutes.DownloadListPage.route) {
                             DownloadListPage()
+                        }
+
+                        composable(MainRoutes.SubscribePage.route) {
+                            SubscribePage()
                         }
 
                         composable(MainRoutes.AdvancedPage.route){
