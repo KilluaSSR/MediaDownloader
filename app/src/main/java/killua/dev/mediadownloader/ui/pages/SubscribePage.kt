@@ -66,6 +66,8 @@ fun SubscribePage() {
         topBar = {
             SubscribePageTopAppBar(
                 navController,
+                selectAllOnClick = {},
+                calcelAllOnClick = {},
             ) {
                 showBottomSheet = true
             }
