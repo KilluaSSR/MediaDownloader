@@ -21,6 +21,8 @@ sealed interface SubscribePageUIIntent : UIIntent {
     data object LoadSubscriptions : SubscribePageUIIntent
     data class FilterAuthors(val query: String) : SubscribePageUIIntent
     data class BatchUpdateSubscriptions(val updates: Map<String, Boolean>) : SubscribePageUIIntent
+    data object CancelAll: SubscribePageUIIntent
+    data object SubscribeAll: SubscribePageUIIntent
 }
 
 data class SubscribePageUIState(
@@ -115,6 +117,8 @@ class SubscribePageViewModel @Inject constructor(
             is SubscribePageUIIntent.LoadSubscriptions -> refreshData()
             is SubscribePageUIIntent.FilterAuthors -> applyFilter(intent.query)
             is SubscribePageUIIntent.BatchUpdateSubscriptions -> batchUpdateSubscriptions(intent.updates)
+            SubscribePageUIIntent.CancelAll -> cancelAllSubscriptions()
+            SubscribePageUIIntent.SubscribeAll -> subscribeAllAuthors()
         }
     }
 
@@ -181,6 +185,66 @@ class SubscribePageViewModel @Inject constructor(
                 emitEffect(SnackbarUIEffect.ShowSnackbar(
                     message = EVENT_BATCH_UPDATE_SUCCESS
                 ))
+            } catch (e: Exception) {
+                emitEffect(SnackbarUIEffect.ShowSnackbar(
+                    message = "$EVENT_ERROR:${e.javaClass.simpleName}"
+                ))
+            }
+        }
+    }
+
+    private fun cancelAllSubscriptions() {
+        viewModelScope.launch {
+            try {
+                val authorsToCancel = uiState.value.filteredAuthors
+                    .filter { (_, isSubscribed) -> isSubscribed }
+                    .associate { (author, _) -> author to false }
+
+                if (authorsToCancel.isEmpty()) {
+                    return@launch
+                }
+
+                twitterSubscriptionRepository.updateBatchSubscriptions(authorsToCancel)
+
+                val updatedAuthors = uiState.value.twitterAuthors.map { (name, subscribed) ->
+                    if (name in authorsToCancel) Pair(name, false) else Pair(name, subscribed)
+                }
+
+                emitState(uiState.value.copy(
+                    twitterAuthors = updatedAuthors,
+                    filteredAuthors = filterAuthors(updatedAuthors, uiState.value.filterQuery)
+                ))
+
+            } catch (e: Exception) {
+                emitEffect(SnackbarUIEffect.ShowSnackbar(
+                    message = "$EVENT_ERROR:${e.javaClass.simpleName}"
+                ))
+            }
+        }
+    }
+    private fun subscribeAllAuthors() {
+        viewModelScope.launch {
+            try {
+                val authorsToSubscribe = uiState.value.filteredAuthors
+                    .filter { (_, isSubscribed) -> !isSubscribed }
+                    .associate { (author, _) -> author to true }
+
+                if (authorsToSubscribe.isEmpty()) {
+                    return@launch
+                }
+
+                twitterSubscriptionRepository.updateBatchSubscriptions(authorsToSubscribe)
+
+                val updatedAuthors = uiState.value.twitterAuthors.map { (name, subscribed) ->
+                    if (name in authorsToSubscribe) Pair(name, true) else Pair(name, subscribed)
+                }
+
+                emitState(uiState.value.copy(
+                    twitterAuthors = updatedAuthors,
+                    filteredAuthors = filterAuthors(updatedAuthors, uiState.value.filterQuery)
+                ))
+
+
             } catch (e: Exception) {
                 emitEffect(SnackbarUIEffect.ShowSnackbar(
                     message = "$EVENT_ERROR:${e.javaClass.simpleName}"

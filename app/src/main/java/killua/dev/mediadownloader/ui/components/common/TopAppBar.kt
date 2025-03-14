@@ -117,7 +117,7 @@ fun DownloadPageTopAppBar(
 fun SubscribePageTopAppBar(
     navController: NavHostController,
     selectAllOnClick: () -> Unit,
-    calcelAllOnClick: () -> Unit,
+    cancelAllOnClick: () -> Unit,
     showMoreOnClick: () -> Unit
 ) {
     TopBar(navController, stringResource(R.string.subscribe), extraIcons = {
@@ -130,7 +130,7 @@ fun SubscribePageTopAppBar(
             )
         }
         IconButton(
-            onClick = calcelAllOnClick
+            onClick = cancelAllOnClick
         ) {
             Icon(
                 imageVector = Icons.Default.AllOut,
