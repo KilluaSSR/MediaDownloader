@@ -36,7 +36,7 @@ data class SubscribePageUIState(
 class SubscribePageViewModel @Inject constructor(
     private val downloadListManager: DownloadListManager,
     private val twitterSubscriptionRepository: TwitterSubscriptionRepository
-) : BaseViewModel<SubscribePageUIIntent, SubscribePageUIState, SnackbarUIEffect>(SubscribePageUIState()) {
+) : BaseViewModel<SubscribePageUIIntent, SubscribePageUIState, SnackbarUIEffect>(SubscribePageUIState(isLoading = true)) {
     private val mutex = Mutex()
 
     companion object {

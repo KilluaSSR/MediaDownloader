@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,6 +46,7 @@ import killua.dev.mediadownloader.R
 import killua.dev.mediadownloader.ui.LocalNavController
 import killua.dev.mediadownloader.ui.ViewModels.SubscribePageUIIntent
 import killua.dev.mediadownloader.ui.ViewModels.SubscribePageViewModel
+import killua.dev.mediadownloader.ui.components.Loading
 import killua.dev.mediadownloader.ui.components.MainScaffold
 import killua.dev.mediadownloader.ui.components.common.SubscribePageTopAppBar
 import killua.dev.mediadownloader.ui.tokens.SizeTokens
@@ -105,12 +105,7 @@ fun SubscribePage() {
 
             when {
                 uiState.isLoading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
+                    Loading()
                 }
                 uiState.error != null -> {
                     Box(
