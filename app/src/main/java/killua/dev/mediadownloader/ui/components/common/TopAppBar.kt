@@ -3,9 +3,11 @@ package killua.dev.mediadownloader.ui.components.common
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AllOut
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -114,9 +116,28 @@ fun DownloadPageTopAppBar(
 @Composable
 fun SubscribePageTopAppBar(
     navController: NavHostController,
+    selectAllOnClick: () -> Unit,
+    calcelAllOnClick: () -> Unit,
     showMoreOnClick: () -> Unit
 ) {
-    TopBar(navController, stringResource(R.string.subscribe),
+    TopBar(navController, stringResource(R.string.subscribe), extraIcons = {
+        IconButton(
+            onClick = selectAllOnClick
+        ) {
+            Icon(
+                imageVector = Icons.Default.SelectAll,
+                "Select all subscriptions"
+            )
+        }
+        IconButton(
+            onClick = calcelAllOnClick
+        ) {
+            Icon(
+                imageVector = Icons.Default.AllOut,
+                "Cancel all subscriptions"
+            )
+        }
+    },
         showMoreOnClick = showMoreOnClick
     )
 }
