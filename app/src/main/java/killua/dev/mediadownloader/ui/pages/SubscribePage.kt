@@ -47,7 +47,6 @@ import killua.dev.mediadownloader.ui.LocalNavController
 import killua.dev.mediadownloader.ui.ViewModels.SubscribePageUIIntent
 import killua.dev.mediadownloader.ui.ViewModels.SubscribePageViewModel
 import killua.dev.mediadownloader.ui.components.Loading
-import killua.dev.mediadownloader.ui.components.MainPageBottomSheet
 import killua.dev.mediadownloader.ui.components.MainScaffold
 import killua.dev.mediadownloader.ui.components.common.SubscribePageTopAppBar
 import killua.dev.mediadownloader.ui.tokens.SizeTokens
@@ -58,11 +57,9 @@ import kotlinx.coroutines.launch
 fun SubscribePage() {
     val navController = LocalNavController.current!!
     LocalContext.current
-    rememberModalBottomSheetState()
     val viewModel: SubscribePageViewModel = hiltViewModel()
     val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
-    rememberModalBottomSheetState()
-    var showBottomSheet by remember { mutableStateOf(false) }
+    var showconfig by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     MainScaffold(
         topBar = {
@@ -79,12 +76,12 @@ fun SubscribePage() {
                     }
                 },
             ) {
-                showBottomSheet = true
+                showconfig = true
             }
         },
         snackbarHostState = viewModel.snackbarHostState
     ) {
-        if(showBottomSheet){
+        if(showconfig){
 
         }
 
