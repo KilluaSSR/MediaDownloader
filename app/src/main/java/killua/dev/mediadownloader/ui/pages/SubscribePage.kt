@@ -56,7 +56,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun SubscribePage() {
     val navController = LocalNavController.current!!
-    LocalContext.current
+    val context = LocalContext.current
     val viewModel: SubscribePageViewModel = hiltViewModel()
     val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
     var showconfig by remember { mutableStateOf(false) }
