@@ -47,8 +47,7 @@ val MAX_RETRIES = intPreferencesKey("max_retries")
 val WIFI = booleanPreferencesKey("wifi")
 val PHOTOS_KEY = booleanPreferencesKey("photos")
 // Read
-fun Context.readApplicationUserScreenName() = readStoreString(key = APPLICATION_USER_SCREENNAME_KEY, defValue = "")
-fun Context.readApplicationUserName() = readStoreString(key = APPLICATION_USER_NAME_KEY, defValue = "")
+
 fun Context.readApplicationUserCt0() = readStoreString(key = APPLICATION_USER_USERCT0_KEY, defValue = "")
 fun Context.readApplicationUserAuth() = readStoreString(key = APPLICATION_USER_USERAUTH_KEY, defValue = "")
 fun Context.readLofterLoginKey() = readStoreString(key = LOFTER_LOGIN_KEY, defValue = "")
@@ -80,8 +79,6 @@ fun Context.readAllTwitterAuthorSubscriptions() = dataStore.data.map { preferenc
         }
 }
 //Write
-suspend fun Context.writeApplicationUserScreenName(screenName: String) = saveStoreString(key = APPLICATION_USER_SCREENNAME_KEY, value = screenName)
-suspend fun Context.writeApplicationUserName(name: String) = saveStoreString(key = APPLICATION_USER_NAME_KEY, value = name)
 suspend fun Context.writeApplicationUserCt0(ct0: String) = saveStoreString(key = APPLICATION_USER_USERCT0_KEY, value = ct0)
 suspend fun Context.writeApplicationUserAuth(auth: String) = saveStoreString(key = APPLICATION_USER_USERAUTH_KEY, value = auth)
 suspend fun Context.writeLofterLoginKey(key: String) = saveStoreString(key = LOFTER_LOGIN_KEY, value = key)
