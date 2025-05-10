@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import killua.dev.mediadownloader.R
-import killua.dev.mediadownloader.ui.LocalNavController
 import killua.dev.mediadownloader.ui.components.common.Clickable
 import killua.dev.mediadownloader.ui.components.common.SettingsScaffold
 import killua.dev.mediadownloader.ui.components.common.Title

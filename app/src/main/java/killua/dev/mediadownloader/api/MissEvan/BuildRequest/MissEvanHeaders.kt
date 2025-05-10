@@ -2,8 +2,6 @@ package killua.dev.mediadownloader.api.MissEvan.BuildRequest
 
 import killua.dev.mediadownloader.utils.USER_AGENT
 import okhttp3.Request
-import kotlin.collections.component1
-import kotlin.collections.component2
 
 object MissEvanHeaders {
     fun getEntireDramaHeaders(id: String) = mapOf(

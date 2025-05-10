@@ -42,6 +42,7 @@ import killua.dev.mediadownloader.ui.components.common.Section
 import killua.dev.mediadownloader.ui.components.common.paddingTop
 import killua.dev.mediadownloader.ui.getRandomColors
 import killua.dev.mediadownloader.ui.tokens.SizeTokens
+import killua.dev.mediadownloader.utils.Auth
 import killua.dev.mediadownloader.utils.navigateSingle
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -176,7 +177,7 @@ fun MainPage(
                                 MainRoutes.Download.route -> showDialog = true
                                 MainRoutes.DownloadListPage.route -> scope.launch {
                                     if (context.readSecureMyDownload().first()) {
-                                        viewmodel.authenticateNavigation(
+                                        Auth().authenticateAndNavigate(
                                             navController = navController,
                                             route = item.route,
                                             onAuthFailed = { message ->

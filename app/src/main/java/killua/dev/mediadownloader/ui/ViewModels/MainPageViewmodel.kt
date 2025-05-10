@@ -3,17 +3,15 @@ package killua.dev.mediadownloader.ui.ViewModels
 import android.content.Context
 import androidx.compose.material3.SnackbarDuration
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import killua.dev.mediadownloader.Model.AvailablePlatforms
 import killua.dev.mediadownloader.Model.NotLoggedInPlatform
 import killua.dev.mediadownloader.download.DownloadbyLink
 import killua.dev.mediadownloader.repository.DownloadRepository
 import killua.dev.mediadownloader.ui.SnackbarUIEffect
-import killua.dev.mediadownloader.ui.SnackbarUIEffect.*
+import killua.dev.mediadownloader.ui.SnackbarUIEffect.ShowSnackbar
 import killua.dev.mediadownloader.ui.UIIntent
 import killua.dev.mediadownloader.ui.UIState
-import killua.dev.mediadownloader.utils.BiometricManagerSingleton
 import killua.dev.mediadownloader.utils.navigateLofterProfile
 import killua.dev.mediadownloader.utils.navigatePixivProfile
 import killua.dev.mediadownloader.utils.navigateTwitterProfile
@@ -68,27 +66,7 @@ class MainPageViewmodel @Inject constructor(
         }
     }
 
-    suspend fun authenticateNavigation(
-        navController: NavController,
-        route: String,
-        onAuthFailed: (String) -> Unit
-    ) {
-        val biometricHelper = BiometricManagerSingleton.getBiometricHelper()
-        if (biometricHelper == null) {
-            onAuthFailed("生物识别服务未初始化")
-            return
-        }
 
-        if (biometricHelper.canAuthenticate()) {
-            if (biometricHelper.authenticate()) {
-                navController.navigate(route)
-            } else {
-                onAuthFailed("认证失败")
-            }
-        } else {
-            onAuthFailed("设备不支持生物识别")
-        }
-    }
 
     suspend fun presentFavouriteCardDetails() {
         val mostDownloaded = downloadRepository.getMostDownloadedUser()

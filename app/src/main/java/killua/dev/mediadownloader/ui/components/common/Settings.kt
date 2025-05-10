@@ -44,6 +44,7 @@ import killua.dev.mediadownloader.datastore.readStoreBoolean
 import killua.dev.mediadownloader.datastore.saveStoreBoolean
 import killua.dev.mediadownloader.ui.animations.AnimatedTextContainer
 import killua.dev.mediadownloader.ui.tokens.SizeTokens
+import killua.dev.mediadownloader.utils.Auth
 import killua.dev.mediadownloader.utils.withState
 import kotlinx.coroutines.launch
 
@@ -402,6 +403,50 @@ fun Switchable(
         onCheckedChange(it.not())
     }
 
+    Switchable(
+        enabled = enabled,
+        checked = stored,
+        icon = icon,
+        title = title,
+        checkedText = checkedText,
+        notCheckedText = notCheckedText,
+        desc = desc,
+        onCheckedChange = {
+            scope.launch {
+                onClick(stored)
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun SwitchableSecured(
+    enabled: Boolean = true,
+    key: Preferences.Key<Boolean>,
+    defValue: Boolean = true,
+    icon: ImageVector? = null,
+    title: String,
+    checkedText: String,
+    notCheckedText: String = checkedText,
+    desc: String? = null,
+    onCheckedChange: (Boolean) -> Unit = {},
+    onAuthFailed: (String) -> Unit = {}
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val stored by context.readStoreBoolean(key = key, defValue = defValue)
+        .collectAsStateWithLifecycle(initialValue = defValue)
+    val authenticator = remember { Auth() }
+    val onClick: suspend (Boolean) -> Unit = {
+        val authenticated = authenticator.authenticate { errorMsg->
+            onAuthFailed(errorMsg)
+        }
+        if(authenticated){
+            context.saveStoreBoolean(key = key, value = it.not())
+            onCheckedChange(it.not())
+        }
+    }
     Switchable(
         enabled = enabled,
         checked = stored,

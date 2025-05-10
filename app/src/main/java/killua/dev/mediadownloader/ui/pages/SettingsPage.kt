@@ -26,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.mediadownloader.R
 import killua.dev.mediadownloader.datastore.NOTIFICATION_ENABLED
@@ -52,12 +53,15 @@ import killua.dev.mediadownloader.datastore.writePixivPHPSSID
 import killua.dev.mediadownloader.datastore.writeTheme
 import killua.dev.mediadownloader.ui.LocalNavController
 import killua.dev.mediadownloader.ui.PrepareRoutes
+import killua.dev.mediadownloader.ui.SnackbarUIEffect
+import killua.dev.mediadownloader.ui.ViewModels.SettingsPageViewModel
 import killua.dev.mediadownloader.ui.components.ThemeSettingsBottomSheet
 import killua.dev.mediadownloader.ui.components.common.CancellableAlert
 import killua.dev.mediadownloader.ui.components.common.Clickable
 import killua.dev.mediadownloader.ui.components.common.SettingsScaffold
 import killua.dev.mediadownloader.ui.components.common.Slideable
 import killua.dev.mediadownloader.ui.components.common.Switchable
+import killua.dev.mediadownloader.ui.components.common.SwitchableSecured
 import killua.dev.mediadownloader.ui.components.common.Title
 import killua.dev.mediadownloader.ui.theme.ThemeMode
 import killua.dev.mediadownloader.ui.theme.getThemeModeName
@@ -74,9 +78,10 @@ import kotlin.math.roundToInt
 @Composable
 fun SettingsPage(){
     val context = LocalContext.current
-    val navController =  LocalNavController.current!!
+    val navController = LocalNavController.current!!
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val scope = rememberCoroutineScope()
+    val viewModel: SettingsPageViewModel = hiltViewModel()
     var showThemeMenu by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
     val currentTheme by context.readTheme()
@@ -84,8 +89,8 @@ fun SettingsPage(){
     SettingsScaffold(
         scrollBehavior = scrollBehavior,
         title = stringResource(R.string.settings),
+        snackbarHostState = viewModel.snackbarHostState
     ) {
-
         if (showThemeMenu){
             ThemeSettingsBottomSheet(
                 onDismiss = { showThemeMenu = false },
@@ -93,7 +98,6 @@ fun SettingsPage(){
                 onThemeSelected = { theme -> context.writeTheme(theme.name) }
             )
         }
-
         var isShowReset by remember { mutableStateOf(false) }
         if(isShowReset){
             CancellableAlert(
@@ -200,8 +204,7 @@ fun SettingsPage(){
                 }
             }
             Title(title = stringResource(R.string.privacy)) {
-
-                Switchable(
+                SwitchableSecured(
                     enabled = isBiometricAvailable,
                     key = SECURE_MY_DOWNLOAD,
                     title = stringResource(R.string.biometric_auth),
@@ -209,8 +212,16 @@ fun SettingsPage(){
                         !isBiometricAvailable -> stringResource(R.string.biometric_auth_disabled_desc)
                         securedDownloadList -> stringResource(R.string.biometric_auth_desc_on)
                         else -> stringResource(R.string.biometric_auth_desc_off)
+                    },
+                ){ errorMsg->
+                    scope.launch {
+                        viewModel.emitEffect(
+                            SnackbarUIEffect.ShowSnackbar(
+                                errorMsg
+                            )
+                        )
                     }
-                )
+                }
             }
 
             Title(title = stringResource(R.string.platform_configurations)) {
