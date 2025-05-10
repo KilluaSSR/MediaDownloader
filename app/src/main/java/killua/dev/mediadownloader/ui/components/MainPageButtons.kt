@@ -42,11 +42,11 @@ val MainPageButtons = listOf(
         Icons.Rounded.DownloadDone,
         MainRoutes.DownloadListPage.route
     ),
-    ButtonsEssentials(
-        R.string.subscribe,
-        Icons.Rounded.Subscriptions,
-        MainRoutes.SubscribePage.route
-    ),
+//    ButtonsEssentials(
+//        R.string.subscribe,
+//        Icons.Rounded.Subscriptions,
+//        MainRoutes.SubscribePage.route
+//    ),
     ButtonsEssentials(
         R.string.advanced,
         Icons.Rounded.Star,
