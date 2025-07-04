@@ -8,7 +8,6 @@ import androidx.compose.material.icons.rounded.DownloadDone
 import androidx.compose.material.icons.rounded.Report
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Star
-import androidx.compose.material.icons.rounded.Subscriptions
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import killua.dev.mediadownloader.R

@@ -31,7 +31,14 @@ fun MainTopBar(navController: NavHostController, showMoreOnClick : ()-> Unit ) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(navController: NavHostController, title: String, enableNavIcon: Boolean = true, extraIcons: @Composable ()-> Unit = {}, showMoreIcon: Boolean = true, showMoreOnClick: ()-> Unit) {
+fun TopBar(
+    navController: NavHostController,
+    title: String,
+    enableNavIcon: Boolean = true,
+    extraIcons: @Composable () -> Unit = {},
+    showMoreIcon: Boolean = true,
+    showMoreOnClick: () -> Unit
+) {
     TopAppBar(
         title = { Text(title) },
         navigationIcon = {

@@ -6,7 +6,7 @@ import killua.dev.mediadownloader.api.Kuaikan.BuildRequest.KuaikanWholeComicRequ
 import killua.dev.mediadownloader.api.Kuaikan.Model.MangaInfo
 import killua.dev.mediadownloader.api.NetworkHelper
 import killua.dev.mediadownloader.di.ApplicationScope
-import killua.dev.mediadownloader.di.UserDataManager
+import killua.dev.mediadownloader.features.UserDataManager
 import killua.dev.mediadownloader.utils.USER_AGENT
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

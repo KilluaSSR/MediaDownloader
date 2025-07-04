@@ -13,7 +13,7 @@ import killua.dev.mediadownloader.api.MissEvan.Model.MissEvanEntireDramaResponse
 import killua.dev.mediadownloader.api.MissEvan.Model.MissEvanSoundResponse
 import killua.dev.mediadownloader.api.NetworkHelper
 import killua.dev.mediadownloader.di.ApplicationScope
-import killua.dev.mediadownloader.di.UserDataManager
+import killua.dev.mediadownloader.features.UserDataManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

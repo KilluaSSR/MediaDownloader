@@ -19,7 +19,7 @@ import killua.dev.mediadownloader.api.Pixiv.Model.PixivNovelDetailResponse
 import killua.dev.mediadownloader.api.Pixiv.Model.PixivPictureDetailResponse
 import killua.dev.mediadownloader.api.Pixiv.Model.PixivPicturePageResponse
 import killua.dev.mediadownloader.di.ApplicationScope
-import killua.dev.mediadownloader.di.UserDataManager
+import killua.dev.mediadownloader.features.UserDataManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

@@ -13,7 +13,7 @@ import killua.dev.mediadownloader.api.Lofter.utils.LofterParser.parseAuthorInfo
 import killua.dev.mediadownloader.api.Lofter.utils.LofterParser.parseFromArchiveInfos
 import killua.dev.mediadownloader.api.NetworkHelper
 import killua.dev.mediadownloader.di.ApplicationScope
-import killua.dev.mediadownloader.di.UserDataManager
+import killua.dev.mediadownloader.features.UserDataManager
 import killua.dev.mediadownloader.utils.UserAgentUtils
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope

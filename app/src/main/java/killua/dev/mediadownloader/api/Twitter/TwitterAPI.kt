@@ -23,7 +23,7 @@ import killua.dev.mediadownloader.api.Twitter.Model.UserBasicInfo
 import killua.dev.mediadownloader.api.Twitter.Model.extractMediaPageData
 import killua.dev.mediadownloader.api.Twitter.Model.extractTwitterUser
 import killua.dev.mediadownloader.api.Twitter.Model.extractUserMediaPageData
-import killua.dev.mediadownloader.di.UserDataManager
+import killua.dev.mediadownloader.features.UserDataManager
 import killua.dev.mediadownloader.utils.ShowNotification
 import killua.dev.mediadownloader.utils.getAllHighestBitrateUrls
 import killua.dev.mediadownloader.utils.getAllImageUrls

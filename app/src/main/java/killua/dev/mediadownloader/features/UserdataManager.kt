@@ -1,16 +1,6 @@
-package killua.dev.mediadownloader.di
+package killua.dev.mediadownloader.features
 
 import android.content.Context
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
-import killua.dev.mediadownloader.api.Kuaikan.KuaikanService
-import killua.dev.mediadownloader.api.Lofter.LofterService
-import killua.dev.mediadownloader.api.MissEvan.MissEvanService
-import killua.dev.mediadownloader.api.Pixiv.PixivService
-import killua.dev.mediadownloader.api.Twitter.TwitterDownloadAPI
 import killua.dev.mediadownloader.datastore.ApplicationUserDataLofter
 import killua.dev.mediadownloader.datastore.ApplicationUserDataTwitter
 import killua.dev.mediadownloader.datastore.readApplicationUserAuth
@@ -24,14 +14,6 @@ import killua.dev.mediadownloader.datastore.readLofterLoginKey
 import killua.dev.mediadownloader.datastore.readLofterStartTime
 import killua.dev.mediadownloader.datastore.readMissEvanToken
 import killua.dev.mediadownloader.datastore.readPixivPHPSSID
-import killua.dev.mediadownloader.download.DownloadQueueManager
-import killua.dev.mediadownloader.download.DownloadbyLink
-import killua.dev.mediadownloader.repository.DownloadRepository
-import killua.dev.mediadownloader.repository.DownloadServicesRepository
-import killua.dev.mediadownloader.utils.DownloadEventManager
-import killua.dev.mediadownloader.utils.DownloadPreChecks
-import killua.dev.mediadownloader.utils.FileUtils
-import killua.dev.mediadownloader.utils.ShowNotification
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -41,18 +23,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Module
-@InstallIn(SingletonComponent::class)
-object UserDataModule {
-    @Provides
-    @Singleton
-    fun provideUserDataManager(
-        @ApplicationContext context: Context,
-        @ApplicationScope scope: CoroutineScope
-    ): UserDataManager {
-        return UserDataManager(context, scope)
-    }
-}
 @Singleton
 class UserDataManager @Inject constructor(
     private val context: Context,
@@ -135,85 +105,3 @@ class UserDataManager @Inject constructor(
         }
     }
 }
-
-
-@Module
-@InstallIn(SingletonComponent::class)
-object ProvideAPI {
-    @Provides
-    @Singleton
-    fun provideDownloadByLink(
-        downloadRepository: DownloadServicesRepository,
-        downloadQueueManager: DownloadQueueManager,
-        downloadEventManager: DownloadEventManager,
-        downloadPreChecks: DownloadPreChecks,
-        fileUtils: FileUtils
-    ): DownloadbyLink {
-        return DownloadbyLink(downloadRepository, downloadQueueManager, downloadEventManager, downloadPreChecks, fileUtils)
-    }
-
-    @Provides
-    @Singleton
-    fun provideDownloadServicesRepository(
-        twitterDownloadAPI: TwitterDownloadAPI,
-        lofterService: LofterService,
-        pixivService: PixivService,
-        missEvanService: MissEvanService,
-        kuaikanService: KuaikanService,
-        downloadRepository: DownloadRepository
-    ): DownloadServicesRepository {
-        return DownloadServicesRepository(twitterDownloadAPI, lofterService, pixivService,missEvanService, kuaikanService, downloadRepository)
-    }
-
-    @Provides
-    @Singleton
-    fun provideTwitterSingleMedia(
-        userDataManager: UserDataManager,
-        notification: ShowNotification
-    ): TwitterDownloadAPI {
-        return TwitterDownloadAPI(userDataManager, notification)
-    }
-
-    @Provides
-    @Singleton
-    fun provideLofterService(
-        userDataManager: UserDataManager,
-        @ApplicationScope scope: CoroutineScope
-    ): LofterService {
-        return LofterService(userDataManager,scope)
-    }
-
-    @Provides
-    @Singleton
-    fun providePixivService(
-        userDataManager: UserDataManager,
-        @ApplicationScope scope: CoroutineScope
-    ): PixivService {
-        return PixivService(userDataManager,scope)
-    }
-
-    @Provides
-    @Singleton
-    fun provideMissEvanService(
-        userDataManager: UserDataManager,
-        @ApplicationScope scope: CoroutineScope
-    ): MissEvanService {
-        return MissEvanService(userDataManager,scope)
-    }
-
-    @Provides
-    @Singleton
-    fun provideKuaikanService(
-        userDataManager: UserDataManager,
-        @ApplicationScope scope: CoroutineScope
-    ): KuaikanService {
-        return KuaikanService(userDataManager,scope)
-    }
-
-    @Provides
-    @Singleton
-    fun provideFileUtils(
-        @ApplicationContext context: Context
-    ) = FileUtils(context)
-}
-
