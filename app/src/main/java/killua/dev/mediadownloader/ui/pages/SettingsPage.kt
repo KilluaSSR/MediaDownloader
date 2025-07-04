@@ -26,7 +26,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import killua.dev.mediadownloader.R
 import killua.dev.mediadownloader.datastore.NOTIFICATION_ENABLED
@@ -53,8 +52,6 @@ import killua.dev.mediadownloader.datastore.writePixivPHPSSID
 import killua.dev.mediadownloader.datastore.writeTheme
 import killua.dev.mediadownloader.ui.LocalNavController
 import killua.dev.mediadownloader.ui.PrepareRoutes
-import killua.dev.mediadownloader.ui.SnackbarUIEffect
-import killua.dev.mediadownloader.ui.ViewModels.SettingsPageViewModel
 import killua.dev.mediadownloader.ui.components.ThemeSettingsBottomSheet
 import killua.dev.mediadownloader.ui.components.common.CancellableAlert
 import killua.dev.mediadownloader.ui.components.common.Clickable
@@ -81,7 +78,6 @@ fun SettingsPage(){
     val navController = LocalNavController.current!!
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val scope = rememberCoroutineScope()
-    val viewModel: SettingsPageViewModel = hiltViewModel()
     var showThemeMenu by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
     val currentTheme by context.readTheme()
@@ -89,7 +85,6 @@ fun SettingsPage(){
     SettingsScaffold(
         scrollBehavior = scrollBehavior,
         title = stringResource(R.string.settings),
-        snackbarHostState = viewModel.snackbarHostState
     ) {
         if (showThemeMenu){
             ThemeSettingsBottomSheet(
@@ -213,15 +208,7 @@ fun SettingsPage(){
                         securedDownloadList -> stringResource(R.string.biometric_auth_desc_on)
                         else -> stringResource(R.string.biometric_auth_desc_off)
                     },
-                ){ errorMsg->
-                    scope.launch {
-                        viewModel.emitEffect(
-                            SnackbarUIEffect.ShowSnackbar(
-                                errorMsg
-                            )
-                        )
-                    }
-                }
+                )
             }
 
             Title(title = stringResource(R.string.platform_configurations)) {
