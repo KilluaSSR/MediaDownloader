@@ -6,7 +6,7 @@ import killua.dev.mediadownloader.Model.AvailablePlatforms
 import killua.dev.mediadownloader.Model.DownloadTask
 import killua.dev.mediadownloader.Model.MediaType
 import killua.dev.mediadownloader.Model.NetworkResult
-import killua.dev.mediadownloader.api.MissEvan.extractMissEvanSoundId
+import killua.dev.mediadownloader.api.extractMissEvanSoundId
 import killua.dev.mediadownloader.repository.DownloadServicesRepository
 import killua.dev.mediadownloader.utils.DownloadEventManager
 import killua.dev.mediadownloader.utils.DownloadPreChecks

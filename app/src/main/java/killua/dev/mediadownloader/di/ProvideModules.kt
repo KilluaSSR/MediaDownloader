@@ -10,11 +10,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import killua.dev.mediadownloader.api.Kuaikan.KuaikanService
-import killua.dev.mediadownloader.api.Lofter.LofterService
-import killua.dev.mediadownloader.api.MissEvan.MissEvanService
-import killua.dev.mediadownloader.api.Pixiv.PixivService
-import killua.dev.mediadownloader.api.Twitter.TwitterDownloadAPI
+import killua.dev.mediadownloader.api.PlatformService
 import killua.dev.mediadownloader.db.DownloadDao
 import killua.dev.mediadownloader.db.LofterTagsRepository
 import killua.dev.mediadownloader.db.MediaDownloadDatabase
@@ -24,6 +20,7 @@ import killua.dev.mediadownloader.download.DownloadManager
 import killua.dev.mediadownloader.download.DownloadQueueManager
 import killua.dev.mediadownloader.download.DownloadbyLink
 import killua.dev.mediadownloader.features.AdvancedFeaturesManager
+import killua.dev.mediadownloader.features.UserDataManager
 import killua.dev.mediadownloader.repository.DownloadRepository
 import killua.dev.mediadownloader.repository.DownloadServicesRepository
 import killua.dev.mediadownloader.repository.ThumbnailRepository
@@ -126,12 +123,8 @@ object ProvideModules {
     @Provides
     @Singleton
     fun ProvideAdvancedFeaturesManager(
-        twitterDownloadAPI: TwitterDownloadAPI,
-        kuaikanService: KuaikanService,
-        lofterService: LofterService,
+        platformService: PlatformService,
         notification: ShowNotification,
-        pixelService: PixivService,
-        missEvanService: MissEvanService,
         downloadQueueManager: DownloadQueueManager,
         downloadRepository: DownloadRepository,
         tagsRepository: LofterTagsRepository,
@@ -139,11 +132,7 @@ object ProvideModules {
         fileUtils: FileUtils,
         @ApplicationContext context: Context
     ): AdvancedFeaturesManager = AdvancedFeaturesManager(
-        twitterDownloadAPI,
-        kuaikanService,
-        lofterService,
-        pixelService,
-        missEvanService,
+        platformService,
         notification,
         downloadQueueManager,
         downloadRepository,
@@ -168,59 +157,21 @@ object ProvideModules {
     @Provides
     @Singleton
     fun provideDownloadServicesRepository(
-        twitterDownloadAPI: TwitterDownloadAPI,
-        lofterService: LofterService,
-        pixivService: PixivService,
-        missEvanService: MissEvanService,
-        kuaikanService: KuaikanService,
+        platformService: PlatformService,
         downloadRepository: DownloadRepository
     ): DownloadServicesRepository {
-        return DownloadServicesRepository(twitterDownloadAPI, lofterService, pixivService,missEvanService, kuaikanService, downloadRepository)
+        return DownloadServicesRepository(platformService, downloadRepository)
     }
+
 
     @Provides
     @Singleton
-    fun provideTwitterSingleMedia(
+    fun providePlatformService(
         userDataManager: UserDataManager,
+        @ApplicationScope scope: CoroutineScope,
         notification: ShowNotification
-    ): TwitterDownloadAPI {
-        return TwitterDownloadAPI(userDataManager, notification)
-    }
-
-    @Provides
-    @Singleton
-    fun provideLofterService(
-        userDataManager: UserDataManager,
-        @ApplicationScope scope: CoroutineScope
-    ): LofterService {
-        return LofterService(userDataManager,scope)
-    }
-
-    @Provides
-    @Singleton
-    fun providePixivService(
-        userDataManager: UserDataManager,
-        @ApplicationScope scope: CoroutineScope
-    ): PixivService {
-        return PixivService(userDataManager,scope)
-    }
-
-    @Provides
-    @Singleton
-    fun provideMissEvanService(
-        userDataManager: UserDataManager,
-        @ApplicationScope scope: CoroutineScope
-    ): MissEvanService {
-        return MissEvanService(userDataManager,scope)
-    }
-
-    @Provides
-    @Singleton
-    fun provideKuaikanService(
-        userDataManager: UserDataManager,
-        @ApplicationScope scope: CoroutineScope
-    ): KuaikanService {
-        return KuaikanService(userDataManager,scope)
+    ): PlatformService {
+        return PlatformService(userDataManager,scope, notification)
     }
 
     @Provides

@@ -1,6 +1,6 @@
 package killua.dev.mediadownloader.Model
 
-import killua.dev.mediadownloader.api.Kuaikan.Chapter
+import killua.dev.mediadownloader.api.KuaikanChapter
 import killua.dev.mediadownloader.api.MissEvan.Model.MissEvanEpisodes
 import killua.dev.mediadownloader.api.Pixiv.Model.NovelInfo
 
@@ -16,7 +16,7 @@ sealed class ChapterInfo {
 
 }
 
-fun Chapter.toChapterInfo() =
+fun KuaikanChapter.toChapterInfo() =
     ChapterInfo.DownloadableChapter(id = id, title = name, seriesName = null)
 
 fun NovelInfo.toChapterInfo() =

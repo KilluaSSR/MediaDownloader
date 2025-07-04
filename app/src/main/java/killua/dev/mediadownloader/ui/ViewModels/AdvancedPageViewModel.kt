@@ -6,10 +6,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import killua.dev.mediadownloader.Model.ChapterInfo
 import killua.dev.mediadownloader.Model.NetworkResult
 import killua.dev.mediadownloader.Model.toChapterInfo
-import killua.dev.mediadownloader.api.Kuaikan.Chapter
+import killua.dev.mediadownloader.api.KuaikanChapter
 import killua.dev.mediadownloader.api.MissEvan.Model.MissEvanDownloadDrama
 import killua.dev.mediadownloader.api.Pixiv.Model.NovelInfo
-import killua.dev.mediadownloader.api.Twitter.TwitterDownloadAPI
+import killua.dev.mediadownloader.api.PlatformService
 import killua.dev.mediadownloader.di.ApplicationScope
 import killua.dev.mediadownloader.features.AdvancedFeaturesManager
 import killua.dev.mediadownloader.states.CurrentState
@@ -72,7 +72,7 @@ enum class DialogType {
 
 @HiltViewModel
 class AdvancedPageViewModel @Inject constructor(
-    private val twitterDownloadAPI: TwitterDownloadAPI,
+    private val platformService: PlatformService,
     private val advancedFeaturesManager: AdvancedFeaturesManager,
     private val downloadPreChecks: DownloadPreChecks,
     @ApplicationScope private val applicationScope: CoroutineScope
@@ -172,7 +172,7 @@ class AdvancedPageViewModel @Inject constructor(
         downloadPreChecks.canStartDownload().onSuccess {
             applicationScope.launch {
                 emitState(uiState.value.copy(isFetching = true))
-                when (val result = twitterDownloadAPI.getUserBasicInfo(screenName)) {
+                when (val result = platformService.getTwitterUserBasicInfo(screenName)) {
                     is NetworkResult.Success -> {
                         emitState(uiState.value.copy(
                             isFetching = false,
@@ -307,16 +307,16 @@ class AdvancedPageViewModel @Inject constructor(
 
             when (uiState.value.currentDownloadType) {
                 ChapterDownloadType.KUAIKAN_MANGA -> {
-                    val kuaikanChapters = selectedChapters.mapNotNull { chapterInfo ->
+                    val kuaikanKuaikanChapters = selectedChapters.mapNotNull { chapterInfo ->
                         when (chapterInfo) {
-                            is ChapterInfo.DownloadableChapter -> Chapter(
+                            is ChapterInfo.DownloadableChapter -> KuaikanChapter(
                                 id = chapterInfo.id,
                                 name = chapterInfo.title
                             )
                             else -> null
                         }
                     }
-                    advancedFeaturesManager.downloadEntireKuaikanComic(kuaikanChapters)
+                    advancedFeaturesManager.downloadEntireKuaikanComic(kuaikanKuaikanChapters)
                     advancedFeaturesManager.cancelKuaikanProgressNotification()
                 }
                 ChapterDownloadType.PIXIV_NOVEL -> {

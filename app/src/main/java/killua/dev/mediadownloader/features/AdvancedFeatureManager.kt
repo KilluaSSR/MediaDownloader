@@ -7,17 +7,13 @@ import killua.dev.mediadownloader.Model.AvailablePlatforms
 import killua.dev.mediadownloader.Model.DownloadTask
 import killua.dev.mediadownloader.Model.MediaType
 import killua.dev.mediadownloader.Model.NetworkResult
-import killua.dev.mediadownloader.api.Kuaikan.Chapter
-import killua.dev.mediadownloader.api.Kuaikan.KuaikanService
-import killua.dev.mediadownloader.api.Lofter.LofterService
-import killua.dev.mediadownloader.api.MissEvan.MissEvanService
+import killua.dev.mediadownloader.api.KuaikanChapter
 import killua.dev.mediadownloader.api.MissEvan.Model.MissEvanDownloadDrama
 import killua.dev.mediadownloader.api.MissEvan.Model.MissEvanDramaResult
-import killua.dev.mediadownloader.api.MissEvan.extractDramaId
 import killua.dev.mediadownloader.api.Pixiv.Model.NovelInfo
-import killua.dev.mediadownloader.api.Pixiv.PixivService
+import killua.dev.mediadownloader.api.PlatformService
 import killua.dev.mediadownloader.api.Twitter.Model.TwitterUser
-import killua.dev.mediadownloader.api.Twitter.TwitterDownloadAPI
+import killua.dev.mediadownloader.api.extractDramaId
 import killua.dev.mediadownloader.datastore.readLofterEndTime
 import killua.dev.mediadownloader.datastore.readLofterStartTime
 import killua.dev.mediadownloader.db.LofterTagsRepository
@@ -40,11 +36,7 @@ import javax.inject.Inject
 import kotlin.random.Random
 
 class AdvancedFeaturesManager @Inject constructor(
-    private val twitterDownloadAPI: TwitterDownloadAPI,
-    private val kuaikanService: KuaikanService,
-    private val lofterService: LofterService,
-    private val pixelService: PixivService,
-    private val missEvanService: MissEvanService,
+    private val platformService: PlatformService,
     private val notification: ShowNotification,
     private val downloadQueueManager: DownloadQueueManager,
     private val downloadRepository: DownloadRepository,
@@ -65,7 +57,7 @@ class AdvancedFeaturesManager @Inject constructor(
     fun cancelPixivProgressNotification() = notification.cancelSpecificNotification(PIXIV_ENTIRE_NOTIFICATION_ID)
     fun cancelMissEvanProgressNotification() = notification.cancelSpecificNotification(MISSEVAN_ENTIRE_DRAMA_ID)
     suspend fun handleTwitterBookmarks(): Result<Unit> = runCatching {
-        twitterDownloadAPI.getBookmarksAllTweets(
+        platformService.getBookmarksAllTweets(
             onNewItems = { bookmarks ->
                 bookmarks.forEach { bookmark ->
                     processTwitterMedia(bookmark.videoUrls, bookmark.user, bookmark.tweetId, MediaType.VIDEO)
@@ -77,7 +69,7 @@ class AdvancedFeaturesManager @Inject constructor(
     }
 
     suspend fun handleTwitterLikes(): Result<Unit> = runCatching {
-        twitterDownloadAPI.getLikesAllTweets(
+        platformService.getLikesAllTweets(
             onNewItems = { tweets ->
                 tweets.forEach { tweet ->
                     processTwitterMedia(tweet.videoUrls, tweet.user, tweet.tweetId, MediaType.VIDEO)
@@ -89,7 +81,7 @@ class AdvancedFeaturesManager @Inject constructor(
     }
 
     suspend fun getUserMediaByUserId(userId: String, screenName: String): Result<Unit> = runCatching {
-        twitterDownloadAPI.getUserMediaByUserId(
+        platformService.getTwitterUserMediaByUserId(
             userId = userId,
             screenName = screenName,
             onNewItems = { tweets ->
@@ -109,7 +101,7 @@ class AdvancedFeaturesManager @Inject constructor(
         }
         val tags = tagsRepository.getAllTags()
         notification.showStartGettingLofterImages()
-        val blogInfo = lofterService.getByAuthorTags(link, tags)
+        val blogInfo = platformService.getLofterByAuthorTags(link, tags)
         notification.cancelSpecificNotification(LOFTER_GET_BY_TAGS_ID)
         val authorID = blogInfo.authorId
         val authorName = blogInfo.authorName
@@ -131,8 +123,8 @@ class AdvancedFeaturesManager @Inject constructor(
         }
     }
 
-    suspend fun getKuaikanEntireComic(url: String): NetworkResult<List<Chapter>> = runCatching {
-        when(val result = kuaikanService.getEntireComic(url)) {
+    suspend fun getKuaikanEntireComic(url: String): NetworkResult<List<KuaikanChapter>> = runCatching {
+        when(val result = platformService.getEntireComic(url)) {
             is NetworkResult.Error -> {
                 NetworkResult.Error(
                     code = result.code,
@@ -152,7 +144,7 @@ class AdvancedFeaturesManager @Inject constructor(
 
     suspend fun getPixivEntireNovel(url: String): NetworkResult<List<NovelInfo>> = runCatching {
         val id = url.split("series/")[1]
-        when(val result = pixelService.getEntireNovel(id)) {
+        when(val result = platformService.getEntirePixivNovel(id)) {
             is NetworkResult.Error -> {
                 NetworkResult.Error(
                     code = result.code,
@@ -172,7 +164,7 @@ class AdvancedFeaturesManager @Inject constructor(
 
     suspend fun getMissEvanEntireDrama(url: String): NetworkResult<MissEvanDramaResult> = runCatching {
         val id = extractDramaId(url)!!
-        when(val result = missEvanService.getEntireDrama(id)) {
+        when(val result = platformService.getMissEvanEntireDrama(id)) {
             is NetworkResult.Error -> {
                 NetworkResult.Error(
                     code = result.code,
@@ -190,11 +182,11 @@ class AdvancedFeaturesManager @Inject constructor(
         )
     }
 
-    suspend fun downloadEntireKuaikanComic(mangaList: List<Chapter>) = runCatching {
+    suspend fun downloadEntireKuaikanComic(mangaList: List<KuaikanChapter>) = runCatching {
         mangaList.forEach{
             delay(Random.nextLong(500, 7000))
             notification.updateGettingProgress(it.name)
-            when(val mangaResult = kuaikanService.getSingleChapter("https://www.kuaikanmanhua.com/webs/comic-next/${it.id}")){
+            when(val mangaResult = platformService.getSingleChapter("https://www.kuaikanmanhua.com/webs/comic-next/${it.id}")){
                 is NetworkResult.Error -> return@forEach
                 is NetworkResult.Success -> {
                     createDownloadTask(
@@ -216,7 +208,7 @@ class AdvancedFeaturesManager @Inject constructor(
         dramaList.forEach{
             delay(Random.nextLong(500, 3000))
             notification.updateGettingProgress(it.title)
-            when(val result = missEvanService.getDrama(it.id)){
+            when(val result = platformService.getMissEvanDrama(it.id)){
                 is NetworkResult.Error -> return@forEach
                 is NetworkResult.Success -> {
                     createDownloadTask(
@@ -237,7 +229,7 @@ class AdvancedFeaturesManager @Inject constructor(
     suspend fun downloadEntirePixivNovel(novelList: List<NovelInfo>) = runCatching {
         novelList.forEach{
             notification.updateGettingProgress(it.title, downloadId = PIXIV_ENTIRE_NOTIFICATION_ID, type = "novel")
-            when(val result = pixelService.getNovel(it.id)) {
+            when(val result = platformService.getPixivNovel(it.id)) {
                 is NetworkResult.Success -> {
                     val formattedContent = result.data.content.formatUnicodeToReadable()
                     val formattedTitle = result.data.title.formatUnicodeToReadable()
